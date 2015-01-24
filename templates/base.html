@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{% block title %}{% endblock title%} | TÅGEKAMMERET</title>
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}style.css" />
+  </head>
+  <body>
+    <div id="page">
+      <div id="header">
+        <div id="navbar">
+          <ul>
+            <li><a href="{% url 'gallery' %}" >Galleri</a></li>
+          </ul>
+        </div> <!-- navbar -->
+      </div> <!-- header -->
+      <div id="content">
+        {% block content %}{% endblock content%}
+      </div> <!-- content -->
+      <p id="footer">
+        <a href="http://validator.w3.org/check?uri=referer" rel="nofollow">
+          <img src="http://www.w3.org/Icons/valid-html401-blue" alt="Valid HTML 4.01 Strict" /></a>
+        <a href="http://jigsaw.w3.org/css-validator/check/referer" rel="nofollow">
+          <img src="http://www.w3.org/Icons/valid-css-blue" alt="Valid CSS!" /></a><br/>
+        &copy;1956-2015 <a href="/">TÅGEKAMMERET</a>
+      </p>
+    </div> <!-- page -->
+    <script type="text/javascript" src="{{ STATIC_URL }}yoxview/yoxview-init.js"></script>
+    {% block js %}{% endblock js%}
+  </body>
+</html>

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload til galleri{% endblock title %}
+
+{% block content %}
+<h2>Tilføj billeder til: {{ album_name }}</h2>
+{% load jfutags %}
+{% jfu 'album-img-upload-form.html' %}
+{% endblock content%}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Galleri{% endblock title %}
+
+{% block js %}<script type="text/javascript">
+  $(document).ready(function(){{% for album in albums %}{% if album.images.all %}
+    $("#{{ album.gfyear|slugify }}-{{ album.title|slugify }}").yoxview({
+      images: [{% for image in album.images.all %}
+        { media: { src: '{{ image.image.url }}', title: '{{ image.caption }}' }},{% endfor %}
+      ]});{% endif %}{% endfor %}
+  });
+</script>{% endblock js%}
+
+{% block content %}
+<table cellpadding="1">
+{% for album in albums %}
+
+  <tr>
+    <td class="title"><h3>{{ album.title }}</h3></td>
+    <td class="picture">
+      {% if album.images.all %}
+        <a href="" id="{{ album.gfyear|slugify }}-{{ album.title|slugify }}">
+          <img src="{{ album.images.all.0.thumbnail.url }}" class="" alt="{{ album.images.all.0.caption }}" />
+        </a>
+      {% else %}No images{% endif %}
+    </td>
+  </tr>{% endfor %}
+  </table>
+{% endblock content%}
