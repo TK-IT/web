@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load imagekit %}
 
 {% block title %}Galleri{% endblock title %}
 
@@ -20,7 +21,7 @@
     <td class="picture">
       {% if album.images.all %}
         <a href="" id="{{ album.gfyear|slugify }}-{{ album.title|slugify }}">
-          <img src="{{ album.images.all.0.thumbnail.url }}" class="" alt="{{ album.images.all.0.caption }}" />
+          {% thumbnail '262x262' album.images.all.0.image crop=0  %}
         </a>
       {% else %}No images{% endif %}
     </td>
