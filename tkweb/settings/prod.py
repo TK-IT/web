@@ -1,4 +1,4 @@
-from base import *
+from tkweb.settings.base import *
 
 DEBUG = False
 TEMPLATE_DEBUG = False
