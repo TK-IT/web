@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}News{% endblock title %}
+
+{% block content %}
+<h2>Tilføj billeder til: {{ associatedObject }}</h2>
+{% load jfutags %}
+{% jfu 'upload-form.html' %}
+{% endblock content%}

@@ -5,14 +5,4 @@ from tkweb.apps.gallery import views
 urlpatterns = patterns('',
                        url(r'^$',
                            'tkweb.apps.gallery.views.gallery',
-                           name='gallery'),
-                       url(r'^upload/',
-                           'tkweb.apps.gallery.views.upload',
-                           name = 'jfu_upload' ),
-                       url(r'^delete/(?P<pk>\d+)$',
-                           'tkweb.apps.gallery.views.upload_delete',
-                           name = 'jfu_delete' ),
-                       url(r'^uploadf/(?P<album_id>\w+)',
-                           'tkweb.apps.gallery.views.galleryImgUpload',
-                           name = 'uploadform' ),
-)
+                           name='gallery'))
