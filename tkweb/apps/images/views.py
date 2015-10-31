@@ -8,15 +8,6 @@ from jfu.http import upload_receive, UploadResponse, JFUResponse
 
 from tkweb.apps.images.models import Image
 
-@permission_required('image.add_image')
-def uploadForm(request, content_type, object_id):
-    ct = ContentType.objects.get(model=content_type)
-    associatedObject = ct.get_object_for_this_type(pk=object_id)
-    context = {'associatedObject' : associatedObject,
-               'content_type' : content_type,
-               'object_id' : object_id,}
-    return render(request, 'upload.html', context)
-
 @require_POST
 @permission_required('image.add_image', raise_exception=True)
 def upload(request):
