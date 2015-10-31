@@ -17,8 +17,8 @@ DEFAULT_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-    'imagekit',
     'jfu',
+    'sorl.thumbnail',
 ]
 
 LOCAL_APPS = [
