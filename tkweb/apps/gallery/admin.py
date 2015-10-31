@@ -1,13 +1,17 @@
-from django import forms
 from django.contrib import admin
-from django.db import models
+from django.contrib.contenttypes import generic
+from sorl.thumbnail.admin import AdminImageMixin
 from tkweb.apps.gallery.models import Album
+from tkweb.apps.images.models import Image
+
+class InlineImageAdmin(AdminImageMixin, generic.GenericTabularInline):
+    model = Image
+    extra = 0
+    def has_add_permission(self, request):
+        return False
 
 class AlbumAdmin(admin.ModelAdmin):
-    list_display = ('title', 'gfyear', 'image_admin_url')
-
-    def image_admin_url(self, obj):
-        return '<a href="/images/uploadf/album/%s">Upload images</a>' % obj.id
-    image_admin_url.allow_tags = True
+    list_display = ('title', 'gfyear')
+    inlines = [InlineImageAdmin]
 
 admin.site.register(Album, AlbumAdmin)
