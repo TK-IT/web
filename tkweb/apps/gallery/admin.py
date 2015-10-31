@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.contenttypes import generic
 from sorl.thumbnail.admin import AdminImageMixin
-from tkweb.apps.gallery.models import Album
-from tkweb.apps.images.models import Image
+from tkweb.apps.gallery.models import Album, Image
+
 
 class InlineImageAdmin(AdminImageMixin, generic.GenericTabularInline):
     model = Image
