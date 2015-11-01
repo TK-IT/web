@@ -3,3 +3,4 @@ pytz>=2015.2
 pillow>=2.6
 sorl-thumbnail>=12.3
 django-jfu>=2.0.9
+django-bootstrap3>=6.2.2
