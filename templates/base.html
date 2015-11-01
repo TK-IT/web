@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% endblock title%} | TÅGEKAMMERET</title>
-    <!-- ><link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}style.css" /> -->
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}style.css" />
     {% bootstrap_css %}
   </head>
   <body>
@@ -20,7 +20,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">TÅGEKAMERET</a>
+          <a class="navbar-brand" href="#">{% tket %}</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
@@ -37,7 +37,7 @@
     <div id="container">
       {% block content %}{% endblock content%}
     </div> <!-- container -->
-      &copy;1956-2015 <a href="/">TÅGEKAMMERET</a>
+      &copy;1956-2015 <a href="/">{% tket %}</a>
     </p>
     {% bootstrap_javascript jquery=1%}
     <script type="text/javascript" src="{{ STATIC_URL }}yoxview/yoxview-init.js"></script>
