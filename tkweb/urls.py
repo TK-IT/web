@@ -1,11 +1,30 @@
 from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from django.contrib.flatpages import views
 
 urlpatterns = patterns('',
                        # Examples:
                        # url(r'^$', 'tkweb.views.home', name='home'),
                        # url(r'^blog/', include('blog.urls')),
+
+                       url(r'^om/$',
+                           views.flatpage, {'url': '/om/'},
+                           name='om'),
+                       url(r'^bestfu/$',
+                           views.flatpage, {'url': '/bestfu/'},
+                           name='bestfu'),
+                       url(r'^arrangementer/$',
+                           views.flatpage, {'url': '/arrangementer/'},
+                           name='arrangementer'),
+                       url(r'^kontakt/$',
+                           views.flatpage, {'url': '/kontakt/'},
+                           name='kontakt'),
+                       url(r'^ket/$',
+                           views.flatpage, {'url': '/ket/'},
+                           name='ket'),
+
+
                        url(r'^gallery/',
                            include('tkweb.apps.gallery.urls'),
                            name = 'gallery'),

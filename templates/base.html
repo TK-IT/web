@@ -24,12 +24,12 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li><a href="#">Om TK</a></li>
-            <li><a href="#">BEST/FU</a></li>
+            <li><a href="{% url 'om' %}">Om TK</a></li>
+            <li><a href="{% url 'bestfu' %}">BEST/FU</a></li>
             <li><a href="#">Kalender</a></li>
-            <li><a href="#">Arrangementer</a></li>
+            <li><a href="{% url 'arrangementer' %}">Arrangementer</a></li>
             <li><a href="{% url 'gallery' %}">Galleri</a></li>
-            <li><a href="#">Kontakt</a></li>
+            <li><a href="{% url 'kontakt' %}">Kontakt</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
