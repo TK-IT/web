@@ -124,3 +124,7 @@ MIDDLEWARE_CLASSES = (
 # ----
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+# Sites
+# -----
+SITE_ID = 1
