@@ -10,7 +10,8 @@
         { media: { src: '{{ image.image.url }}', title: '{{ image.caption }}' }},{% endfor %}
       ]});{% endif %}{% endfor %}
   });
-</script>{% endblock js%}
+</script>
+<script type="text/javascript" src="{{ STATIC_URL }}yoxview/yoxview-init.js"></script>{% endblock js%}
 
 {% block content %}
 <table cellpadding="1">
