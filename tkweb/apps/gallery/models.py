@@ -29,5 +29,5 @@ class Album(models.Model):
 
     images = generic.GenericRelation(Image)
 
-    def __unicode__(self):
-        return self.title
+    def __str__(self):
+        return '%s: %s' % (self.gfyear, self.title)

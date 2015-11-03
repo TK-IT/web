@@ -6,3 +6,8 @@ body > .container {
 .tk-brand {
     font-family: monospace;
 }
+
+/* Til gallery appen */
+.thumb {
+    margin-bottom: 30px;
+}

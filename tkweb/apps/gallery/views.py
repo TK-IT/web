@@ -10,7 +10,9 @@ from tkweb.apps.gallery.models import Album, Image
 
 def gallery(request):
     albums = Album.objects.all()
-    context = {'albums': albums}
+    gfyears = set([a.gfyear for a in albums])
+    group_by_year = {y : [a for a in albums if a.gfyear==y] for y in gfyears}
+    context = {'group_by_year': group_by_year}
     return render(request, 'gallery.html', context)
 
 @require_POST

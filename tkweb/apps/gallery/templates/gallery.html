@@ -4,28 +4,30 @@
 {% block title %}Galleri{% endblock title %}
 
 {% block js %}<script type="text/javascript">
-  $(document).ready(function(){{% for album in albums %}{% if album.images.all %}
-    $("#{{ album.gfyear|slugify }}-{{ album.title|slugify }}").yoxview({
-      images: [{% for image in album.images.all %}
-        { media: { src: '{{ image.image.url }}', title: '{{ image.caption }}' }},{% endfor %}
-      ]});{% endif %}{% endfor %}
+  $(document).ready(function(){{% for year, albums in group_by_year.items %}{% for album in albums %}{% if album.images.all %}
+  $("#{{ year|slugify }}-{{ album.title|slugify }}").yoxview({
+  images: [{% for image in album.images.all %}
+  { media: { src: '{{ image.image.url }}', title: '{{ image.caption }}' }},{% endfor %}
+  ]});{% endif %}{% endfor %}{% endfor %}
   });
 </script>
 <script type="text/javascript" src="{{ STATIC_URL }}yoxview/yoxview-init.js"></script>{% endblock js%}
 
 {% block content %}
-<table cellpadding="1">
-{% for album in albums %}
+{% for year, albums in group_by_year.items %}
+<div class="row">
+  <div class="col-xs-12"><h2>{{year}}</h2></div>
+  {% for album in albums %}
+  <div class="col-xs-6 thumb">
+    {% thumbnail album.images.first.image "400x300" crop="center" as thumb %}
+    <a class="thumbnail" href="" id="{{ album.gfyear|slugify }}-{{ album.title|slugify }}">
+      <img class="img-responsive" src="{{ thumb.url }}" alt="{{ album.title }}" />
+      <p>{{ album.title }}</p>
+    </a>
+    {% empty %}No images{% endthumbnail %}
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
 
-  <tr>
-    <td class="title"><h3>{{ album.title }}</h3></td>
-    <td class="picture">
-      {% thumbnail album.images.all.0.image "262x262" crop="noop" as thumb %}
-        <a href="" id="{{ album.gfyear|slugify }}-{{ album.title|slugify }}">
-          <img src="{{ thumb.url }}" alt="{{ album.title }}" />
-        </a>
-      {% empty %}No images{% endthumbnail %}
-    </td>
-  </tr>{% endfor %}
-  </table>
 {% endblock content%}
