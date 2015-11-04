@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+
+{% block title %}Kalender{% endblock title %}
+
+{% block content %}
+<div class="row">
+  <h2>Kommende arrangementer</h2>
+  {% with futureEvents as events %}
+    {% include 'events.html' %}
+  {% endwith %}
+</div> <!-- row -->
+
+<div class="row">
+  <h2>Tidligere Arrangementer</h2>
+  {% with pastEvents as events %}
+    {% include 'events.html' %}
+  {% endwith %}
+</div> <!-- row -->
+{% endblock content%}

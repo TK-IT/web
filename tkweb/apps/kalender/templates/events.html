@@ -1,0 +1,11 @@
+<table class="table">
+  <tbody>
+    {% for event in events %}
+    <tr>
+      <td>{{ event.date }}</td>
+      <td>{{ event.title }}</td>
+      <td>{{ event.description }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

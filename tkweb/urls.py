@@ -24,6 +24,9 @@ urlpatterns = patterns('',
                            views.flatpage, {'url': '/ket/'},
                            name='ket'),
 
+                       url(r'^kalender/',
+                           'tkweb.apps.kalender.views.kalender',
+                           name = 'kalender'),
 
                        url(r'^gallery/',
                            include('tkweb.apps.gallery.urls'),
