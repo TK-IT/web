@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from icalendar import Calendar, Event, vDatetime
-from tkweb.apps.kalender.models import Event
+from tkweb.apps.calendar.models import Event
 import datetime
 import urllib.request
 

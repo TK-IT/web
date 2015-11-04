@@ -1,6 +1,7 @@
-from django.shortcuts import render
-from tkweb.apps.kalender.models import Event
 from datetime import date, timedelta
+from django.shortcuts import render
+from tkweb.apps.calendar.models import Event
+
 def kalender(request):
     todayish = date.today() - timedelta(days=1)
     yearAgo = date.today() - timedelta(days=365)
