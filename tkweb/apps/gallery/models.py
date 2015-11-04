@@ -1,4 +1,5 @@
 import os
+from datetime import date
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -29,10 +30,19 @@ class Album(models.Model):
     def nextGfyear():
         # TODO: Dette skal erstattes af et globalt gfyear på et
         # tidspunkt
-        return Album.objects.last().gfyear
+
+        if Album.objects.exists():
+            gfyear = Album.objects.last().gfyear
+        else:
+            gfyear = date.today().year
+        return gfyear
 
     def nextOrder():
-        return Album.objects.last().order + 3
+        if Album.objects.exists():
+            order = Album.objects.last().order
+        else:
+            order = 1
+        return order
 
     title = models.CharField(max_length = 200)
     gfyear = models.PositiveSmallIntegerField(default=nextGfyear)
