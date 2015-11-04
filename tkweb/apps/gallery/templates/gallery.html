@@ -14,20 +14,33 @@
 <script type="text/javascript" src="{{ STATIC_URL }}yoxview/yoxview-init.js"></script>{% endblock js%}
 
 {% block content %}
-{% for year, albums in group_by_year %}
 <div class="row">
-  <div class="col-xs-12"><h2>{{year}}</h2></div>
-  {% for album in albums %}
-  <div class="col-xs-6 thumb">
-    {% thumbnail album.images.first.image "400x300" crop="center" as thumb %}
-    <a class="thumbnail" href="" id="{{ album.gfyear|slugify }}-{{ album.title|slugify }}">
-      <img class="img-responsive" src="{{ thumb.url }}" alt="{{ album.title }}" />
-      <p>{{ album.title }}</p>
-    </a>
-    {% empty %}No images{% endthumbnail %}
-  </div>
+  {% for year, albums in group_by_year %}
+  <div class="panel-group" id="accordition" role="tablist" aria-multiselectable="true">
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="heading{{year}}">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{year}}" aria-expanded="false" aria-controls="collapse{{year}}">
+            {{year}}
+          </a>
+        </h4>
+      </div> <!-- panel-heading -->
+      <div id="collapse{{year}}" class="panel-colappse collapse" role="tabpanel" aria-labelledby="heading{{year}}">
+        <div class="panel-body">
+          {% for album in albums %}
+          <div class="col-xs-6 thumb">
+            {% thumbnail album.images.first.image "400x300" crop="center" as thumb %}
+            <a class="thumbnail" href="" id="{{ album.gfyear|slugify }}-{{ album.title|slugify }}">
+              <img class="img-responsive" src="{{ thumb.url }}" alt="{{ album.title }}" />
+              <p>{{ album.title }}</p>
+            </a>
+            {% empty %}No images{% endthumbnail %}
+          </div> <!-- col-xs-6 thumb -->
+          {% endfor %}
+        </div> <!-- panel-body -->
+      </div> <!-- collapse{{year}} -->
+    </div> <!-- panel panel-default  -->
+  </div> <!-- panel-group -->
   {% endfor %}
-</div>
-{% endfor %}
-
+</div> <!-- row -->
 {% endblock content%}
