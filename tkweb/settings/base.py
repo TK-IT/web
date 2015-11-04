@@ -26,6 +26,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     'tkweb.apps.gallery',
+    'tkweb.apps.kalender',
     'tkweb.apps.tk-brand',
 ]
 
