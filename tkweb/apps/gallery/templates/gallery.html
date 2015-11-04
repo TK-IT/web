@@ -4,7 +4,7 @@
 {% block title %}Galleri{% endblock title %}
 
 {% block js %}<script type="text/javascript">
-  $(document).ready(function(){{% for year, albums in group_by_year.items %}{% for album in albums %}{% if album.images.all %}
+  $(document).ready(function(){{% for year, albums in group_by_year %}{% for album in albums %}{% if album.images.all %}
   $("#{{ year|slugify }}-{{ album.title|slugify }}").yoxview({
   images: [{% for image in album.images.all %}
   { media: { src: '{{ image.image.url }}', title: '{{ image.caption }}' }},{% endfor %}
@@ -14,7 +14,7 @@
 <script type="text/javascript" src="{{ STATIC_URL }}yoxview/yoxview-init.js"></script>{% endblock js%}
 
 {% block content %}
-{% for year, albums in group_by_year.items %}
+{% for year, albums in group_by_year %}
 <div class="row">
   <div class="col-xs-12"><h2>{{year}}</h2></div>
   {% for album in albums %}

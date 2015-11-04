@@ -23,10 +23,21 @@ class Image(models.Model):
 
 
 class Album(models.Model):
-    title = models.CharField(max_length = 200)
-    gfyear = models.PositiveSmallIntegerField()
-    description = models.TextField(blank = True)
+    class Meta:
+        ordering = ['gfyear', 'order']
 
+    def nextGfyear():
+        # TODO: Dette skal erstattes af et globalt gfyear på et
+        # tidspunkt
+        return Album.objects.last().gfyear
+
+    def nextOrder():
+        return Album.objects.last().order + 3
+
+    title = models.CharField(max_length = 200)
+    gfyear = models.PositiveSmallIntegerField(default=nextGfyear)
+    order = models.PositiveSmallIntegerField(default=nextOrder)
+    description = models.TextField(blank = True)
     images = generic.GenericRelation(Image)
 
     def __str__(self):
