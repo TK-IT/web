@@ -3,7 +3,12 @@
     {% for event in events %}
     <tr>
       <td>{{ event.date }}</td>
-      <td>{{ event.title }}</td>
+      <td>{{ event.title }}
+        {% if event.facebook %}
+        <br />
+        <a href="{{ event.facebook }}">Facebook event</a>
+        {% endif %}
+      </td>
       <td>{{ event.description }}</td>
     </tr>
     {% endfor %}
