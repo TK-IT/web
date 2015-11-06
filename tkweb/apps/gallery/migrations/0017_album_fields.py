@@ -8,7 +8,7 @@ import datetime
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gallery', '0010_auto_20151105_2139'),
+        ('gallery', '0016_album_fields'),
     ]
 
     operations = [
