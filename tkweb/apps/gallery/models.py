@@ -102,6 +102,7 @@ class Image(models.Model):
         slug = (base36_encode(v) + '0' * self.SLUG_SIZE)[:self.SLUG_SIZE]
 
         if len(Image.objects.all().filter(slug=slug)) > 0:
+            # XXX: This results in a 500 error
             raise ValidationError('A file with this slug already exists')
 
         super(Image, self).save()
