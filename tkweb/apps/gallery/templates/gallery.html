@@ -25,7 +25,7 @@
           </a>
         </h4>
       </div> <!-- panel-heading -->
-      <div id="collapse{{year}}" class="panel-colappse collapse" role="tabpanel" aria-labelledby="heading{{year}}">
+      <div id="collapse{{year}}" class="panel-colappse collapse{% if forloop.first %} in{% endif %}" role="tabpanel" aria-labelledby="heading{{year}}">
         <div class="panel-body">
           {% for album in albums %}
           <div class="col-xs-6 thumb">
