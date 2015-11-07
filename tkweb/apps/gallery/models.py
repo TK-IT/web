@@ -63,7 +63,7 @@ class Image(models.Model):
 
 class Album(models.Model):
     class Meta:
-        ordering = ['gfyear', 'order']
+        ordering = ['gfyear', 'publish_date']
 
     def nextGfyear():
         # TODO: Dette skal erstattes af et globalt gfyear på et
@@ -75,19 +75,11 @@ class Album(models.Model):
             gfyear = date.today().year
         return gfyear
 
-    def nextOrder():
-        if Album.objects.exists():
-            order = Album.objects.last().order
-        else:
-            order = 1
-        return order
-
     title = models.CharField(max_length = 200)
-    publish_date = models.DateField(default=date.today())
-    eventalbum = models.BooleanField(default=True)
-    gfyear = models.PositiveSmallIntegerField(default=nextGfyear)
+    publish_date = models.DateField()
+    eventalbum = models.BooleanField()
+    gfyear = models.PositiveSmallIntegerField()
     slug = models.SlugField(unique=True)
-    order = models.PositiveSmallIntegerField(default=nextOrder) # skal udfases
     description = models.TextField(blank = True)
     images = generic.GenericRelation(Image)
 

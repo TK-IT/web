@@ -19,11 +19,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='album',
             name='gfyear',
-            field=models.PositiveSmallIntegerField(default=tkweb.apps.gallery.models.Album.nextGfyear),
+            field=models.PositiveSmallIntegerField(),
         ),
         migrations.AlterField(
             model_name='album',
             name='order',
-            field=models.PositiveSmallIntegerField(default=tkweb.apps.gallery.models.Album.nextOrder),
+            field=models.PositiveSmallIntegerField(),
         ),
     ]
