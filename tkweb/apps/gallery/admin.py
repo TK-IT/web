@@ -32,7 +32,7 @@ class AlbumAdminForm(forms.ModelForm):
         return qs['gfyear__max']
         
     def __init__(self, *args, **kwargs):
-        if not kwargs['initial']:
+        if not kwargs.get('initial'):
             kwargs['initial'] = {}
         kwargs['initial'].update({
             'publish_date': date.today(),
@@ -42,7 +42,9 @@ class AlbumAdminForm(forms.ModelForm):
         super(AlbumAdminForm, self).__init__(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
-        cleaned_data = self.cleaned_data
+        cleaned_data = super(AlbumAdminForm, self).clean(*args, **kwargs)
+        if not 'title' in cleaned_data or not 'publish_date' in cleaned_data:
+            return
         title = cleaned_data['title']
         year = cleaned_data['publish_date'].year
         potentialslug = slugify('%s-%s' %(title, year))
