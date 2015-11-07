@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from jfu.http import upload_receive, UploadResponse, JFUResponse
 from tkweb.apps.gallery.models import Album, Image
+from django.shortcuts import get_object_or_404
 
 
 def gallery(request):
@@ -14,6 +15,11 @@ def gallery(request):
     group_by_year = [[y, [a for a in albums if a.gfyear==y]] for y in gfyears]
     context = {'group_by_year': group_by_year}
     return render(request, 'gallery.html', context)
+    
+def album(request, year, album_slug):
+    album = get_object_or_404(Album, slug=album_slug)
+    context = {'album': album}
+    return render(request, 'album.html', context)
 
 @require_POST
 @permission_required('gallery.add_image', raise_exception=True)

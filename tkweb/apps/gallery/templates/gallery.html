@@ -29,22 +29,24 @@
         <div class="panel-body">
           <div class="eventalbums">
             {% for album in albums %}
-              {% ifchanged album.eventalbum %}{% if not album.eventalbum %}
+              {% if album.images.count > 1 %}
+                {% ifchanged album.eventalbum %}{% if not album.eventalbum %}
           </div>
           <div class="col-xs-12">
             <hr>
             <h4>Årets gang:</h4>
           </div>
           <div class="oddalbums">
-              {% endif %}{% endifchanged %}
+                {% endif %}{% endifchanged %}
             <div class="col-xs-6 thumb">
-              {% thumbnail album.images.first.image "400x300" crop="center" as thumb %}
-              <a class="thumbnail" href="" id="{{ album.gfyear|slugify }}-{{ album.title|slugify }}">
+              <a class="thumbnail" href="{% url 'album' year=album.gfyear album_slug=album.slug %}" id="{{ album.slug }}">
+                {% thumbnail album.images.first.image "400x300" crop="center" as thumb %}
                 <img class="img-responsive" src="{{ thumb.url }}" alt="{{ album.title }}" />
                 <p>{{ album.title }}</p>
+                {% empty %}<p>{{ album.title }} (Tomt album)</p>{% endthumbnail %}
               </a>
-              {% empty %}<p>{{ album.title }} (Tomt album)</p>{% endthumbnail %}
             </div> <!-- col-xs-6 thumb -->
+              {% endif %}
             {% endfor %}
           </div>
         </div> <!-- panel-body -->
