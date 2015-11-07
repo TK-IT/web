@@ -49,7 +49,7 @@ class AlbumAdminForm(forms.ModelForm):
         year = cleaned_data['publish_date'].year
         potentialslug = slugify('%s-%s' %(title, year))
         qs = Album.objects.filter(slug=potentialslug)
-        if qs.count() == 1 and qs[0] != cleaned_data:
+        if qs.count() == 1 and qs[0] != self.instance:
             msg = "Albummet '%s' i %s eksisterer allerede" % (title,year)
             raise ValidationError(msg)
 
