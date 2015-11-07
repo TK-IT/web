@@ -65,16 +65,6 @@ class Album(models.Model):
     class Meta:
         ordering = ['gfyear', 'publish_date']
 
-    def nextGfyear():
-        # TODO: Dette skal erstattes af et globalt gfyear på et
-        # tidspunkt
-
-        if Album.objects.exists():
-            gfyear = Album.objects.last().gfyear
-        else:
-            gfyear = date.today().year
-        return gfyear
-
     title = models.CharField(max_length = 200)
     publish_date = models.DateField()
     eventalbum = models.BooleanField()

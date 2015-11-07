@@ -5,6 +5,8 @@ from tkweb.apps.gallery.models import Album, Image
 from django.core.exceptions import ValidationError
 from django import forms
 from django.utils.text import slugify
+from datetime import date
+from django.db.models import Max
 
 
 class InlineImageAdmin(AdminImageMixin, generic.GenericTabularInline):
@@ -24,6 +26,20 @@ class AlbumAdminForm(forms.ModelForm):
             'eventalbum', 
             'description'
         ]
+        
+    def get_gfyear(self):
+        qs = Album.objects.all().aggregate(Max('gfyear'))
+        return qs['gfyear__max']
+        
+    def __init__(self, *args, **kwargs):
+        if not kwargs['initial']:
+            kwargs['initial'] = {}
+        kwargs['initial'].update({
+            'publish_date': date.today(),
+            'gfyear': self.get_gfyear(),
+            'eventalbum': True,
+        })
+        super(AlbumAdminForm, self).__init__(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
         cleaned_data = self.cleaned_data
