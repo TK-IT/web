@@ -105,6 +105,8 @@ class Image(models.Model):
             # XXX: This results in a 500 error
             raise ValidationError('A file with this slug already exists')
 
+        self.slug = slug
+
         super(Image, self).save()
 
 class Album(models.Model):
