@@ -63,7 +63,7 @@ class Image(models.Model):
 
 class Album(models.Model):
     class Meta:
-        ordering = ['gfyear', 'publish_date']
+        ordering = ['gfyear', '-eventalbum', 'publish_date']
 
     title = models.CharField(max_length = 200)
     publish_date = models.DateField()

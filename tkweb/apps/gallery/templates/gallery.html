@@ -27,16 +27,26 @@
       </div> <!-- panel-heading -->
       <div id="collapse{{year}}" class="panel-colappse collapse{% if forloop.first %} in{% endif %}" role="tabpanel" aria-labelledby="heading{{year}}">
         <div class="panel-body">
-          {% for album in albums %}
-          <div class="col-xs-6 thumb">
-            {% thumbnail album.images.first.image "400x300" crop="center" as thumb %}
-            <a class="thumbnail" href="" id="{{ album.gfyear|slugify }}-{{ album.title|slugify }}">
-              <img class="img-responsive" src="{{ thumb.url }}" alt="{{ album.title }}" />
-              <p>{{ album.title }}</p>
-            </a>
-            {% empty %}<p>{{ album.title }} (Tomt album)</p>{% endthumbnail %}
-          </div> <!-- col-xs-6 thumb -->
-          {% endfor %}
+          <div class="eventalbums">
+            {% for album in albums %}
+              {% ifchanged album.eventalbum %}{% if not album.eventalbum %}
+          </div>
+          <div class="col-xs-12">
+            <hr>
+            <h4>Årets gang:</h4>
+          </div>
+          <div class="oddalbums">
+              {% endif %}{% endifchanged %}
+            <div class="col-xs-6 thumb">
+              {% thumbnail album.images.first.image "400x300" crop="center" as thumb %}
+              <a class="thumbnail" href="" id="{{ album.gfyear|slugify }}-{{ album.title|slugify }}">
+                <img class="img-responsive" src="{{ thumb.url }}" alt="{{ album.title }}" />
+                <p>{{ album.title }}</p>
+              </a>
+              {% empty %}<p>{{ album.title }} (Tomt album)</p>{% endthumbnail %}
+            </div> <!-- col-xs-6 thumb -->
+            {% endfor %}
+          </div>
         </div> <!-- panel-body -->
       </div> <!-- collapse{{year}} -->
     </div> <!-- panel panel-default  -->
