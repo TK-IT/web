@@ -2,11 +2,16 @@ from PIL.ExifTags import TAGS
 from datetime import date, datetime
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
 from sorl.thumbnail import ImageField
 import PIL
 import os
+import hashlib
+import string
+import shutil
+import tempfile
 
 
 def file_name(instance, filename):
@@ -17,34 +22,47 @@ def file_name(instance, filename):
     return '/'.join([content_type_folder, object_id_folder, newFilename])
 
 def get_exif_date_or_now(filename):
-    image = PIL.Image.open(filename)
-    info = image._getexif()
-    if info is not None:
-        exif = {}
-        for tag, value in info.items():
-            decoded = TAGS.get(tag, tag)
-            exif[decoded] = value
+    try:
+        image = PIL.Image.open(filename)
+        info = image._getexif()
+        if info is not None:
+            exif = {}
+            for tag, value in info.items():
+                decoded = TAGS.get(tag, tag)
+                exif[decoded] = value
 
-        for t in ["Original", "Digitized", ""]:
-            """
-            Check the exif fields DateTimeOriginal, DateTimeDigitized and
-            DateTime in that order. Return when the first is found.
-            """
-            if 'DateTime' + t in exif:
-                s = exif['DateTime' + t]
-                if type(s) is tuple:
-                    s = str(s[0])
-                if 'SubsecTime' + t in exif:
-                    ms = exif['SubsecTime' + t]
-                    if type(ms) is tuple:
-                        ms = str(ms[0])
-                else:
-                    ms = '0'
-                s += "." + ms
-                return datetime.strptime(s, '%Y:%m:%d %H:%M:%S.%f')
-    return datetime.now()
+            for t in ["Original", "Digitized", ""]:
+                """
+                Check the exif fields DateTimeOriginal, DateTimeDigitized and
+                DateTime in that order. Return when the first is found.
+                """
+                if 'DateTime' + t in exif:
+                    s = exif['DateTime' + t]
+                    if type(s) is tuple:
+                        s = str(s[0])
+                    if 'SubsecTime' + t in exif:
+                        ms = exif['SubsecTime' + t]
+                        if type(ms) is tuple:
+                            ms = str(ms[0])
+                    else:
+                        ms = '0'
+                    s += "." + ms
+                    return datetime.strptime(s, '%Y:%m:%d %H:%M:%S.%f')
+    except Exception:
+        return datetime.now()
+
+def base36_encode(n):
+    symbols = string.digits + string.ascii_lowercase
+
+    s = ''
+    while n:
+        s += symbols[n % 36]
+        n //= 36
+
+    return s
 
 class Image(models.Model):
+    SLUG_SIZE = 6
 
     class Meta:
         ordering = ['date']
@@ -57,8 +75,35 @@ class Image(models.Model):
     date = models.DateTimeField(null=True,blank=True)
     caption = models.CharField(max_length=200, blank=True)
 
+    slug = models.SlugField(unique=True)
+
     def save(self):
-        self.date = get_exif_date_or_now(self.image)
+        f = tempfile.NamedTemporaryFile(delete=False)
+        path = f.name
+
+        shutil.copyfileobj(self.image, f)
+        f.close()
+
+        with open(path, 'r') as f:
+            self.date = get_exif_date_or_now(f)
+
+        m = hashlib.sha1()
+        with open(path, 'rb') as f:
+            while True:
+                b = f.read(2 ** 20)
+                print(len(b))
+                if b == b'':
+                    break
+                m.update(b)
+
+        os.remove(path)
+
+        v = int(m.hexdigest(), 16)
+        slug = (base36_encode(v) + '0' * self.SLUG_SIZE)[:self.SLUG_SIZE]
+
+        if len(Image.objects.all().filter(slug=slug)) > 0:
+            raise ValidationError('A file with this slug already exists')
+
         super(Image, self).save()
 
 class Album(models.Model):
