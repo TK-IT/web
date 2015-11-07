@@ -13,27 +13,39 @@ class InlineImageAdmin(AdminImageMixin, generic.GenericTabularInline):
     def has_add_permission(self, request):
         return False
 
-        
+
 class AlbumAdminForm(forms.ModelForm):
     class Meta:
         model = Album
-        fields = '__all__'
+        fields = [
+            'title', 
+            'publish_date', 
+            'gfyear', 
+            'eventalbum', 
+            'description'
+        ]
 
     def clean(self, *args, **kwargs):
         cleaned_data = self.cleaned_data
-        title = cleaned_data.get('title')
-        year = cleaned_data.get('publish_date').year
+        title = cleaned_data['title']
+        year = cleaned_data['publish_date'].year
         potentialslug = slugify('%s-%s' %(title, year))
-        qs = Album.objects.filter(slug=potentialslug).exclude(id=cleaned_data.get('id'))
-        if qs.count() > 0:
+        qs = Album.objects.filter(slug=potentialslug)
+        if qs.count() == 1 and qs[0] != cleaned_data:
             msg = "Albummet '%s' i %s eksisterer allerede" % (title,year)
             raise ValidationError(msg)
-        cleaned_data['slug'] = potentialslug
-        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super(AlbumAdminForm, self).save(commit=False)
+        instance.slug = slugify(
+        '%s-%s' % (instance.title, instance.publish_date.year))
+        if commit:
+            instance.save()
+        return instance
 
 class AlbumAdmin(admin.ModelAdmin):
     list_display = ('title', 'gfyear', 'publish_date', 'slug')
     inlines = [InlineImageAdmin]
     form = AlbumAdminForm
-    
+
 admin.site.register(Album, AlbumAdmin)

@@ -86,15 +86,10 @@ class Album(models.Model):
     publish_date = models.DateField(default=date.today())
     eventalbum = models.BooleanField(default=True)
     gfyear = models.PositiveSmallIntegerField(default=nextGfyear)
-    slug = models.SlugField(unique=True, editable=False)
+    slug = models.SlugField(unique=True)
     order = models.PositiveSmallIntegerField(default=nextOrder) # skal udfases
     description = models.TextField(blank = True)
     images = generic.GenericRelation(Image)
-    
-    def save(self, *args, **kwargs):
-        self.slug =  slugify('%s-%s' %(self.title, self.publish_date.year))
-        super(Album, self).save(self, *args, **kwargs)
-
 
     def __str__(self):
         return '%s: %s' % (self.gfyear, self.title)
