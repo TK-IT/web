@@ -40,7 +40,21 @@ def image(request, album_slug, image_slug, **kwargs):
             gfyear=album.gfyear, 
             album_slug=album_slug)
     else:
-        context = {'album': album, 'start_image': image_slug}
+        image = album.images.get(slug=image_slug)
+        context = {
+            'album': album, 
+            'start_image': image,
+        }
+        next_image = album.images.filter(date__gt=image.date)
+        try:
+            context['next_image'] = next_image[0]
+        except:
+            context['next_image'] = image
+        prev_image = album.images.filter(date__lt=image.date).reverse()
+        try:
+            context['prev_image'] = prev_image[0]
+        except:
+            context['prev_image'] = image
     return render(request, 'image.html', context)
 
 @require_POST

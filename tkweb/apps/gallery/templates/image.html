@@ -13,31 +13,39 @@
 {% endblock js%}
 
 {% block content %}
-<h1>{{ album.title }}, {{ album.publish_date }}</h1>
+  {% if album.eventalbum %}
+<h3>Billeder fra {{ album.title }}, {{ album.publish_date }}</h3>
+  {% else %}
+<h3>{{ album.title }}, {{ album.gfyear }}</h3>
+  {% endif %}
 <p>
-  <a class="tkgal_link prev" link="#" href="#prev">Forige</a> | 
-  <a class="tkgal_link album_link url_base" 
+  <a class="tkgal_link prev" 
+    link="{{ prev_image.slug }}" 
+    href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=prev_image.slug %}">Forige</a> | 
+  <a class="tkgal_url_base" 
     href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">Tilbage til albumoversigt</a> | 
-  <a class="tkgal_link next" link="#" href="#next">Næste</a>
+  <a class="tkgal_link next" 
+    link="{{ next_image.slug }}" 
+    href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=next_image.slug %}">Næste</a>
 </p>
 <div class="tkgal_container">
   {% for image in album.images.all %}
-  <picture permlink="{{ image.slug }}"{% ifequal image.slug start_image %}class="current"{% endifequal %}>
+  <picture permlink="{{ image.slug }}"{% ifequal image start_image %}class="current"{% endifequal %}>
     {% thumbnail image.image "960x960" as large %}
     <source 
       media="(min-width: 960px)"
-      {% ifnotequal image.slug start_image %}data-{% endifnotequal %}srcset="{{ large.url }}" 
+      {% ifnotequal image start_image %}data-{% endifnotequal %}srcset="{{ large.url }}" 
       alt="{{ album.slug }}/{{ image.slug }}">
     {% empty %}{% endthumbnail %}
     {% thumbnail image.image "575x575" as medium %}
     <source 
       media="(min-width: 575px)"
-      {% ifnotequal image.slug start_image %}data-{% endifnotequal %}srcset="{{ medium.url }}" 
+      {% ifnotequal image start_image %}data-{% endifnotequal %}srcset="{{ medium.url }}" 
       alt="{{ album.slug }}/{{ image.slug }}">
     {% empty %}{% endthumbnail %}
     {% thumbnail image.image "420x420" as small %}
     <img 
-      {% ifnotequal image.slug start_image %}data-{% endifnotequal %}src="{{ small.url }}" 
+      {% ifnotequal image start_image %}data-{% endifnotequal %}src="{{ small.url }}" 
       alt="{{ album.slug }}/{{ image.slug }}">
     {% empty %}{% endthumbnail %}
     <figcaption>

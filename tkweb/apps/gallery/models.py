@@ -108,6 +108,10 @@ class Image(models.Model):
         self.slug = slug
 
         super(Image, self).save()
+    
+    def __str__(self):
+        return '%s, %s' % (self.slug, self.date)
+        
 
 class Album(models.Model):
     class Meta:
@@ -123,6 +127,13 @@ class Album(models.Model):
     
     def number_of_images(self):
         return self.images.count()
+        
+    def prev(self, image_slug):
+        image = self.images.get(slug=image_slug)
+        prev = self.images.filter(date__lt=image.date).reverse[0]
+        print(prev)
+        return prev
+                
 
     def __str__(self):
         return '%s: %s' % (self.gfyear, self.title)
