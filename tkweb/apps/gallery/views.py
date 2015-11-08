@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from django.views.decorators.http import require_POST
 from jfu.http import upload_receive, UploadResponse, JFUResponse
 from tkweb.apps.gallery.models import Album, Image
+from django.db.models import Max
 
 
 def gallery(request, **kwargs):
@@ -14,14 +15,10 @@ def gallery(request, **kwargs):
     gfyears = sorted(set([a.gfyear for a in albums]), reverse=True)
     group_by_year = [[y, [a for a in albums if a.gfyear==y]] for y in gfyears]
     context = {'group_by_year': group_by_year}
-    if kwargs['gfyear']:
-        show_year = int(kwargs['gfyear'])
-        get_list_or_404(Album, gfyear=show_year)
-        context['show_year'] = show_year
-    else:
-        qs = Album.objects.all().aggregate(Max('gfyear'))
-        latest_gfyear = qs['gfyear__max']
-        context['show_year'] = show_year
+    qs = Album.objects.all().aggregate(Max('gfyear'))
+    latest_gfyear = qs['gfyear__max']
+    context['show_year'] = int(kwargs.get('gfyear', latest_gfyear))
+    get_list_or_404(Album, gfyear=context['show_year'])
     return render(request, 'gallery.html', context)
     
 def album(request, gfyear, album_slug):
