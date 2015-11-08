@@ -5,7 +5,7 @@ from tkweb.apps.gallery import views
 urlpatterns = patterns('',
                        url(r'^$',
                            'tkweb.apps.gallery.views.gallery',
-                           name='index'),
+                           name='gallery_index'),
                        url(r'^upload/',
                            'tkweb.apps.gallery.views.upload',
                            name='jfu_upload'),

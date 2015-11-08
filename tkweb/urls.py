@@ -34,9 +34,7 @@ urlpatterns = patterns('',
                            name = 'kalender'),
 
                        url(r'^galleri/',
-                           include('tkweb.apps.gallery.urls',
-                               namespace='gallery',
-                           ),
+                           include('tkweb.apps.gallery.urls'),
                            name = 'gallery'),
 
                        url(r'^admin/',
