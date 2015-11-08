@@ -3,15 +3,7 @@
 
 {% block title %}Galleri{% endblock title %}
 
-{% block js %}<script type="text/javascript">
-  $(document).ready(function(){{% for year, albums in group_by_year %}{% for album in albums %}{% if album.images.all %}
-  $("#{{ year|slugify }}-{{ album.title|slugify }}").yoxview({
-  images: [{% for image in album.images.all %}
-  { media: { src: '{{ image.image.url }}', title: '{{ image.caption }}' }},{% endfor %}
-  ]});{% endif %}{% endfor %}{% endfor %}
-  });
-</script>
-<script type="text/javascript" src="{{ STATIC_URL }}yoxview/yoxview-init.js"></script>{% endblock js%}
+{% block js %}{% endblock js%}
 
 {% block content %}
 <div class="row">
@@ -39,7 +31,7 @@
           <div class="oddalbums">
                 {% endif %}{% endifchanged %}
             <div class="col-xs-6 thumb">
-              <a class="thumbnail" href="{% url 'album' year=album.gfyear album_slug=album.slug %}" id="{{ album.slug }}">
+              <a class="thumbnail" href="{% url 'gallery:album' gfyear=album.gfyear album_slug=album.slug %}" id="{{ album.slug }}">
                 {% thumbnail album.images.first.image "400x300" crop="center" as thumb %}
                 <img class="img-responsive" src="{{ thumb.url }}" alt="{{ album.title }}" />
                 <p>{{ album.title }}</p>

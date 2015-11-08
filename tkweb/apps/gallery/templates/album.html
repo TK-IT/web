@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+
+{% block title %}{{ album.title }}{% endblock title %}
+
+{% block js %}{% endblock js%}
+
+{% block content %}
+<h1>{{ album.title }}, {{ album.publish_date }}</h1>
+  {% for image in album.images.all %}
+    {% thumbnail image.image "400x300" crop="center" as thumb %}
+  <img src="{{ thumb.url }}" alt="{{ album.title }}" />
+    {% empty %}
+  <p>Albummet '{{ album.title }}' har ingen billeder endnu.</p>
+    {% endthumbnail %}
+  {% endfor %}
+{% endblock content%}

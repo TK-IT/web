@@ -2,11 +2,10 @@ import os
 from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 from jfu.http import upload_receive, UploadResponse, JFUResponse
 from tkweb.apps.gallery.models import Album, Image
-from django.shortcuts import get_object_or_404
 
 
 def gallery(request):
@@ -16,10 +15,17 @@ def gallery(request):
     context = {'group_by_year': group_by_year}
     return render(request, 'gallery.html', context)
     
-def album(request, year, album_slug):
+def album(request, gfyear, album_slug):
     album = get_object_or_404(Album, slug=album_slug)
-    context = {'album': album}
-    return render(request, 'album.html', context)
+    if int(gfyear) != album.gfyear:
+        return redirect(
+            'gallery:album', 
+            gfyear=album.gfyear, 
+            album_slug=album_slug,
+        )
+    else:
+        context = {'album': album}
+        return render(request, 'album.html', context)
 
 @require_POST
 @permission_required('gallery.add_image', raise_exception=True)
