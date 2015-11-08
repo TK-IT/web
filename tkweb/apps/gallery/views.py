@@ -8,7 +8,7 @@ from jfu.http import upload_receive, UploadResponse, JFUResponse
 from tkweb.apps.gallery.models import Album, Image
 
 
-def gallery(request):
+def gallery(request, **kwargs):
     albums = Album.objects.all()
     gfyears = sorted(set([a.gfyear for a in albums]), reverse=True)
     group_by_year = [[y, [a for a in albums if a.gfyear==y]] for y in gfyears]
