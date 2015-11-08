@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% load staticfiles %}
+
+{% block title %}{{ album.title }}{% endblock title %}
+
+{% block js %}
+ <style>
+  .tkgal_container > * {display:none;}
+  .tkgal_container > .current {display:block;}
+</style>
+<script src="{% static "tkgal.js" %}"></script>
+{% endblock js%}
+
+{% block content %}
+<h1>{{ album.title }}, {{ album.publish_date }}</h1>
+<p>
+  <a class="tkgal_link prev" link="#" href="#prev">Forige</a> | 
+  <a class="tkgal_link album_link url_base" 
+    href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">Tilbage til albumoversigt</a> | 
+  <a class="tkgal_link next" link="#" href="#next">Næste</a>
+</p>
+<div class="tkgal_container">
+  {% for image in album.images.all %}
+  <picture permlink="{{ image.slug }}"{% ifequal image.slug start_image %}class="current"{% endifequal %}>
+    {% thumbnail image.image "960x960" as large %}
+    <source 
+      media="(min-width: 960px)"
+      {% ifnotequal image.slug start_image %}data-{% endifnotequal %}srcset="{{ large.url }}" 
+      alt="{{ album.slug }}/{{ image.slug }}">
+    {% empty %}{% endthumbnail %}
+    {% thumbnail image.image "575x575" as medium %}
+    <source 
+      media="(min-width: 575px)"
+      {% ifnotequal image.slug start_image %}data-{% endifnotequal %}srcset="{{ medium.url }}" 
+      alt="{{ album.slug }}/{{ image.slug }}">
+    {% empty %}{% endthumbnail %}
+    {% thumbnail image.image "420x420" as small %}
+    <img 
+      {% ifnotequal image.slug start_image %}data-{% endifnotequal %}src="{{ small.url }}" 
+      alt="{{ album.slug }}/{{ image.slug }}">
+    {% empty %}{% endthumbnail %}
+    <figcaption>
+      <p>image.slug: {{ image.slug }}</p>
+      <p>image.datetime: {{ image.date }}</p>
+      <p>image.description: {{ image.description }}</p>
+    </figcaption>
+  </picture>
+  {% endfor %}
+</div>
+{% endblock content%}
