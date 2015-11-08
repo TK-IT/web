@@ -21,8 +21,7 @@
         <div class="panel-body">
           <div class="eventalbums">
             {% for album in albums %}
-              {% if album.images.count > 1 %}
-                {% ifchanged album.eventalbum %}{% if not album.eventalbum %}
+              {% ifchanged album.eventalbum %}{% if not album.eventalbum %}
           </div>
           <div class="col-xs-12">
             <hr>
@@ -38,7 +37,6 @@
                 {% empty %}<p>{{ album.title }} (Tomt album)</p>{% endthumbnail %}
               </a>
             </div> <!-- col-xs-6 thumb -->
-              {% endif %}
             {% endfor %}
           </div>
         </div> <!-- panel-body -->

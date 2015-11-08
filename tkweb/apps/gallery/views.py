@@ -10,7 +10,7 @@ from tkweb.apps.gallery.models import Album, Image
 
 
 def gallery(request, **kwargs):
-    albums = Album.objects.all()
+    albums = Album.objects.exclude(images__isnull=True)
     gfyears = sorted(set([a.gfyear for a in albums]), reverse=True)
     group_by_year = [[y, [a for a in albums if a.gfyear==y]] for y in gfyears]
     context = {'group_by_year': group_by_year}
