@@ -7,11 +7,14 @@
 
 {% block content %}
 <h1>{{ album.title }}, {{ album.publish_date }}</h1>
+<p>{{ album.number_of_images }} billeder</p>
   {% for image in album.images.all %}
-    {% thumbnail image.image "400x300" crop="center" as thumb %}
-  <img src="{{ thumb.url }}" alt="{{ album.title }}" />
+  <a href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=image.slug %}" alt="Se billede">
+    {% thumbnail image.image "300x200" crop="center" as thumb %}
+    <img src="{{ thumb.url }}" alt="{{ album.title }}" />
     {% empty %}
   <p>Albummet '{{ album.title }}' har ingen billeder endnu.</p>
     {% endthumbnail %}
+  </a>
   {% endfor %}
 {% endblock content%}

@@ -120,6 +120,9 @@ class Album(models.Model):
     slug = models.SlugField(unique=True)
     description = models.TextField(blank = True)
     images = generic.GenericRelation(Image)
+    
+    def number_of_images(self):
+        return self.images.count()
 
     def __str__(self):
         return '%s: %s' % (self.gfyear, self.title)

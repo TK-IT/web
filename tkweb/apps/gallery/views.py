@@ -25,13 +25,23 @@ def album(request, gfyear, album_slug):
     album = get_object_or_404(Album, slug=album_slug)
     if int(gfyear) != album.gfyear:
         return redirect(
-            'gallery:album', 
+            'album', 
             gfyear=album.gfyear, 
-            album_slug=album_slug,
-        )
+            album_slug=album_slug)
     else:
         context = {'album': album}
         return render(request, 'album.html', context)
+        
+def image(request, album_slug, image_slug, **kwargs):
+    album = get_object_or_404(Album, slug=album_slug)
+    if not album.images.filter(slug=image_slug):
+        return redirect(
+            'album', 
+            gfyear=album.gfyear, 
+            album_slug=album_slug)
+    else:
+        context = {'album': album, 'start_image': image_slug}
+    return render(request, 'image.html', context)
 
 @require_POST
 @permission_required('gallery.add_image', raise_exception=True)
