@@ -63,5 +63,19 @@ $(document).ready(function() {
 	  e.preventDefault();
 	  changeCurrent( $(this).attr("link") );
 	});
+  
+  $(".tkgal_container > *").swipe( {
+    swipe:function(event, direction, distance, duration, fingerCount, fingerData) {
+    switch(direction) {
+      case "left":
+        $(".tkgal_link.next")[0].click();
+        break;
+      case "right":
+        $(".tkgal_link.prev")[0].click();
+        break;
+      default:
+}
+    }
+  });
 
 });

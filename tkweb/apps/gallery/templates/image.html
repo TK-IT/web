@@ -5,11 +5,12 @@
 {% block title %}{{ album.title }}{% endblock title %}
 
 {% block js %}
- <style>
-  .tkgal_container > * {display:none;}
-  .tkgal_container > .current {display:block;}
-</style>
-<script src="{% static "tkgal.js" %}"></script>
+   <style>
+    .tkgal_container > * {display:none;}
+    .tkgal_container > .current {display:block;}
+  </style>
+  <script src="{% static "jquery.touchswipe.min.js" %}"></script>
+  <script src="{% static "tkgal.js" %}"></script>
 {% endblock js%}
 
 {% block content %}
@@ -49,9 +50,7 @@
       alt="{{ album.slug }}/{{ image.slug }}">
     {% empty %}{% endthumbnail %}
     <figcaption>
-      <p>image.slug: {{ image.slug }}</p>
-      <p>image.datetime: {{ image.date }}</p>
-      <p>image.description: {{ image.description }}</p>
+      <p>{{ image.date }}</p>
     </figcaption>
   </picture>
   {% endfor %}
