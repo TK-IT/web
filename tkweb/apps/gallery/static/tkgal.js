@@ -69,7 +69,12 @@ $(document).ready(function() {
 	});
   
   $(".tkgal_container > *").swipe( {
-    swipe:function(event, direction, distance, duration, fingerCount, fingerData) {
+    swipeLeft:swipehandler,
+    swipeRight:swipehandler,
+    allowPageScroll:"auto" ,
+  });
+    
+  function swipehandler(event, direction) {
     switch(direction) {
       case "left":
         $(".tkgal_link.next")[0].click();
@@ -78,8 +83,7 @@ $(document).ready(function() {
         $(".tkgal_link.prev")[0].click();
         break;
       default:
-}
     }
-  });
+  };
 
 });

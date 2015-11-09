@@ -6,46 +6,54 @@
 
 {% block js %}
    <style>
-    .tkgal_container > * {display:none;}
+    .tkgal_container > *{display:none;position:relative;}
+    img {margin: 0 auto;}
     .tkgal_container > .current {display:block;}
+    .tkgal_controls {}
   </style>
   <script src="{% static "jquery.touchswipe.min.js" %}"></script>
   <script src="{% static "tkgal.js" %}"></script>
 {% endblock js%}
 
 {% block content %}
-  {% if album.eventalbum %}
-<h3>Billeder fra {{ album.title }}, {{ album.publish_date }}</h3>
-  {% else %}
-<h3>{{ album.title }}, {{ album.gfyear }}</h3>
-  {% endif %}
-<p>
-  <a class="tkgal_link prev" 
-    link="{{ prev_image.slug }}" 
-    href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=prev_image.slug %}">Forige</a> | 
-  <a class="tkgal_url_base" 
-    href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">Tilbage til albumoversigt</a> | 
-  <a class="tkgal_link next" 
-    link="{{ next_image.slug }}" 
-    href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=next_image.slug %}">Næste</a>
-</p>
-<div class="tkgal_container">
+
+<div class="col-xs-12 col-md-6">
+    {% if album.eventalbum %}
+  <h3>{{ album.title }} <small>{{ album.publish_date }}</small></h3>
+    {% else %}
+  <h3>{{ album.title }} <small>{{ album.gfyear}}</small></h3>
+    {% endif %}
+</div>
+<div class="col-xs-12 col-md-6" style="float: right; text-align:right;">
+  <h3><small><p class="tkgal_controls">
+    <a class="tkgal_link prev" 
+      link="{{ prev_image.slug }}" 
+      href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=prev_image.slug %}">Forige</a> | 
+    <a class="tkgal_url_base" 
+      href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">Tilbage til albumoversigt</a> | 
+    <a class="tkgal_link next" 
+      link="{{ next_image.slug }}" 
+      href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=next_image.slug %}">Næste</a>
+  </small></h3>
+</div>
+<div class="tkgal_container .col-md-12">
   {% for image in album.images.all %}
   <picture permlink="{{ image.slug }}"{% ifequal image start_image %}class="current"{% endifequal %}>
-    {% thumbnail image.image "960x960" as large %}
+    {% thumbnail image.image "1140x700" as large %}
     <source 
-      media="(min-width: 960px)"
+      media="(min-width: 720px)"
       {% ifnotequal image start_image %}data-{% endifnotequal %}srcset="{{ large.url }}" 
       alt="{{ album.slug }}/{{ image.slug }}">
     {% empty %}{% endthumbnail %}
-    {% thumbnail image.image "575x575" as medium %}
+    {% thumbnail image.image "720x440" as medium %}
     <source 
       media="(min-width: 575px)"
       {% ifnotequal image start_image %}data-{% endifnotequal %}srcset="{{ medium.url }}" 
       alt="{{ album.slug }}/{{ image.slug }}">
     {% empty %}{% endthumbnail %}
-    {% thumbnail image.image "420x420" as small %}
+    {% thumbnail image.image "440x440" as small %}
     <img 
+      class='img-responsive'
       {% ifnotequal image start_image %}data-{% endifnotequal %}src="{{ small.url }}" 
       alt="{{ album.slug }}/{{ image.slug }}">
     {% empty %}{% endthumbnail %}
