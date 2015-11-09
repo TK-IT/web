@@ -4,13 +4,17 @@ from tkweb.apps.calendar.models import Event
 import datetime
 import urllib.request
 
+
 class Command(BaseCommand):
     help = 'Updater kalenderen fra ical'
 
     def handle(self, *args, **options):
         Event.objects.all().delete()
 
-        url = "https://www.google.com/calendar/ical/best@taagekammeret.dk/public/basic.ics" # TODO: gem den her url et andet sted
+        # TODO: gem den her url et andet sted
+        url = ("https://www.google.com/calendar/ical/"
+               "best@taagekammeret.dk/public/basic.ics")
+
         response = urllib.request.urlopen(url)
         data = response.read().decode('utf-8')
 

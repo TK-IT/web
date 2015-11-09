@@ -7,10 +7,10 @@ from django.db import models
 from django.utils.text import slugify
 from sorl.thumbnail import ImageField
 import PIL
-import os
 import hashlib
-import string
+import os
 import shutil
+import string
 import tempfile
 
 
@@ -20,6 +20,7 @@ def file_name(instance, filename):
     content_type_folder = slugify(instance.content_type.model)
     object_id_folder = slugify(instance.object_id)
     return '/'.join([content_type_folder, object_id_folder, newFilename])
+
 
 def get_exif_date_or_now(filename):
     try:
@@ -46,10 +47,11 @@ def get_exif_date_or_now(filename):
                             ms = str(ms[0])
                     else:
                         ms = '0'
-                    s += "." + ms
+                        s += "." + ms
                     return datetime.strptime(s, '%Y:%m:%d %H:%M:%S.%f')
     except Exception:
         return datetime.now()
+
 
 def base36_encode(n):
     symbols = string.digits + string.ascii_lowercase
@@ -60,6 +62,7 @@ def base36_encode(n):
         n //= 36
 
     return s
+
 
 class Image(models.Model):
     SLUG_SIZE = 6
@@ -72,7 +75,7 @@ class Image(models.Model):
     associatedObject = generic.GenericForeignKey('content_type', 'object_id')
 
     image = ImageField(upload_to=file_name)
-    date = models.DateTimeField(null=True,blank=True)
+    date = models.DateTimeField(null=True, blank=True)
     caption = models.CharField(max_length=200, blank=True)
 
     slug = models.SlugField(unique=True)
@@ -108,32 +111,31 @@ class Image(models.Model):
         self.slug = slug
 
         super(Image, self).save()
-    
+
     def __str__(self):
         return '%s, %s' % (self.slug, self.date)
-        
+
 
 class Album(models.Model):
     class Meta:
         ordering = ['gfyear', '-eventalbum', 'publish_date']
 
-    title = models.CharField(max_length = 200)
+    title = models.CharField(max_length=200)
     publish_date = models.DateField()
     eventalbum = models.BooleanField()
     gfyear = models.PositiveSmallIntegerField()
     slug = models.SlugField(unique=True)
-    description = models.TextField(blank = True)
+    description = models.TextField(blank=True)
     images = generic.GenericRelation(Image)
-    
+
     def number_of_images(self):
         return self.images.count()
-        
+
     def prev(self, image_slug):
         image = self.images.get(slug=image_slug)
         prev = self.images.filter(date__lt=image.date).reverse[0]
         print(prev)
         return prev
-                
 
     def __str__(self):
         return '%s: %s' % (self.gfyear, self.title)

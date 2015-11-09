@@ -1,6 +1,7 @@
 from django.db import models
 import re
 
+
 class Event(models.Model):
     class Meta:
         ordering = ['date']

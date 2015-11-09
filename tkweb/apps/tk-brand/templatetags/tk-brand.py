@@ -15,9 +15,11 @@ html_tk = ('<span '
 
 html_tket = html_tk + '<span style="vertical-align: 0.6pt">ET</span>'
 
+
 @register.simple_tag
 def tk(monospace=None):
     return '<span class="tk-brand">' + html_tk + '</span>'
+
 
 @register.simple_tag
 def tket():

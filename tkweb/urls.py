@@ -31,17 +31,18 @@ urlpatterns = patterns('',
 
                        url(r'^kalender/',
                            'tkweb.apps.calendar.views.kalender',
-                           name = 'kalender'),
+                           name='kalender'),
 
                        url(r'^galleri/',
                            include('tkweb.apps.gallery.urls'),
-                           name = 'gallery'),
+                           name='gallery'),
 
                        url(r'^admin/',
                            include(admin.site.urls)),
 
-                           # Temporary media (user uploaded static files) serving from dev server
+                       # Temporary media (user uploaded static files)
+                       # serving from dev server
                        url(r'^media/(?P<path>.*)$',
                            'django.views.static.serve',
                            {'document_root': settings.MEDIA_ROOT}),
-)
+                       )
