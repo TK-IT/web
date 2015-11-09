@@ -21,6 +21,10 @@ function changeCurrent(permlink) {
   $(".tkgal_link.prev").attr("link", prevPermlink);
   $(".tkgal_link.next").attr("link", nextPermlink);
   
+  url_base = $(".tkgal_url_base").attr("href");
+  $(".tkgal_link.prev").attr("href", url_base + "/" + prevPermlink);
+  $(".tkgal_link.next").attr("href", url_base + "/" + nextPermlink);
+  
   
   loadContent(prevPermlink);
   loadContent(nextPermlink);
