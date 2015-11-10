@@ -1,3 +1,4 @@
+from constance import config
 from datetime import date
 from django import forms
 from django.contrib import admin
@@ -28,16 +29,12 @@ class AlbumAdminForm(forms.ModelForm):
             'description'
         ]
 
-    def get_gfyear(self):
-        qs = Album.objects.all().aggregate(Max('gfyear'))
-        return qs['gfyear__max']
-
     def __init__(self, *args, **kwargs):
         if not kwargs.get('initial'):
             kwargs['initial'] = {}
             kwargs['initial'].update({
                 'publish_date': date.today(),
-                'gfyear': self.get_gfyear(),
+                'gfyear': config.GFYEAR,
                 'eventalbum': True,
             })
             super(AlbumAdminForm, self).__init__(*args, **kwargs)

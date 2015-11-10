@@ -1,3 +1,4 @@
+from constance import config
 from django.core.management.base import BaseCommand
 from icalendar import Calendar, Event, vDatetime
 from tkweb.apps.calendar.models import Event
@@ -11,9 +12,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         Event.objects.all().delete()
 
-        # TODO: gem den her url et andet sted
-        url = ("https://www.google.com/calendar/ical/"
-               "best@taagekammeret.dk/public/basic.ics")
+        url = config.ICAL_URL
 
         response = urllib.request.urlopen(url)
         data = response.read().decode('utf-8')

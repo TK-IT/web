@@ -19,9 +19,11 @@ DEFAULT_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'bootstrap3',
+    'constance',
+    'constance.backends.database',
     'jfu',
     'sorl.thumbnail',
-    'bootstrap3',
 ]
 
 LOCAL_APPS = [
@@ -105,9 +107,10 @@ TEMPLATE_DIRS = (
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
+    'constance.context_processors.config',
     'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.static',
     'django.core.context_processors.request',
+    'django.core.context_processors.static',
 )
 
 
@@ -130,3 +133,13 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 # Sites
 # -----
 SITE_ID = 1
+
+
+# Constance
+# ---------
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+CONSTANCE_CONFIG = {
+    'GFYEAR': (2015, 'Året hvor nuværende BEST blev valgt'),
+    'ICAL_URL': ('https://www.google.com/calendar/ical/best@taagekammeret.dk/public/basic.ics', 'iCalendar URLen hvor den offentlige kalender bliver genereret fra.'),
+}
