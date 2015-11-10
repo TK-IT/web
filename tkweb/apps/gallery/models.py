@@ -54,7 +54,7 @@ def get_exif_date_or_now(filename):
         return datetime.now()
 
 class Image(models.Model):
-    SLUG_SIZE = 6
+    SLUG_SIZE = 9
 
     class Meta:
         ordering = ['date']
@@ -83,7 +83,6 @@ class Image(models.Model):
         with open(path, 'rb') as f:
             while True:
                 b = f.read(2 ** 20)
-                print(len(b))
                 if b == b'':
                     break
                 m.update(b)
