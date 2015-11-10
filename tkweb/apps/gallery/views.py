@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.db.models import Max
 from django.shortcuts import get_object_or_404, get_list_or_404
@@ -91,9 +90,6 @@ def upload(request):
         'size': image.size,
 
         'url': instance.image.url,
-
-        'deleteUrl': reverse('jfu_delete', kwargs={'pk': instance.pk}),
-        'deleteType': 'POST',
     }
 
     return UploadResponse(request, file_dict)

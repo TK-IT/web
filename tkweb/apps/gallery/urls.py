@@ -31,7 +31,4 @@ urlpatterns = patterns('',
                        url(r'^upload/',
                            'tkweb.apps.gallery.views.upload',
                            name='jfu_upload'),
-                       url(r'^delete/(?P<pk>\d+)$',
-                           'tkweb.apps.gallery.views.upload_delete',
-                           name='jfu_delete'),
                       )
