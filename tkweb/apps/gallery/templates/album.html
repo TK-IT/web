@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% load thumbnail %}
+{% load thumbnail tkbrand %}
 
 {% block title %}{{ album.title }}{% endblock title %}
 
 {% block content %}
 <div class="row">
-  <h2>{{ album.title }} <small>{{ album.number_of_images }} billede{{ album.number_of_images|pluralize:"r" }} fra   {% if album.eventalbum %}{{ album.publish_date }}{% else %}{{ album.gfyear }}  {% endif%}</small></h2>
+  <h2>{{ album.title }} <small>{{ album.number_of_images }} billede{{ album.number_of_images|pluralize:"r" }} fra   {% if album.eventalbum %}{{ album.publish_date }}{% else %}{{ album.gfyear|gfyearPPslash }}  {% endif%}</small></h2>
   {% for image in album.images.all %}
   <div class="col-xs-6 col-sm-4 col-md-3">
     <a class="thumbnail" href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=image.slug %}" alt="Se billede">

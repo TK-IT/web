@@ -1,4 +1,5 @@
 from django import template
+from tkweb.apps.tkbrand import util
 
 register = template.Library()
 
@@ -24,3 +25,11 @@ def tk(monospace=None):
 @register.simple_tag
 def tket():
     return '<span class="tk-brand">' + html_tket + '</span>'
+
+@register.filter
+def gfyearPP(gfyear):
+    return util.gfyearPP(gfyear)
+
+@register.filter
+def gfyearPPslash(gfyear):
+    return util.gfyearPPslash(gfyear)

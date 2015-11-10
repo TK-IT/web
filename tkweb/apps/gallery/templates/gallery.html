@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load thumbnail %}
+{% load thumbnail tkbrand %}
 
 {% block title %}Galleri{% endblock title %}
 
@@ -11,7 +11,7 @@
       <div class="panel-heading" role="tab" id="heading{{year}}">
         <h4 class="panel-title">
           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{year}}" aria-expanded="false" aria-controls="collapse{{year}}">
-            {{year}}
+            {{year|gfyearPPslash}}
           </a>
         </h4>
       </div> <!-- panel-heading -->
