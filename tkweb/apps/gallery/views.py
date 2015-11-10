@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ValidationError
 from django.db.models import Max
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, redirect
@@ -73,7 +74,15 @@ def upload(request):
     object_id = request.POST['object_id']
     instance = Image(image=image, content_type=content_type,
                      object_id=object_id)
-    instance.save()
+    try:
+        instance.save()
+    except ValidationError:
+        file_dict = {
+            'name': image.name,
+            'size': image.size,
+            'error': "Filen eksisterer allerede på serveren"
+        }
+        return UploadResponse(request, file_dict)
 
     basename = os.path.basename(instance.image.path)
 

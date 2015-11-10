@@ -94,7 +94,6 @@ class Image(models.Model):
         slug = (int_to_base36(v) + '0' * self.SLUG_SIZE)[:self.SLUG_SIZE]
 
         if len(Image.objects.all().filter(slug=slug)) > 0:
-            # XXX: This results in a 500 error
             raise ValidationError('A file with this slug already exists')
 
         self.slug = slug
