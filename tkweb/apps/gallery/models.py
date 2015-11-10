@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
+from django.utils.http import int_to_base36
 from sorl.thumbnail import ImageField
 import PIL
 import hashlib
@@ -52,18 +53,6 @@ def get_exif_date_or_now(filename):
     except Exception:
         return datetime.now()
 
-
-def base36_encode(n):
-    symbols = string.digits + string.ascii_lowercase
-
-    s = ''
-    while n:
-        s += symbols[n % 36]
-        n //= 36
-
-    return s
-
-
 class Image(models.Model):
     SLUG_SIZE = 6
 
@@ -102,7 +91,7 @@ class Image(models.Model):
         os.remove(path)
 
         v = int(m.hexdigest(), 16)
-        slug = (base36_encode(v) + '0' * self.SLUG_SIZE)[:self.SLUG_SIZE]
+        slug = (int_to_base36(v) + '0' * self.SLUG_SIZE)[:self.SLUG_SIZE]
 
         if len(Image.objects.all().filter(slug=slug)) > 0:
             # XXX: This results in a 500 error
