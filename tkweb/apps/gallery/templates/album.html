@@ -3,21 +3,19 @@
 
 {% block title %}{{ album.title }}{% endblock title %}
 
-{% block js %}{% endblock js%}
-
 {% block content %}
-  {% if album.eventalbum %}
-<h2>{{ album.title }} <small>{{ album.number_of_images }} billede{{ album.number_of_images|pluralize:"r" }} fra {{ album.publish_date }}</small></h2>
-  {% else %}
-<h2>{{ album.title }} <small>{{ album.number_of_images }} billede{{ album.number_of_images|pluralize:"r" }} fra {{ album.gfyear }}</small></h2>
-  {% endif%}
+<div class="row">
+  <h2>{{ album.title }} <small>{{ album.number_of_images }} billede{{ album.number_of_images|pluralize:"r" }} fra   {% if album.eventalbum %}{{ album.publish_date }}{% else %}{{ album.gfyear }}  {% endif%}</small></h2>
   {% for image in album.images.all %}
-  <a href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=image.slug %}" alt="Se billede">
-    {% thumbnail image.image "300x200" crop="center" as thumb %}
+  <div class="col-xs-6 col-sm-4 col-md-3">
+    <a class="thumbnail" href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=image.slug %}" alt="Se billede">
+    {% thumbnail image.image "336x224" crop="center" as thumb %}
     <img src="{{ thumb.url }}" alt="{{ album.title }}" />
     {% empty %}
   <p>Albummet '{{ album.title }}' har ingen billeder endnu.</p>
     {% endthumbnail %}
   </a>
+</div> <!-- col-xs-6 -->
   {% endfor %}
+</div> <!-- row -->
 {% endblock content%}

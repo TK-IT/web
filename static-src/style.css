@@ -1,5 +1,5 @@
 body > .container {
-  padding: 60px 15px 0;
+    padding: 60px 15px 0;
 }
 
 /* Til tk-brand appen */
@@ -8,6 +8,38 @@ body > .container {
 }
 
 /* Til gallery appen */
-.thumb {
-    margin-bottom: 30px;
+.thumbcap .caption{
+    background-color: #000;
+    bottom: 0;
+    color: #fff;
+    left: 0;
+    opacity: 0.5;
+    position: absolute;
+    width: 100%;
+}
+
+.thumbcap {
+    width: 100%;
+    padding: 0px;
+    position:relative;
+}
+
+.tkgal_container > *{
+    display:none;
+    position:relative;
+}
+
+.tkgal_container > img {
+    margin: 0 auto;
+}
+
+.tkgal_container > .current {
+    display:block;
+}
+
+@media (min-width: 768px) { /* Erstat 768px med @screen-sm-min når denne bliver til en .less-fil */
+    #tkgal_controls {
+        margin-top: 26px;
+        margin-bottom: 10px;
+    }
 }
