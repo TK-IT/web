@@ -1,6 +1,6 @@
 from PIL.ExifTags import TAGS
 from datetime import date, datetime
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -61,7 +61,7 @@ class Image(models.Model):
 
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
-    associatedObject = generic.GenericForeignKey('content_type', 'object_id')
+    associatedObject = GenericForeignKey('content_type', 'object_id')
 
     image = ImageField(upload_to=file_name)
     date = models.DateTimeField(null=True, blank=True)
@@ -113,7 +113,7 @@ class Album(models.Model):
     gfyear = models.PositiveSmallIntegerField()
     slug = models.SlugField(unique=True)
     description = models.TextField(blank=True)
-    images = generic.GenericRelation(Image)
+    images = GenericRelation(Image)
 
     def number_of_images(self):
         return self.images.count()

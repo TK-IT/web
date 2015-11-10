@@ -10,7 +10,7 @@ urlpatterns = patterns('',
                        # url(r'^$', 'tkweb.views.home', name='home'),
                        # url(r'^blog/', include('blog.urls')),
                        url('^$',
-                           RedirectView.as_view(url='/kalender/'),
+                           RedirectView.as_view(url='/kalender/', permanent=True),
                            name='index'),
 
                        url(r'^om/$',
