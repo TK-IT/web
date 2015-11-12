@@ -28,26 +28,25 @@
 </div>
 <div class="tkgal_container">
   {% for image in album.images.all %}
-  <picture permlink="{{ image.slug }}"{% ifequal image start_image %}class="current"{% endifequal %}>
-    {% thumbnail image.image "1140x700" as large %}
-    <source media="(min-width: 720px)"
-       {% ifnotequal image start_image %}data-{% endifnotequal %}srcset="{{ large.url }}"
-       alt="{{ album.slug }}/{{ image.slug }}">
-      {% empty %}{% endthumbnail %}
-      {% thumbnail image.image "720x440" as medium %}
-      <source media="(min-width: 575px)"
-         {% ifnotequal image start_image %}data-{% endifnotequal %}srcset="{{ medium.url }}"
-         alt="{{ album.slug }}/{{ image.slug }}">
-        {% empty %}{% endthumbnail %}
-        {% thumbnail image.image "440x440" as small %}
-      <img class='img-responsive'
-           {% ifnotequal image start_image %}data-{% endifnotequal %}src="{{ small.url }}"
-           alt="{{ album.slug }}/{{ image.slug }}">
-      {% empty %}{% endthumbnail %}
-      <figcaption>
-        <p>{{ image.date }}</p>
-      </figcaption>
-  </picture>
+  <div permlink="{{ image.slug }}" {% ifequal image start_image %}class="current"{% endifequal %}>
+    {% thumbnail image.image '400' as xs %}{# De 400 her er /ikke/ taget fra bootstrap3 #}
+    {% thumbnail image.image '720' as sm %}
+    {% thumbnail image.image '940' as ml %}
+    {% thumbnail image.image '1140' as lg %}
+    <img class="img-responsive {% ifequal image start_image %}current{% endifequal %}"
+         alt="{{ album.slug }}/{{ image.slug }}"
+         sizes="(max-width: 768px) calc(100vw - 15px),
+                (max-width: 992px) 720px,
+                (max-width: 1200px) 940px,
+                100vw"
+         srcset="{{ xs.url }} {{ xs.x }}w,
+                 {{ sm.url }} {{ sm.x }}w,
+                 {{ ml.url }} {{ ml.x }}w,
+                 {{ lg.url }} {{ lg.x }}w"
+         src="{{ sm.url }}">
+    {% endthumbnail %}{% endthumbnail %}{% endthumbnail %}{% endthumbnail %}
+    <p>{{ image.date }}</p>
+  </div> <!-- permlink, current? -->
   {% endfor %}
 </div>
 {% endblock content%}
