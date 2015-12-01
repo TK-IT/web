@@ -2,6 +2,7 @@
 {% load i18n jfutags %}
 {% block content %}
 {{ block.super }}
+<br class="clear"/>
 {% if object_id %}
 {% jfu 'admin/gallery/upload_form.html' %}
 {% else %}
