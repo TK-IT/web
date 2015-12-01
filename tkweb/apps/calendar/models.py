@@ -18,6 +18,6 @@ class Event(models.Model):
         mo = p.search(self.description)
         if mo is not None:
             self.facebook = mo.group(0)
-            self.description = self.description[:mo.begin(0)]
+            self.description = self.description[:mo.start(0)]
 
         super(Event, self).save()
