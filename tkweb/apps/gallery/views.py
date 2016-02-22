@@ -106,7 +106,7 @@ def upload_delete(request, pk):
     success = True
     try:
         instance = Image.objects.get(pk=pk)
-        os.unlink(instance.image.path)
+        instance.image.delete(save=False)
         instance.delete()
     except Image.DoesNotExist:
         success = False
