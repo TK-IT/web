@@ -82,7 +82,9 @@ def upload(request):
     except ValidationError as exn:
         try:
             error = ' '.join(
-                '%s: %s' % (k, v) for k, v in exn.message_dict.items())
+                '%s: %s' % (k, v)
+                for k, vs in exn.message_dict.items()
+                for v in vs)
         except AttributeError:
             error = ' '.join(exn.messages)
         file_dict = {
