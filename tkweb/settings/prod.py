@@ -1,7 +1,7 @@
 from tkweb.settings.base import *
 
 DEBUG = False
-TEMPLATE_DEBUG = False
+TEMPLATES[0]['OPTIONS']['debug'] = False
 
 # Generate using pwgen -sy 50 1
 SECRET_KEY = '...'
