@@ -1,3 +1,6 @@
+# encoding: utf8
+from __future__ import absolute_import, unicode_literals, division
+
 from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
