@@ -1,4 +1,5 @@
 from django import template
+from django.utils.safestring import mark_safe
 from tkweb.apps.tkbrand import util
 
 register = template.Library()
@@ -19,12 +20,12 @@ html_tket = html_tk + '<span style="vertical-align: 0.6pt">ET</span>'
 
 @register.simple_tag
 def tk(monospace=None):
-    return '<span class="tk-brand">' + html_tk + '</span>'
+    return mark_safe('<span class="tk-brand">' + html_tk + '</span>')
 
 
 @register.simple_tag
 def tket():
-    return '<span class="tk-brand">' + html_tket + '</span>'
+    return mark_safe('<span class="tk-brand">' + html_tket + '</span>')
 
 @register.filter
 def gfyearPP(gfyear):
