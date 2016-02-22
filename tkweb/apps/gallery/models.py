@@ -89,9 +89,6 @@ class Image(models.Model):
         v = int(m.hexdigest(), 16)
         slug = (int_to_base36(v) + '0' * self.SLUG_SIZE)[:self.SLUG_SIZE]
 
-        if len(Image.objects.all().filter(slug=slug)) > 0:
-            raise ValidationError('A file with this slug already exists')
-
         self.slug = slug
 
         super(Image, self).save()
