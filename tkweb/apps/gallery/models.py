@@ -1,3 +1,6 @@
+# encoding: utf8
+from __future__ import absolute_import, unicode_literals, division
+
 from PIL.ExifTags import TAGS
 from datetime import datetime
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
