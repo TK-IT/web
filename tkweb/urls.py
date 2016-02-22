@@ -14,7 +14,7 @@ urlpatterns = [
     # url(r'^$', 'tkweb.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
     url('^$',
-        RedirectView.as_view(url='/kalender/', permanent=True),
+        RedirectView.as_view(url='/kalender/'),
         name='index'),
 
     url(r'^om/$',
