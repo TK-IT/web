@@ -78,7 +78,7 @@ def upload(request):
     instance = Image(image=image, content_type=content_type,
                      object_id=object_id)
     try:
-        instance.full_clean()
+        instance.full_clean(exclude=['slug'])
     except ValidationError:
         file_dict = {
             'name': image.name,
