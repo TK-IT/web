@@ -21,7 +21,8 @@ def gallery(request, **kwargs):
     context = {'group_by_year': group_by_year}
     qs = Album.objects.all().aggregate(Max('gfyear'))
     latest_gfyear = qs['gfyear__max']
-    context['show_year'] = int(kwargs.get('gfyear', latest_gfyear))
+    gfyear = kwargs.get('gfyear', latest_gfyear)
+    context['show_year'] = None if gfyear is None else int(gfyear)
     get_list_or_404(Album, gfyear=context['show_year'])
     return render(request, 'gallery.html', context)
 
