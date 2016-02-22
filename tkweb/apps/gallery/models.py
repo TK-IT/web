@@ -69,7 +69,7 @@ class Image(models.Model):
 
     slug = models.SlugField(unique=True)
 
-    def save(self):
+    def clean(self):
         try:
             self.image.open('rb')
             self.date = get_exif_date_or_now(self.image)
@@ -90,8 +90,6 @@ class Image(models.Model):
         slug = (int_to_base36(v) + '0' * self.SLUG_SIZE)[:self.SLUG_SIZE]
 
         self.slug = slug
-
-        super(Image, self).save()
 
     def __str__(self):
         return '%s, %s' % (self.slug, self.date)

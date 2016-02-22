@@ -78,7 +78,7 @@ def upload(request):
     instance = Image(image=image, content_type=content_type,
                      object_id=object_id)
     try:
-        instance.save()
+        instance.full_clean()
     except ValidationError:
         file_dict = {
             'name': image.name,
@@ -86,6 +86,7 @@ def upload(request):
             'error': "Filen eksisterer allerede på serveren"
         }
         return UploadResponse(request, file_dict)
+    instance.save()
 
     basename = os.path.basename(instance.image.path)
 
