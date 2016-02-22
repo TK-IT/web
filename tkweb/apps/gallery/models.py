@@ -105,7 +105,7 @@ class Image(models.Model):
             return b36
 
         v = int(m.hexdigest(), 16)
-        slug = (int_to_base36(v) + '0' * self.SLUG_SIZE)[:self.SLUG_SIZE]
+        slug = ('0' * self.SLUG_SIZE + int_to_base36(v))[-self.SLUG_SIZE:]
 
         self.slug = slug
 
