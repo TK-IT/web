@@ -101,19 +101,28 @@ STATICFILES_FINDERS = (
 # Templates
 # ---------
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'constance.context_processors.config',
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.request',
+                'django.template.context_processors.static',
+            ],
+        },
+    },
+]
+
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or
     # "C:/www/django/templates".  Always use forward slashes, even on
     # Windows.  Don't forget to use absolute paths, not relative
     # paths.
     "templates",
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'constance.context_processors.config',
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.request',
-    'django.core.context_processors.static',
 )
 
 
