@@ -1,8 +1,7 @@
 from PIL.ExifTags import TAGS
-from datetime import date, datetime
+from datetime import datetime
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
 from django.utils.http import int_to_base36
@@ -10,9 +9,6 @@ from sorl.thumbnail import ImageField
 import PIL
 import hashlib
 import os
-import shutil
-import string
-import tempfile
 
 
 def file_name(instance, filename):
