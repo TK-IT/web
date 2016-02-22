@@ -16,7 +16,7 @@ pip install -r requirements.txt
 ./manage.py createsuperuser --settings=tkweb.settings.dev
 ```
 
-Konfigurationen er delt i flere moduler. `manage.py` bruger enten miljøvariabelen `DJANGO_SETTINGS_MODULE` eller en parameter til at bestemme hvilken konfiguration der skal bruges. For at kører udviklingsserveren med udviklingskonfigurationen skriv:
+Konfigurationen er delt i flere moduler. `manage.py` bruger enten miljøvariabelen `DJANGO_SETTINGS_MODULE` eller en parameter til at bestemme hvilken konfiguration der skal bruges. For at køre udviklingsserveren med udviklingskonfigurationen skriv:
 
 ```shell
 ./manage.py runserver --settings=tkweb.settings.dev
