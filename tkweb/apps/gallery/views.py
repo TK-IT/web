@@ -78,7 +78,7 @@ def upload(request):
     instance = Image(image=image, content_type=content_type,
                      object_id=object_id)
     try:
-        instance.full_clean(exclude=['slug'])
+        instance.full_clean()
     except ValidationError as exn:
         try:
             error = ' '.join(

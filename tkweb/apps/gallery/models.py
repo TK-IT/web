@@ -68,6 +68,14 @@ class Image(models.Model):
 
     slug = models.SlugField(unique=True)
 
+    def clean_fields(self, exclude=None):
+        if exclude is None:
+            exclude = []
+        else:
+            exclude = list(exclude)
+        exclude.append('slug')
+        return super(Image, self).clean_fields(exclude=exclude)
+
     def clean(self):
         self.image.open('rb')
         self.date = get_exif_date_or_now(self.image)
