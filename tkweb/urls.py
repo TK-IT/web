@@ -4,6 +4,10 @@ from django.contrib import admin
 from django.contrib.flatpages import views
 from django.views.generic.base import RedirectView
 
+import tkweb.apps.calendar.views
+import tkweb.apps.gallery.urls
+import django.views.static
+
 
 urlpatterns = [
     # Examples:
@@ -30,11 +34,11 @@ urlpatterns = [
         name='ket'),
 
     url(r'^kalender/',
-        'tkweb.apps.calendar.views.kalender',
+        tkweb.apps.calendar.views.kalender,
         name='kalender'),
 
     url(r'^galleri/',
-        include('tkweb.apps.gallery.urls'),
+        include(tkweb.apps.gallery.urls),
         name='gallery'),
 
     url(r'^admin/',
@@ -43,6 +47,6 @@ urlpatterns = [
     # Temporary media (user uploaded static files)
     # serving from dev server
     url(r'^media/(?P<path>.*)$',
-        'django.views.static.serve',
+        django.views.static.serve,
         {'document_root': settings.MEDIA_ROOT}),
 ]
