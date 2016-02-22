@@ -70,24 +70,21 @@ class Image(models.Model):
     slug = models.SlugField(unique=True)
 
     def save(self):
-        f = tempfile.NamedTemporaryFile(delete=False)
-        path = f.name
+        try:
+            self.image.open('rb')
+            self.date = get_exif_date_or_now(self.image)
 
-        shutil.copyfileobj(self.image, f)
-        f.close()
+            self.image.open('rb')  # open() does a seek(0)
+            m = hashlib.sha1()
 
-        with open(path, 'r') as f:
-            self.date = get_exif_date_or_now(f)
-
-        m = hashlib.sha1()
-        with open(path, 'rb') as f:
             while True:
-                b = f.read(2 ** 20)
-                if b == b'':
+                b = self.image.read(2 ** 20)
+                if not b:
                     break
                 m.update(b)
 
-        os.remove(path)
+        finally:
+            self.image.close()
 
         v = int(m.hexdigest(), 16)
         slug = (int_to_base36(v) + '0' * self.SLUG_SIZE)[:self.SLUG_SIZE]
