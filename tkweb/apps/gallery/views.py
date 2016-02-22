@@ -79,11 +79,16 @@ def upload(request):
                      object_id=object_id)
     try:
         instance.full_clean(exclude=['slug'])
-    except ValidationError:
+    except ValidationError as exn:
+        try:
+            error = ' '.join(
+                '%s: %s' % (k, v) for k, v in exn.message_dict.items())
+        except AttributeError:
+            error = ' '.join(exn.messages)
         file_dict = {
             'name': image.name,
             'size': image.size,
-            'error': "Filen eksisterer allerede på serveren"
+            'error': error,
         }
         return UploadResponse(request, file_dict)
     instance.save()
