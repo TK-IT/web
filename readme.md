@@ -12,7 +12,7 @@ cd web
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-./manage.py migrate --settings=tkweb.settings.dev
+./manage.py migrate --run-syncdb --settings=tkweb.settings.dev
 ./manage.py createsuperuser --settings=tkweb.settings.dev
 ```
 
@@ -34,9 +34,7 @@ cd web
 python3 -m venv venv
 PATH\TO\ENV\Scripts\activate
 pip install -r requirements.txt
-python manage.py migrate --settings=tkweb.settings.dev
+python manage.py migrate --run-syncdb --settings=tkweb.settings.dev
 python manage.py createsuperuser --settings=tkweb.settings.dev
 python manage.py runserver --settings=tkweb.settings.dev
 ```
-
-
