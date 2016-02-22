@@ -2,6 +2,7 @@ from tkweb.settings.base import *
 
 DEBUG = True
 TEMPLATES[0]['OPTIONS']['debug'] = True
+THUMBNAIL_DEBUG = True
 
 SECRET_KEY = 'This.is.not.a.secret.key'
 
