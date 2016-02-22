@@ -69,21 +69,17 @@ class Image(models.Model):
     slug = models.SlugField(unique=True)
 
     def clean(self):
-        try:
-            self.image.open('rb')
-            self.date = get_exif_date_or_now(self.image)
+        self.image.open('rb')
+        self.date = get_exif_date_or_now(self.image)
 
-            self.image.open('rb')  # open() does a seek(0)
-            m = hashlib.sha1()
+        self.image.open('rb')  # open() does a seek(0)
+        m = hashlib.sha1()
 
-            while True:
-                b = self.image.read(2 ** 20)
-                if not b:
-                    break
-                m.update(b)
-
-        finally:
-            self.image.close()
+        while True:
+            b = self.image.read(2 ** 20)
+            if not b:
+                break
+            m.update(b)
 
         v = int(m.hexdigest(), 16)
         slug = (int_to_base36(v) + '0' * self.SLUG_SIZE)[:self.SLUG_SIZE]
