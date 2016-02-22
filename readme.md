@@ -24,7 +24,7 @@ Konfigurationen er delt i flere moduler. `manage.py` bruger enten miljøvariabel
 
 ### Udviklingsmiljø for Windows-noobs
 
-Det er stadig en forudsætning, at have en python (3.3 eller nyere) installation med 'pip'.
+Det er en forudsætning, at have en python (3.3 eller nyere) installation med `pip`.
 
 I cmd kan nedenstående give samme opsætning, som ovenstående;
 
