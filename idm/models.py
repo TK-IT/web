@@ -10,6 +10,47 @@ from __future__ import unicode_literals
 from django.db import models
 
 
+class Profile(models.Model):
+    navn = models.CharField(max_length=50, blank=True, null=True)
+    email = models.CharField(max_length=50, blank=True, null=True)
+    accepteremail = models.CharField(max_length=3, blank=True, null=True)
+    accepterdirektemail = models.CharField(max_length=3)
+    gade = models.CharField(max_length=50, blank=True, null=True)
+    husnr = models.CharField(max_length=15, blank=True, null=True)
+    postnr = models.CharField(max_length=10, blank=True, null=True)
+    postby = models.CharField(max_length=25, blank=True, null=True)
+    land = models.CharField(max_length=50, blank=True, null=True)
+    gone = models.CharField(max_length=3)
+    tlf = models.CharField(max_length=20, blank=True, null=True)
+    note = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'tkfolk'
+
+
+class Best(models.Model):
+    sortid = models.IntegerField(primary_key=True)
+    orgtitel = models.CharField(max_length=50)
+    titel = models.CharField(max_length=10)
+
+    class Meta:
+        managed = False
+        db_table = 'best'
+
+
+class Group(models.Model):
+    navn = models.CharField(max_length=25, blank=True, null=True)
+    regexp = models.CharField(max_length=50)
+    matchtest = models.TextField()
+    relativ = models.IntegerField()
+    type = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'grupper'
+
+
 class Adresser(models.Model):
     id = models.IntegerField(primary_key=True)
     gade = models.CharField(max_length=50)
@@ -45,16 +86,6 @@ class Arrangementer(models.Model):
     class Meta:
         managed = False
         db_table = 'arrangementer'
-
-
-class Best(models.Model):
-    sortid = models.IntegerField(primary_key=True)
-    orgtitel = models.CharField(max_length=50)
-    titel = models.CharField(max_length=10)
-
-    class Meta:
-        managed = False
-        db_table = 'best'
 
 
 class Bestyrelsen(models.Model):
@@ -125,18 +156,6 @@ class Gruppemedlemmer(models.Model):
     class Meta:
         managed = False
         db_table = 'gruppemedlemmer'
-
-
-class Grupper(models.Model):
-    navn = models.CharField(max_length=25, blank=True, null=True)
-    regexp = models.CharField(max_length=50)
-    matchtest = models.TextField()
-    relativ = models.IntegerField()
-    type = models.IntegerField()
-
-    class Meta:
-        managed = False
-        db_table = 'grupper'
 
 
 class Grupperold(models.Model):
@@ -267,25 +286,6 @@ class Titler(models.Model):
     class Meta:
         managed = False
         db_table = 'titler'
-
-
-class Tkfolk(models.Model):
-    navn = models.CharField(max_length=50, blank=True, null=True)
-    email = models.CharField(max_length=50, blank=True, null=True)
-    accepteremail = models.CharField(max_length=3, blank=True, null=True)
-    accepterdirektemail = models.CharField(max_length=3)
-    gade = models.CharField(max_length=50, blank=True, null=True)
-    husnr = models.CharField(max_length=15, blank=True, null=True)
-    postnr = models.CharField(max_length=10, blank=True, null=True)
-    postby = models.CharField(max_length=25, blank=True, null=True)
-    land = models.CharField(max_length=50, blank=True, null=True)
-    gone = models.CharField(max_length=3)
-    tlf = models.CharField(max_length=20, blank=True, null=True)
-    note = models.TextField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'tkfolk'
 
 
 class TkfolkOld(models.Model):
