@@ -3,6 +3,12 @@ from __future__ import unicode_literals
 from django.db import models
 
 
+class GradGroupMembership(models.Model):
+    profile = models.ForeignKey('Profile')
+    group = models.ForeignKey('Group')
+    grad = models.IntegerField()
+
+
 class Profile(models.Model):
     navn = models.CharField(max_length=50, blank=True, null=True)
     email = models.CharField(max_length=50, blank=True, null=True)
@@ -16,6 +22,8 @@ class Profile(models.Model):
     gone = models.CharField(max_length=3)
     tlf = models.CharField(max_length=20, blank=True, null=True)
     note = models.TextField(blank=True, null=True)
+
+    groups = models.ManyToManyField('Group')
 
     class Meta:
         db_table = 'tkfolk'
@@ -39,6 +47,13 @@ class Group(models.Model):
 
     class Meta:
         db_table = 'grupper'
+
+
+class Title(models.Model):
+    profile = models.ForeignKey('Profile')
+    grad = models.IntegerField()
+    orgtitel = models.CharField(max_length=10)
+    inttitel = models.CharField(max_length=10)
 
 
 class Adresser(models.Model):
