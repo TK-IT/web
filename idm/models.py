@@ -18,7 +18,6 @@ class Profile(models.Model):
     note = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tkfolk'
 
 
@@ -28,7 +27,6 @@ class Best(models.Model):
     titel = models.CharField(max_length=10)
 
     class Meta:
-        managed = False
         db_table = 'best'
 
 
@@ -40,7 +38,6 @@ class Group(models.Model):
     type = models.IntegerField()
 
     class Meta:
-        managed = False
         db_table = 'grupper'
 
 
