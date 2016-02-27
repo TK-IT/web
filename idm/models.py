@@ -21,13 +21,27 @@ def tk_prefix(age):
 
 
 @python_2_unicode_compatible
-class GradGroupMembership(models.Model):
-    profile = models.ForeignKey('Profile')
-    group = models.ForeignKey('Group', limit_choices_to=Q(type=1))
-    grad = models.IntegerField()
+class Group(models.Model):
+    TYPES = (
+        (0, 'Underforening'),
+        (1, 'Årgangsgruppe'),
+        (2, 'Titel'),
+        (3, 'DirectUser'),
+        (4, 'BESTFU hack'),
+    )
+
+    navn = models.CharField(max_length=25, blank=True, null=True)
+    regexp = models.CharField(max_length=50)
+    matchtest = models.TextField()
+    relativ = models.IntegerField()
+    type = models.IntegerField(choices=TYPES)
+
+    class Meta:
+        db_table = 'grupper'
+        ordering = ['navn']
 
     def __str__(self):
-        return '%s%s %s' % (tk_prefix(self.grad), self.group, self.profile)
+        return self.navn
 
 
 @python_2_unicode_compatible
@@ -51,7 +65,7 @@ class Profile(models.Model):
     tlf = models.CharField(max_length=20, blank=True, null=True)
     note = models.TextField(blank=True, null=True)
 
-    groups = models.ManyToManyField('Group', blank=True,
+    groups = models.ManyToManyField(Group, blank=True,
                                     limit_choices_to=Q(type=0))
 
     class Meta:
@@ -60,6 +74,16 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.navn
+
+
+@python_2_unicode_compatible
+class GradGroupMembership(models.Model):
+    profile = models.ForeignKey(Profile)
+    group = models.ForeignKey(Group, limit_choices_to=Q(type=1))
+    grad = models.IntegerField()
+
+    def __str__(self):
+        return '%s%s %s' % (tk_prefix(self.grad), self.group, self.profile)
 
 
 @python_2_unicode_compatible
@@ -73,30 +97,6 @@ class Best(models.Model):
 
     def __str__(self):
         return self.titel
-
-
-@python_2_unicode_compatible
-class Group(models.Model):
-    TYPES = (
-        (0, 'Underforening'),
-        (1, 'Årgangsgruppe'),
-        (2, 'Titel'),
-        (3, 'DirectUser'),
-        (4, 'BESTFU hack'),
-    )
-
-    navn = models.CharField(max_length=25, blank=True, null=True)
-    regexp = models.CharField(max_length=50)
-    matchtest = models.TextField()
-    relativ = models.IntegerField()
-    type = models.IntegerField(choices=TYPES)
-
-    class Meta:
-        db_table = 'grupper'
-        ordering = ['navn']
-
-    def __str__(self):
-        return self.navn
 
 
 @python_2_unicode_compatible
