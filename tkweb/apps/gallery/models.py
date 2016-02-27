@@ -58,7 +58,7 @@ class Image(models.Model):
     class Meta:
         ordering = ['date']
 
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.PositiveIntegerField()
     associatedObject = GenericForeignKey('content_type', 'object_id')
 
