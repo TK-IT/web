@@ -144,25 +144,6 @@ class Bruger(models.Model):
         db_table = 'bruger'
 
 
-class Gradgruppemedlemmer(models.Model):
-    personid = models.IntegerField(blank=True, null=True)
-    grad = models.IntegerField(blank=True, null=True)
-    gruppeid = models.IntegerField()
-
-    class Meta:
-        managed = False
-        db_table = 'gradgruppemedlemmer'
-
-
-class Gruppemedlemmer(models.Model):
-    gruppeid = models.IntegerField(blank=True, null=True)
-    personid = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'gruppemedlemmer'
-
-
 class Grupperold(models.Model):
     navn = models.CharField(max_length=25, blank=True, null=True)
     regexp = models.CharField(max_length=50)
@@ -280,17 +261,6 @@ class Nyheder(models.Model):
     class Meta:
         managed = False
         db_table = 'nyheder'
-
-
-class Titler(models.Model):
-    personid = models.IntegerField(blank=True, null=True)
-    grad = models.IntegerField(blank=True, null=True)
-    orgtitel = models.CharField(max_length=10, blank=True, null=True)
-    inttitel = models.CharField(max_length=10, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'titler'
 
 
 class TkfolkOld(models.Model):
