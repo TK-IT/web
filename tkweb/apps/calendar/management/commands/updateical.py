@@ -28,5 +28,6 @@ class Command(BaseCommand):
                     startdate = startdatetime
                 description = component.decoded('description').decode('utf-8')
                 e = Event(title=title, date=startdate, description=description)
+                e.clean()
                 e.save()
         self.stdout.write('Kalenderen blev opdateret')
