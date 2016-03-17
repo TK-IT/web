@@ -36,7 +36,10 @@
     <div class="container" role="main">
       {% block content %}{% endblock content%}
       <footer class="footer">
-        <p class="small">&copy;1956-2015 <a href="/">{% tket %}</a></p>
+          <p class="small">
+              &copy;1956-2015 <a href="/">{% tket %}.</a>&nbsp;|&nbsp;
+              <a href="{{ config.SMILEY_URL }}">Se Fødevarestyrelsens smiley-rapporter.</a>
+          </p>
       </footer>
     </div> <!-- container -->
     {% bootstrap_javascript jquery=1%}
