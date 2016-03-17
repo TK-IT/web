@@ -145,6 +145,10 @@ SITE_ID = 1
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
 CONSTANCE_CONFIG = {
-    'GFYEAR': (2015, 'Året hvor nuværende BEST blev valgt'),
-    'ICAL_URL': ('https://www.google.com/calendar/ical/best@taagekammeret.dk/public/basic.ics', 'iCalendar URLen hvor den offentlige kalender bliver genereret fra.'),
+    'GFYEAR': (2015,
+               'Året hvor nuværende BEST blev valgt'),
+    'ICAL_URL': ('https://www.google.com/calendar/ical/best@taagekammeret.dk/public/basic.ics',
+                 'iCalendar URLen hvor den offentlige kalender bliver genereret fra.'),
+    'CAL_URL': ('//calendar.google.com/calendar/embed?src=BEST@TAAGEKAMMERET.dk&ctz=Europe/Copenhagen',
+                'URLen til \'Tilføj til din egen kalender\'-linket på kalendersiden.'),
 }
