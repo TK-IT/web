@@ -6,6 +6,7 @@ THUMBNAIL_DEBUG = True
 
 SECRET_KEY = 'This.is.not.a.secret.key'
 
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
