@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load thumbnail %}
 {% load staticfiles %}
+{% load bootstrap3 %}
 
 {% block title %}{{ album.title }}{% endblock title %}
 
@@ -45,8 +46,13 @@
                  {{ lg.url }} {{ lg.x }}w"
          src="{{ sm.url }}">
     {% endthumbnail %}{% endthumbnail %}{% endthumbnail %}{% endthumbnail %}
-    <p>{{ image.date }}</p>
+         {{ image.date }}
+    <div class="pull-right">
+        <a href="{{ image.image.url }}">
+            {% bootstrap_icon "download-alt" %}
+            ({{ image.image.size|filesizeformat }})</a>
+    </div>
   </div> <!-- permlink, current? -->
   {% endfor %}
 </div>
-{% endblock content%}
+{% endblock content %}
