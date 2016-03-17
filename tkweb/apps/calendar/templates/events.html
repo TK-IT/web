@@ -1,16 +1,37 @@
-<table class="table">
-  <tbody>
-    {% for event in events %}
-    <tr>
-      <td>{{ event.date }}</td>
-      <td>{{ event.title }}
-        {% if event.facebook %}
-        <br />
-        <a href="{{ event.facebook }}">Facebook event</a>
-        {% endif %}
-      </td>
-      <td>{{ event.description }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% load bootstrap3 %}
+
+{% for event in events %}
+<div class="row">
+    <div class="col-xs-12 visible-xs-block">
+        <h4>
+            {{ event.title }}
+            {% if event.facebook %}
+            <a href="{{ event.facebook }}">{% bootstrap_icon "calendar" %}</a>
+            {% endif %}
+            <span class="pull-right">
+                <small>
+                    {{ event.date }}
+                </small>
+            </span>
+        </h4>
+    </div>
+    <div class="col-sm-4 hidden-xs col-lg-offset-1">
+        <h4>
+            {{ event.title }}
+            {% if event.facebook %}
+            <a href="{{ event.facebook }}">{% bootstrap_icon "calendar" %}</a>
+            {% endif %}
+        <br/>
+        <small>
+            {{ event.date }}
+        </small>
+        </h4>
+    </div>
+    <div class="col-xs-12 col-sm-8 col-lg-6">
+        <div class=" hidden-xs"><h4></h4></div> {# Empty h4 for vertical alingment of text baselines #}
+        <p class="">
+            {{ event.description }}
+        </p>
+    </div>
+</div>
+{% endfor %}

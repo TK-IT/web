@@ -5,16 +5,21 @@
 
 {% block content %}
 <div class="row">
-  <h2>Kommende arrangementer</h2>
-  {% with futureEvents as events %}
-    {% include 'events.html' %}
-  {% endwith %}
+    <div class="col-xs-12 col-lg-10 col-lg-offset-1">
+        <h2>Kommende arrangementer</h2>
+    </div>
 </div> <!-- row -->
+{% with futureEvents as events %}
+{% include 'events.html' %}
+{% endwith %}
 
 <div class="row">
-  <h2>Tidligere Arrangementer</h2>
-  {% with pastEvents as events %}
-    {% include 'events.html' %}
-  {% endwith %}
+    <div class="col-xs-12 col-lg-10 col-lg-offset-1">
+        <h2>Tidligere Arrangementer</h2>
+    </div>
 </div> <!-- row -->
+{% with pastEvents as events %}
+{% include 'events.html' %}
+{% endwith %}
+
 {% endblock content%}
