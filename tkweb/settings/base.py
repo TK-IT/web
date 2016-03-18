@@ -27,6 +27,7 @@ THIRD_PARTY_APPS = [
     'constance.backends.database',
     'jfu',
     'sorl.thumbnail',
+    'django_cleanup',
 ]
 
 LOCAL_APPS = [
