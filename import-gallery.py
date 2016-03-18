@@ -4,6 +4,7 @@ from datetime import datetime
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tkweb.settings.dev")
 
+import django
 from django.core.files import File
 from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
@@ -24,7 +25,8 @@ def replace_all(text, dic):
         text = text.replace(i, j)
     return text
 
-#Album.objects.all().delete()
+django.setup()
+Album.objects.all().delete()
 
 for yearFolder in os.listdir(rootdir):
     yearStr = yearFolder[3:5]
