@@ -9,10 +9,12 @@ from django.db import models
 from django.utils.text import slugify
 from django.utils.http import int_to_base36
 from sorl.thumbnail import ImageField
-import PIL
+from PIL import Image as PilImage
 import hashlib
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 
 def file_name(instance, filename):
     sepFilename = os.path.splitext(filename)
@@ -24,7 +26,7 @@ def file_name(instance, filename):
 
 def get_exif_date_or_now(filename):
     try:
-        image = PIL.Image.open(filename)
+        image = PilImage.open(filename)
         info = image._getexif()
         if info is not None:
             exif = {}
@@ -47,10 +49,13 @@ def get_exif_date_or_now(filename):
                             ms = str(ms[0])
                     else:
                         ms = '0'
-                        s += "." + ms
+                    s += "." + ms
                     return datetime.strptime(s, '%Y:%m:%d %H:%M:%S.%f')
-    except Exception:
-        return datetime.now()
+    except Exception as e:
+        logger.warning('Exception occurred in the slightly volatile get_exif_date_or_now. Returning \'now\':', e)
+
+    logger.info('get_exif_date_or_now could not get exif date. Returning \'now\'')
+    return datetime.now()
 
 class Image(models.Model):
     SLUG_SIZE = 9
