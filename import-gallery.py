@@ -1,6 +1,7 @@
 import os
 import sys
 from datetime import datetime
+import imghdr
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tkweb.settings.dev")
 
@@ -34,7 +35,7 @@ for yearFolder in os.listdir(rootdir):
         yearStr = "19" + yearStr
     else:
         yearStr = "20" + yearStr
-    print(yearStr)
+    print('===', yearStr, "===")
 
     for eventFolder in os.listdir(os.path.join(rootdir, yearFolder)):
         eventNo = eventFolder[:2]
@@ -53,16 +54,29 @@ for yearFolder in os.listdir(rootdir):
         album.gfyear = int(yearStr)
         album.slug = slugify(yearStr + "-" + eventStr) #TODO Find a better slug
         album.save()
+
         for orgiFolder in os.listdir(os.path.join(rootdir, yearFolder,
                                                   eventFolder)):
-            for imgName in os.listdir(os.path.join(rootdir, yearFolder,
-                                                   eventFolder, orgiFolder)):
-                op = open(os.path.join(rootdir, yearFolder, eventFolder,
-                                       orgiFolder, imgName), "rb")
-                djFile = File(op)
-                img = Image()
-                img.associatedObject = album
-                img.image.save('imgName', djFile, save=False)
-                img.full_clean()
-                img.save()
-                print('   ' + imgName)
+            filelist = os.listdir(os.path.join(rootdir, yearFolder,
+                                                   eventFolder, orgiFolder))
+            missing = []
+            for imgName in filelist:
+                filepath = os.path.join(rootdir, yearFolder, eventFolder,
+                                       orgiFolder, imgName)
+
+                if imghdr.what(filepath):
+                    op = open(filepath, "rb")
+                    djFile = File(op)
+                    img = Image()
+                    img.associatedObject = album
+                    img.image.save('imgName', djFile, save=False)
+                    img.full_clean()
+                    img.save()
+                else:
+                    missing.append(filepath)
+
+            print('  ', eventStr, ': Imported', len(album.images.all()))
+            if len(missing) > 0:
+                print('   ', '\033[93m', 'Missing files:', missing, '\033[0m')
+
+
