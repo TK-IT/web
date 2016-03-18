@@ -1,6 +1,6 @@
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, date, timedelta
 import imghdr
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tkweb.settings.dev")
@@ -46,10 +46,9 @@ for yearFolder in os.listdir(rootdir):
         eventStr = eventFolder[3:]
         eventStr = replace_all(eventStr, replDict)
 
-        print(' ' + eventStr)
         album = Album()
         album.title = eventStr
-        album.publish_date = datetime.today() #TODO Find a better date
+        album.publish_date = date.fromtimestamp(0) # Set 1970-01-01 as placeholder timestamp
         album.eventalbum = eventalbum
         album.gfyear = int(yearStr)
         album.slug = slugify(yearStr + "-" + eventStr) #TODO Find a better slug
@@ -72,11 +71,22 @@ for yearFolder in os.listdir(rootdir):
                     img.image.save('imgName', djFile, save=False)
                     img.full_clean()
                     img.save()
+
+                    #Set album date from last image with non 1970 date.
+                    if img.date != datetime.fromtimestamp(0):
+                        album.publish_date = img.date
                 else:
                     missing.append(filepath)
 
             print('  ', eventStr, ': Imported', len(album.images.all()))
             if len(missing) > 0:
                 print('   ', '\033[93m', 'Missing files:', missing, '\033[0m')
+
+
+        # If no date has been set. The first album gets the likely GFDATE of
+        # the year. Subsequent albums are on the following days
+        if album.publish_date != datetime.fromtimestamp(0):
+            album.publish_date = date(int(yearStr), 9, 20) + timedelta(days=int(eventFolder[:2]))
+        album.save()
 
 

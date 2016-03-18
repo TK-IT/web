@@ -8,6 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.text import slugify
 from django.utils.http import int_to_base36
+from django.utils.timezone import get_current_timezone
 from sorl.thumbnail import ImageField
 from PIL import Image as PilImage
 import hashlib
@@ -24,7 +25,7 @@ def file_name(instance, filename):
     return '/'.join([content_type_folder, object_id_folder, newFilename])
 
 
-def get_exif_date_or_now(filename):
+def get_exif_date_or_1970(filename):
     try:
         image = PilImage.open(filename)
         info = image._getexif()
@@ -52,10 +53,10 @@ def get_exif_date_or_now(filename):
                     s += "." + ms
                     return datetime.strptime(s, '%Y:%m:%d %H:%M:%S.%f')
     except Exception as e:
-        logger.warning('Exception occurred in the slightly volatile get_exif_date_or_now. Returning \'now\':', e)
+        logger.warning('Exception occurred in the slightly volatile get_exif_date_or_1970. Returning 1970:', e)
 
-    logger.info('get_exif_date_or_now could not get exif date. Returning \'now\'')
-    return datetime.now()
+    logger.info('get_exif_date_or_1970 could not get exif date. Returning 1970')
+    return datetime.fromtimestamp(0, tz=get_current_timezone())
 
 class Image(models.Model):
     SLUG_SIZE = 9
@@ -83,7 +84,7 @@ class Image(models.Model):
 
     def clean(self):
         self.image.open('rb')
-        self.date = get_exif_date_or_now(self.image)
+        self.date = get_exif_date_or_1970(self.image)
 
         self.image.open('rb')  # open() does a seek(0)
         m = hashlib.sha1()
