@@ -26,7 +26,8 @@ class AlbumAdminForm(forms.ModelForm):
             'publish_date',
             'gfyear',
             'eventalbum',
-            'description'
+            'description',
+            'slug',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -39,30 +40,10 @@ class AlbumAdminForm(forms.ModelForm):
             })
             super(AlbumAdminForm, self).__init__(*args, **kwargs)
 
-    def clean(self, *args, **kwargs):
-        cleaned_data = super(AlbumAdminForm, self).clean(*args, **kwargs)
-        if 'title' not in cleaned_data or 'publish_date' not in cleaned_data:
-            return
-        title = cleaned_data['title']
-        year = cleaned_data['publish_date'].year
-        potentialslug = slugify('%s-%s' % (title, year))
-        qs = Album.objects.filter(slug=potentialslug)
-        if qs.count() == 1 and qs[0] != self.instance:
-            msg = "Albummet '%s' i %s eksisterer allerede" % (title, year)
-            raise ValidationError(msg)
-
-    def save(self, commit=True):
-        instance = super(AlbumAdminForm, self).save(commit=False)
-        instance.slug = slugify(
-            '%s-%s' % (instance.title, instance.publish_date.year))
-        if commit:
-            instance.save()
-        return instance
-
-
 class AlbumAdmin(admin.ModelAdmin):
     list_display = ('title', 'gfyear', 'publish_date', 'slug')
     inlines = [InlineImageAdmin]
     form = AlbumAdminForm
+    prepopulated_fields = { 'slug': ('title',), }
 
 admin.site.register(Album, AlbumAdmin)

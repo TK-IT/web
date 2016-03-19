@@ -122,12 +122,13 @@ class Image(models.Model):
 class Album(models.Model):
     class Meta:
         ordering = ['gfyear', '-eventalbum', 'publish_date']
+        unique_together = (('gfyear', 'slug'),)
 
     title = models.CharField(max_length=200)
     publish_date = models.DateField()
     eventalbum = models.BooleanField()
     gfyear = models.PositiveSmallIntegerField()
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField()
     description = models.TextField(blank=True)
     images = GenericRelation(Image)
 

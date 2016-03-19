@@ -44,14 +44,15 @@ for yearFolder in os.listdir(rootdir):
             eventalbum = False
 
         eventStr = eventFolder[3:]
-        eventStr = replace_all(eventStr, replDict)
+        unSlugEventStr = replace_all(eventStr, replDict)
 
         album = Album()
-        album.title = eventStr
+        album.title = unSlugEventStr
         album.publish_date = date.fromtimestamp(0) # Set 1970-01-01 as placeholder timestamp
         album.eventalbum = eventalbum
         album.gfyear = int(yearStr)
-        album.slug = slugify(yearStr + "-" + eventStr) #TODO Find a better slug
+        album.slug = slugify(eventStr) # The old title should be a perfect
+                                       # slug. We slugify() to be sure.
         album.save()
 
         for orgiFolder in os.listdir(os.path.join(rootdir, yearFolder,
