@@ -2,7 +2,7 @@ from constance import config
 from datetime import date
 from django import forms
 from django.contrib import admin
-from django.contrib.contenttypes.admin import GenericTabularInline
+from django.contrib.admin import TabularInline
 from django.core.exceptions import ValidationError
 from django.db.models import Max
 from django.utils.text import slugify
@@ -10,7 +10,7 @@ from sorl.thumbnail.admin import AdminImageMixin
 from tkweb.apps.gallery.models import Album, Image
 
 
-class InlineImageAdmin(AdminImageMixin, GenericTabularInline):
+class InlineImageAdmin(AdminImageMixin, TabularInline):
     model = Image
     extra = 0
 

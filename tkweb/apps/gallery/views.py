@@ -63,10 +63,8 @@ def upload(request):
     # If multiple files can be uploaded simulatenously,
     # 'file' may be a list of files.
     image = upload_receive(request)
-    content_type = ContentType.objects.get(model=request.POST['content_type'])
-    object_id = request.POST['object_id']
-    instance = Image(image=image, content_type=content_type,
-                     object_id=object_id)
+    album = Album.objects.get(id=int(request.POST['object_id']))
+    instance = Image(image=image, album=album)
     try:
         instance.full_clean()
     except ValidationError as exn:

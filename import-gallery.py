@@ -7,7 +7,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tkweb.settings.dev")
 
 import django
 from django.core.files import File
-from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
 from tkweb.apps.gallery.models import Album, Image
 
@@ -68,8 +67,8 @@ for yearFolder in os.listdir(rootdir):
                     op = open(filepath, "rb")
                     djFile = File(op)
                     img = Image()
-                    img.associatedObject = album
-                    img.image.save('imgName', djFile, save=False)
+                    img.album = album
+                    img.image = djFile
                     img.full_clean()
                     img.save()
 

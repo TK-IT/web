@@ -17,12 +17,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def file_name(instance, filename):
+def file_name(instance, path):
+    filename = os.path.split(path)[1]
     sepFilename = os.path.splitext(filename)
     newFilename = slugify(sepFilename[0]) + sepFilename[1]
-    content_type_folder = slugify(instance.content_type.model)
-    object_id_folder = slugify(instance.object_id)
-    return '/'.join([content_type_folder, object_id_folder, newFilename])
+    gfyear = str(instance.album.gfyear)
+    album_slug = instance.album.slug
+
+    return '/'.join([gfyear, album_slug, newFilename])
 
 
 def get_exif_date_or_1970(filename):
@@ -58,15 +60,37 @@ def get_exif_date_or_1970(filename):
     logger.info('get_exif_date_or_1970 could not get exif date. Returning 1970')
     return datetime.fromtimestamp(0, tz=get_current_timezone())
 
+class Album(models.Model):
+    class Meta:
+        ordering = ['-gfyear', '-eventalbum', '-publish_date']
+        unique_together = (('gfyear', 'slug'),)
+
+    title = models.CharField(max_length=200)
+    publish_date = models.DateField()
+    eventalbum = models.BooleanField()
+    gfyear = models.PositiveSmallIntegerField()
+    slug = models.SlugField()
+    description = models.TextField(blank=True)
+
+    def number_of_images(self):
+        return self.images.count()
+
+    def prev(self, image_slug):
+        image = self.images.get(slug=image_slug)
+        prev = self.images.filter(date__lt=image.date).reverse[0]
+        print(prev)
+        return prev
+
+    def __str__(self):
+        return '%s: %s' % (self.gfyear, self.title)
+
 class Image(models.Model):
     SLUG_SIZE = 9
 
     class Meta:
         ordering = ['date']
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
-    object_id = models.PositiveIntegerField()
-    associatedObject = GenericForeignKey('content_type', 'object_id')
+    album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name="images")
 
     image = ImageField(upload_to=file_name)
     date = models.DateTimeField(null=True, blank=True)
@@ -117,29 +141,3 @@ class Image(models.Model):
 
     def __str__(self):
         return '%s, %s' % (self.slug, self.date)
-
-
-class Album(models.Model):
-    class Meta:
-        ordering = ['gfyear', '-eventalbum', 'publish_date']
-        unique_together = (('gfyear', 'slug'),)
-
-    title = models.CharField(max_length=200)
-    publish_date = models.DateField()
-    eventalbum = models.BooleanField()
-    gfyear = models.PositiveSmallIntegerField()
-    slug = models.SlugField()
-    description = models.TextField(blank=True)
-    images = GenericRelation(Image)
-
-    def number_of_images(self):
-        return self.images.count()
-
-    def prev(self, image_slug):
-        image = self.images.get(slug=image_slug)
-        prev = self.images.filter(date__lt=image.date).reverse[0]
-        print(prev)
-        return prev
-
-    def __str__(self):
-        return '%s: %s' % (self.gfyear, self.title)
