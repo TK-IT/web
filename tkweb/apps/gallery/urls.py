@@ -14,16 +14,9 @@ urlpatterns = [
     url(r'^(?P<gfyear>\d+)/(?P<album_slug>[^/]+)$',
         tkweb.apps.gallery.views.album,
         name='album'),
-    url(r'^(?P<album_slug>[^/]+)$',
-        tkweb.apps.gallery.views.album,
-        {'gfyear': '0000'}),
 
     # Single images
-    url((r'^(?P<gfyear>\d+)/(?P<album_slug>[^/]+)/'
-         r'(?P<image_slug>[^/]+)$'),
-        tkweb.apps.gallery.views.image,
-        name='image'),
-    url(r'^(?P<album_slug>[^/]+)/(?P<image_slug>[^/]+)$',
+    url(r'^(?P<gfyear>\d+)/(?P<album_slug>[^/]+)/(?P<image_slug>[^/]+)$',
         tkweb.apps.gallery.views.image,
         name='image'),
 

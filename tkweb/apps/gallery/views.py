@@ -28,40 +28,30 @@ def gallery(request, **kwargs):
 
 
 def album(request, gfyear, album_slug):
-    album = get_object_or_404(Album, slug=album_slug)
-    if int(gfyear) != album.gfyear:
-        return redirect(
-            'album',
-            gfyear=album.gfyear,
-            album_slug=album_slug)
-    else:
-        context = {'album': album}
-        return render(request, 'album.html', context)
+    album = get_object_or_404(Album, gfyear=gfyear, slug=album_slug)
+    context = {'album': album}
+    return render(request, 'album.html', context)
 
 
-def image(request, album_slug, image_slug, **kwargs):
-    album = get_object_or_404(Album, slug=album_slug)
-    if not album.images.filter(slug=image_slug):
-        return redirect(
-            'album',
-            gfyear=album.gfyear,
-            album_slug=album_slug)
-    else:
-        image = album.images.get(slug=image_slug)
-        context = {
-            'album': album,
-            'start_image': image,
-        }
-        next_image = album.images.filter(date__gt=image.date)
-        try:
-            context['next_image'] = next_image[0]
-        except:
-            context['next_image'] = image
-            prev_image = album.images.filter(date__lt=image.date).reverse()
-        try:
-            context['prev_image'] = prev_image[0]
-        except:
-            context['prev_image'] = image
+def image(request, gfyear, album_slug, image_slug, **kwargs):
+    album = get_object_or_404(Album, gfyear=gfyear, slug=album_slug)
+    image = get_object_or_404(Image, slug=image_slug)
+    context = {
+        'album': album,
+        'start_image': image,
+    }
+    next_image = album.images.filter(date__gt=image.date)
+
+    try:
+        context['next_image'] = next_image[0]
+    except:
+        context['next_image'] = image
+        prev_image = album.images.filter(date__lt=image.date).reverse()
+    try:
+        context['prev_image'] = prev_image[0]
+    except:
+        context['prev_image'] = image
+
     return render(request, 'image.html', context)
 
 
