@@ -94,8 +94,6 @@ class Album(models.Model):
         return '%s: %s' % (self.gfyear, self.title)
 
 class Image(models.Model):
-    SLUG_SIZE = 9
-
     class Meta:
         ordering = ['date']
 
@@ -105,48 +103,16 @@ class Image(models.Model):
     date = models.DateTimeField(null=True, blank=True)
     caption = models.CharField(max_length=200, blank=True)
 
-    slug = models.SlugField(unique=True)
-
-    def clean_fields(self, exclude=None):
-        if exclude is None:
-            exclude = []
-        else:
-            exclude = list(exclude)
-        exclude.append('slug')
-        return super(Image, self).clean_fields(exclude=exclude)
+    slug = models.SlugField(blank=True)
 
     def clean(self):
-        self.image.open('rb')
         self.date = get_exif_date(self.image)
-
-        self.image.open('rb')  # open() does a seek(0)
-        m = hashlib.sha1()
-
-        while True:
-            b = self.image.read(2 ** 20)
-            if not b:
-                break
-            m.update(b)
-
-        def int_to_base36(i):
-            """
-            Converts an integer to a base36 string
-            """
-            char_set = '0123456789abcdefghijklmnopqrstuvwxyz'
-            if i < 0:
-                raise ValueError("Negative base36 conversion input.")
-            if i < 36:
-                return char_set[i]
-            b36 = ''
-            while i != 0:
-                i, n = divmod(i, 36)
-                b36 = char_set[n] + b36
-            return b36
-
-        v = int(m.hexdigest(), 16)
-        slug = ('0' * self.SLUG_SIZE + int_to_base36(v))[-self.SLUG_SIZE:]
-
-        self.slug = slug
+        if self.date == None:
+            self.slug = os.path.basename(self.image.name)
+            logger.debug('slug')
+        else:
+            self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
+            logger.debug('slug')
 
     def __str__(self):
-        return '%s, %s' % (self.slug, self.date)
+        return '%s' % (self.slug)
