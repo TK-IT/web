@@ -71,7 +71,7 @@ def get_exif_date(filename):
 
 class Album(models.Model):
     class Meta:
-        ordering = ['-gfyear', '-eventalbum', '-publish_date']
+        ordering = ['gfyear', '-eventalbum', 'publish_date']
         unique_together = (('gfyear', 'slug'),)
 
     title = models.CharField(max_length=200)
@@ -110,10 +110,8 @@ class Image(models.Model):
         self.date = get_exif_date(self.image)
         if self.date == None:
             self.slug = os.path.basename(self.image.name)
-            logger.debug('slug')
         else:
             self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
-            logger.debug('slug')
 
     def __str__(self):
         return '%s' % (self.slug)
