@@ -95,7 +95,7 @@ class Album(models.Model):
 
 class Image(models.Model):
     class Meta:
-        ordering = ['date']
+        ordering = ['date', 'slug']
         unique_together = (('album', 'slug'),)
 
     album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name="images")
