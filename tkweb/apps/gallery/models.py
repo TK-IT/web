@@ -27,7 +27,8 @@ def file_name(instance, path):
     return '/'.join([gfyear, album_slug, newFilename])
 
 
-def get_exif_date_or_1970(filename):
+def get_exif_date(filename):
+    logger.debug('get_exif_date: called with filename: %s' % filename.name)
     try:
         image = PilImage.open(filename)
         info = image._getexif()
@@ -46,19 +47,27 @@ def get_exif_date_or_1970(filename):
                     s = exif['DateTime' + t]
                     if type(s) is tuple:
                         s = str(s[0])
+                    logger.debug('get_exif_date: found EXIF field DateTime%s. Parsed it as %s', t, s)
+
                     if 'SubsecTime' + t in exif:
                         ms = exif['SubsecTime' + t]
                         if type(ms) is tuple:
                             ms = str(ms[0])
+                        logger.debug('get_exif_date: found EXIF field SubsecTime. Parsed it as %s', ms)
                     else:
                         ms = '0'
-                    s += "." + ms
-                    return datetime.strptime(s, '%Y:%m:%d %H:%M:%S.%f')
-    except Exception as e:
-        logger.warning('Exception occurred in the slightly volatile get_exif_date_or_1970. Returning 1970:', e)
 
-    logger.info('get_exif_date_or_1970 could not get exif date. Returning 1970')
-    return datetime.fromtimestamp(0, tz=get_current_timezone())
+                    s += "." + ms
+                    dt = datetime.strptime(s, '%Y:%m:%d %H:%M:%S.%f')
+                    dt = dt.replace(tzinfo=get_current_timezone())
+
+                    logger.info('get_exif_date: returning exif date: %s', dt)
+                    return dt
+    except Exception as e:
+        logger.warning('get_exif_date: An exception occurred in this slightly volatile function.', exc_info=True)
+
+    logger.info('get_exif_date: could not get exif date. Returning none')
+    return None
 
 class Album(models.Model):
     class Meta:
@@ -108,7 +117,7 @@ class Image(models.Model):
 
     def clean(self):
         self.image.open('rb')
-        self.date = get_exif_date_or_1970(self.image)
+        self.date = get_exif_date(self.image)
 
         self.image.open('rb')  # open() does a seek(0)
         m = hashlib.sha1()
