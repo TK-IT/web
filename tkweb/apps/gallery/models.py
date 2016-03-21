@@ -80,15 +80,17 @@ def get_exif_date(filename):
 
 class Album(models.Model):
     class Meta:
-        ordering = ['gfyear', '-eventalbum', 'publish_date']
+        ordering = ['gfyear', '-eventalbum', 'oldFolder', 'publish_date']
         unique_together = (('gfyear', 'slug'),)
 
     title = models.CharField(max_length=200)
-    publish_date = models.DateField()
+    publish_date = models.DateField(blank=True, null=True)
     eventalbum = models.BooleanField()
     gfyear = models.PositiveSmallIntegerField()
     slug = models.SlugField()
     description = models.TextField(blank=True)
+
+    oldFolder = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
         return '%s: %s' % (self.gfyear, self.title)

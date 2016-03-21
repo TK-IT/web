@@ -51,11 +51,12 @@ for yearFolder in os.listdir(rootdir):
 
         album = Album()
         album.title = unSlugEventStr
-        album.publish_date = date.fromtimestamp(0) # Set 1970-01-01 as placeholder timestamp
+        album.publish_date = None
         album.eventalbum = eventalbum
         album.gfyear = int(yearStr)
         album.slug = slugify(eventStr) # The old title should be a perfect
                                        # slug. We slugify() to be sure.
+        album.oldFolder = os.path.join(yearFolder, eventFolder)
         album.save()
 
         for orgiFolder in os.listdir(os.path.join(rootdir, yearFolder,
@@ -82,11 +83,6 @@ for yearFolder in os.listdir(rootdir):
                     missing.append(filepath)
 
             print('  ', eventStr, ': Imported', len(album.images.all()))
-
-        # If no date has been set. The first album gets the likely GFDATE of
-        # the year. Subsequent albums are on the following days
-        if album.publish_date != datetime.fromtimestamp(0):
-            album.publish_date = date(int(yearStr), 9, 20) + timedelta(days=int(eventFolder[:2]))
         album.save()
 
 if len(missing) > 0:
