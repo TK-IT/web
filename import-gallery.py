@@ -1,3 +1,6 @@
+# You can use `find . -name '*.DS_Store' -type f -delete` if you operating
+# system is a bitch and pollutes you folders
+
 import os
 import sys
 from datetime import datetime, date, timedelta
