@@ -15,6 +15,9 @@ $(document).ready(function() {
 
         var l = slugs.length;
         var i = slugs.indexOf(permlink);
+
+        $("#tkgal-index").html(i+1);
+
         var pi = (((i-1)%l)+l)%l; // js modulo is broken for negative numbers.
         var ni = (i+1)%l;
         $("#tkgal-prev").attr("href", slugs[pi]);

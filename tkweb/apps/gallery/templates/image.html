@@ -2,6 +2,7 @@
 {% load thumbnail %}
 {% load staticfiles %}
 {% load bootstrap3 %}
+{% load tkbrand %}
 
 {% block title %}{{ album.title }}{% endblock title %}
 
@@ -12,22 +13,28 @@
 
 {% block content %}
 <div class="row">
-  <div class="col-xs-12 col-sm-7">
-    <h3>{{ album.title }} <small>{% if album.eventalbum %}{{ album.publish_date }}{% else %}{{ album.gfyear}}{% endif %}</small></h3>
+  <div class="col-xs-12 col-sm-9">
+    <h3>
+      <ol class="breadcrumb">
+        <li><a href="{% url 'gfyear' gfyear=album.gfyear  %}">{{ album.gfyear|gfyearPPslash }}</a></li>
+        <li><a href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">{{ album.title }}</a></li>
+        <li class="active"><span id="tkgal-index">{% for image in album.images.all %}
+            {% ifequal image start_image %}{{ forloop.counter }}{% endifequal %}{% endfor %}</span> af {{ album.images.all|length }} billede{{ album.images.all|length|pluralize:"r" }}</li>
+      </ol>
+    </h3>
   </div>
-  <div class="col-xs-12 col-sm-5 text-right">
-    <p class="tkgal-controls">
-        <a id="tkgal-prev"
-           class="tkgal-control"
-           href="{{ prev_image.slug }}">Forige</a> |
-        <a href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">Tilbage til album</a> |
-        <a id="tkgal-next"
-           class="tkgal-control"
-           href="{{ next_image.slug }}">Næste</a>
+  <div class="col-xs-12 col-sm-3 text-right">
+      <p class="tkgal-controls">
+          <a id="tkgal-prev"
+             class="tkgal-control"
+             href="{{ prev_image.slug }}">Forrige</a> |
+          <a id="tkgal-next"
+             class="tkgal-control"
+             href="{{ next_image.slug }}">Næste</a>
   </div>
 </div>
 <div id="tkgal-container">
-  {% for image in album.images.all %}
+    {% for image in album.images.all %}
   <div permlink="{{ image.slug }}" {% ifequal image start_image %}class="current"{% endifequal %}>
     {% thumbnail image.image '400' as xs %}{# De 400 her er /ikke/ taget fra bootstrap3 #}
     {% thumbnail image.image '720' as sm %}
@@ -45,7 +52,7 @@
                  {{ lg.url }} {{ lg.x }}w"
          src="{{ sm.url }}">
     {% endthumbnail %}{% endthumbnail %}{% endthumbnail %}{% endthumbnail %}
-         {{ image.date }}
+    {{ image.date|default_if_none:"" }}
     <div class="pull-right">
         <a href="{{ image.image.url }}">
             {% bootstrap_icon "download-alt" %}

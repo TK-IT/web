@@ -8,6 +8,13 @@ body > .container {
 }
 
 /* Til gallery appen */
+h2 > .breadcrumb,
+h3 > .breadcrumb {
+    padding: 0;
+    margin-bottom: 10px;
+    background: none;
+}
+
 .thumbcap .caption{
     background-color: #000;
     bottom: 0;
