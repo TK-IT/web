@@ -14,6 +14,7 @@ from django.utils.text import slugify
 from tkweb.apps.gallery.models import Album, Image
 
 rootdir = sys.argv[1]
+missing = []
 
 replDict = {"_": " ",
        "ae": "æ",
@@ -61,7 +62,6 @@ for yearFolder in os.listdir(rootdir):
                                                   eventFolder)):
             filelist = os.listdir(os.path.join(rootdir, yearFolder,
                                                    eventFolder, orgiFolder))
-            missing = []
             for imgName in filelist:
                 filepath = os.path.join(rootdir, yearFolder, eventFolder,
                                        orgiFolder, imgName)
@@ -82,9 +82,6 @@ for yearFolder in os.listdir(rootdir):
                     missing.append(filepath)
 
             print('  ', eventStr, ': Imported', len(album.images.all()))
-            if len(missing) > 0:
-                print('   ', '\033[93m', 'Missing files:', missing, '\033[0m')
-
 
         # If no date has been set. The first album gets the likely GFDATE of
         # the year. Subsequent albums are on the following days
@@ -92,4 +89,5 @@ for yearFolder in os.listdir(rootdir):
             album.publish_date = date(int(yearStr), 9, 20) + timedelta(days=int(eventFolder[:2]))
         album.save()
 
-
+if len(missing) > 0:
+    print('   ', '\033[93m', 'Missing files:', missing, '\033[0m')
