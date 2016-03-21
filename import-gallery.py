@@ -75,8 +75,8 @@ for yearFolder in os.listdir(rootdir):
                     img.full_clean()
                     img.save()
 
-                    #Set album date from last image with non 1970 date.
-                    if img.date != datetime.fromtimestamp(0):
+                    #Set album date from last image with a date.
+                    if not img.date == None:
                         album.publish_date = img.date
                 else:
                     missing.append(filepath)
