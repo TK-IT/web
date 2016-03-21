@@ -18,8 +18,7 @@
       <ol class="breadcrumb">
         <li><a href="{% url 'gfyear' gfyear=album.gfyear  %}">{{ album.gfyear|gfyearPPslash }}</a></li>
         <li><a href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">{{ album.title }}</a></li>
-        <li class="active"><span id="tkgal-index">{% for image in album.images.all %}
-            {% ifequal image start_image %}{{ forloop.counter }}{% endifequal %}{% endfor %}</span> af {{ album.images.all|length }} billede{{ album.images.all|length|pluralize:"r" }}</li>
+        <li class="active"><span id="tkgal-index">{% for image in album.images.all %}{% ifequal image start_image %}{{ forloop.counter }}{% endifequal %}{% endfor %}</span> af {{ album.images.all|length }} billede{{ album.images.all|length|pluralize:"r" }}</li>
       </ol>
     </h3>
   </div>
