@@ -58,15 +58,24 @@ def get_exif_date(filename):
                         ms = '0'
 
                     s += "." + ms
-                    dt = datetime.strptime(s, '%Y:%m:%d %H:%M:%S.%f')
-                    dt = dt.replace(tzinfo=get_current_timezone())
 
-                    logger.info('get_exif_date: returning exif date: %s', dt)
-                    return dt
+                    if any(str(n) in s for n in range(1,9)):
+                        dt = datetime.strptime(s, '%Y:%m:%d %H:%M:%S.%f')
+                        dt = dt.replace(tzinfo=get_current_timezone())
+
+                        logger.info('get_exif_date: returning exif date: %s', dt)
+                        return dt
+
+                    logger.debug('get_exif_date: the DateTime%s field only contained zeros. Trying next field', t)
+
+    except AttributeError as e:
+        logger.info('get_exif_date: could not get exif data. This file is properly not a jpg or tif. Returning None')
+        return None
+
     except Exception as e:
         logger.warning('get_exif_date: An exception occurred in this slightly volatile function.', exc_info=True)
 
-    logger.info('get_exif_date: could not get exif date. Returning none')
+    logger.info('get_exif_date: could not get exif date. Returning None')
     return None
 
 class Album(models.Model):
