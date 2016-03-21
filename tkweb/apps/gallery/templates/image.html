@@ -8,7 +8,7 @@
 {% block js %}
   <script src="{% static "jquery.touchswipe.min.js" %}"></script>
   <script src="{% static "tkgal.js" %}"></script>
-{% endblock js%}
+{% endblock js %}
 
 {% block content %}
 <div class="row">
@@ -16,25 +16,24 @@
     <h3>{{ album.title }} <small>{% if album.eventalbum %}{{ album.publish_date }}{% else %}{{ album.gfyear}}{% endif %}</small></h3>
   </div>
   <div class="col-xs-12 col-sm-5 text-right">
-    <p id="tkgal_controls">
-          <a class="tkgal_link prev"
-             link="{{ prev_image.slug }}"
-             href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=prev_image.slug %}">Forige</a> |
-          <a class="tkgal_url_base"
-             href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">Tilbage til album</a> |
-          <a class="tkgal_link next"
-             link="{{ next_image.slug }}"
-             href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=next_image.slug %}">Næste</a>
+    <p class="tkgal-controls">
+        <a id="tkgal-prev"
+           class="tkgal-control"
+           href="{{ prev_image.slug }}">Forige</a> |
+        <a href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">Tilbage til album</a> |
+        <a id="tkgal-next"
+           class="tkgal-control"
+           href="{{ next_image.slug }}">Næste</a>
   </div>
 </div>
-<div class="tkgal_container">
+<div id="tkgal-container">
   {% for image in album.images.all %}
   <div permlink="{{ image.slug }}" {% ifequal image start_image %}class="current"{% endifequal %}>
     {% thumbnail image.image '400' as xs %}{# De 400 her er /ikke/ taget fra bootstrap3 #}
     {% thumbnail image.image '720' as sm %}
     {% thumbnail image.image '940' as ml %}
     {% thumbnail image.image '1140' as lg %}
-    <img class="img-responsive {% ifequal image start_image %}current{% endifequal %}"
+    <img class="img-responsive"
          alt="{{ album.slug }}/{{ image.slug }}"
          sizes="(max-width: 768px) calc(100vw - 15px),
                 (max-width: 992px) 720px,

@@ -1,74 +1,27 @@
-permlinkBase = "";
-galleryContainer = ".tkgal_container";
-
-// skjuler alt undtagen det ønskede element med attributen permlink="permlink"
-function changeCurrent(permlink) {
-    loadContent(permlink);
-    $elements=$(galleryContainer+" > *");
-    $elements.removeClass("current"); // skjul nuværende
-    numberOfElements = $elements.length;
-
-    $current =$("[permlink="+permlink+"]");
-    $current.addClass("current"); // vis ønskede
-
-    // tilpas viste url i browseren (skal tilpasses django url til samme
-    // indhold)
-    window.history.replaceState(null,null, permlink);
-
-    prevIndex = ($current.index() - 1)%numberOfElements;
-    nextIndex = ($current.index() + 1)%numberOfElements;
-    prevPermlink=$(galleryContainer+" > *").eq(prevIndex).attr("permlink");
-    nextPermlink=$(galleryContainer+" > *").eq(nextIndex).attr("permlink");
-
-    $(".tkgal_link.prev").attr("link", prevPermlink);
-    $(".tkgal_link.next").attr("link", nextPermlink);
-
-    url_base = $(".tkgal_url_base").attr("href");
-    $(".tkgal_link.prev").attr("href", url_base + "/" + prevPermlink);
-    $(".tkgal_link.next").attr("href", url_base + "/" + nextPermlink);
-
-    loadContent(prevPermlink);
-    loadContent(nextPermlink);
-}
-
-// load indhold, ved at fjerne dummy-attributer
-function loadContent(permlink) {
-    $("[permlink="+permlink+"] [data-src]").each(function( index ) {
-        $(this).replaceWith($(this)[0].outerHTML.replace("data-src=","src="));
-    });
-    $("[permlink="+permlink+"] [data-srcset]").each(function( index ) {
-        $(this).replaceWith($(this)[0].outerHTML.replace("data-srcset=",
-                                                         "srcset="));
-    });
-
-    // for media that do not have a parent
-    $("[permlink="+permlink+"][data-src]").each(function( index ) {
-        $(this).replaceWith($(this)[0].outerHTML.replace("data-src=","src="));
-    });
-}
-
-
-// simulate link press when arrow keys are pressed
-document.onkeyup = KeyCheck;
-function KeyCheck(e) {
-    var KeyID = (window.event) ? event.keyCode : e.keyCode;
-    switch(KeyID) {
-    case 37:
-        $(".tkgal_link.prev")[0].click();
-        break;
-    case 39:
-        $(".tkgal_link.next")[0].click();
-        break;
-    }
-}
-
 $(document).ready(function() {
-    $(".tkgal_link").click(function(e) {
+    var slugs = $("#tkgal-container > *").map(function() {
+        return $(this).attr("permlink");
+    }).get();
+
+    $(".tkgal-control").click(function(e) {
         e.preventDefault();
-        changeCurrent( $(this).attr("link") );
+        changeCurrent( $(this).attr("href"));
     });
 
-    $(".tkgal_container > *").swipe( {
+    function changeCurrent(permlink) {
+        $("#tkgal-container > div").removeClass("current");
+        $("[permlink='"+permlink+"']").addClass("current");
+        window.history.replaceState(null, null, permlink);
+
+        var l = slugs.length;
+        var i = slugs.indexOf(permlink);
+        var pi = (((i-1)%l)+l)%l; // js modulo is broken for negative numbers.
+        var ni = (i+1)%l;
+        $("#tkgal-prev").attr("href", slugs[pi]);
+        $("#tkgal-next").attr("href", slugs[ni]);
+    }
+
+    $(".tkgal-container > *").swipe( {
         swipeLeft:swipehandler,
         swipeRight:swipehandler,
         allowPageScroll:"auto"
@@ -77,12 +30,24 @@ $(document).ready(function() {
     function swipehandler(event, direction) {
         switch(direction) {
         case "left":
-            $(".tkgal_link.next")[0].click();
+            $("#tkgal-next")[0].click();
             break;
         case "right":
-            $(".tkgal_link.prev")[0].click();
+            $("#tkgal-prev")[0].click();
             break;
         default:
         }
+    }
+});
+
+// simulate link press when arrow keys are pressed
+$(document).keydown(function(e) {
+    switch(e.which) {
+    case 37: // left
+        $("#tkgal-prev")[0].click();
+        break;
+    case 39: // right
+        $("#tkgal-next")[0].click();
+        break;
     }
 });

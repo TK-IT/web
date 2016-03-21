@@ -24,21 +24,21 @@ body > .container {
     position:relative;
 }
 
-.tkgal_container > *{
+#tkgal-container > *{
     display:none;
     position:relative;
 }
 
-.tkgal_container > img {
+#tkgal-container > img {
     margin: 0 auto;
 }
 
-.tkgal_container > .current {
+#tkgal-container > .current {
     display:block;
 }
 
 @media (min-width: 768px) { /* Erstat 768px med @screen-sm-min når denne bliver til en .less-fil */
-    #tkgal_controls {
+    .tkgal-controls {
         margin-top: 26px;
         margin-bottom: 10px;
     }
