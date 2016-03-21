@@ -59,7 +59,7 @@ def get_exif_date(filename):
 
                     s += "." + ms
 
-                    if any(str(n) in s for n in range(1,9)):
+                    if any(str(n) in s for n in range(1,10)):
                         dt = datetime.strptime(s, '%Y:%m:%d %H:%M:%S.%f')
                         dt = dt.replace(tzinfo=get_current_timezone())
 
