@@ -81,15 +81,6 @@ class Album(models.Model):
     slug = models.SlugField()
     description = models.TextField(blank=True)
 
-    def number_of_images(self):
-        return self.images.count()
-
-    def prev(self, image_slug):
-        image = self.images.get(slug=image_slug)
-        prev = self.images.filter(date__lt=image.date).reverse[0]
-        print(prev)
-        return prev
-
     def __str__(self):
         return '%s: %s' % (self.gfyear, self.title)
 

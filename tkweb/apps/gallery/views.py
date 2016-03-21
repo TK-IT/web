@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals, division
 from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Max
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, redirect
@@ -35,23 +36,32 @@ def album(request, gfyear, album_slug):
 
 def image(request, gfyear, album_slug, image_slug, **kwargs):
     album = get_object_or_404(Album, gfyear=gfyear, slug=album_slug)
-    image = get_object_or_404(Image, slug=image_slug)
+    images = list(album.images.all()) # list() will force evaluation of the
+                                      # QuerySet. We can now use .index()
+    paginator = Paginator(images, 1)
+    start_image = get_object_or_404(Image, slug=image_slug)
+
+    try:
+        prev_image = paginator.page((images.index(start_image))+1-1)[0]
+        # +1 because paginator is 1-indexed, -1 to get the previous image
+    except EmptyPage:
+        # We are at the first image
+        prev_image = paginator.page(paginator.num_pages)[0]
+
+    try:
+        next_image = paginator.page((images.index(start_image))+1+1)[0]
+        # +1 because paginator is 1-indexed, +1 to get the next image
+    except EmptyPage:
+        # We are at the last image
+        next_image = paginator.page(1)[0]
+
+
     context = {
         'album': album,
-        'start_image': image,
+        'start_image': start_image,
+        'prev_image': prev_image,
+        'next_image': next_image,
     }
-    next_image = album.images.filter(date__gt=image.date)
-
-    try:
-        context['next_image'] = next_image[0]
-    except:
-        context['next_image'] = image
-        prev_image = album.images.filter(date__lt=image.date).reverse()
-    try:
-        context['prev_image'] = prev_image[0]
-    except:
-        context['prev_image'] = image
-
     return render(request, 'image.html', context)
 
 
