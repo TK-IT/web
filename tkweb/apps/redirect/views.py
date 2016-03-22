@@ -43,3 +43,32 @@ class GalleryShowFolderRedirectView(RedirectView):
         album_slug = albums[0].slug
         return reverse('album', kwargs={'gfyear': gfyear,
                                         'album_slug': album_slug})
+
+class GalleryShowPictureRedirectView(RedirectView):
+
+    permanent = True
+
+    def get_redirect_url(self, *args, **kwargs):
+
+        folder = self.request.GET.get('folder','')
+        pic_count = int(self.request.GET.get('pic_count',''))
+        if not folder:
+            return None # The old page prints a load of garbage. This will
+                        # return a 410 GONE instead.
+
+        albums = Album.objects.filter(oldFolder__startswith = folder)
+        if not albums:
+            raise Http404("Albummet kan ikke findes")
+
+        gfyear = albums[0].gfyear
+        album_slug = albums[0].slug
+        images = list(albums[0].images.all())
+
+        if pic_count >= len(images):
+            raise Http404("Billedet kan ikke findes")
+
+        image_slug = images[pic_count].slug
+
+        return reverse('image', kwargs={'gfyear': gfyear,
+                                        'album_slug': album_slug,
+                                        'image_slug': image_slug})
