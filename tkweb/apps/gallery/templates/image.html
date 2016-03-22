@@ -32,7 +32,8 @@
              href="{{ next_image.slug }}">Næste</a>
   </div>
 </div>
-<div id="tkgal-container">
+<div class="row">
+<div id="tkgal-container" class="col-xs-12">
     {% for image in album.images.all %}
   <div permlink="{{ image.slug }}" {% ifequal image start_image %}class="current"{% endifequal %}>
     {% thumbnail image.image '400' as xs %}{# De 400 her er /ikke/ taget fra bootstrap3 #}
@@ -59,5 +60,6 @@
     </div>
   </div> <!-- permlink, current? -->
   {% endfor %}
+</div>
 </div>
 {% endblock content %}
