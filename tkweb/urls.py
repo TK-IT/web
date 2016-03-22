@@ -6,6 +6,7 @@ from django.views.generic.base import RedirectView
 
 import tkweb.apps.calendar.views
 import tkweb.apps.gallery.urls
+import tkweb.apps.redirect.urls
 import django.views.static
 import django.views.defaults
 
@@ -52,5 +53,11 @@ urlpatterns = [
         {'document_root': settings.MEDIA_ROOT}),
 
     # 404 page for debugging
-    url(r'^404/$', django.views.defaults.page_not_found, )
+    url(r'^404/$',
+        django.views.defaults.page_not_found, ),
+
+    # Send the rest to the redirect app
+    url('',
+        include(tkweb.apps.redirect.urls), ),
+
 ]
