@@ -1,6 +1,8 @@
 from django.conf.urls import patterns, url
 from django.views.generic.base import RedirectView
 
+from tkweb.apps.redirect.views import GalleryIndexRedirectView
+
 urlpatterns = [
     url(r'^OmTK.php$',
         RedirectView.as_view(url='/om/', permanent=True), ),
@@ -21,5 +23,5 @@ urlpatterns = [
         RedirectView.as_view(url='/admin/', permanent=True), ),
 
     url(r'^Billeder/index.php',
-        RedirectView.as_view(url='/galleri/', permanent=True), ),
+        GalleryIndexRedirectView.as_view(), ),
 ]
