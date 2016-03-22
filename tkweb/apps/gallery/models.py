@@ -18,7 +18,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def file_name(instance, path):
-    filename = os.path.split(path)[1]
+    filename = os.path.basename(path)
     sepFilename = os.path.splitext(filename)
     newFilename = slugify(sepFilename[0]) + sepFilename[1]
     gfyear = str(instance.album.gfyear)
