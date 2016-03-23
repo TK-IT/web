@@ -9,7 +9,7 @@ from django.db import models
 from django.utils.text import slugify
 from django.utils.http import int_to_base36
 from django.utils.timezone import get_current_timezone
-from sorl.thumbnail import ImageField
+from versatileimagefield.fields import VersatileImageField
 from PIL import Image as PilImage
 import hashlib
 import os
@@ -102,7 +102,7 @@ class Image(models.Model):
 
     album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name="images")
 
-    image = ImageField(upload_to=file_name)
+    image = VersatileImageField(upload_to=file_name)
     date = models.DateTimeField(null=True, blank=True)
     caption = models.CharField(max_length=200, blank=True)
 

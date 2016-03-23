@@ -11,6 +11,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tkweb.settings.dev")
 import django
 from django.core.files import File
 from django.utils.text import slugify
+django.setup()
 from tkweb.apps.gallery.models import Album, Image
 
 rootdir = sys.argv[1]
@@ -29,7 +30,6 @@ def replace_all(text, dic):
         text = text.replace(i, j)
     return text
 
-django.setup()
 Album.objects.all().delete()
 
 for yearFolder in os.listdir(rootdir):

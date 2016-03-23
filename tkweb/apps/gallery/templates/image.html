@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% load thumbnail %}
 {% load staticfiles %}
 {% load bootstrap3 %}
 {% load tkbrand %}
@@ -36,22 +35,17 @@
 <div id="tkgal-container" class="col-xs-12">
     {% for image in album.images.all %}
   <div permlink="{{ image.slug }}" {% ifequal image start_image %}class="current"{% endifequal %}>
-    {% thumbnail image.image '400' as xs %}{# De 400 her er /ikke/ taget fra bootstrap3 #}
-    {% thumbnail image.image '720' as sm %}
-    {% thumbnail image.image '940' as ml %}
-    {% thumbnail image.image '1140' as lg %}
     <img class="img-responsive"
          alt="{{ album.slug }}/{{ image.slug }}"
          sizes="(max-width: 768px) calc(100vw - 15px),
                 (max-width: 992px) 720px,
                 (max-width: 1200px) 940px,
                 100vw"
-         srcset="{{ xs.url }} {{ xs.x }}w,
-                 {{ sm.url }} {{ sm.x }}w,
-                 {{ ml.url }} {{ ml.x }}w,
-                 {{ lg.url }} {{ lg.x }}w"
-         src="{{ sm.url }}">
-    {% endthumbnail %}{% endthumbnail %}{% endthumbnail %}{% endthumbnail %}
+         srcset="{{ image.image.thumbnail.400x400.url }} 400w,
+                 {{ image.image.thumbnail.720x720.url }} 720w,
+                 {{ image.image.thumbnail.940x940.url }} 940w,
+                 {{ image.image.thumbnail.1140x1140.url }} 1140w"
+         src="{{ image.image.thumbnail.720x720.url }}">
     {{ image.date|default_if_none:"" }}
     <div class="pull-right">
         <a href="{{ image.image.url }}">

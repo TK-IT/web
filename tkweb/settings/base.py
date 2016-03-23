@@ -26,7 +26,7 @@ THIRD_PARTY_APPS = [
     'constance',
     'constance.backends.database',
     'jfu',
-    'sorl.thumbnail',
+    'versatileimagefield',
     'django_cleanup',
 ]
 
@@ -120,6 +120,19 @@ TEMPLATES = [
     },
 ]
 
+# Thumbnails
+# ----------
+
+VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
+    'gallery': [
+        ('gallery_400', 'crop__400x400'),
+        ('album_336_224', 'crop__336x224'),
+        ('image_400', 'thumbnail__400x400'),
+        ('image_720', 'thumbnail__720x720'),
+        ('image_940', 'thumbnail__940x940'),
+        ('image_1140', 'thumbnail__1140x1140'),
+    ],
+}
 
 # Middleware
 # ----------

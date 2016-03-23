@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load thumbnail tkbrand %}
+{% load tkbrand %}
 
 {% block title %}{{ album.title }}{% endblock title %}
 
@@ -30,12 +30,12 @@
   {% for image in album.images.all %}
   <div class="col-xs-6 col-sm-4 col-md-3">
     <a class="thumbnail" href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=image.slug %}" alt="Se billede">
-    {% thumbnail image.image "336x224" crop="center" as thumb %}
-    <img src="{{ thumb.url }}" alt="{{ album.title }}" />
-    {% empty %}
-    <p>Albummet '{{ album.title }}' har ingen billeder endnu.</p>
-    {% endthumbnail %}
-  </a>
+      {% if image  %}
+        <img src="{{ image.image.crop.336x224.url }}" alt="{{ album.title }}" />
+      {% else %}
+        <p>Albummet '{{ album.title }}' har ingen billeder endnu.</p>
+      {% endif %}
+    </a>
   </div> <!-- col-xs-6 -->
   {% endfor %}
 </div> <!-- row -->
