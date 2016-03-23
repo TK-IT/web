@@ -6,10 +6,12 @@ from datetime import datetime
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils.http import int_to_base36
 from django.utils.timezone import get_current_timezone
 from versatileimagefield.fields import VersatileImageField
+from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 from PIL import Image as PilImage
 import hashlib
 import os
@@ -117,3 +119,15 @@ class Image(models.Model):
 
     def __str__(self):
         return '%s' % (self.slug)
+
+@receiver(models.signals.post_save, sender=Image)
+def generateImageThumbnails(sender, instance, **kwargs):
+    image_warmer = VersatileImageFieldWarmer(
+        instance_or_queryset=instance,
+        rendition_key_set='gallery',
+        image_attr='image',
+    )
+
+    num_created, failed_to_create = image_warmer.warm()
+    logger.debug('generateImageThumbnails: %d thumbnails created. Missing %s' % (
+                 num_created, failed_to_create))
