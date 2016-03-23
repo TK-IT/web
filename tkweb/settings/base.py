@@ -125,8 +125,7 @@ TEMPLATES = [
 
 VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
     'gallery': [
-        ('gallery_400', 'crop__400x400'),
-        ('album_336_224', 'crop__336x224'),
+        ('gallery_253', 'crop__253x253'),
         ('image_400', 'thumbnail__400x400'),
         ('image_720', 'thumbnail__720x720'),
         ('image_940', 'thumbnail__940x940'),
