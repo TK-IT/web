@@ -37,10 +37,6 @@
   <div permlink="{{ image.slug }}" {% ifequal image start_image %}class="current"{% endifequal %}>
     <img class="img-responsive"
          alt="{{ album.slug }}/{{ image.slug }}"
-         sizes="(max-width: 768px) calc(100vw - 15px),
-                (max-width: 992px) 720px,
-                (max-width: 1200px) 940px,
-                100vw"
          srcset="{{ image.image.thumbnail.400x400.url }} 400w,
                  {{ image.image.thumbnail.720x720.url }} 720w,
                  {{ image.image.thumbnail.940x940.url }} 940w,
