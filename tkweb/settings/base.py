@@ -130,6 +130,7 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
         ('image_720', 'thumbnail__720x720'),
         ('image_940', 'thumbnail__940x940'),
         ('image_1140', 'thumbnail__1140x1140'),
+        ('image_2280', 'thumbnail__2280x2280'),
     ],
 }
 
