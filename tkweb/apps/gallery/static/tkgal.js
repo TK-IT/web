@@ -1,29 +1,39 @@
 $(document).ready(function() {
+    // Get array of all slugs
     var slugs = $("#tkgal-container > *").map(function() {
         return $(this).attr("permlink");
     }).get();
 
+    // Call changeCurrent on click on the controls
     $(".tkgal-control").click(function(e) {
         e.preventDefault();
-        changeCurrent( $(this).attr("href"));
+        changeCurrent($(this).attr("href"));
     });
 
-    function changeCurrent(permlink) {
-        $("#tkgal-container > div").removeClass("current");
-        $("[permlink='"+permlink+"']").addClass("current");
-        window.history.replaceState(null, null, permlink);
-
+    function changeCurrent(newimage) {
+        // Calculate prev and next images
         var l = slugs.length;
-        var i = slugs.indexOf(permlink);
+        var i = slugs.indexOf(newimage);
+        var prev = slugs[(((i-1)%l)+l)%l]; // mod is broken for negative numbers
+        var next = slugs[(i+1)%l];
 
+        // Update visibility of current picture
+        $("#tkgal-container > div").removeClass("current");
+        $("[permlink='"+newimage+"']").addClass("current");
+
+        // Update 'i of l images' index
         $("#tkgal-index").html(i+1);
 
-        var pi = (((i-1)%l)+l)%l; // js modulo is broken for negative numbers.
-        var ni = (i+1)%l;
-        $("#tkgal-prev").attr("href", slugs[pi]);
-        $("#tkgal-next").attr("href", slugs[ni]);
+        // Update prev/next links
+        $("#tkgal-prev").attr("href", prev);
+        $("#tkgal-next").attr("href", next);
+
+        // Rewrite history
+        window.history.replaceState(null, null, newimage);
     }
 
+    // Call swipehandler on swipe
+    // This requires jquery touchswipe
     $(".tkgal-container > *").swipe( {
         swipeLeft:swipehandler,
         swipeRight:swipehandler,
