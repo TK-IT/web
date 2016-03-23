@@ -21,6 +21,15 @@ $(document).ready(function() {
         $("#tkgal-container > div").removeClass("current");
         $("[permlink='"+newimage+"']").addClass("current");
 
+        // Rename the prev and next img's data-srcset to srcset
+        function changeSrcset(image) {
+            var i = $("[permlink='"+image+"'] > img");
+            i.attr('srcset', i.attr('data-srcset'));
+            i.removeAttr('data-srcset');
+        }
+        changeSrcset(prev);
+        changeSrcset(next);
+
         // Update 'i of l images' index
         $("#tkgal-index").html(i+1);
 

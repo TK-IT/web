@@ -34,10 +34,10 @@
 <div class="row">
 <div id="tkgal-container" class="col-xs-12">
     {% for image in album.images.all %}
-  <div permlink="{{ image.slug }}" {% ifequal image start_image %}class="current"{% endifequal %}>
+  <div permlink="{{ image.slug }}" {% if image == start_image %}class="current"{% endif %}>
     <img class="img-responsive"
          alt="{{ album.slug }}/{{ image.slug }}"
-         srcset="{{ image.image.thumbnail.400x400.url }} 400w,
+         {% if image != start_image and image != next_image and image != prev_image %}data-{% endif %}srcset="{{ image.image.thumbnail.400x400.url }} 400w,
                  {{ image.image.thumbnail.720x720.url }} 720w,
                  {{ image.image.thumbnail.940x940.url }} 940w,
                  {{ image.image.thumbnail.1140x1140.url }} 1140w,
