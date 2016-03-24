@@ -2,7 +2,8 @@
 from __future__ import absolute_import, unicode_literals, division
 
 from PIL.ExifTags import TAGS
-from datetime import datetime
+from constance import config
+from datetime import date, datetime
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -86,9 +87,9 @@ class Album(models.Model):
         unique_together = (('gfyear', 'slug'),)
 
     title = models.CharField(max_length=200)
-    publish_date = models.DateField(blank=True, null=True)
-    eventalbum = models.BooleanField()
-    gfyear = models.PositiveSmallIntegerField()
+    publish_date = models.DateField(blank=True, null=True, default=date.today())
+    eventalbum = models.BooleanField(default=True)
+    gfyear = models.PositiveSmallIntegerField(default=config.GFYEAR)
     slug = models.SlugField()
     description = models.TextField(blank=True)
 
