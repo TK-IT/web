@@ -31,12 +31,12 @@ h3 > .breadcrumb {
     position:relative;
 }
 
-#tkgal-container > *{
+#tkgal-container > * {
     display:none;
     position:relative;
 }
 
-#tkgal-container > img {
+#tkgal-container > div > img {
     margin: 0 auto;
 }
 
