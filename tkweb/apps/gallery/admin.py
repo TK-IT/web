@@ -3,17 +3,14 @@ from django.contrib import admin
 from django.contrib.admin import TabularInline
 from django.core.exceptions import ValidationError
 from django.db import models
-from sorl.thumbnail.admin import AdminImageMixin
 from tkweb.apps.gallery.models import Album, Image
 
 
-class InlineImageAdmin(AdminImageMixin, TabularInline):
+class InlineImageAdmin(TabularInline):
     model = Image
     extra = 0
-    formfield_overrides = { models.SlugField:
-                            { 'widget':
-                              forms.TextInput(attrs = { 'readOnly': 'True' })}}
-
+    fields = ( 'admin_thumbnail', 'date', 'caption', 'slug', )
+    readonly_fields = ( 'admin_thumbnail', 'slug', )
 
     def has_add_permission(self, request):
         return False

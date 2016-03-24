@@ -26,6 +26,7 @@ THIRD_PARTY_APPS = [
     'constance',
     'constance.backends.database',
     'jfu',
+    'sorl.thumbnail',
     'versatileimagefield',
     'django_cleanup',
 ]

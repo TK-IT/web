@@ -11,6 +11,7 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils.http import int_to_base36
 from django.utils.timezone import get_current_timezone
+from sorl.thumbnail import get_thumbnail
 from versatileimagefield.fields import VersatileImageField
 from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 from PIL import Image as PilImage
@@ -110,6 +111,11 @@ class Image(models.Model):
     caption = models.CharField(max_length=200, blank=True)
 
     slug = models.SlugField(blank=True)
+
+    def admin_thumbnail(self):
+        return u'<img src="%s" />' % (get_thumbnail(self.image, '150x150').url)
+    admin_thumbnail.short_description = 'Thumbnail'
+    admin_thumbnail.allow_tags = True
 
     def clean(self):
         self.date = get_exif_date(self.image)
