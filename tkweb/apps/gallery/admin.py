@@ -9,7 +9,7 @@ from tkweb.apps.gallery.models import Album, Image
 class InlineImageAdmin(TabularInline):
     model = Image
     extra = 0
-    fields = ( 'admin_thumbnail', 'date', 'caption', 'slug', )
+    fields = ( 'admin_thumbnail', 'date', 'caption', 'notPublic', 'slug', )
     readonly_fields = ( 'admin_thumbnail', 'slug', )
 
     def has_add_permission(self, request):

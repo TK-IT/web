@@ -111,6 +111,7 @@ class Image(models.Model):
 
     image = VersatileImageField(upload_to=file_name)
     date = models.DateTimeField(null=True, blank=True)
+    notPublic = models.BooleanField(default=False)
     caption = models.CharField(max_length=200, blank=True)
 
     slug = models.SlugField(blank=True)
