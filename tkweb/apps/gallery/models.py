@@ -82,15 +82,18 @@ def get_exif_date(filename):
     logger.info('get_exif_date: could not get exif date. Returning None')
     return None
 
+def get_gfyear():
+    return config.GFYEAR
+
 class Album(models.Model):
     class Meta:
         ordering = ['gfyear', '-eventalbum', 'oldFolder', 'publish_date']
         unique_together = (('gfyear', 'slug'),)
 
     title = models.CharField(max_length=200)
-    publish_date = models.DateField(blank=True, null=True, default=date.today())
+    publish_date = models.DateField(blank=True, null=True, default=date.today)
     eventalbum = models.BooleanField(default=True)
-    gfyear = models.PositiveSmallIntegerField(default=config.GFYEAR)
+    gfyear = models.PositiveSmallIntegerField(default=get_gfyear)
     slug = models.SlugField()
     description = models.TextField(blank=True)
 
