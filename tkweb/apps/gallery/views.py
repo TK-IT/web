@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Max
+from django.http import Http404
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
@@ -17,29 +18,37 @@ import os
 def gallery(request, **kwargs):
     albums = Album.objects.exclude(images__isnull=True)
     gfyears = sorted(set([a.gfyear for a in albums]), reverse=True)
-    group_by_year = [[y, [a for a in albums if a.gfyear == y]] for y
-                     in gfyears]
-    context = {'group_by_year': group_by_year}
+    group_by_year = [[y, [[a, a.images.exclude(notPublic=True).first(),
+                           len(a.images.exclude(notPublic=True))] for a in
+                          albums if a.gfyear == y]] for y in gfyears]
+
     qs = Album.objects.all().aggregate(Max('gfyear'))
     latest_gfyear = qs['gfyear__max']
-    gfyear = kwargs.get('gfyear', latest_gfyear)
-    context['show_year'] = None if gfyear is None else int(gfyear)
-    get_list_or_404(Album, gfyear=context['show_year'])
+    gfyear = int(kwargs.get('gfyear', latest_gfyear))
+
+    context = {'group_by_year': group_by_year,
+               'show_year': gfyear}
+
     return render(request, 'gallery.html', context)
 
 
 def album(request, gfyear, album_slug):
     album = get_object_or_404(Album, gfyear=gfyear, slug=album_slug)
-    context = {'album': album}
+    images = album.images.exclude(notPublic=True)
+    context = {'album': album,
+               'images': images}
     return render(request, 'album.html', context)
 
 
 def image(request, gfyear, album_slug, image_slug, **kwargs):
     album = get_object_or_404(Album, gfyear=gfyear, slug=album_slug)
-    images = list(album.images.all()) # list() will force evaluation of the
-                                      # QuerySet. We can now use .index()
+
+    # list() will force evaluation of the QuerySet. We can now use .index()
+    images = list(album.images.exclude(notPublic=True))
     paginator = Paginator(images, 1)
     start_image = get_object_or_404(Image, slug=image_slug)
+    if start_image.notPublic:
+        raise Http404("Billedet kan ikke findes")
 
     try:
         prev_image = paginator.page((images.index(start_image))+1-1)[0]
@@ -58,6 +67,7 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
 
     context = {
         'album': album,
+        'images': images,
         'start_image': start_image,
         'prev_image': prev_image,
         'next_image': next_image,

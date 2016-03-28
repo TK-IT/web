@@ -16,18 +16,18 @@
   <div class="hidden-xs hidden-sm col-md-5 text-right">
     <h2>
       <small>
-        {{ album.images.all|length }} billede{{ album.images.all|length|pluralize:"r" }}{% if album.publish_date %} fra {{ album.publish_date }}{% endif %}
+        {{ images|length }} billede{{ images|length|pluralize:"r" }}{% if album.publish_date %} fra {{ album.publish_date }}{% endif %}
       </small>
     </h2>
   </div>
   <div class="col-xs-12 hidden-md hidden-lg">
     <p class="lead">
-      {{ album.images.all|length }} billede{{ album.images.all|length|pluralize:"r" }}{% if album.publish_date %} fra {{ album.publish_date }}{% endif %}
+      {{ images|length }} billede{{ images|length|pluralize:"r" }}{% if album.publish_date %} fra {{ album.publish_date }}{% endif %}
     </p>
   </div>
 </div>
 <div class="row">
-  {% for image in album.images.all %}
+  {% for image in images %}
   <div class="col-xs-6 col-sm-4 col-md-3">
     <a class="thumbnail" href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=image.slug %}" alt="Se billede">
       {% if image  %}
