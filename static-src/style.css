@@ -2,17 +2,38 @@ body > .container {
     padding: 60px 15px 0;
 }
 
+@media (max-width: 420px) {
+    .footer {
+        font-size: 60%
+    }
+}
+
 /* Til tk-brand appen */
 .tk-brand {
     font-family: monospace;
 }
 
 /* Til gallery appen */
-h2 > .breadcrumb,
-h3 > .breadcrumb {
+.imagetitle {
     padding: 0;
     margin-bottom: 10px;
     background: none;
+}
+
+@media (min-width: 768px) { /* @screen-sm-min */
+    .imagetitle {
+        font-size: 18px; /* @font-size-h4 */
+        margin-top: 10px; /* (@line-height-computed / 2) */
+        margin-bottom: 10px; /* (@line-height-computed / 2) */
+    }
+}
+
+@media (min-width: 992px) { /* @screen-md-min */
+    .imagetitle {
+        font-size: 24px; /* @font-size-h3 */
+        margin-top: 20px; /* @line-height-computed */
+        margin-bottom: 10px; /* (@line-height-computed / 2) */
+    }
 }
 
 .thumbcap .caption{
@@ -36,17 +57,13 @@ h3 > .breadcrumb {
     position:relative;
 }
 
-#tkgal-container > div > img {
-    margin: 0 auto;
-}
-
 #tkgal-container > .current {
     display:block;
 }
 
-@media (min-width: 768px) { /* Erstat 768px med @screen-sm-min når denne bliver til en .less-fil */
-    .tkgal-controls {
-        margin-top: 26px;
-        margin-bottom: 10px;
-    }
+#tkgal-container > div > img {
+    margin: 0 auto;
+    max-height: calc(100vh - 168px); /* Kan muligvis erstattes af flexbox, eller variabler i en .less-fil */
 }
+
+

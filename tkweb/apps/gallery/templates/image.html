@@ -13,16 +13,15 @@
 {% block content %}
 <div class="row">
   <div class="col-xs-12 col-sm-9">
-    <h3>
-      <ol class="breadcrumb">
+      <ol class="breadcrumb imagetitle">
         <li><a href="{% url 'gfyear' gfyear=album.gfyear  %}">{{ album.gfyear|gfyearPPslash }}</a></li>
         <li><a href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">{{ album.title }}</a></li>
-        <li class="active"><span id="tkgal-index">{% for image in images %}{% ifequal image start_image %}{{ forloop.counter }}{% endifequal %}{% endfor %}</span> af {{ images|length }} billede{{ images|length|pluralize:"r" }}</li>
+        <li class="active"><span id="tkgal-index">{% for image in images %}{% ifequal image start_image %}{{ forloop.counter }}{% endifequal %}{% endfor %}</span> af {{ images|length }} <span class="hidden-xs">billede{{ images|length|pluralize:"r" }}</span></li>
       </ol>
-    </h3>
+
   </div>
   <div class="col-xs-12 col-sm-3 text-right">
-      <p class="tkgal-controls">
+      <p class="imagetitle">
           <a id="tkgal-prev"
              class="tkgal-control"
              href="{{ prev_image.slug }}">Forrige</a> |
