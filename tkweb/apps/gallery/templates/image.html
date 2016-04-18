@@ -10,6 +10,10 @@
   <script src="{% static "gallery/tkgal.js" %}"></script>
 {% endblock js %}
 
+{% block extra_head %}
+  <link rel="canonical" href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">
+{% endblock extra_head %}
+
 {% block content %}
 <div class="row">
   <div class="col-xs-12 col-sm-9">
@@ -24,9 +28,11 @@
       <p class="imagetitle">
           <a id="tkgal-prev"
              class="tkgal-control"
+             rel="prev"
              href="{{ prev_image.slug }}">Forrige</a> |
           <a id="tkgal-next"
              class="tkgal-control"
+             rel="next"
              href="{{ next_image.slug }}">Næste</a>
   </div>
 </div>

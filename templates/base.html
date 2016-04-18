@@ -9,6 +9,7 @@
     {% bootstrap_css %}
     <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}style.css" />
     {% include 'favicon.html' %}
+    {% block extra_head %}{% endblock extra_head %}
   </head>
   <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
