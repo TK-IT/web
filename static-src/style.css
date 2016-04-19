@@ -67,3 +67,21 @@ body > .container {
 }
 
 
+#lg-file-download {
+    padding: 30px 0 60px 0;
+}
+
+.placeholder253x253 {
+    height: 0;
+    max-width: 253px;
+    padding-bottom: 100%;
+}
+
+.placeholder253x253 > p {
+    font-size: 50px;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) }
+}
