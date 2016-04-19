@@ -141,7 +141,7 @@ class Image(BaseMedia):
     def clean(self):
         self.date = get_exif_date(self.file)
         if self.date == None:
-            self.slug = os.path.basename(self.file.name)
+            self.slug = slugify(os.path.splitext(self.file.name)[0])
         else:
             self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
 
@@ -150,7 +150,8 @@ class File(BaseMedia):
 
     def clean(self):
         if self.date == None:
-            self.slug = os.path.basename(self.file.name)
+            sep = os.path.splitext(self.file.name)
+            self.slug = slugify(sep[0]) + sep[1]
             self.forcedOrder = FORCEDORDERMAX
         else:
             self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
