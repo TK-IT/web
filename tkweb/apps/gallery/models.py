@@ -6,6 +6,7 @@ from constance import config
 from datetime import date, datetime
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.dispatch import receiver
 from django.utils.text import slugify
@@ -19,6 +20,8 @@ from PIL import Image as PilImage
 import hashlib
 import os
 import logging
+
+FORCEDORDERMAX = 10000
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +108,7 @@ class Album(models.Model):
 
 class BaseMedia(models.Model):
     class Meta:
-        ordering = ['date', 'slug']
+        ordering = ['forcedOrder', 'date', 'slug']
         unique_together = (('album', 'slug'),)
 
     objects = InheritanceManager()
@@ -116,6 +119,10 @@ class BaseMedia(models.Model):
     caption = models.CharField(max_length=200, blank=True)
 
     slug = models.SlugField(blank=True)
+
+    forcedOrder = models.SmallIntegerField(default=0,
+                                           validators=[MinValueValidator(-FORCEDORDERMAX),
+                                                       MaxValueValidator(FORCEDORDERMAX)])
 
     def admin_thumbnail(self):
         return None
@@ -142,7 +149,11 @@ class File(BaseMedia):
     file = models.FileField(upload_to=file_name)
 
     def clean(self):
-        self.slug = os.path.basename(self.file.name)
+        if self.date == None:
+            self.slug = os.path.basename(self.file.name)
+            self.forcedOrder = FORCEDORDERMAX
+        else:
+            self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
 
 @receiver(models.signals.post_save, sender=Image)
 def generateImageThumbnails(sender, instance, **kwargs):
