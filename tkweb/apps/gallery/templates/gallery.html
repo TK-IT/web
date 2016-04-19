@@ -32,7 +32,7 @@
                 <a class="thumbnail" href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}" id="{{ album.slug }}">
                   <div class="thumbcap">
                     {% if firstImage %}
-                      <img class="img-responsive" src="{{ firstImage.image.crop.253x253.url }}" alt="{{ album.title }}" />
+                      <img class="img-responsive" src="{{ firstImage.file.crop.253x253.url }}" alt="{{ album.title }}" />
                     {% else %}
                     <p>{{ album.title }} (Tomt album)</p>
                     {% endif %}

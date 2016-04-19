@@ -78,13 +78,10 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
 @require_POST
 @permission_required('gallery.add_image', raise_exception=True)
 def upload(request):
-    # The assumption here is that jQuery File Upload
-    # has been configured to send files one at a time.
-    # If multiple files can be uploaded simulatenously,
-    # 'file' may be a list of files.
-    image = upload_receive(request)
+    file = upload_receive(request)
     album = Album.objects.get(id=int(request.POST['object_id']))
-    instance = Image(image=image, album=album)
+    instance = Image(file=file, album=album)
+
     try:
         instance.full_clean()
     except ValidationError as exn:

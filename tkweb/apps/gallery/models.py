@@ -124,27 +124,26 @@ class BaseMedia(models.Model):
         return '%s' % (self.slug)
 
 class Image(BaseMedia):
-    image = VersatileImageField(upload_to=file_name)
+    file = VersatileImageField(upload_to=file_name)
 
     def admin_thumbnail(self):
-        return u'<img src="%s" />' % (get_thumbnail(self.image, '150x150').url)
+        return u'<img src="%s" />' % (get_thumbnail(self.file, '150x150').url)
     admin_thumbnail.short_description = 'Thumbnail'
     admin_thumbnail.allow_tags = True
 
     def clean(self):
-        self.date = get_exif_date(self.image)
+        self.date = get_exif_date(self.file)
         if self.date == None:
-            self.slug = os.path.basename(self.image.name)
+            self.slug = os.path.basename(self.file.name)
         else:
             self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
-
 
 @receiver(models.signals.post_save, sender=Image)
 def generateImageThumbnails(sender, instance, **kwargs):
     image_warmer = VersatileImageFieldWarmer(
         instance_or_queryset=instance,
         rendition_key_set='gallery',
-        image_attr='image',
+        image_attr='file',
     )
 
     num_created, failed_to_create = image_warmer.warm()

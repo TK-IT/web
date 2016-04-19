@@ -42,17 +42,17 @@
   <div permlink="{{ image.slug }}" {% if image == start_image %}class="current"{% endif %}>
     <img class="img-responsive"
          alt="{{ album.slug }}/{{ image.slug }}"
-         {% if image != start_image and image != next_image and image != prev_image %}data-{% endif %}srcset="{{ image.image.thumbnail.400x400.url }} 400w,
-                 {{ image.image.thumbnail.720x720.url }} 720w,
-                 {{ image.image.thumbnail.940x940.url }} 940w,
-                 {{ image.image.thumbnail.1140x1140.url }} 1140w,
-                 {{ image.image.thumbnail.2280x2280.url }} 2280w"
-         src="{{ image.image.thumbnail.720x720.url }}">
+         {% if image != start_image and image != next_image and image != prev_image %}data-{% endif %}srcset="{{ image.file.thumbnail.400x400.url }} 400w,
+                 {{ image.file.thumbnail.720x720.url }} 720w,
+                 {{ image.file.thumbnail.940x940.url }} 940w,
+                 {{ image.file.thumbnail.1140x1140.url }} 1140w,
+                 {{ image.file.thumbnail.2280x2280.url }} 2280w"
+         src="{{ image.file.thumbnail.720x720.url }}">
     {{ image.date|default_if_none:"" }}
     <div class="pull-right">
-        <a href="{{ image.image.url }}">
+        <a href="{{ image.file.url }}">
             {% bootstrap_icon "download-alt" %}
-            ({{ image.image.size|filesizeformat }})</a>
+            ({{ image.file.size|filesizeformat }})</a>
     </div>
   </div> <!-- permlink, current? -->
   {% endfor %}
