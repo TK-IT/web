@@ -104,24 +104,21 @@ def upload(request):
                 for v in vs)
         except AttributeError:
             error = ' '.join(exn.messages)
-        file_dict = {
-            'name': image.name,
-            'size': image.size,
+
+        jfu_msg = {
+            'name': file.name,
+            'size': file.size,
             'error': error,
         }
-        return UploadResponse(request, file_dict)
+        return UploadResponse(request, jfu_msg)
+
     instance.save()
-
-    basename = os.path.basename(instance.image.path)
-
-    file_dict = {
-        'name': basename,
-        'size': image.size,
-
-        'url': instance.image.url,
+    jfu_msg = {
+        'name': os.path.basename(instance.file.path),
+        'size': file.size,
+        'url': instance.file.url,
     }
-
-    return UploadResponse(request, file_dict)
+    return UploadResponse(request, jfu_msg)
 
 
 @require_POST
