@@ -2,7 +2,8 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import sorl.thumbnail.fields
+import datetime
+import versatileimagefield.fields
 import tkweb.apps.gallery.models
 
 
@@ -15,34 +16,51 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Album',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', auto_created=True, primary_key=True, serialize=False)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=200)),
-                ('publish_date', models.DateField()),
-                ('eventalbum', models.BooleanField()),
-                ('gfyear', models.PositiveSmallIntegerField()),
+                ('publish_date', models.DateField(default=datetime.date.today, blank=True, null=True)),
+                ('eventalbum', models.BooleanField(default=True)),
+                ('gfyear', models.PositiveSmallIntegerField(default=tkweb.apps.gallery.models.get_gfyear)),
                 ('slug', models.SlugField()),
                 ('description', models.TextField(blank=True)),
+                ('oldFolder', models.CharField(blank=True, max_length=200)),
             ],
             options={
-                'ordering': ['gfyear', '-eventalbum', 'publish_date'],
+                'ordering': ['gfyear', '-eventalbum', 'oldFolder', 'publish_date'],
+            },
+        ),
+        migrations.CreateModel(
+            name='BaseMedia',
+            fields=[
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('date', models.DateTimeField(blank=True, null=True)),
+                ('notPublic', models.BooleanField(default=False)),
+                ('caption', models.CharField(blank=True, max_length=200)),
+                ('slug', models.SlugField(blank=True)),
+            ],
+            options={
+                'ordering': ['date', 'slug'],
             },
         ),
         migrations.CreateModel(
             name='Image',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', auto_created=True, primary_key=True, serialize=False)),
-                ('image', sorl.thumbnail.fields.ImageField(upload_to=tkweb.apps.gallery.models.file_name)),
-                ('date', models.DateTimeField(blank=True, null=True)),
-                ('caption', models.CharField(max_length=200, blank=True)),
-                ('slug', models.SlugField(unique=True)),
-                ('album', models.ForeignKey(related_name='images', to='gallery.Album')),
+                ('basemedia_ptr', models.OneToOneField(auto_created=True, to='gallery.BaseMedia', primary_key=True, serialize=False, parent_link=True)),
+                ('image', versatileimagefield.fields.VersatileImageField(upload_to=tkweb.apps.gallery.models.file_name)),
             ],
-            options={
-                'ordering': ['date'],
-            },
+            bases=('gallery.basemedia',),
+        ),
+        migrations.AddField(
+            model_name='basemedia',
+            name='album',
+            field=models.ForeignKey(to='gallery.Album', related_name='basemedia'),
         ),
         migrations.AlterUniqueTogether(
             name='album',
             unique_together=set([('gfyear', 'slug')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='basemedia',
+            unique_together=set([('album', 'slug')]),
         ),
     ]

@@ -11,15 +11,15 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 from jfu.http import upload_receive, UploadResponse, JFUResponse
-from tkweb.apps.gallery.models import Album, Image
+from tkweb.apps.gallery.models import Album, Image, BaseMedia
 import os
 
 
 def gallery(request, **kwargs):
-    albums = Album.objects.exclude(images__isnull=True)
+    albums = Album.objects.exclude(basemedia__isnull=True)
     gfyears = sorted(set([a.gfyear for a in albums]), reverse=True)
-    group_by_year = [[y, [[a, a.images.exclude(notPublic=True).first(),
-                           len(a.images.exclude(notPublic=True))] for a in
+    group_by_year = [[y, [[a, a.basemedia.exclude(notPublic=True).select_subclasses().first(),
+                           len(a.basemedia.exclude(notPublic=True).select_subclasses())] for a in
                           albums if a.gfyear == y]] for y in gfyears]
 
     qs = Album.objects.all().aggregate(Max('gfyear'))
@@ -34,7 +34,7 @@ def gallery(request, **kwargs):
 
 def album(request, gfyear, album_slug):
     album = get_object_or_404(Album, gfyear=gfyear, slug=album_slug)
-    images = album.images.exclude(notPublic=True)
+    images = album.basemedia.exclude(notPublic=True).select_subclasses()
     context = {'album': album,
                'images': images}
     return render(request, 'album.html', context)
@@ -44,7 +44,7 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
     album = get_object_or_404(Album, gfyear=gfyear, slug=album_slug)
 
     # list() will force evaluation of the QuerySet. We can now use .index()
-    images = list(album.images.exclude(notPublic=True))
+    images = list(album.basemedia.exclude(notPublic=True).select_subclasses())
     paginator = Paginator(images, 1)
     start_image = get_object_or_404(Image, slug=image_slug)
     if start_image.notPublic:

@@ -11,6 +11,7 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils.http import int_to_base36
 from django.utils.timezone import get_current_timezone
+from model_utils.managers import InheritanceManager
 from sorl.thumbnail import get_thumbnail
 from versatileimagefield.fields import VersatileImageField
 from versatileimagefield.image_warmer import VersatileImageFieldWarmer
@@ -102,19 +103,28 @@ class Album(models.Model):
     def __str__(self):
         return '%s: %s' % (self.gfyear, self.title)
 
-class Image(models.Model):
+class BaseMedia(models.Model):
     class Meta:
         ordering = ['date', 'slug']
         unique_together = (('album', 'slug'),)
 
-    album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name="images")
+    objects = InheritanceManager()
+    album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name='basemedia')
 
-    image = VersatileImageField(upload_to=file_name)
     date = models.DateTimeField(null=True, blank=True)
     notPublic = models.BooleanField(default=False)
     caption = models.CharField(max_length=200, blank=True)
 
     slug = models.SlugField(blank=True)
+
+    def admin_thumbnail(self):
+        return None
+
+    def __str__(self):
+        return '%s' % (self.slug)
+
+class Image(BaseMedia):
+    image = VersatileImageField(upload_to=file_name)
 
     def admin_thumbnail(self):
         return u'<img src="%s" />' % (get_thumbnail(self.image, '150x150').url)
@@ -128,8 +138,6 @@ class Image(models.Model):
         else:
             self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
 
-    def __str__(self):
-        return '%s' % (self.slug)
 
 @receiver(models.signals.post_save, sender=Image)
 def generateImageThumbnails(sender, instance, **kwargs):
