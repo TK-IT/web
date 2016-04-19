@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 from jfu.http import upload_receive, UploadResponse, JFUResponse
-from tkweb.apps.gallery.models import Album, Image, File
+from tkweb.apps.gallery.models import Album, BaseMedia, Image, File
 import os
 
 
@@ -44,33 +44,35 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
     album = get_object_or_404(Album, gfyear=gfyear, slug=album_slug)
 
     # list() will force evaluation of the QuerySet. We can now use .index()
-    images = list(album.basemedia.exclude(notPublic=True).select_subclasses())
-    paginator = Paginator(images, 1)
-    start_image = get_object_or_404(Image, album=album, slug=image_slug)
-    if start_image.notPublic:
+    files = list(album.basemedia.exclude(notPublic=True).select_subclasses())
+    paginator = Paginator(files, 1)
+    start_file = album.basemedia.filter(album=album, slug=image_slug).select_subclasses().first()
+    if not start_file:
         raise Http404("Billedet kan ikke findes")
 
+    if start_file.notPublic:
+        raise Http404("Billedet kan ikke findes")
     try:
-        prev_image = paginator.page((images.index(start_image))+1-1)[0]
+        prev_file = paginator.page((files.index(start_file))+1-1)[0]
         # +1 because paginator is 1-indexed, -1 to get the previous image
     except EmptyPage:
         # We are at the first image
-        prev_image = paginator.page(paginator.num_pages)[0]
+        prev_file = paginator.page(paginator.num_pages)[0]
 
     try:
-        next_image = paginator.page((images.index(start_image))+1+1)[0]
+        next_file = paginator.page((files.index(start_file))+1+1)[0]
         # +1 because paginator is 1-indexed, +1 to get the next image
     except EmptyPage:
         # We are at the last image
-        next_image = paginator.page(1)[0]
+        next_file = paginator.page(1)[0]
 
 
     context = {
         'album': album,
-        'images': images,
-        'start_image': start_image,
-        'prev_image': prev_image,
-        'next_image': next_image,
+        'files': files,
+        'start_file': start_file,
+        'prev_file': prev_file,
+        'next_file': next_file,
     }
     return render(request, 'image.html', context)
 

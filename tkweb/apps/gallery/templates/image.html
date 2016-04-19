@@ -20,7 +20,7 @@
       <ol class="breadcrumb imagetitle">
         <li><a href="{% url 'gfyear' gfyear=album.gfyear  %}">{{ album.gfyear|gfyearPPslash }}</a></li>
         <li><a href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">{{ album.title }}</a></li>
-        <li class="active"><span id="tkgal-index">{% for image in images %}{% ifequal image start_image %}{{ forloop.counter }}{% endifequal %}{% endfor %}</span> af {{ images|length }} <span class="hidden-xs">billede{{ images|length|pluralize:"r" }}</span></li>
+        <li class="active"><span id="tkgal-index">{% for file in files %}{% ifequal file start_file %}{{ forloop.counter }}{% endifequal %}{% endfor %}</span> af {{ files|length }} <span class="hidden-xs">billede{{ files|length|pluralize:"r" }}</span></li>
       </ol>
 
   </div>
@@ -29,30 +29,30 @@
           <a id="tkgal-prev"
              class="tkgal-control"
              rel="prev"
-             href="{{ prev_image.slug }}">Forrige</a> |
+             href="{{ prev_file.slug }}">Forrige</a> |
           <a id="tkgal-next"
              class="tkgal-control"
              rel="next"
-             href="{{ next_image.slug }}">Næste</a>
+             href="{{ next_file.slug }}">Næste</a>
   </div>
 </div>
 <div class="row">
 <div id="tkgal-container" class="col-xs-12">
-    {% for image in images %}
-  <div permlink="{{ image.slug }}" {% if image == start_image %}class="current"{% endif %}>
+    {% for file in files %}
+    <div permlink="{{ file.slug }}" {% if file == start_file %}class="current"{% endif %}>
     <img class="img-responsive"
-         alt="{{ album.slug }}/{{ image.slug }}"
-         {% if image != start_image and image != next_image and image != prev_image %}data-{% endif %}srcset="{{ image.file.thumbnail.400x400.url }} 400w,
-                 {{ image.file.thumbnail.720x720.url }} 720w,
-                 {{ image.file.thumbnail.940x940.url }} 940w,
-                 {{ image.file.thumbnail.1140x1140.url }} 1140w,
-                 {{ image.file.thumbnail.2280x2280.url }} 2280w"
-         src="{{ image.file.thumbnail.720x720.url }}">
-    {{ image.date|default_if_none:"" }}
+         alt="{{ album.slug }}/{{ file.slug }}"
+         {% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}srcset="{{ file.file.thumbnail.400x400.url }} 400w,
+                 {{ file.file.thumbnail.720x720.url }} 720w,
+                 {{ file.file.thumbnail.940x940.url }} 940w,
+                 {{ file.file.thumbnail.1140x1140.url }} 1140w,
+                 {{ file.file.thumbnail.2280x2280.url }} 2280w"
+         src="{{ file.file.thumbnail.720x720.url }}">
+    {{ file.date|default_if_none:"" }}
     <div class="pull-right">
-        <a href="{{ image.file.url }}">
+        <a href="{{ file.file.url }}">
             {% bootstrap_icon "download-alt" %}
-            ({{ image.file.size|filesizeformat }})</a>
+            ({{ file.file.size|filesizeformat }})</a>
     </div>
   </div> <!-- permlink, current? -->
   {% endfor %}
