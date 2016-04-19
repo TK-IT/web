@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 from jfu.http import upload_receive, UploadResponse, JFUResponse
-from tkweb.apps.gallery.models import Album, Image, BaseMedia
+from tkweb.apps.gallery.models import Album, Image, File
 import os
 
 
@@ -80,7 +80,19 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
 def upload(request):
     file = upload_receive(request)
     album = Album.objects.get(id=int(request.POST['object_id']))
-    instance = Image(file=file, album=album)
+    ext = os.path.splitext(file.name)[1].lower()
+
+    if ext in (".png", ".gif", ".jpg", ".jpeg" ):
+        instance = Image(file=file, album=album)
+    elif ext in (".mp3", ".mp4", ".pdf", ".txt"):
+        instance = File(file=file, album=album)
+    else:
+        jfu_msg = {
+            'name': file.name,
+            'size': file.size,
+            'error': "Unsurported file type",
+        }
+        return UploadResponse(request, jfu_msg)
 
     try:
         instance.full_clean()

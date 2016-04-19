@@ -138,6 +138,12 @@ class Image(BaseMedia):
         else:
             self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
 
+class File(BaseMedia):
+    file = models.FileField(upload_to=file_name)
+
+    def clean(self):
+        self.slug = os.path.basename(self.file.name)
+
 @receiver(models.signals.post_save, sender=Image)
 def generateImageThumbnails(sender, instance, **kwargs):
     image_warmer = VersatileImageFieldWarmer(
