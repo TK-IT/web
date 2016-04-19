@@ -8,7 +8,7 @@ from tkweb.apps.gallery.models import Album, BaseMedia
 class InlineBaseMediaAdmin(admin.TabularInline):
     model = BaseMedia
     extra = 0
-    fields = ( 'admin_thumbnail', 'date', 'caption', 'notPublic', 'slug', )
+    fields = ( 'admin_thumbnail', 'date', 'caption', 'notPublic', 'slug', 'forcedOrder', )
     readonly_fields = ( 'admin_thumbnail', 'slug', )
 
     def has_add_permission(self, request):
