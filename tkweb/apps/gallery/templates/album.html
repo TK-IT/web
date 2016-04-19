@@ -17,16 +17,16 @@
   </div>
   <div class="col-xs-12 col-sm-5 text-right">
       <p class="imagetitle">
-          {{ images|length }} billede{{ images|length|pluralize:"r" }}{% if album.publish_date %} fra {{ album.publish_date }}{% endif %}
+          {{ files|length }} billede{{ files|length|pluralize:"r" }}{% if album.publish_date %} fra {{ album.publish_date }}{% endif %}
       </p>
   </div>
 </div>
 <div class="row">
-  {% for image in images %}
+  {% for file in files %}
   <div class="col-xs-6 col-sm-4 col-md-3">
-    <a class="thumbnail" href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=image.slug %}" alt="Se billede">
-      {% if image  %}
-        <img src="{{ image.file.crop.253x253.url }}" alt="{{ album.title }}" />
+    <a class="thumbnail" href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=file.slug %}" alt="Se billede">
+      {% if file %}
+        <img src="{{ file.file.crop.253x253.url }}" alt="{{ album.title }}" />
       {% else %}
         <p>Albummet '{{ album.title }}' har ingen billeder endnu.</p>
       {% endif %}

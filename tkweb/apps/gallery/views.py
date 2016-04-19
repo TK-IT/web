@@ -34,9 +34,9 @@ def gallery(request, **kwargs):
 
 def album(request, gfyear, album_slug):
     album = get_object_or_404(Album, gfyear=gfyear, slug=album_slug)
-    images = album.basemedia.exclude(notPublic=True).select_subclasses()
+    files = album.basemedia.exclude(notPublic=True).select_subclasses()
     context = {'album': album,
-               'images': images}
+               'files': files}
     return render(request, 'album.html', context)
 
 
