@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load tkbrand %}
+{% load bootstrap3 tkbrand %}
 
 {% block title %}{{ album.title }}{% endblock title %}
 
@@ -26,7 +26,13 @@
   <div class="col-xs-6 col-sm-4 col-md-3">
     <a class="thumbnail" href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=file.slug %}" alt="Se billede">
       {% if file %}
-        <img src="{{ file.file.crop.253x253.url }}" alt="{{ album.title }}" />
+        {% if file.file.crop.253x253.url %}
+          <img src="{{ file.file.crop.253x253.url }}" alt="{{ album.title }}" />
+        {% else %}
+          <div class="placeholder253x253">
+            <p>{% bootstrap_icon "file" %}</p>
+          </div>
+        {% endif %}
       {% else %}
         <p>Albummet '{{ album.title }}' har ingen billeder endnu.</p>
       {% endif %}

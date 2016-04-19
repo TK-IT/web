@@ -40,6 +40,7 @@
 <div id="tkgal-container" class="col-xs-12">
     {% for file in files %}
     <div permlink="{{ file.slug }}" {% if file == start_file %}class="current"{% endif %}>
+        {% if file.file.thumbnail.720x720.url %}
     <img class="img-responsive"
          alt="{{ album.slug }}/{{ file.slug }}"
          {% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}srcset="{{ file.file.thumbnail.400x400.url }} 400w,
@@ -54,6 +55,17 @@
             {% bootstrap_icon "download-alt" %}
             ({{ file.file.size|filesizeformat }})</a>
     </div>
+    {% else %}
+    <div id="lg-file-download" class="text-center">
+        <a href="{{ file.file.url }}">
+            <button type="button" class="btn btn-default btn-lg">
+            {% bootstrap_icon "download-alt" %}
+            {{ file.slug }}
+            ({{ file.file.size|filesizeformat }})
+            </button>
+        </a>
+    </div>
+    {% endif %}
   </div> <!-- permlink, current? -->
   {% endfor %}
 </div>
