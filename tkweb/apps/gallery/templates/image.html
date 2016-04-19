@@ -38,23 +38,28 @@
 </div>
 <div class="row">
 <div id="tkgal-container" class="col-xs-12">
-    {% for file in files %}
+  {% for file in files %}
     <div permlink="{{ file.slug }}" {% if file == start_file %}class="current"{% endif %}>
-        {% if file.file.thumbnail.720x720.url %}
-    <img class="img-responsive"
-         alt="{{ album.slug }}/{{ file.slug }}"
-         {% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}srcset="{{ file.file.thumbnail.400x400.url }} 400w,
+      {% if file.file.thumbnail.720x720.url %}
+        <img class="img-responsive"
+             alt="{{ album.slug }}/{{ file.slug }}"
+             {% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}srcset="
+                 {{ file.file.thumbnail.400x400.url }} 400w,
                  {{ file.file.thumbnail.720x720.url }} 720w,
                  {{ file.file.thumbnail.940x940.url }} 940w,
                  {{ file.file.thumbnail.1140x1140.url }} 1140w,
                  {{ file.file.thumbnail.2280x2280.url }} 2280w"
-         src="{{ file.file.thumbnail.720x720.url }}">
-    {{ file.date|default_if_none:"" }}
-    <div class="pull-right">
-        <a href="{{ file.file.url }}">
-            {% bootstrap_icon "download-alt" %}
-            ({{ file.file.size|filesizeformat }})</a>
-    </div>
+             src="{{ file.file.thumbnail.720x720.url }}">
+    {% elif file.type == "A" %}
+    <audio controls>
+        <source src="{{ file.file.url }}" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    {% elif file.type == "V" %}
+    <video controls>
+        <source src="{{ file.file.url }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
     {% else %}
     <div id="lg-file-download" class="text-center">
         <a href="{{ file.file.url }}">
@@ -66,6 +71,12 @@
         </a>
     </div>
     {% endif %}
+    {{ file.date|default_if_none:"" }}
+    <div class="pull-right">
+        <a href="{{ file.file.url }}">
+            {% bootstrap_icon "download-alt" %}
+            ({{ file.file.size|filesizeformat }})</a>
+    </div>
   </div> <!-- permlink, current? -->
   {% endfor %}
 </div>

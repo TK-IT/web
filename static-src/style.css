@@ -61,8 +61,10 @@ body > .container {
     display:block;
 }
 
-#tkgal-container > div > img {
+#tkgal-container > div > * {
+    display:block;
     margin: 0 auto;
+    max-width: 100%;
     max-height: calc(100vh - 168px); /* Kan muligvis erstattes af flexbox, eller variabler i en .less-fil */
 }
 

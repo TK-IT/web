@@ -146,6 +146,17 @@ class Image(BaseMedia):
             self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
 
 class File(BaseMedia):
+    VIDEO = 'V'
+    AUDIO = 'A'
+    OTHER = 'O'
+    TYPE_CHOICES = (
+        (VIDEO, 'Video'),
+        (AUDIO, 'Audio'),
+        (OTHER, 'Other'),
+    )
+    type = models.CharField(max_length=1,
+                                      choices=TYPE_CHOICES,
+                                      default=OTHER)
     file = models.FileField(upload_to=file_name)
 
     def clean(self):

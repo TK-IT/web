@@ -86,8 +86,15 @@ def upload(request):
 
     if ext in (".png", ".gif", ".jpg", ".jpeg" ):
         instance = Image(file=file, album=album)
-    elif ext in (".mp3", ".mp4", ".pdf", ".txt"):
+    elif ext in (".mp3"):
         instance = File(file=file, album=album)
+        instance.type = File.AUDIO
+    elif ext in (".mp4"):
+        instance = File(file=file, album=album)
+        instance.type = File.VIDEO
+    elif ext in (".pdf", ".txt"):
+        instance = File(file=file, album=album)
+        instance.type = File.OTHER
     else:
         jfu_msg = {
             'name': file.name,
