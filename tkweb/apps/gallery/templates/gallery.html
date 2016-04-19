@@ -19,7 +19,7 @@
         <div class="panel-body">
           <div class="row">
             <div id="eventalbums">
-            {% for album, firstImage, count in albumSets %}
+            {% for album, firstFile, count in albumSets %}
               {% ifchanged album.eventalbum %}{% if not album.eventalbum %}
             </div>
             <div class="col-xs-12">
@@ -31,8 +31,8 @@
               <div class="col-xs-6 col-sm-4 col-md-3">
                 <a class="thumbnail" href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}" id="{{ album.slug }}">
                   <div class="thumbcap">
-                    {% if firstImage %}
-                      <img class="img-responsive" src="{{ firstImage.file.crop.253x253.url }}" alt="{{ album.title }}" />
+                    {% if firstFile %}
+                      <img class="img-responsive" src="{{ firstFile.file.crop.253x253.url }}" alt="{{ album.title }}" />
                     {% else %}
                     <p>{{ album.title }} (Tomt album)</p>
                     {% endif %}
