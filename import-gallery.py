@@ -149,16 +149,26 @@ for yearFolder in os.listdir(rootdir):
 
         if not missingFromOriginale:
             # There is nothing missing from orginale
-            filelist = [os.path.join(rootdir, yearFolder, eventFolder,
-                                     f) for f in orgiFilelist]
+            for f in orgiFilelist:
+                fullpath = os.path.join(rootdir, yearFolder, eventFolder, f)
+                if os.path.isfile(fullpath):
+                    filelist.append(fullpath)
+                else:
+                    skipped.append(fullpath)
+
             if missingFromResized:
                 missingFromResizedGlobal.extend([os.path.join(rootdir, yearFolder, eventFolder,
                                                     f) for f in missingFromResized])
 
         elif not orgiFilelist:
             # There is no 'orginal' folder, use 'resized' folder
-            filelist = [os.path.join(rootdir, yearFolder, eventFolder,
-                                     f) for f in resizedFilelist]
+            for f in resizedFilelist:
+                fullpath = os.path.join(rootdir, yearFolder, eventFolder, f)
+                if os.path.isfile(fullpath):
+                    filelist.append(fullpath)
+                else:
+                    skipped.append(fullpath)
+
         #printi(3, filelist)
 
         if not filelist:
