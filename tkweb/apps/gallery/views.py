@@ -46,7 +46,7 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
     # list() will force evaluation of the QuerySet. We can now use .index()
     images = list(album.basemedia.exclude(notPublic=True).select_subclasses())
     paginator = Paginator(images, 1)
-    start_image = get_object_or_404(Image, slug=image_slug)
+    start_image = get_object_or_404(Image, album=album, slug=image_slug)
     if start_image.notPublic:
         raise Http404("Billedet kan ikke findes")
 
