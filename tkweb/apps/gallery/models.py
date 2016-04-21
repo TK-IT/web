@@ -36,7 +36,7 @@ def file_name(instance, path):
 
 
 def get_exif_date(filename):
-    logger.debug('get_exif_date: called with filename: %s' % filename.name)
+    logger.debug('get_exif_date: called with filename: %s' % filename)
     try:
         image = PilImage.open(filename)
         info = image._getexif()
