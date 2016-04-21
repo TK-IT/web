@@ -180,6 +180,7 @@ for yearFolder in os.listdir(rootdir):
 
         else:
             if args.check or args.save:
+                i = 0
                 for filepath in filelist:
                     op = open(filepath, "rb")
                     file = File(op)
@@ -201,6 +202,9 @@ for yearFolder in os.listdir(rootdir):
 
                     if os.path.basename(filepath) in missingFromResized:
                         instance.notPublic = True
+
+                    instance.forcedOrder = i
+                    i += 1
 
                     instance.full_clean()
                     if args.save:
