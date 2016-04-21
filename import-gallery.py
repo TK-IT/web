@@ -6,7 +6,6 @@ from os.path import join
 import sys
 import re
 from datetime import datetime, date, timedelta
-import imghdr
 import argparse
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tkweb.settings.dev")
@@ -15,7 +14,7 @@ import django
 from django.core.files import File
 from django.utils.text import slugify
 django.setup()
-from tkweb.apps.gallery.models import Album, Image
+from tkweb.apps.gallery.models import Album, BaseMedia, Image, GenericFile
 
 parser = argparse.ArgumentParser(description="Delete all old Albums and Images. Transverses the rootdir and makes new Albums. With arguments it will also add Images.")
 parser.add_argument('-c', "--check", action="store_true",
@@ -182,26 +181,34 @@ for yearFolder in os.listdir(rootdir):
         else:
             if args.check or args.save:
                 for filepath in filelist:
-                    if imghdr.what(filepath):
-                        op = open(filepath, "rb")
-                        djFile = File(op)
-                        img = Image()
-                        img.album = album
-                        img.image = djFile
-
-                        if os.path.basename(filepath) in missingFromResized:
-                            img.notPublic = True
-
-                        img.full_clean()
-                        if args.save:
-                            img.save() # This prints a newline
-
-                        #Set album date from last image with a date.
-                        if not img.date == None:
-                            album.publish_date = img.date
+                    op = open(filepath, "rb")
+                    file = File(op)
+                    ext = os.path.splitext(filepath)[1].lower()
+                    if ext in (".png", ".gif", ".jpg", ".jpeg" ):
+                        instance = Image(file=file, album=album)
+                    elif ext in (".mp3"):
+                        instance = GenericFile(file=file, album=album)
+                        instance.type = GenericFile.AUDIO
+                    elif ext in (".mp4"):
+                        instance = GenericFile(file=file, album=album)
+                        instance.type = GenericFile.VIDEO
+                    elif ext in (".pdf", ".txt"):
+                        instance = GenericFile(file=file, album=album)
+                        instance.type = GenericFile.OTHER
                     else:
                         skipped.append(filepath)
+                        continue
 
+                    if os.path.basename(filepath) in missingFromResized:
+                        instance.notPublic = True
+
+                    instance.full_clean()
+                    if args.save:
+                        instance.save() # This prints a newline
+
+                    #Set album date from last image with a date.
+                    if not instance.date == None:
+                        album.publish_date = instance.date
         album.save()
 
 print('Missing from resized / Not public images:')
