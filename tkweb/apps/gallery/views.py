@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 from jfu.http import upload_receive, UploadResponse, JFUResponse
-from tkweb.apps.gallery.models import Album, BaseMedia, Image, File
+from tkweb.apps.gallery.models import Album, BaseMedia, Image, GenericFile
 import os
 
 
@@ -87,14 +87,14 @@ def upload(request):
     if ext in (".png", ".gif", ".jpg", ".jpeg" ):
         instance = Image(file=file, album=album)
     elif ext in (".mp3"):
-        instance = File(file=file, album=album)
-        instance.type = File.AUDIO
+        instance = GenericFile(file=file, album=album)
+        instance.type = GenericFile.AUDIO
     elif ext in (".mp4"):
-        instance = File(file=file, album=album)
-        instance.type = File.VIDEO
+        instance = GenericFile(file=file, album=album)
+        instance.type = GenericFile.VIDEO
     elif ext in (".pdf", ".txt"):
-        instance = File(file=file, album=album)
-        instance.type = File.OTHER
+        instance = GenericFile(file=file, album=album)
+        instance.type = GenericFile.OTHER
     else:
         jfu_msg = {
             'name': file.name,

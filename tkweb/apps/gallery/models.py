@@ -145,7 +145,7 @@ class Image(BaseMedia):
         else:
             self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
 
-class File(BaseMedia):
+class GenericFile(BaseMedia):
     VIDEO = 'V'
     AUDIO = 'A'
     OTHER = 'O'
