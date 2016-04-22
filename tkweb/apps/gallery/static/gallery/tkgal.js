@@ -7,6 +7,7 @@ $(document).ready(function() {
     // Call changeCurrent on click on the controls
     $(".tkgal-control").click(function(e) {
         e.preventDefault();
+        pauseMedia();
         changeCurrent($(this).attr("href"));
     });
 
@@ -39,6 +40,15 @@ $(document).ready(function() {
 
         // Rewrite history
         window.history.replaceState(null, null, newimage);
+    }
+
+    function pauseMedia() {
+        if ($(".current > video").length) {
+            $(".current > video").get(0).pause();
+        }
+        if ($(".current > audio").lenght) {
+            $(".current > audio").get(0).pause();
+        }
     }
 
     // Call swipehandler on swipe
