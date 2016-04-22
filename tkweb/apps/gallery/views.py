@@ -92,16 +92,9 @@ def upload(request):
     elif ext in (".mp4"):
         instance = GenericFile(file=file, album=album)
         instance.type = BaseMedia.VIDEO
-    elif ext in (".pdf", ".txt"):
+    else:
         instance = GenericFile(file=file, album=album)
         instance.type = BaseMedia.OTHER
-    else:
-        jfu_msg = {
-            'name': file.name,
-            'size': file.size,
-            'error': "Unsurported file type",
-        }
-        return UploadResponse(request, jfu_msg)
 
     try:
         instance.full_clean()
