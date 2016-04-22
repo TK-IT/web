@@ -111,6 +111,20 @@ class BaseMedia(models.Model):
         ordering = ['forcedOrder', 'date', 'slug']
         unique_together = (('album', 'slug'),)
 
+    IMAGE = 'I'
+    VIDEO = 'V'
+    AUDIO = 'A'
+    OTHER = 'O'
+    TYPE_CHOICES = (
+        (IMAGE, 'Image'),
+        (VIDEO, 'Video'),
+        (AUDIO, 'Audio'),
+        (OTHER, 'Other'),
+    )
+    type = models.CharField(max_length=1,
+                                      choices=TYPE_CHOICES,
+                                      default=OTHER)
+
     objects = InheritanceManager()
     album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name='basemedia')
 
@@ -140,23 +154,14 @@ class Image(BaseMedia):
 
     def clean(self):
         self.date = get_exif_date(self.file)
+        self.type = BaseMedia.IMAGE
+
         if self.date == None:
             self.slug = slugify(os.path.splitext(os.path.basename(self.file.name))[0])
         else:
             self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
 
 class GenericFile(BaseMedia):
-    VIDEO = 'V'
-    AUDIO = 'A'
-    OTHER = 'O'
-    TYPE_CHOICES = (
-        (VIDEO, 'Video'),
-        (AUDIO, 'Audio'),
-        (OTHER, 'Other'),
-    )
-    type = models.CharField(max_length=1,
-                                      choices=TYPE_CHOICES,
-                                      default=OTHER)
     file = models.FileField(upload_to=file_name)
 
     def clean(self):

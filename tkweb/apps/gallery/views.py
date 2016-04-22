@@ -88,13 +88,13 @@ def upload(request):
         instance = Image(file=file, album=album)
     elif ext in (".mp3"):
         instance = GenericFile(file=file, album=album)
-        instance.type = GenericFile.AUDIO
+        instance.type = BaseMedia.AUDIO
     elif ext in (".mp4"):
         instance = GenericFile(file=file, album=album)
-        instance.type = GenericFile.VIDEO
+        instance.type = BaseMedia.VIDEO
     elif ext in (".pdf", ".txt"):
         instance = GenericFile(file=file, album=album)
-        instance.type = GenericFile.OTHER
+        instance.type = BaseMedia.OTHER
     else:
         jfu_msg = {
             'name': file.name,
