@@ -11,7 +11,11 @@ body > .container {
 /* Til tk-brand appen */
 .tk-brand {
 	font-weight:bold;
-    font-family: Courier, monospace;
+    font-family: 'PT Mono', Courier New, Courier, monospace;
+}
+
+.navbar-brand .tk-brand{
+	color:#F0F0F0;
 }
 
 /* Til gallery appen */
