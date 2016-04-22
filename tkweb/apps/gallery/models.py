@@ -132,7 +132,7 @@ class BaseMedia(models.Model):
     notPublic = models.BooleanField(default=False)
     caption = models.CharField(max_length=200, blank=True)
 
-    slug = models.SlugField(blank=True)
+    slug = models.SlugField(null=True, blank=True)
 
     forcedOrder = models.SmallIntegerField(default=0,
                                            validators=[MinValueValidator(-FORCEDORDERMAX),
@@ -153,24 +153,29 @@ class Image(BaseMedia):
     admin_thumbnail.allow_tags = True
 
     def clean(self):
-        self.date = get_exif_date(self.file)
         self.type = BaseMedia.IMAGE
 
         if self.date == None:
-            self.slug = slugify(os.path.splitext(os.path.basename(self.file.name))[0])
-        else:
-            self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
+            self.date = get_exif_date(self.file)
+
+        if self.slug == None:
+            if self.date == None:
+                self.slug = slugify(os.path.splitext(os.path.basename(self.file.name))[0])
+            else:
+                self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
+
 
 class GenericFile(BaseMedia):
     file = models.FileField(upload_to=file_name)
 
     def clean(self):
-        if self.date == None:
-            sep = os.path.splitext(os.path.basename(self.file.name))
-            self.slug = slugify(sep[0]) + sep[1]
-            self.forcedOrder = FORCEDORDERMAX
-        else:
-            self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
+        if self.slug == None:
+            if self.date == None:
+                sep = os.path.splitext(os.path.basename(self.file.name))
+                self.slug = slugify(sep[0]) + sep[1]
+                self.forcedOrder = FORCEDORDERMAX
+            else:
+                self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
 
 @receiver(models.signals.post_save, sender=Image)
 def generateImageThumbnails(sender, instance, **kwargs):
