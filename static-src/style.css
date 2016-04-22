@@ -4,13 +4,14 @@ body > .container {
 
 @media (max-width: 420px) {
     .footer {
-        font-size: 60%
+        font-size: 60%;
     }
 }
 
 /* Til tk-brand appen */
 .tk-brand {
-    font-family: monospace;
+	font-weight:bold;
+    font-family: Courier, monospace;
 }
 
 /* Til gallery appen */
