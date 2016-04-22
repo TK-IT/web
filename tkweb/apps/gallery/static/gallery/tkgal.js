@@ -43,10 +43,11 @@ $(document).ready(function() {
 
     // Call swipehandler on swipe
     // This requires jquery touchswipe
-    $(".tkgal-container > *").swipe( {
+	$("body").swipe( { // register swipe anywhere in body
         swipeLeft:swipehandler,
         swipeRight:swipehandler,
         allowPageScroll:"auto"
+		
     });
 
     function swipehandler(event, direction) {
