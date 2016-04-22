@@ -166,6 +166,7 @@ class Image(BaseMedia):
 
 
 class GenericFile(BaseMedia):
+    originalFile = models.FileField(upload_to=file_name, blank=True)
     file = models.FileField(upload_to=file_name)
 
     def clean(self):
