@@ -42,15 +42,6 @@ $(document).ready(function() {
         window.history.replaceState(null, null, newimage);
     }
 
-    function pauseMedia() {
-        if ($(".current > video").length) {
-            $(".current > video").get(0).pause();
-        }
-        if ($(".current > audio").lenght) {
-            $(".current > audio").get(0).pause();
-        }
-    }
-
     // Call swipehandler on swipe
     // This requires jquery touchswipe
 	$("body").swipe( { // register swipe anywhere in body
@@ -73,6 +64,18 @@ $(document).ready(function() {
     }
 });
 
+function pauseMedia() {
+	$("video, audio").each(function(){
+		$(this).get(0).pause();
+	});
+}
+
+function togglePlay() {
+	$(".current audio, .current video").each(function(){
+		if (this.paused ? this.play() : this.pause());
+	});
+}
+
 // simulate link press when arrow keys are pressed
 $(document).keydown(function(e) {
     switch(e.which) {
@@ -82,5 +85,9 @@ $(document).keydown(function(e) {
     case 39: // right
         $("#tkgal-next")[0].click();
         break;
+	case 32: // space 
+        togglePlay();
+        break;
     }
 });
+

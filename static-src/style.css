@@ -2,7 +2,7 @@ body > .container {
     padding: 0px 15px;
 }
 
-body > .navbar-fixed-top~.container {
+body > .navbar-fixed-top~div {
     padding: 70px 15px 0px 15px;
 }
 
