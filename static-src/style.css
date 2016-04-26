@@ -1,5 +1,9 @@
 body > .container {
-    padding: 60px 15px 0;
+    padding: 0px 15px;
+}
+
+body > .navbar-fixed-top~.container {
+    padding: 70px 15px 0px 15px;
 }
 
 @media (max-width: 420px) {

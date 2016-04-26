@@ -4,6 +4,7 @@
 {% load tkbrand %}
 
 {% block title %}{{ album.title }}{% endblock title %}
+{% block navbar_class %}navbar-static-top{% endblock navbar_class %}
 
 {% block js %}
   <script src="{% static "gallery/jquery.touchswipe.min.js" %}"></script>
