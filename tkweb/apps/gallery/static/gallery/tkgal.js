@@ -23,10 +23,13 @@ $(document).ready(function() {
         $("[permlink='"+newimage+"']").addClass("current");
 
         // Rename the prev and next img's data-srcset to srcset
-        function changeSrcset(image) {
-            var i = $("[permlink='"+image+"'] > img");
+        function changeSrcset(file) {
+            var i = $("[permlink='"+file+"'] *[data-srcset]");
             i.attr('srcset', i.attr('data-srcset'));
             i.removeAttr('data-srcset');
+			var i = $("[permlink='"+file+"'] *[data-src]");
+            i.attr('src', i.attr('data-src'));
+            i.removeAttr('data-src');
         }
         changeSrcset(prev);
         changeSrcset(next);
