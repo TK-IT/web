@@ -50,7 +50,7 @@
                  {{ file.file.thumbnail.940x940.url }} 940w,
                  {{ file.file.thumbnail.1140x1140.url }} 1140w,
                  {{ file.file.thumbnail.2280x2280.url }} 2280w"
-             src="{{ file.file.thumbnail.720x720.url }}">
+			 {% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}src="{{ file.file.thumbnail.720x720.url }}">
     {% elif file.type == "A" %}
     <audio controls>
         <source src="{{ file.file.url }}" type="audio/mpeg">
