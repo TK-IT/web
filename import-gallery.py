@@ -353,6 +353,9 @@ for yearFolder in os.listdir(rootdir):
                     if filepath in deleteFiles:
                         continue
 
+                    if os.path.splitext(os.path.basename(filepath))[0][0] == ".":
+                        continue
+
                     op = open(filepath, "rb")
                     file = File(op)
                     ext = os.path.splitext(filepath)[1].lower()
