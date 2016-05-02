@@ -31,4 +31,17 @@ urlpatterns = [
     url(r'^Billeder/ShowPicture.php',
         GalleryShowPictureRedirectView.as_view(), ),
 
+    url(r'^tk40/tk40new.php',
+        RedirectView.as_view(url='/J40/', permanent=True), ),
+
+    url(r'^tk40/jubi40_histnew.php',
+        RedirectView.as_view(url='/J40hist/', permanent=True), ),
+
+    url(r'^J50Resume.php',
+        RedirectView.as_view(url='/J50/', permanent=True), ),
+
+    url(r'(?i)^J60/index.html',
+        RedirectView.as_view(url='/J60/', permanent=True), ),
+
+
 ]

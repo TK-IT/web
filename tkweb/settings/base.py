@@ -34,8 +34,9 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     'tkweb.apps.calendar',
     'tkweb.apps.gallery',
-    'tkweb.apps.tkbrand',
+    'tkweb.apps.jubi',
     'tkweb.apps.redirect',
+    'tkweb.apps.tkbrand',
 ]
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS

@@ -6,6 +6,7 @@ from django.views.generic.base import RedirectView
 
 import tkweb.apps.calendar.views
 import tkweb.apps.gallery.urls
+import tkweb.apps.jubi.urls
 import tkweb.apps.redirect.urls
 import django.views.static
 import django.views.defaults
@@ -42,6 +43,12 @@ urlpatterns = [
     url(r'^galleri/',
         include(tkweb.apps.gallery.urls),
         name='gallery'),
+
+    # Note the missing trailing slash. This catches everything that start with
+    # 'j' or 'J'.
+    url(r'(?i)^J',
+        include(tkweb.apps.jubi.urls),
+        name='jubi'),
 
     url(r'^admin/',
         include(admin.site.urls)),
