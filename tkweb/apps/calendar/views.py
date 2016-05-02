@@ -1,3 +1,5 @@
+# encoding: utf8
+from __future__ import unicode_literals
 from datetime import date, timedelta
 from django.shortcuts import render
 from tkweb.apps.calendar.models import Event

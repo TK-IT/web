@@ -10,6 +10,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.dispatch import receiver
 from django.utils.text import slugify
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.http import int_to_base36
 from django.utils.timezone import get_current_timezone
 from model_utils.managers import InheritanceManager
@@ -89,6 +90,7 @@ def get_exif_date(filename):
 def get_gfyear():
     return config.GFYEAR
 
+@python_2_unicode_compatible
 class Album(models.Model):
     class Meta:
         ordering = ['gfyear', '-eventalbum', 'oldFolder', 'publish_date']
@@ -106,6 +108,7 @@ class Album(models.Model):
     def __str__(self):
         return '%s: %s' % (self.gfyear, self.title)
 
+@python_2_unicode_compatible
 class BaseMedia(models.Model):
     class Meta:
         ordering = ['forcedOrder', 'date', 'slug']

@@ -1,3 +1,5 @@
+# encoding: utf8
+from __future__ import unicode_literals
 from constance import config
 from django.core.management.base import BaseCommand
 from icalendar import Calendar, Event, vDatetime

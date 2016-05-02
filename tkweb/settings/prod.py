@@ -1,3 +1,5 @@
+# encoding: utf8
+from __future__ import unicode_literals
 from tkweb.settings.base import *
 
 DEBUG = False
