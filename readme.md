@@ -78,8 +78,8 @@ og issue #31 for motivationen.
 
 For ikke at have node.js som dependency på serveren er det nødvendigt at have en
 compilet CSS version af alle LESS filerne i git. Det er indeholdt i
-[`static-src/style.css`](static-src/style.css) og
-[`static-src/style.min.css`](static-src/style.min.css).
+[`static-src/style.min.css`](static-src/style.min.css) og
+[`static-src/style.min.css.map`](static-src/style.min.css.map).
 
 For at compile dette kræver det LESS og node.js. Med en fungerende node.js
 installation kan LESS og en CSS-minifier installeres med
@@ -89,6 +89,5 @@ npm install -g less less-plugin-clean-css
 For at genere nye CSS filer køres
 ```shell
 cd static-src
-lessc style.less style.css
-lessc --clean-css style.less style.min.css
+lessc --clean-css --source-map style.less style.min.css
 ```
