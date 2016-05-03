@@ -22,7 +22,7 @@ De 'statiske' sider (Om TK, Arrangementer, BEST/FU osv.) ligger i databasen som
 nemt ændres fra admin-interfacet.
 
 [`static-src`](static-src) indeholder statiske filer (grafik, css, js) samt
-[getbootstrap.com](Bootstrap 3) som et `git submodule`.
+[Bootstrap 3](http://getbootstrap.com) som et `git submodule`.
 
 [`tkweb/settings`](tkweb/settings) indeholder konfigurationen. Den er delt op i
 flere moduler der nedarver fra hindanden. Se også under
