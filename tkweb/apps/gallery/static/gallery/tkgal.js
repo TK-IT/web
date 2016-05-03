@@ -1,7 +1,7 @@
 $(document).ready(function() {
     // Get array of all slugs
     var slugs = $("#tkgal-container > *").map(function() {
-        return $(this).attr("permlink");
+        return $(this).attr("data-permlink");
     }).get();
 
     // Call changeCurrent on click on the controls
@@ -20,14 +20,17 @@ $(document).ready(function() {
 
         // Update visibility of current picture
         $("#tkgal-container > div").removeClass("current");
-        $("[permlink='"+newimage+"']").addClass("current");
+        $("[data-permlink='"+newimage+"']").addClass("current");
 
         // Rename the prev and next img's data-srcset to srcset
         function changeSrcset(file) {
-            var i = $("[permlink='"+file+"'] *[data-srcset]");
+            var i = $("[data-permlink='"+file+"'] *[data-srcset]");
             i.attr('srcset', i.attr('data-srcset'));
             i.removeAttr('data-srcset');
-			var i = $("[permlink='"+file+"'] *[data-src]");
+            var i = $("[data-permlink='"+file+"'] *[data-sizes]");
+            i.attr('sizes', i.attr('data-sizes'));
+            i.removeAttr('data-sizes');
+            var i = $("[data-permlink='"+file+"'] *[data-src]");
             i.attr('src', i.attr('data-src'));
             i.removeAttr('data-src');
         }
@@ -51,7 +54,6 @@ $(document).ready(function() {
         swipeLeft:swipehandler,
         swipeRight:swipehandler,
         allowPageScroll:"auto"
-		
     });
 
     function swipehandler(event, direction) {
@@ -68,15 +70,15 @@ $(document).ready(function() {
 });
 
 function pauseMedia() {
-	$("video, audio").each(function(){
-		$(this).get(0).pause();
-	});
+    $("video, audio").each(function(){
+        $(this).get(0).pause();
+    });
 }
 
 function togglePlay() {
-	$(".current audio, .current video").each(function(){
-		if (this.paused ? this.play() : this.pause());
-	});
+    $(".current audio, .current video").each(function(){
+        if (this.paused ? this.play() : this.pause());
+    });
 }
 
 // simulate link press when arrow keys are pressed
@@ -88,7 +90,7 @@ $(document).keydown(function(e) {
     case 39: // right
         $("#tkgal-next")[0].click();
         break;
-	case 32: // space 
+    case 32: // space
         togglePlay();
         break;
     }
