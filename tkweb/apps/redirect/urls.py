@@ -4,6 +4,7 @@ from django.conf.urls import patterns, url
 from django.views.generic.base import RedirectView
 
 from tkweb.apps.redirect.views import GalleryIndexRedirectView, GalleryShowFolderRedirectView, GalleryShowPictureRedirectView
+from tkweb.settings.base import STATIC_URL
 
 urlpatterns = [
     url(r'^OmTK.php$',
@@ -41,6 +42,10 @@ urlpatterns = [
 
     url(r'^J50Resume.php',
         RedirectView.as_view(url='/J50/', permanent=True), ),
+
+    url(r'^J50Resume/J50-Jubiskrift.pdf',
+        RedirectView.as_view(url=STATIC_URL+'jubi/J50/J50-Jubiskrift.pdf',
+                             permanent=True), ),
 
     url(r'(?i)^J60/index.html',
         RedirectView.as_view(url='/J60/', permanent=True), ),
