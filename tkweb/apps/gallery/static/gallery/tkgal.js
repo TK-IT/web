@@ -22,22 +22,28 @@ $(document).ready(function() {
         $("#tkgal-container > div").removeClass("current");
         $("[data-permlink='"+newimage+"']").addClass("current");
 
-        // Rename the prev and next img's data-srcset to srcset
-        function changeSrcset(file) {
-            var i = $("[data-permlink='"+file+"'] *[data-srcset]");
-            i.attr('srcset', i.attr('data-srcset'));
-            i.removeAttr('data-srcset');
-            var i = $("[data-permlink='"+file+"'] *[data-sizes]");
-            i.attr('sizes', i.attr('data-sizes'));
-            i.removeAttr('data-sizes');
-            var i = $("[data-permlink='"+file+"'] *[data-src]");
-            i.attr('src', i.attr('data-src'));
-            i.removeAttr('data-src');
-        }
-        changeSrcset(prev);
-        changeSrcset(next);
+        function deferMedia(file) {
+            // This removes the data- prefix from 'file' causing the browser to
+            // request the files.
+            var img = $("[data-permlink='"+file+"'] *");
 
-        // Update 'i of l images' index
+            if(img.attr('data-srcset')){
+                img.attr('srcset', img.attr('data-srcset'));
+                img.removeAttr('data-srcset');
+            }
+            if(img.attr('data-sizes')){
+                img.attr('sizes', img.attr('data-sizes'));
+                img.removeAttr('data-sizes');
+            }
+            if(img.attr('data-src')){
+                img.attr('src', img.attr('data-src'));
+                img.removeAttr('data-src');
+            }
+        }
+        deferMedia(prev);
+        deferMedia(next);
+
+        // Update 'i af l billeder' index
         $("#tkgal-index").html(i+1);
 
         // Update prev/next links

@@ -50,9 +50,13 @@
                  {{ file.file.thumbnail.940x940.url }} 940w,
                  {{ file.file.thumbnail.1140x1140.url }} 1140w,
                  {{ file.file.thumbnail.2280x2280.url }} 2280w"
-             sizes="100vw"
-			 {% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}src=
-			 "{{ file.file.thumbnail.720x720.url }}">
+			       {% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}sizes="100vw"
+			       {% if file != start_file and file != next_file and file != prev_file %}data-src=
+			       "{{ file.file.thumbnail.720x720.url }}"
+             src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+             {% else %}
+             src="{{ file.file.thumbnail.720x720.url }}"
+             {% endif %}>
     {% elif file.type == "A" %}
 		<audio controls
 			{% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}src=
