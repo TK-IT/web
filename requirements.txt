@@ -9,3 +9,4 @@ icalendar>=3.9.1
 django-constance[database]>=1.1.1
 django-cleanup>=0.4.2
 django-model-utils>=2.5
+six>=1.10
