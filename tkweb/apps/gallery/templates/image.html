@@ -60,13 +60,13 @@
     {% elif file.type == "A" %}
 		<audio controls
 			{% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}src=
-			"{{ file.file.url }}" type="audio/mpeg">
+			"{{ file.file.url }}">
 			Your browser does not support the audio element.
 		</audio>
     {% elif file.type == "V" %}
 		<video controls
 			{% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}src=
-			"{{ file.file.url }}" type="video/mp4">
+			"{{ file.file.url }}">
 			Your browser does not support the video tag.
 		</video>
     {% else %}
