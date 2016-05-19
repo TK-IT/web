@@ -75,7 +75,7 @@ LOGIN_URL = '/admin/login'
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, '../media/')
 
 
 # Static files
@@ -85,7 +85,7 @@ MEDIA_ROOT = 'media'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = 'staticr'
+STATIC_ROOT = os.path.join(BASE_DIR, '../staticr/')
 
 
 # Additional locations of static files

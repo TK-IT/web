@@ -32,6 +32,10 @@ ADMINS = (
     ('John Doe', 'webmaster@example.com'),
 )
 
+# Media files
+
+MEDIA_ROOT = '/Pictures/tkammer/media/'
+
 # Logging
 
 LOGGING = {
