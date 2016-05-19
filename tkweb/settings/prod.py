@@ -44,16 +44,19 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'django.log'),
-            'formatter': 'simple',
+            'class': 'logging.handlers.WatchedFileHandler',
+            'filename': os.path.join(BASE_DIR, '../django.log'),
         },
         'mail_admins': {
             'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler'
+            'class': 'django.utils.log.AdminEmailHandler',
         },
     },
     'loggers': {
+        'django': {
+            'handlers': ['file', 'mail_admins'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'WARNING'),
+        },
         'tkweb': {
             'handlers': ['file', 'mail_admins'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
