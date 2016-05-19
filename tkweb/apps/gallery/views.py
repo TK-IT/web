@@ -24,7 +24,8 @@ def gallery(request, **kwargs):
 
     qs = Album.objects.all().aggregate(Max('gfyear'))
     latest_gfyear = qs['gfyear__max']
-    gfyear = int(kwargs.get('gfyear', latest_gfyear))
+    gfyear = kwargs.get('gfyear', latest_gfyear)
+    gfyear = int(gfyear) if gfyear else None
 
     context = {'group_by_year': group_by_year,
                'show_year': gfyear}

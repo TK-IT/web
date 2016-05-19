@@ -54,7 +54,10 @@
         </div> <!-- panel-body -->
       </div> <!-- collapse{{year}} -->
     </div> <!-- panel panel-default  -->
-  {% empty %}<p>Ingen albums med billeder fundet.</p>
+  {% empty %}
+    <div class="col-xs-12">
+      <p>Ingen albums med billeder fundet.</p>
+    </div>
   {% endfor %}
   </div> <!-- panel-group -->
 </div> <!-- row -->
