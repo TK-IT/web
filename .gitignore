@@ -1,10 +1,18 @@
+# Log files
 *.log
-*.pot
+
+# Python bytecode
 *.pyc
+
+# Development database
 *.sqlite3
 
+# Django static and media folders
 media/
 static/
+
+# Python virtual environments
 venv*/
 
+# TLS keys (Let's encrypt)
 *.key
