@@ -7,6 +7,9 @@
 # Development database
 *.sqlite3
 
+# Production settings
+tkweb/settings/prod.py
+
 # Django static and media folders
 media/
 static/
