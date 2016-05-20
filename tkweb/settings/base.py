@@ -189,6 +189,4 @@ CONSTANCE_CONFIG = {
                  'iCalendar URLen hvor den offentlige kalender bliver genereret fra.'),
     'CAL_URL': ('//calendar.google.com/calendar/embed?src=BEST@TAAGEKAMMERET.dk&ctz=Europe/Copenhagen',
                 'URLen til \'Tilføj til din egen kalender\'-linket på kalendersiden.'),
-    'SMILEY_URL': ('//findsmiley.dk/da-DK/Searching/DetailsView.htm?virk=552572',
-                   'URL til Fødevarestyrrelsens smiley rapporter for TK.'),
 }
