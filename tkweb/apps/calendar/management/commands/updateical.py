@@ -6,7 +6,9 @@ from icalendar import Calendar, Event, vDatetime
 from tkweb.apps.calendar.models import Event
 import datetime
 from six.moves import urllib
+import logging
 
+logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = 'Updater kalenderen fra ical'
@@ -16,12 +18,29 @@ class Command(BaseCommand):
 
         url = config.ICAL_URL
 
-        response = urllib.request.urlopen(url)
+        try:
+            response = urllib.request.urlopen(url)
+        except ValueError as e:
+            logger.error("%s Did you remember to preprend http(s?):// URL: '%s'" % (e, url))
+            return
+        except urllib.error.HTTPError as e:
+            logger.error("Recieved HTTP error code %s. URL: '%s'" % (e.code, url))
+            return
+
         data = response.read().decode('utf-8')
 
-        cal = Calendar.from_ical(data)
+        try:
+            cal = Calendar.from_ical(data)
+        except ValueError as e:
+            logger.error("Could not parse response as ical.")
+            logger.debug("Response was %s" % (data))
+            return
+
+        eventsAdded = False
+
         for component in cal.walk():
             if component.name == "VEVENT":
+                eventsAdded = True
                 title = component.decoded('summary').decode('utf-8')
                 startdatetime = component.decoded('dtstart')
                 if type(startdatetime) is datetime.datetime:
@@ -32,4 +51,12 @@ class Command(BaseCommand):
                 e = Event(title=title, date=startdate, description=description)
                 e.clean()
                 e.save()
-        self.stdout.write('Kalenderen blev opdateret')
+
+        if not eventsAdded:
+            noEventsText = "The calendar was updated, but it contained no events."
+            logger.warning(noEventsText)
+            self.stdout.write(noEventsText)
+        else:
+            finishText = 'The calendar was updated. %s events was imported.' % (Event.objects.count())
+            logger.info(finishText)
+            self.stdout.write(finishText)
