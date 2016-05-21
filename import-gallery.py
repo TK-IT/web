@@ -1,3 +1,6 @@
+# encoding: utf8
+from __future__ import unicode_literals
+
 # You can use `find . -name '*.DS_Store' -type f -delete` if you operating
 # system is a bitch and pollutes you folders
 
@@ -65,12 +68,6 @@ def replace_all(text, dic):
     for i, j in dic.items():
         text = text.replace(i, j)
     return text
-
-def printi(n, t1, t2=""):
-    indent = ""
-    for i in range(n):
-        indent += "  "
-    print(indent, t1, t2)
 
 # The slug for the files in the Albums in this list will be forced to be from
 # the name instead of EXIF
@@ -339,12 +336,11 @@ for yearFolder in os.listdir(rootdir):
         #printi(3, filelist)
 
         if not filelist:
-            print("===", os.path.join(rootdir, yearFolder, eventFolder), "===")
-            printi(2, "orgiFilelist", orgiFilelist)
-            printi(2, "resizedFilelist", resizedFilelist)
-            printi(2, "missingFromOriginale", missingFromOriginale)
-            printi(2, "missingFromResized", missingFromResized)
-            print("")
+            print("=== %s ===" % (os.path.join(rootdir, yearFolder, eventFolder)))
+            print("orgiFilelist %s\n\n" % (orgiFilelist))
+            print("resizedFilelist %s\n\n" % (resizedFilelist))
+            print("missingFromOriginale %s\n\n" % (missingFromOriginale))
+            print("missingFromResized %s\n\n" % (missingFromResized))
 
         else:
             if args.check or args.save:
@@ -400,9 +396,9 @@ for yearFolder in os.listdir(rootdir):
                     try:
                         instance.full_clean()
                     except ValidationError as e:
-                        print("===", os.path.join(rootdir, yearFolder, eventFolder), "===")
-                        printi(2, "file", file)
-                        printi(2, "ValidationError", e)
+                        print("=== %s ===" % (os.path.join(rootdir, yearFolder, eventFolder)))
+                        print("file", file)
+                        print("ValidationError", e)
                         print("")
                         continue
 
@@ -421,8 +417,8 @@ for yearFolder in os.listdir(rootdir):
 
 print('Missing from resized / Not public images:')
 for l in missingFromResizedGlobal:
-    printi(2, l)
+    print("%s" % (l))
 
-print('Skipped files:')
+print('\n\nSkipped files:')
 for l in skipped:
-    printi(2, l)
+    print("%s" % (l))
