@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, EmptyPage
-from django.db.models import Max
+from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, redirect
@@ -16,19 +16,22 @@ import os
 
 
 def gallery(request, **kwargs):
-    albums = Album.objects.exclude(basemedia__isnull=True)
-    gfyears = sorted(set([a.gfyear for a in albums]), reverse=True)
-    group_by_year = [[y, [[a, a.basemedia.exclude(notPublic=True).select_subclasses().first(),
-                           len(a.basemedia.exclude(notPublic=True).select_subclasses())] for a in
-                          albums if a.gfyear == y]] for y in gfyears]
+    allalbums = Album.objects.exclude(basemedia__isnull=True)
+    years = allalbums.order_by().values_list('gfyear').distinct()
+    years = [y[0] for y in years][::-1]
 
-    qs = Album.objects.all().aggregate(Max('gfyear'))
-    latest_gfyear = qs['gfyear__max']
-    gfyear = kwargs.get('gfyear', latest_gfyear)
-    gfyear = int(gfyear) if gfyear else None
+    latest_year = max(years)
+    show_year = kwargs.get('gfyear', latest_year)
+    show_year = int(show_year) if show_year else None
 
-    context = {'group_by_year': group_by_year,
-               'show_year': gfyear}
+    albums = allalbums.filter(gfyear__exact=show_year).prefetch_related('basemedia').annotate(count=Count('basemedia'))
+
+    albumSets = [(a, a.basemedia.first()) for a in albums]
+
+    context = {'years': years,
+               'show_year': show_year,
+               'albumSets': albumSets,
+    }
 
     return render(request, 'gallery.html', context)
 
