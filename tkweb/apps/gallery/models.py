@@ -108,6 +108,16 @@ class Album(models.Model):
     def __str__(self):
         return '%s: %s' % (self.gfyear, self.title)
 
+    def clean(self):
+        for m in self.basemedia.all():
+            m.isCoverFile = False
+            m.save()
+
+        f = self.basemedia.first()
+        if f:
+            f.isCoverFile = True
+            f.save()
+
 @python_2_unicode_compatible
 class BaseMedia(models.Model):
     class Meta:
@@ -140,6 +150,7 @@ class BaseMedia(models.Model):
     forcedOrder = models.SmallIntegerField(default=0,
                                            validators=[MinValueValidator(-FORCEDORDERMAX),
                                                        MaxValueValidator(FORCEDORDERMAX)])
+    isCoverFile = models.BooleanField(default=False)
 
     def admin_thumbnail(self):
         return None
@@ -166,6 +177,7 @@ class Image(BaseMedia):
                 self.slug = slugify(os.path.splitext(os.path.basename(self.file.name))[0])
             else:
                 self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
+        self.album.clean()
 
 
 class GenericFile(BaseMedia):
@@ -180,6 +192,7 @@ class GenericFile(BaseMedia):
                 self.forcedOrder = FORCEDORDERMAX
             else:
                 self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
+        self.album.clean()
 
 @receiver(models.signals.post_save, sender=Image)
 def generateImageThumbnails(sender, instance, **kwargs):

@@ -33,8 +33,8 @@
                 <a class="thumbnail" href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">
                     <div class="thumbcap">
                       {% if firstFile %}
-                      {% if firstFile.image %}
-                        <img class="img-responsive" src="{{ firstFile.image.file.crop.253x253.url }}" alt="{{ album.title }}" />
+                      {% if firstFile.type == "I" %}
+                        <img class="img-responsive" src="{{ firstFile.file.crop.253x253.url }}" alt="{{ album.title }}" />
                       {% else %}
                         <div class="placeholder253x253">
                           <p>{% bootstrap_icon "file" %}</p>
