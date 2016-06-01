@@ -30,7 +30,12 @@ class AlbumAdminForm(forms.ModelForm):
         ]
 
 class AlbumAdmin(admin.ModelAdmin):
-    list_display = ('title', 'gfyear', 'publish_date', 'slug')
+    # List display of multiple albums
+    list_display = ('title', 'gfyear', 'publish_date',)
+    ordering = ['-gfyear', 'eventalbum', '-oldFolder', '-publish_date'] # Reverse of models.Album.ordering
+    list_filter = ('gfyear', 'eventalbum')
+
+    # Form display of single album
     inlines = [InlineBaseMediaAdmin]
     form = AlbumAdminForm
     prepopulated_fields = { 'slug': ('title',), }
