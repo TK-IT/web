@@ -2,10 +2,12 @@
 //
 //##
 
-@brand-primary: #7E8AA2;
-@body-bg: #080808;
-@text-color: @gray-lighter;
-@link-hover-color: #263248;
+@brand-primary:        #7E8AA2;
+@body-bg:              #080808;
+@text-color:           @gray-lighter;
+@link-hover-color:     #263248;
+
+@tkweb-border-color:   lighten(@body-bg, 10%);
 
 //== Navbar
 //
@@ -13,7 +15,7 @@
 
 @navbar-inverse-color:                      @text-color;
 @navbar-inverse-bg:                         @body-bg;
-@navbar-inverse-border:                     lighten(@navbar-inverse-bg, 10%);
+@navbar-inverse-border:                     @tkweb-border-color;
 
 // Inverted navbar links
 @navbar-inverse-link-color:                 @text-color;
@@ -25,6 +27,33 @@
 @navbar-inverse-brand-color:                #fff;
 @navbar-inverse-brand-hover-color:          #fff;
 
+
+//== Panels
+//
+//##
+
+@panel-bg:                    @body-bg;
+@panel-default-text:          @text-color;
+@panel-default-border:        @tkweb-border-color;
+@panel-default-heading-bg:    @tkweb-border-color;
+
+
+//== Thumbnails
+//
+//##
+
+//** Thumbnail background color
+@thumbnail-bg:                @body-bg;
+//** Thumbnail border color
+@thumbnail-border:            @tkweb-border-color;
+
+//== Type
+//
+//##
+//** Page header border color
+@page-header-border-color:    @tkweb-border-color;
+//** Horizontal line color.
+@hr-border:                   @tkweb-border-color;
 
 //== Iconography
 //

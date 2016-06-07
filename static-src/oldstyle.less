@@ -8,18 +8,61 @@ body {
     }
 }
 
-/* Til calendar appen */
+//== The calendar app
+//
+//##
+
 .cal-baseline-fix {
     margin-top: 11px;
 }
 
-/* Til tk-brand appen */
+//== The tk-brand app
+//
+//##
+
 .tk-brand {
     font-family: 'Courier New', Courier, monospace;
     font-size: 120%;
 }
 
-/* Til gallery appen */
+//== The gallery app
+//
+//##
+
+//** gallery.html and album.html
+.thumbcap .caption{
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.5);
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    width: 100%;
+}
+
+.thumbcap {
+    width: 100%;
+    padding: 0px;
+    position:relative;
+}
+
+//** gallery.html and album.html: generic files
+.placeholder253x253 {
+    height: 0;
+    max-width: 253px;
+    padding-bottom: 100%;
+}
+
+.placeholder253x253 > p {
+    font-size: 50px;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+//** image.html
+
 .imagetitle {
     padding: 0;
     margin-bottom: 10px;
@@ -41,23 +84,6 @@ body {
         margin-bottom: 10px; /* (@line-height-computed / 2) */
     }
 }
-
-.thumbcap .caption{
-    background-color: #000;
-    bottom: 0;
-    color: #fff;
-    left: 0;
-    opacity: 0.5;
-    position: absolute;
-    width: 100%;
-}
-
-.thumbcap {
-    width: 100%;
-    padding: 0px;
-    position:relative;
-}
-
 #tkgal-container > * {
     display:none;
     position:relative;
@@ -71,25 +97,10 @@ body {
     display:block;
     margin: 0 auto;
     max-width: 100%;
-    max-height: ~'calc(100vh - 168px)'; /* Kan muligvis erstattes af flexbox, eller variabler i en .less-lg */
+    max-height: ~'calc(100vh - 168px)'; /* Kan muligvis erstattes af flexbox, eller variabler i en .less-fil */
 }
 
-
-.fil-file-download {
+//** image.html: generic file
+.lg-file-download {
     padding: 30px 0 60px 0;
-}
-
-.placeholder253x253 {
-    height: 0;
-    max-width: 253px;
-    padding-bottom: 100%;
-}
-
-.placeholder253x253 > p {
-    font-size: 50px;
-    margin: 0;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
 }
