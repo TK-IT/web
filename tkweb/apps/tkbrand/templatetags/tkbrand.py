@@ -46,7 +46,7 @@ def do_evaluate(parser, token):
     try:
         tag_name, variable = token.split_contents()
     except ValueError:
-        raise template.TemplateSyntaxError, "%r tag requires a single argument" % token.contents.split()[0]
+        raise template.TemplateSyntaxError("%r tag requires a single argument" % token.contents.split()[0])
     return EvaluateNode(variable)
 
 class EvaluateNode(template.Node):
@@ -59,5 +59,5 @@ class EvaluateNode(template.Node):
             content = '{% load tkbrand %}\n' + content # Always load tkbrand
             t = template.Template(content)
             return t.render(context)
-        except template.VariableDoesNotExist, template.TemplateSyntaxError:
+        except (template.VariableDoesNotExist, template.TemplateSyntaxError):
             return 'Error rendering', self.variable
