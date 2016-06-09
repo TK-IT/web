@@ -47,7 +47,7 @@ INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
 TIME_ZONE = 'Europe/Copenhagen'
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'da'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True

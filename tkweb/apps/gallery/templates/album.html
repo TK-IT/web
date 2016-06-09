@@ -17,7 +17,7 @@
   </div>
   <div class="col-xs-12 col-sm-5 text-right">
       <p class="imagetitle">
-          {{ files|length }} billede{{ files|length|pluralize:"r" }}{% if album.publish_date %} fra {{ album.publish_date }}{% endif %}
+          {{ files|length }} billede{{ files|length|pluralize:"r" }}{% if album.publish_date %} fra d. {{ album.publish_date }}{% endif %}
       </p>
   </div>
 </div>
