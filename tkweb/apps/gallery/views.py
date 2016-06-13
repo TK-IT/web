@@ -72,6 +72,10 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
     except EmptyPage:
         # We are at the first image
         prev_file = paginator.page(paginator.num_pages)[0]
+		
+    prev_files = files[1:]+files[:1]
+    next_files = files[-1:]+files[:-1]
+    filess = zip(files, prev_files, next_files)
 
     try:
         next_file = paginator.page((files.index(start_file))+1+1)[0]
@@ -84,6 +88,7 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
     context = {
         'album': album,
         'files': files,
+		'filess': filess,
         'start_file': start_file,
         'prev_file': prev_file,
         'next_file': next_file,

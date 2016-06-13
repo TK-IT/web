@@ -1,6 +1,6 @@
 $(document).ready(function() {
     // Get array of all slugs
-    var slugs = $("#tkgal-container > *").map(function() {
+    var slugs = $(".tkgal-container > *").map(function() {
         return $(this).attr("data-permlink");
     }).get();
 
@@ -10,6 +10,7 @@ $(document).ready(function() {
         pauseMedia();
         changeCurrent($(this).attr("href"));
     });
+	
 
     function changeCurrent(newimage) {
         // Calculate prev and next images
@@ -19,13 +20,14 @@ $(document).ready(function() {
         var next = slugs[(i+1)%l];
 
         // Update visibility of current picture
-        $("#tkgal-container > div").removeClass("current");
+        $(".media.current").removeClass("current");
         $("[data-permlink='"+newimage+"']").addClass("current");
 
         function deferMedia(file) {
             // This removes the data- prefix from 'file' causing the browser to
             // request the files.
-            var img = $("[data-permlink='"+file+"'] *");
+			$("[data-permlink='"+file+"']").addClass('loaded'); // For debugging
+            var img = $("[data-permlink='"+file+"'] [data-src]");
 
             if(img.attr('data-srcset')){
                 img.attr('srcset', img.attr('data-srcset'));
@@ -42,13 +44,6 @@ $(document).ready(function() {
         }
         deferMedia(prev);
         deferMedia(next);
-
-        // Update 'i af l billeder' index
-        $("#tkgal-index").html(i+1);
-
-        // Update prev/next links
-        $("#tkgal-prev").attr("href", prev);
-        $("#tkgal-next").attr("href", next);
 
         // Rewrite history
         window.history.replaceState(null, null, newimage);
@@ -73,6 +68,10 @@ $(document).ready(function() {
         default:
         }
     }
+	
+	//Load nabobilleder
+	loadfirst = $(".tkgal-container > .current").attr("data-permlink");
+	changeCurrent(loadfirst);
 });
 
 function pauseMedia() {
@@ -91,10 +90,10 @@ function togglePlay() {
 $(document).keydown(function(e) {
     switch(e.which) {
     case 37: // left
-        $("#tkgal-prev")[0].click();
+        $(".current .tkgal-prev")[0].click();
         break;
     case 39: // right
-        $("#tkgal-next")[0].click();
+        $(".current .tkgal-next")[0].click();
         break;
     case 32: // space
         togglePlay();
