@@ -66,32 +66,16 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
 
     if start_file.notPublic:
         raise Http404("Billedet kan ikke findes")
-    try:
-        prev_file = paginator.page((files.index(start_file))+1-1)[0]
-        # +1 because paginator is 1-indexed, -1 to get the previous image
-    except EmptyPage:
-        # We are at the first image
-        prev_file = paginator.page(paginator.num_pages)[0]
-		
+
     prev_files = files[1:]+files[:1]
     next_files = files[-1:]+files[:-1]
-    filess = zip(files, prev_files, next_files)
-
-    try:
-        next_file = paginator.page((files.index(start_file))+1+1)[0]
-        # +1 because paginator is 1-indexed, +1 to get the next image
-    except EmptyPage:
-        # We are at the last image
-        next_file = paginator.page(1)[0]
-
+    file_orders = zip(files, prev_files, next_files)
 
     context = {
         'album': album,
         'files': files,
-		'filess': filess,
+        'file_orders': file_orders,
         'start_file': start_file,
-        'prev_file': prev_file,
-        'next_file': next_file,
     }
     return render(request, 'image.html', context)
 

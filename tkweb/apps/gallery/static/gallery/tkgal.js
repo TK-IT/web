@@ -60,16 +60,16 @@ $(document).ready(function() {
     function swipehandler(event, direction) {
         switch(direction) {
         case "left":
-            $("#tkgal-next")[0].click();
+            $(".tkgal-next:visible")[0].click();
             break;
         case "right":
-            $("#tkgal-prev")[0].click();
+            $(".tkgal-prev:visible")[0].click();
             break;
         default:
         }
     }
 	
-	//Load nabobilleder
+	//Load neighbors on pageload
 	loadfirst = $(".tkgal-container > .current").attr("data-permlink");
 	changeCurrent(loadfirst);
 });
@@ -90,14 +90,16 @@ function togglePlay() {
 $(document).keydown(function(e) {
     switch(e.which) {
     case 37: // left
-        $(".current .tkgal-prev")[0].click();
+        $(".tkgal-prev:visible")[0].click();
         break;
     case 39: // right
-        $(".current .tkgal-next")[0].click();
+        $(".tkgal-next:visible")[0].click();
         break;
     case 32: // space
         togglePlay();
         break;
     }
 });
+
+$('video').click(function(){ togglePlay(); });
 

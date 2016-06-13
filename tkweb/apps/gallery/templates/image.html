@@ -21,19 +21,19 @@
 
 {% block raw_content %}
 <div class="tkgal-container">
-	{% for file, next_file, prev_file in filess %}
+	{% for file, next_file, prev_file in file_orders %}
 	<div class="media{% if file == start_file %} current{% endif %}" data-permlink="{{ file.slug }}">
 		<div class="container-full">
 		{% if file.file.thumbnail.720x720.url %}
 			<img alt="{{ album.slug }}/{{ file.slug }}"
-				{% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}srcset=
+				{% if file != start_file %}data-{% endif %}srcset=
 					"{{ file.file.thumbnail.400x400.url }} 400w,
 					{{ file.file.thumbnail.720x720.url }} 720w,
 					{{ file.file.thumbnail.940x940.url }} 940w,
 					{{ file.file.thumbnail.1140x1140.url }} 1140w,
 					{{ file.file.thumbnail.2280x2280.url }} 2280w"
-				{% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}sizes="100vw"
-			    {% if file != start_file and file != next_file and file != prev_file %}data-src=
+				{% if file != start_file %}data-{% endif %}sizes="100vw"
+			    {% if file != start_file %}data-src=
 					"{{ file.file.thumbnail.720x720.url }}"
 				src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 				{% else %}
@@ -41,13 +41,13 @@
 				{% endif %}>
 		{% elif file.type == "A" %}
 			<audio controls
-				{% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}src=
+				{% if file != start_file %}data-{% endif %}src=
 				"{{ file.file.url }}">
 				Your browser does not support the audio element.
 			</audio>
 		{% elif file.type == "V" %}
 			<video controls
-				{% if file != start_file and file != next_file and file != prev_file %}data-{% endif %}src=
+				{% if file != start_file %}data-{% endif %}src=
 				"{{ file.file.url }}">
 				Your browser does not support the video tag.
 			</video>
