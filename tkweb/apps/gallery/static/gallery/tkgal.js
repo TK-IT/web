@@ -97,6 +97,9 @@ $(document).keydown(function(e) {
         break;
     case 32: // space
         togglePlay();
+		if(e.target == document.body) {
+			e.preventDefault();
+		}
         break;
     }
 });
