@@ -16,6 +16,13 @@
   <link rel="stylesheet" type="text/css" href="{% static "gallery/tkgal.css" %}">
 {% endblock extra_head %}
 
+{% block opengraph %}<meta property="og:type" content="image" />
+	<meta property="og:url" content="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=start_file.slug %}" />
+	<meta property="og:image" content="{{ start_file.file.thumbnail.720x720.url }}" />
+	<meta property="og:title" content="{{ album.title }} {{ album.gfyear|gfyearPPslash }}" />
+	<meta property="og:description" content="Fra TÅGEKAMMERETs galleri for &#8217;{{ album.title }}&#8217;.{% if  start_file.date %} Taget {{ start_file.date }}.{% endif %}" />
+{% endblock opengraph %}
+
 {% block content %}
 {% endblock content %}
 
