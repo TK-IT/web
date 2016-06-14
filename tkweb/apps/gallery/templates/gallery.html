@@ -3,6 +3,14 @@
 
 {% block title %}Galleri{% endblock title %}
 
+{% block opengraph %}
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="{% url 'gfyear' gfyear='2013' %}" />
+	<meta property="og:image" content="{{ STATIC_URL }}TKlogo.jpg" />
+	<meta property="og:title" content="Gallerier fra {{show_year|gfyearPPslash}}." />
+	<meta property="og:description" content="Oversigt over TÅGEKAMMERETs gallerier fra bestyrelsesåret {{show_year|gfyearPPslash}}." />
+{% endblock opengraph %}
+
 {% block content %}
 <div class="row">
   <div class="panel-group" id="accordition" role="tablist" aria-multiselectable="true">
