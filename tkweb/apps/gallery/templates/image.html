@@ -13,10 +13,6 @@
 
 {% block canonical_url %}{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=start_file.slug %}{% endblock canonical_url %}
 
-{% block extra_head %}
-  <link rel="stylesheet" type="text/css" href="{% static "gallery/tkgal.css" %}">
-{% endblock extra_head %}
-
 {% block opengraph %}
   <meta property="og:type" content="{% if start_file.type == "I" %}image{% elif start_file.type == "V" %}video{% elif start_file.type == "A" %}audio{% else %}website{% endif %}" />
   <meta property="og:image" content="{% if start_file.type == "I" %}{{ start_file.file.thumbnail.2280x2280.url }}{% else %}{{ STATIC_URL }}TKlogo.jpg{% endif %}" />
