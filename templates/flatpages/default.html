@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% load tkbrand %}
 {% block title %}{{ flatpage.title }}{% endblock title %}
+
+{% block canonical_url %}
+<link rel="canonical" href="{{ flatpage.url }}">
+<meta property="og:url" content="{{ flatpage.url }}" />
+{% endblock canonical_url %}
+
 {% block content %}
 <div class="page-header">
   <h1>{{ flatpage.title }}</h1>
