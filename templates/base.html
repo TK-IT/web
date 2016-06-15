@@ -5,17 +5,16 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta property="og:site_name" content="TÅGEKAMMERET" />
-	<meta property="og:locale" content="da" />
-	{% block opengraph %}
-	<meta property="og:type" content="website" />
-	<meta property="og:image" content="{{ STATIC_URL }}TKlogo.jpg" />
-	<meta property="og:description" content="TÅGEKAMMERET er en fest- og foredragsforening på Det Naturvidenskabelige Fakultet på Aarhus Universitet." />
-	{% endblock opengraph %}
     <title>{% repeated_block title %}{% endblock title%} | TÅGEKAMMERET</title>
     <meta property="og:title" content="{% repeat title %}" />
     <link rel="canonical" href="{% repeated_block canonical_url %}{% endblock canonical_url %}">
     <meta property="og:url" content="{% repeat canonical_url %}" />
+    <meta property="og:site_name" content="TÅGEKAMMERET" />
+    <meta property="og:locale" content="da" />
+    {% block opengraph %}
+    <meta property="og:image" content="{{ STATIC_URL }}TKlogo.jpg" />
+    <meta property="og:description" content="TÅGEKAMMERET er en fest- og foredragsforening på Det Naturvidenskabelige Fakultet på Aarhus Universitet." />
+    {% endblock opengraph %}
     {% bootstrap_css %}
     {% include 'favicon.html' %}
     {% block extra_head %}{% endblock extra_head %}
@@ -44,7 +43,7 @@
         </div>
       </div>
     </nav>
-	{% block raw_content %}{% endblock raw_content %}
+    {% block raw_content %}{% endblock raw_content %}
     <div class="container" role="main">
       {% block content %}{% endblock content%}
       <footer class="footer">

@@ -6,9 +6,8 @@
 {% block canonical_url %}{% url 'gfyear' gfyear=show_year %}{% endblock canonical_url %}
 
 {% block opengraph %}
-	<meta property="og:type" content="website" />
-	<meta property="og:image" content="{{ STATIC_URL }}TKlogo.jpg" />
-	<meta property="og:description" content="Oversigt over TÅGEKAMMERETs gallerier fra bestyrelsesåret {{show_year|gfyearPPslash}}." />
+<meta property="og:image" content="{{ STATIC_URL }}TKlogo.jpg" />
+<meta property="og:description" content="Oversigt over TÅGEKAMMERETs gallerier fra bestyrelsesåret {{ show_year|gfyearPPslash }}." />
 {% endblock opengraph %}
 
 {% block content %}

@@ -6,9 +6,8 @@
 {% block canonical_url %}{% url 'album' gfyear=album.gfyear album_slug=album.slug %}{% endblock canonical_url %}
 
 {% block opengraph %}
-	<meta property="og:type" content="website" />
-	<meta property="og:image" content="{{ STATIC_URL }}TKlogo.jpg" />
-	<meta property="og:description" content="TÅGEKAMMERETs galleri for &#8217;{{ album.title }}&#8217;{% if  album.publish_date %}, d. {{ album.publish_date }}{% endif %}." />
+  <meta property="og:image" content="{{ STATIC_URL }}TKlogo.jpg" />
+  <meta property="og:description" content="TÅGEKAMMERETs galleri for &#8217;{{ album.title }}&#8217;{% if album.publish_date %}, d. {{ album.publish_date }}{% endif %}." />
 {% endblock opengraph %}
 
 {% block content %}
