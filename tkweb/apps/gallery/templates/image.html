@@ -20,7 +20,6 @@
 {% block opengraph %}
 	<meta property="og:type" content="{% if start_file.type == "I" %}image{% elif start_file.type == "V" %}video{% elif start_file.type == "A" %}audio{% else %}website{% endif %}" />
 	<meta property="og:image" content="{% if start_file.type == "I" %}{{ start_file.file.thumbnail.720x720.url }}{% else %}{{ STATIC_URL }}TKlogo.jpg{% endif %}" />
-	<meta property="og:title" content="{{ album.title }} {{ album.gfyear|gfyearPPslash }}" />
 	<meta property="og:description" content="Fra TÅGEKAMMERETs galleri for &#8217;{{ album.title }}&#8217;.{% if  start_file.date %} Taget {{ start_file.date }}.{% endif %}" />
 {% endblock opengraph %}
 

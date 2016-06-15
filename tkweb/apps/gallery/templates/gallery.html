@@ -1,14 +1,13 @@
 {% extends 'base.html' %}
 {% load bootstrap3 tkbrand staticfiles %}
 
-{% block title %}Galleri{% endblock title %}
+{% block title %}{{ show_year|gfyearPPslash }}{% endblock title %}
 
 {% block canonical_url %}{% url 'gfyear' gfyear=show_year %}{% endblock canonical_url %}
 
 {% block opengraph %}
 	<meta property="og:type" content="website" />
 	<meta property="og:image" content="{{ STATIC_URL }}TKlogo.jpg" />
-	<meta property="og:title" content="Gallerier fra {{show_year|gfyearPPslash}}." />
 	<meta property="og:description" content="Oversigt over TÅGEKAMMERETs gallerier fra bestyrelsesåret {{show_year|gfyearPPslash}}." />
 {% endblock opengraph %}
 
