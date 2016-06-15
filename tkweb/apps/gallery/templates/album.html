@@ -3,10 +3,7 @@
 
 {% block title %}{{ album.title }}{% endblock title %}
 
-{% block canonical_url %}
-<link rel="canonical" href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">
-<meta property="og:url" content="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}" />
-{% endblock canonical_url %}
+{% block canonical_url %}{% url 'album' gfyear=album.gfyear album_slug=album.slug %}{% endblock canonical_url %}
 
 {% block opengraph %}
 	<meta property="og:type" content="website" />

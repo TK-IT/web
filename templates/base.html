@@ -1,4 +1,4 @@
-{% load bootstrap3 tkbrand staticfiles%}
+{% load repeatedblocks bootstrap3 tkbrand staticfiles %}
 <!DOCTYPE html>
 <html lang="da">
   <head>
@@ -13,7 +13,8 @@
 	<meta property="og:image" content="{{ STATIC_URL }}TKlogo.jpg" />
 	<meta property="og:description" content="TÅGEKAMMERET er en fest- og foredragsforening på Det Naturvidenskabelige Fakultet på Aarhus Universitet." />
 	{% endblock opengraph %}
-    {% block canonical_url %}{% endblock canonical_url %}
+    <link rel="canonical" href="{% repeated_block canonical_url %}{% endblock canonical_url %}">
+    <meta property="og:url" content="{% repeat canonical_url %}" />
     {% bootstrap_css %}
     {% include 'favicon.html' %}
     {% block extra_head %}{% endblock extra_head %}

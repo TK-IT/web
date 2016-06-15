@@ -29,6 +29,7 @@ THIRD_PARTY_APPS = [
     'sorl.thumbnail',
     'versatileimagefield',
     'django_cleanup',
+    'macros',
 ]
 
 LOCAL_APPS = [

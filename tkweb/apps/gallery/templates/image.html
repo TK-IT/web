@@ -11,10 +11,7 @@
   <script src="{% static "gallery/tkgal.js" %}"></script>
 {% endblock js %}
 
-{% block canonical_url %}
-  <link rel="canonical" href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=start_file.slug %}">
-  <meta property="og:url" content="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=start_file.slug %}" />
-{% endblock canonical_url %}
+{% block canonical_url %}{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=start_file.slug %}{% endblock canonical_url %}
 
 {% block extra_head %}
   <link rel="stylesheet" type="text/css" href="{% static "gallery/tkgal.css" %}">

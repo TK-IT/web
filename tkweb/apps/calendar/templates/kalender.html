@@ -2,10 +2,7 @@
 
 {% block title %}Kalender{% endblock title %}
 
-{% block canonical_url %}
-<link rel="canonical" href="{% url 'kalender' %}">
-<meta property="og:url" content="{% url 'kalender' %}" />
-{% endblock canonical_url %}
+{% block canonical_url %}{% url 'kalender' %}{% endblock canonical_url %}
 
 {% block content %}
 <div class="row">
