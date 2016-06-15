@@ -8,14 +8,14 @@
 *.sqlite3
 
 # Production settings
-tkweb/settings/prod.py
+/tkweb/settings/prod.py
 
 # Django static and media folders
-media/
-static/
+/media/
+/static/
 
 # Python virtual environments
-venv*/
+/venv*/
 
 # TLS keys (Let's encrypt)
 *.key
