@@ -85,20 +85,8 @@ body {
         margin-bottom: 10px; /* (@line-height-computed / 2) */
     }
 }
-#tkgal-container > * {
-    display:none;
-    position:relative;
-}
-
-#tkgal-container > .current {
-    display:block;
-}
-
-#tkgal-container > div > * {
-    display:block;
-    margin: 0 auto;
-    max-width: 100%;
-    max-height: ~'calc(100vh - 168px)'; /* Kan muligvis erstattes af flexbox, eller variabler i en .less-fil */
+#tkgal-container {
+    margin-top: -20px;
 }
 
 //** image.html: generic file
@@ -107,10 +95,6 @@ body {
 }
 
 //** from tkgal.css
-.tkgal-container {
-    margin-top: -20px;
-}
-
 html {
     overflow: scroll;
     overflow-y: scroll;

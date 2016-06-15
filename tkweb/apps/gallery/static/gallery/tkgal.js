@@ -1,6 +1,6 @@
 $(document).ready(function() {
     // Get array of all slugs
-    var slugs = $(".tkgal-container > *").map(function() {
+    var slugs = $("#tkgal-container > *").map(function() {
         return $(this).attr("data-permlink");
     }).get();
 
@@ -70,7 +70,7 @@ $(document).ready(function() {
     }
 	
 	//Load neighbors on pageload
-	loadfirst = $(".tkgal-container > .current").attr("data-permlink");
+	loadfirst = $("#tkgal-container > .current").attr("data-permlink");
 	changeCurrent(loadfirst);
 });
 

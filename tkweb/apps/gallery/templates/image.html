@@ -23,7 +23,7 @@
 {% endblock content %}
 
 {% block raw_content %}
-<div class="tkgal-container">
+<div id="tkgal-container">
 	{% for file, next_file, prev_file in file_orders %}
 	<div class="media{% if file == start_file %} current{% endif %}" data-permlink="{{ file.slug }}">
 		<div class="container-full">
