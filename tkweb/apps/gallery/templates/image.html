@@ -64,7 +64,7 @@
 			</div>
 		{% endif %}
 			<div class="overlay overlay-top">
-				<ol class="breadcrumb imagetitle">
+        <ol class="breadcrumb">
 					<li><a href="{% url 'gfyear' gfyear=album.gfyear  %}">{{ album.gfyear|gfyearPPslash }}</a></li>
 					<li><a href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">{{ album.title }}</a></li>
 					<li>{{ forloop.counter }} af {{ files|length }}{% if file.file.thumbnail.720x720.url %} <span class="hidden-xs">billede{{ files|length|pluralize:"r" }}</span>{% endif %}</li>

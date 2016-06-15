@@ -62,32 +62,60 @@ body {
     transform: translate(-50%, -50%);
 }
 
-//** image.html
-
+//** album.html
 .imagetitle {
     padding: 0;
     margin-bottom: 10px;
     background: none;
-}
 
-@media (min-width: 768px) { /* @screen-sm-min */
-    .imagetitle {
-        font-size: 18px; /* @font-size-h4 */
-        margin-top: 10px; /* (@line-height-computed / 2) */
-        margin-bottom: 10px; /* (@line-height-computed / 2) */
+    @media (min-width: @screen-sm-min) {
+        font-size: @font-size-h4;
+        margin-top: (@line-height-computed / 2);
+        margin-bottom: (@line-height-computed / 2);
+    }
+    @media (min-width: @screen-md-min) {
+        font-size: @font-size-h3;
+        margin-top: @line-height-computed;
+        margin-bottom: (@line-height-computed / 2);
     }
 }
 
-@media (min-width: 992px) { /* @screen-md-min */
-    .imagetitle {
-        font-size: 24px; /* @font-size-h3 */
-        margin-top: 20px; /* @line-height-computed */
-        margin-bottom: 10px; /* (@line-height-computed / 2) */
-    }
-}
+//** image.html
 #tkgal-container {
     margin-top: -20px;
+
+    .overlay {
+        position: absolute;
+        padding: 10px 20px;
+        background-color: rgba(8,8,8,0.5);
+
+        .breadcrumb {
+            padding: 0;
+            margin: 0;
+            background: none;
+            @media (min-width: @screen-sm-min) {
+                font-size: @font-size-h4;
+            }
+            @media (min-width: @screen-md-min) {
+                font-size: @font-size-h3;
+            }
+        }
+
+        a {
+            color: @text-color;
+        }
+    }
+
+    .overlay-top{
+        top: 0px;
+    }
+
+    .overlay-bottom{
+        bottom: 0px;
+        width: 100%;
+    }
 }
+
 
 //** image.html: generic file
 .lg-file-download {
@@ -134,23 +162,4 @@ html {
 
 .container-full video{
     padding-bottom: 50px;
-}
-
-.overlay {
-    position:absolute;
-    padding:10px 20px;
-    background-color: rgba(8,8,8,0.5);
-}
-
-.overlay a {
-    color: #EEEEEE;
-}
-
-.overlay-top{
-    top: 0px;
-}
-
-.overlay-bottom{
-    bottom: 0px;
-    width: 100%;
 }
