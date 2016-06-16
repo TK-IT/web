@@ -1,5 +1,5 @@
 body {
-    padding-top: 70px; /* for navbar-fixed-top */
+    padding-top: @navbar-height + @navbar-margin-bottom;
 }
 
 @media (max-width: 420px) {
@@ -82,7 +82,7 @@ body {
 
 //** image.html
 #tkgal-container {
-    margin-top: -20px;
+    margin-top: -@navbar-margin-bottom;
 
     .overlay {
         position: absolute;
