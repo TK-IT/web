@@ -43,15 +43,12 @@
         </div>
       </div>
     </nav>
-    {% block raw_content %}{% endblock raw_content %}
+    {% block raw_content %}
     <div class="container" role="main">
       {% block content %}{% endblock content%}
-      <footer class="footer">
-          <p class="small">
-              &copy;1956-{% now "Y" %} <a href="/">{% tket %}.</a>
-          </p>
-      </footer>
+        {% include 'footer.html' %}
     </div> <!-- container -->
+    {% endblock raw_content %}
     {% bootstrap_javascript jquery=1%}
     {% block js %}{% endblock js%}
   </body>

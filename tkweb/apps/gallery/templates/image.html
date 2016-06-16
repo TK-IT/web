@@ -19,11 +19,8 @@
   <meta property="og:description" content="Fra TÅGEKAMMERETs galleri for &#8217;{{ album.title }}&#8217;.{% if start_file.date %} Taget {{ start_file.date }}.{% endif %}" />
 {% endblock opengraph %}
 
-{% block content %}
-{% endblock content %}
-
 {% block raw_content %}
-<div id="tkgal-container">
+<div id="tkgal-container" role="main">
 	{% for file, next_file, prev_file in file_orders %}
 	<div class="{% if file != start_file %}hidden{% endif %}" data-permlink="{{ file.slug }}">
 		<div class="mediawrapper">
