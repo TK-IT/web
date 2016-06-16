@@ -26,7 +26,7 @@
 <div id="tkgal-container">
 	{% for file, next_file, prev_file in file_orders %}
 	<div class="{% if file != start_file %}hidden{% endif %}" data-permlink="{{ file.slug }}">
-		<div class="container-full">
+		<div class="mediawrapper">
 		{% if file.file.thumbnail.720x720.url %}
 			<img alt="{{ album.slug }}/{{ file.slug }}"
 				{% if file != start_file %}data-{% endif %}srcset=

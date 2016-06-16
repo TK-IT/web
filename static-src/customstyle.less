@@ -81,7 +81,13 @@ body {
 }
 
 //** image.html
+html, body {
+    height: 100%; /* This is applied site-wide, but should not be a problem as
+                     long pages are contained in a .container div */
+}
+
 #tkgal-container {
+    height: ~'calc(100% +'@navbar-margin-bottom~')';
     margin-top: -@navbar-margin-bottom;
 
     .overlay {
@@ -114,43 +120,30 @@ body {
         bottom: 0px;
         width: 100%;
     }
+    > div, .mediawrapper {
+        height: 100%
+    }
+    img, video, audio{
+        display: block;
+        margin: auto;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    img, video {
+        max-width: 100%;
+        max-height: 100%;
+    }
+    video {
+        padding-bottom: 40px;
+        @media (min-width: @screen-sm-min) {
+            padding-bottom: 45px;
+        }
+    }
 }
 
 
 //** image.html: generic file
 .lg-file-download {
     padding: 30px 0 60px 0;
-}
-
-//** from tkgal.css
-html {
-    overflow: scroll;
-    overflow-y: scroll;
-    overflow-x: hidden;
-}
-
-.container-full {
-    display: table-cell;
-    width: 100vw;
-    height: ~'calc(100vh - 50px)';
-    vertical-align: middle;
-    text-align: center;
-    padding: 0px;
-    margin: 0px;
-    position: relative;
-    border-bottom: 1px solid rgb(34,34,34);
-}
-
-.container-full+.container {
-    margin-top: 20px;
-}
-
-.container-full img, .container-full video {
-    max-width: 100%;
-    max-height: 100%;
-    position: relative;
-}
-
-.container-full video{
-    padding-bottom: 50px;
 }
