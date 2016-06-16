@@ -84,10 +84,16 @@
 				</div>
 			</div>
 		</div>
-		<div class="container">
-			<p>{{ file.caption }}</p>
-		</div>
 	</div>
 	{% endfor %}
+</div>
+
+<div class="container">
+    <div id="tkgal-caption-container">
+        {% for file, next_file, prev_file in file_orders %}
+		    <p class="hidden" data-permlink="{{ file.slug }}">{{ file.caption }}</p>
+        {% endfor %}
+    </div>
+    {% include 'footer.html' %}
 </div>
 {% endblock raw_content %}

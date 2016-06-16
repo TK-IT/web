@@ -21,6 +21,7 @@ $(document).ready(function() {
 
         // Update visibility of current picture
         $("#tkgal-container>*").addClass("hidden");
+        $("#tkgal-caption-container>*").addClass("hidden");
         $("[data-permlink='"+newimage+"']").removeClass("hidden");
 
         function deferMedia(file) {
