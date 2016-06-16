@@ -7,7 +7,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.dispatch import receiver
-from django.utils.text import slugify
 from django.utils.encoding import python_2_unicode_compatible
 from model_utils.managers import InheritanceManager
 from sorl.thumbnail import get_thumbnail
@@ -15,7 +14,7 @@ from versatileimagefield.fields import VersatileImageField
 from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 import os
 import logging
-from tkweb.apps.gallery.utils import file_name, get_exif_date, get_gfyear
+from tkweb.apps.gallery.utils import file_name, get_exif_date, get_gfyear, slugify
 
 FORCEDORDERMAX = 10000
 

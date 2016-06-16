@@ -11,4 +11,5 @@ django-cleanup>=0.4.2
 django-model-utils>=2.5
 six>=1.10
 django-macros>=0.4.0
+unidecode>=0.04.19
 #mysql-python>=1.2.5 # for python2 and production settings

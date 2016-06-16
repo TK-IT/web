@@ -5,12 +5,17 @@ from PIL.ExifTags import TAGS
 from constance import config
 from datetime import datetime
 from django.utils.timezone import get_current_timezone
-from django.utils.text import slugify
+from django.utils.text import slugify as dslugify
 from PIL import Image as PilImage
+from unidecode import unidecode
 import logging
 import os
 
 logger = logging.getLogger(__name__)
+
+def slugify(string):
+    return dslugify(unidecode(string))
+
 
 def file_name(instance, path):
     filename = os.path.basename(path)
