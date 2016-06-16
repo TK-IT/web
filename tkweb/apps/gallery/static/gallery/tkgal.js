@@ -20,8 +20,8 @@ $(document).ready(function() {
         var next = slugs[(i+1)%l];
 
         // Update visibility of current picture
-        $(".media.current").removeClass("current");
-        $("[data-permlink='"+newimage+"']").addClass("current");
+        $("#tkgal-container>*").addClass("hidden");
+        $("[data-permlink='"+newimage+"']").removeClass("hidden");
 
         function deferMedia(file) {
             // This removes the data- prefix from 'file' causing the browser to
@@ -70,7 +70,7 @@ $(document).ready(function() {
     }
 	
 	//Load neighbors on pageload
-	loadfirst = $("#tkgal-container > .current").attr("data-permlink");
+  loadfirst = $("#tkgal-container > :not(.hidden)").attr("data-permlink");
 	changeCurrent(loadfirst);
 });
 
