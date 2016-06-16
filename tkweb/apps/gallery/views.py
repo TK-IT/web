@@ -4,7 +4,6 @@ from __future__ import absolute_import, unicode_literals, division
 from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import get_object_or_404, get_list_or_404
@@ -57,10 +56,10 @@ def album(request, gfyear, album_slug):
 def image(request, gfyear, album_slug, image_slug, **kwargs):
     album = get_object_or_404(Album, gfyear=gfyear, slug=album_slug)
 
-    # list() will force evaluation of the QuerySet. We can now use .index()
+    # list() will force evaluation of the QuerySet. It is now iterable.
     files = list(album.basemedia.exclude(notPublic=True).select_subclasses())
-    paginator = Paginator(files, 1)
     start_file = album.basemedia.filter(album=album, slug=image_slug).select_subclasses().first()
+
     if not start_file:
         raise Http404("Billedet kan ikke findes")
 
@@ -73,7 +72,6 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
 
     context = {
         'album': album,
-        'files': files,
         'file_orders': file_orders,
         'start_file': start_file,
     }
