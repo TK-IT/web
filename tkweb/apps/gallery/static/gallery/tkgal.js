@@ -27,7 +27,6 @@ $(document).ready(function() {
         function deferMedia(file) {
             // This removes the data- prefix from 'file' causing the browser to
             // request the files.
-			$("[data-permlink='"+file+"']").addClass('loaded'); // For debugging
             var img = $("[data-permlink='"+file+"'] [data-src]");
 
             if(img.attr('data-srcset')){
