@@ -137,7 +137,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'gradgruppemedlemmer',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -164,7 +163,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'gruppemedlemmer',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -343,7 +341,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'titler',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
