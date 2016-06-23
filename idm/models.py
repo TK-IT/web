@@ -100,7 +100,7 @@ class Title(models.Model):
         return config.GFYEAR - self.period
 
     def display_title(self):
-        return '%s%s' % (tk_prefix(self.grad), self.orgtitel)
+        return '%s%s' % (tk_prefix(self.age), self.orgtitel)
 
     def __str__(self):
         return '%s %s' % (self.display_title(), self.profile)
