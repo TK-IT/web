@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from idm.models import (
     Profile, Group, tk_prefix,
-    Title, GradGroupMembership,
+    Title,
 )
 
 
@@ -10,15 +10,11 @@ class ProfileTitleAdmin(admin.TabularInline):
     model = Title
 
 
-class ProfileGradGroupAdmin(admin.TabularInline):
-    model = GradGroupMembership
-
-
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
         'navn', 'title', 'email', 'accepteremail', 'accepterdirektemail',
     )
-    inlines = [ProfileTitleAdmin, ProfileGradGroupAdmin]
+    inlines = [ProfileTitleAdmin]
 
     def title(self, profile):
         return ' '.join(

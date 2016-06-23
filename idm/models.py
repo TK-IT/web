@@ -66,16 +66,6 @@ class Profile(models.Model):
 
 
 @python_2_unicode_compatible
-class GradGroupMembership(models.Model):
-    profile = models.ForeignKey(Profile)
-    group = models.ForeignKey(Group, limit_choices_to=Q(type=1))
-    grad = models.IntegerField()
-
-    def __str__(self):
-        return '%s%s %s' % (tk_prefix(self.grad), self.group, self.profile)
-
-
-@python_2_unicode_compatible
 class Title(models.Model):
     BEST, FU, EFU = 'BEST', 'FU', 'EFU'
     KIND = [(BEST, 'BEST'), (FU, 'FU'), (EFU, 'EFU')]
