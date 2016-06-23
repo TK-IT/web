@@ -37,7 +37,6 @@ class Group(models.Model):
     type = models.IntegerField(choices=TYPES)
 
     class Meta:
-        db_table = 'grupper'
         ordering = ['navn']
 
     def __str__(self):
@@ -69,7 +68,6 @@ class Profile(models.Model):
                                     limit_choices_to=Q(type=0))
 
     class Meta:
-        db_table = 'tkfolk'
         ordering = ['navn']
 
     def __str__(self):
