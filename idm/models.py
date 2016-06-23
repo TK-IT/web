@@ -92,7 +92,7 @@ class Title(models.Model):
 
     profile = models.ForeignKey('Profile')
     period = models.IntegerField()
-    orgtitel = models.CharField(max_length=10)
+    root = models.CharField(max_length=10)
     kind = models.CharField(max_length=10, choices=KIND)
 
     @property
@@ -100,7 +100,7 @@ class Title(models.Model):
         return config.GFYEAR - self.period
 
     def display_title(self):
-        return '%s%s' % (tk_prefix(self.age), self.orgtitel)
+        return '%s%s' % (tk_prefix(self.age), self.root)
 
     def __str__(self):
         return '%s %s' % (self.display_title(), self.profile)
