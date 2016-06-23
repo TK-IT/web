@@ -86,10 +86,14 @@ class GradGroupMembership(models.Model):
 
 @python_2_unicode_compatible
 class Title(models.Model):
+    BEST, FU, EFU = 'BEST', 'FU', 'EFU'
+    KIND = [(BEST, 'BEST'), (FU, 'FU'), (EFU, 'EFU')]
+
     profile = models.ForeignKey('Profile')
     grad = models.IntegerField()
     orgtitel = models.CharField(max_length=10)
     inttitel = models.CharField(max_length=10)
+    kind = models.CharField(max_length=10, choices=KIND, blank=True, null=True)
 
     def display_title(self):
         return '%s%s' % (tk_prefix(self.grad), self.orgtitel)
