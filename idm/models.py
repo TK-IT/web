@@ -91,6 +91,7 @@ class Title(models.Model):
 
     profile = models.ForeignKey('Profile')
     grad = models.IntegerField()
+    period = models.IntegerField()
     orgtitel = models.CharField(max_length=10)
     kind = models.CharField(max_length=10, choices=KIND)
 
