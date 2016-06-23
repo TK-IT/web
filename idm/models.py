@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.db.models import Q
 from django.utils.encoding import python_2_unicode_compatible
+from constance import config
 
 
 def tk_prefix(age):
@@ -93,6 +94,10 @@ class Title(models.Model):
     period = models.IntegerField()
     orgtitel = models.CharField(max_length=10)
     kind = models.CharField(max_length=10, choices=KIND)
+
+    @property
+    def age(self):
+        return config.GFYEAR - self.period
 
     def display_title(self):
         return '%s%s' % (tk_prefix(self.grad), self.orgtitel)
