@@ -124,7 +124,6 @@ class Adresser(models.Model):
     gone = models.IntegerField()
 
     class Meta:
-        managed = False
         db_table = 'adresser'
 
 
@@ -134,7 +133,6 @@ class Andenbruger(models.Model):
     type = models.CharField(max_length=10, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'andenbruger'
 
 
@@ -146,7 +144,6 @@ class Arrangementer(models.Model):
     beskrivelse = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'arrangementer'
 
 
@@ -167,7 +164,6 @@ class Bestyrelsen(models.Model):
     hjemmeside = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'bestyrelsen'
 
 
@@ -188,7 +184,6 @@ class Bestyrelsenold(models.Model):
     hjemmeside = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'bestyrelsenOLD'
 
 
@@ -197,7 +192,6 @@ class Bruger(models.Model):
     password = models.CharField(max_length=32, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'bruger'
 
 
@@ -209,7 +203,6 @@ class Grupperold(models.Model):
     type = models.IntegerField()
 
     class Meta:
-        managed = False
         db_table = 'grupperOLD'
 
 
@@ -221,7 +214,6 @@ class Grupperv2Old(models.Model):
     type = models.IntegerField()
 
     class Meta:
-        managed = False
         db_table = 'grupperV2OLD'
 
 
@@ -245,7 +237,6 @@ class J50Adr(models.Model):
     tilmeld = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'j50adr'
 
 
@@ -269,7 +260,6 @@ class J50AdrOld(models.Model):
     tilmeld = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'j50adr-OLD'
 
 
@@ -282,7 +272,6 @@ class J50Arr(models.Model):
     arrangement = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'j50arr'
 
 
@@ -291,7 +280,6 @@ class Lokaldata(models.Model):
     data = models.TextField()
 
     class Meta:
-        managed = False
         db_table = 'lokalData'
 
 
@@ -305,7 +293,6 @@ class Mylog(models.Model):
     action = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'mylog'
 
 
@@ -316,7 +303,6 @@ class Nyheder(models.Model):
     beskrivelse = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'nyheder'
 
 
@@ -326,7 +312,6 @@ class TkfolkOld(models.Model):
     accepteremail = models.CharField(max_length=3, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tkfolk-OLD'
 
 
@@ -336,7 +321,6 @@ class Tkfolkbackup(models.Model):
     accepteremail = models.CharField(max_length=3, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tkfolkBACKUP'
 
 
@@ -346,5 +330,4 @@ class Tkfolkfix(models.Model):
     accepteremail = models.CharField(max_length=3, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tkfolkFix'
