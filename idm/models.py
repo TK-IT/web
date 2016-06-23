@@ -93,7 +93,7 @@ class Title(models.Model):
     grad = models.IntegerField()
     orgtitel = models.CharField(max_length=10)
     inttitel = models.CharField(max_length=10)
-    kind = models.CharField(max_length=10, choices=KIND, blank=True, null=True)
+    kind = models.CharField(max_length=10, choices=KIND)
 
     def display_title(self):
         return '%s%s' % (tk_prefix(self.grad), self.orgtitel)
