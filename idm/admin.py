@@ -27,7 +27,7 @@ class ProfileAdmin(admin.ModelAdmin):
 
 class GroupAdmin(admin.ModelAdmin):
     list_display = (
-        'navn', 'regexp', 'matchtest', 'relativ'
+        'navn', 'regexp', 'matchtest',
     )
 
 

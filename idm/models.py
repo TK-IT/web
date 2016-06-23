@@ -26,7 +26,6 @@ class Group(models.Model):
     navn = models.CharField(max_length=25, blank=True, null=True)
     regexp = models.CharField(max_length=50)
     matchtest = models.TextField()
-    relativ = models.IntegerField()
 
     class Meta:
         ordering = ['navn']
