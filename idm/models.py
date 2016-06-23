@@ -23,19 +23,10 @@ def tk_prefix(age):
 
 @python_2_unicode_compatible
 class Group(models.Model):
-    TYPES = (
-        (0, 'Underforening'),
-        (1, 'Årgangsgruppe'),
-        (2, 'Titel'),
-        (3, 'DirectUser'),
-        (4, 'BESTFU hack'),
-    )
-
     navn = models.CharField(max_length=25, blank=True, null=True)
     regexp = models.CharField(max_length=50)
     matchtest = models.TextField()
     relativ = models.IntegerField()
-    type = models.IntegerField(choices=TYPES)
 
     class Meta:
         ordering = ['navn']
