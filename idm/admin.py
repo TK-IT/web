@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from idm.models import (
-    Profile, Best, Group, tk_prefix,
+    Profile, Group, tk_prefix,
     Title, GradGroupMembership,
 )
 
@@ -25,10 +25,6 @@ class ProfileAdmin(admin.ModelAdmin):
             sorted(t.display_title() for t in profile.title_set.all()))
 
 
-class BestAdmin(admin.ModelAdmin):
-    list_display = ('sortid', 'orgtitel', 'titel')
-
-
 class GroupAdmin(admin.ModelAdmin):
     list_display = (
         'navn', 'type', 'regexp', 'matchtest', 'relativ'
@@ -36,5 +32,4 @@ class GroupAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Profile, ProfileAdmin)
-admin.site.register(Best, BestAdmin)
 admin.site.register(Group, GroupAdmin)
