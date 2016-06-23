@@ -31,5 +31,11 @@ class GroupAdmin(admin.ModelAdmin):
     )
 
 
+class TitleAdmin(admin.ModelAdmin):
+    list_display = (
+        '__str__', 'profile', 'period', 'root', 'kind', 'display_title')
+
+
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Group, GroupAdmin)
+admin.site.register(Title, TitleAdmin)
