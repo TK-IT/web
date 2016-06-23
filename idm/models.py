@@ -92,7 +92,6 @@ class Title(models.Model):
     profile = models.ForeignKey('Profile')
     grad = models.IntegerField()
     orgtitel = models.CharField(max_length=10)
-    inttitel = models.CharField(max_length=10)
     kind = models.CharField(max_length=10, choices=KIND)
 
     def display_title(self):
