@@ -24,7 +24,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'adresser',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -37,7 +36,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'andenbruger',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -52,7 +50,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'arrangementer',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -64,7 +61,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'best',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -88,7 +84,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'bestyrelsen',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -112,7 +107,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'bestyrelsenOLD',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -124,7 +118,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'bruger',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -151,7 +144,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'grupper',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -177,7 +169,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'grupperOLD',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -192,7 +183,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'grupperV2OLD',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -219,7 +209,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'j50adr',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -246,7 +235,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'j50adr-OLD',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -262,7 +250,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'j50arr',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -274,7 +261,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'lokalData',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -291,7 +277,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'mylog',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -305,7 +290,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'nyheder',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -327,7 +311,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'tkfolk',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -353,7 +336,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'tkfolkBACKUP',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -366,7 +348,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'tkfolkFix',
-                'managed': False,
             },
         ),
         migrations.CreateModel(
@@ -379,7 +360,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'tkfolk-OLD',
-                'managed': False,
             },
         ),
     ]
