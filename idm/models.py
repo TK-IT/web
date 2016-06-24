@@ -45,8 +45,6 @@ class Profile(models.Model):
 
     name = models.CharField(max_length=50, blank=True, null=True)
     email = models.CharField(max_length=50, blank=True, null=True)
-    accepteremail = models.CharField(max_length=3, blank=True, null=True,
-                                     choices=JANEJ)
     accepterdirektemail = models.CharField(max_length=3, choices=JANEJ)
     street_name = models.CharField(max_length=50, blank=True, null=True)
     house_number = models.CharField(max_length=15, blank=True, null=True)
