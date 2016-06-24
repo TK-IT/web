@@ -55,8 +55,7 @@ class Profile(models.Model):
     tlf = models.CharField(max_length=20, blank=True, null=True)
     note = models.TextField(blank=True, null=True)
 
-    groups = models.ManyToManyField(Group, blank=True,
-                                    limit_choices_to=Q(type=0))
+    groups = models.ManyToManyField(Group, blank=True)
 
     class Meta:
         ordering = ['navn']
