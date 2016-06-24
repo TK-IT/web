@@ -109,7 +109,7 @@ class GroupAdmin(admin.ModelAdmin):
 
 class TitleAdmin(admin.ModelAdmin):
     list_display = (
-        'get_display_title', 'profile_link', 'period')
+        'get_display_title', 'profile_link', 'get_period')
     list_filter = ['kind', TitleRootFilter, ('period', TitlePeriodFilter)]
 
     def profile_link(self, title):
@@ -126,6 +126,12 @@ class TitleAdmin(admin.ModelAdmin):
         return title.display_title()
 
     get_display_title.short_description = 'Titel'
+
+    def get_period(self, title):
+        return period_display_prefix(title.period, title.get_kind_display())
+
+    get_period.short_description = 'Årgang'
+    get_period.admin_order_field = 'period'
 
 
 admin.site.register(Profile, ProfileAdmin)
