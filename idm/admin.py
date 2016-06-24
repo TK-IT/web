@@ -57,8 +57,9 @@ class ProfileAdmin(admin.ModelAdmin):
     inlines = [ProfileTitleAdmin]
 
     def get_titles(self, profile):
-        return ' '.join(
-            sorted(t.display_title() for t in profile.title_set.all()))
+        titles = list(profile.title_set.all())
+        if titles:
+            return ' '.join(sorted(t.display_title() for t in titles))
 
     get_titles.short_description = 'Titler'
 
