@@ -38,11 +38,12 @@ class ProfileAdmin(admin.ModelAdmin):
         return ' '.join(
             sorted(t.display_title() for t in profile.title_set.all()))
 
-    get_titles.short_description = 'Titles'
+    get_titles.short_description = 'Titler'
 
     def on_mailing_list(self, profile):
         return profile.groups.filter(regexp=Group.REGEXP_MAILING_LIST).exists()
 
+    on_mailing_list.short_description = 'Hængerlisten'
     on_mailing_list.boolean = True
 
 
