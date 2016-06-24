@@ -50,6 +50,13 @@ class TitleRootFilter(admin.SimpleListFilter):
             return queryset.filter(root=self.value())
 
 
+def period_display_prefix(period, name):
+    second_half = (period + 1) % 100
+    age = config.GFYEAR - period
+    prefix = tk_prefix(age)
+    return '%s%s %s/%02d' % (prefix, name, period, second_half)
+
+
 class TitlePeriodFilter(admin.AllValuesFieldListFilter):
     def choices(self, cl):
         for choice in super().choices(cl):
@@ -60,11 +67,7 @@ class TitlePeriodFilter(admin.AllValuesFieldListFilter):
             except TypeError:
                 pass
             else:
-                second_half = (period + 1) % 100
-                age = config.GFYEAR - period
-                prefix = tk_prefix(age)
-                choice['display'] = ('%s/%02d %sBEST/FU' %
-                                     (period, second_half, prefix))
+                choice['display'] = period_display_prefix(period, 'BEST/FU')
             yield choice
 
 
