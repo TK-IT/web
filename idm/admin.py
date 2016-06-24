@@ -12,7 +12,7 @@ class ProfileTitleAdmin(admin.TabularInline):
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'get_titles', 'email', 'accepteremail', 'accepterdirektemail',
+        'name', 'get_titles', 'email', 'on_mailing_list', 'accepterdirektemail',
     )
     inlines = [ProfileTitleAdmin]
 
@@ -21,6 +21,11 @@ class ProfileAdmin(admin.ModelAdmin):
             sorted(t.display_title() for t in profile.title_set.all()))
 
     get_titles.short_description = 'Titles'
+
+    def on_mailing_list(self, profile):
+        return profile.groups.filter(regexp=Group.REGEXP_MAILING_LIST).exists()
+
+    on_mailing_list.boolean = True
 
 
 class GroupAdmin(admin.ModelAdmin):
