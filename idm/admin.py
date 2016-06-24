@@ -1,6 +1,7 @@
 from django.core import urlresolvers
 from django.contrib import admin
 from django.utils.html import format_html
+from constance import config
 
 from idm.models import (
     Profile, Group, tk_prefix,
@@ -49,6 +50,24 @@ class TitleRootFilter(admin.SimpleListFilter):
             return queryset.filter(root=self.value())
 
 
+class TitlePeriodFilter(admin.AllValuesFieldListFilter):
+    def choices(self, cl):
+        for choice in super().choices(cl):
+            try:
+                period = int(choice['display'])
+            except ValueError:
+                pass
+            except TypeError:
+                pass
+            else:
+                second_half = (period + 1) % 100
+                age = config.GFYEAR - period
+                prefix = tk_prefix(age)
+                choice['display'] = ('%s/%02d %sBEST/FU' %
+                                     (period, second_half, prefix))
+            yield choice
+
+
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
         'name', 'get_titles', 'get_email',
@@ -88,7 +107,7 @@ class GroupAdmin(admin.ModelAdmin):
 class TitleAdmin(admin.ModelAdmin):
     list_display = (
         'get_display_title', 'profile_link', 'period')
-    list_filter = ['kind', TitleRootFilter, 'period']
+    list_filter = ['kind', TitleRootFilter, ('period', TitlePeriodFilter)]
 
     def profile_link(self, title):
         return format_html(
