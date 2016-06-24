@@ -11,8 +11,8 @@
 {% endblock opengraph %}
 
 {% block content %}
-<h2>[Bestyrelsen]</h2>
-<p>TÅGEKAMMERETs bestyrelse består af otte personer. For øjeblikket er
+<h2>Bestyrelsen</h2>
+<p>{% tkets %} bestyrelse består af otte personer. For øjeblikket er
     det:</p>
 <table class="table table-condensed">
     <tbody>
@@ -20,7 +20,7 @@
         <tr>
             <td>{{ p.display_title }}</td>
             <td>{{ p.profile.name }}</td>
-            <td><a href="mailto:{{ p.display_title }}@TAAGEKAMMERET.dk">{{ p.display_title }}@TAAGEKAMMERET.dk</a></td>
+            <td><a href="mailto:{{ p.display_title }}@TAAGEKAMMERET.dk">{{ p.display_title }}@{% tket %}.dk</a></td>
         </tr>
         {% endfor %}
     </tbody>
@@ -29,7 +29,7 @@
 <p>Ligesom de græske guder er hvert bestyrelsesmedlem udstyret med et
     ansvarsområde og nogle attributter.</p>
 
-<h3>[FORM]</h3>
+<h3>FORM</h3>
 <p>FORM er dum. Det ses tydeligt, da høn har valgt at tage hele det
     store ansvar for kammeret. Det forlyder dog, at høn er snedig &ndash;
     det påstår høn i hvert fald selv, og af og til viser høn, at høn har
@@ -38,7 +38,7 @@
     Næstformationen.</p>
 
 
-<h3>[NF]</h3>
+<h3>NF</h3>
 <p>NF befinder sig i en grænsetilstand af mental ustabilitet og er
     derfor i den unikke situation at kunne lukke sindssyge tanker ud på
     kommando. Disse tanker kommunikeres ud til folkemasserne via
@@ -46,32 +46,32 @@
     RemToR. Al officiel kommunikation med verden udenfor foregår normalt
     også gennem makkerparret NF og RemToR.</p>
 
-<h3>[INKA]</h3>
-<p>INKA er TÅGEKAMMERETs inkassator og har den fornemme opgave at
+<h3>INKA</h3>
+<p>INKA er {% tkets %} inkassator og har den fornemme opgave at
     indkræve penge fra de folk, som skylder.  For at kunne løfte denne
     byrde har INKA et sæt rokokokøller, som høn glædeligt svinger, hvis
     høn føler sig berettiget til det. Der er god grund til at frygte høn,
     for høn står nemlig ikke alene! Høn har nemlig banden KET i ryggen, en
     samling af gamle, onde kasserer og inkassatorer.  Derudover står INKA
-    også for medlemskaberne i TÅGEKAMMERET.</p>
+    også for medlemskaberne i {% tket %}.</p>
 
-<h3>[KA$$]</h3>
+<h3>KA$$</h3>
 <p>KA$$ har til opgave at holde styr på regnskabet. KA$$ er nærig, så
-    der skal fedtes, hvis der skal foretages indkøb til TÅGEKAMMERET. Til
+    der skal fedtes, hvis der skal foretages indkøb til {% tket %}. Til
     at hjælpe med at tælle penge, har KA$$ en kugleramme og en hær af
     gamle, onde kasserer og inkassatorer (KET), der sikrer ham mod at
     regne forkert, så betvivl ej! Regnskabet passer altid!</p>
 
-<h3>[CERM]</h3>
+<h3>CERM</h3>
 <p>Hvis du hører et horn, der galder og en gøglers fjollerier i det
     fjerne, så har du nok hørt den kære ceremonimester. For når
-    TÅGEKAMMERET optræder offentligt, er det CERM der styrer
+    {% tket %} optræder offentligt, er det CERM der styrer
     showet. Således er det CERM der laver happenings og leder tropperne
     rundt til relevante receptioner &ndash; altid med en fantastisk
     nyskreven sang og et horn i hånden.</p>
 
-<h3>[VC]</h3>
-<p>En af de aktiviteter, der dyrkes mest på TÅGEKAMMERET er indtagning
+<h3>VC</h3>
+<p>En af de aktiviteter, der dyrkes mest på {% tket %} er indtagning
     af øl og vand. Det er ViceCeremonimesterens opgave at sørge for, der
     altid er rigeligt at tage af. Dagligt køres tomme kasser væk og fyldte
     kasser til for at holde ølflowet konstant. Drikkes kammeret tomt,
@@ -80,7 +80,7 @@
     denne af en eller anden grund ikke dukker op. Med dette ansvar følger
     også tilladelsen til at trutte i CERMs horn, når der skal larmes.</p>
 
-<h3>[SEKR]</h3>
+<h3>SEKR</h3>
 <p>Sekretæren har det utaknemmelige job at registrere alt hvad der
     sker i Kammerregi og nedfælde det i Kammerets protokol. Takket være
     sekretærernes indsatser gennem tiderne kan man finde oplysninger om
@@ -89,7 +89,7 @@
     drinks der udbydes til festerne og køber det nødvendige sprut og
     barinventar.</p>
 
-<h3>[PR]</h3>
+<h3>PR</h3>
 <p>PR kan alt med papir, saks, tusch og lim. Den ene plakat efter den
     anden trylles frem og op til vores arrangementer er de fleste af
     fakultetets gule mursten dækket af farverige og indbydende
@@ -97,8 +97,8 @@
     sig udadtil igennem hjemmesiden og Facebooksiden.  PR og SEKR er ikke
     medlemmer af en forening.</p>
 
-<h2>[FESTUDVALGET]</h2>
-<p>TÅGEKAMMERET bygger på en aktiv medlemsskare, der ikke er bange for
+<h2>Festudvalget</h2>
+<p>{% tket %} bygger på en aktiv medlemsskare, der ikke er bange for
     at give en hånd med til vores arrangementer.  For at gøre afholdelsen
     af fester lidt mere smertefrie, har vi dog et specielt FestUdvalg, som
     normalt består af førsteårstuderende. Når man optages i dette udvalg,
@@ -112,7 +112,7 @@
         <tr>
             <td>{{ p.display_title }}</td>
             <td>{{ p.profile.name }}</td>
-            <td><a href="mailto:{{ p.display_title }}@TAAGEKAMMERET.dk">{{ p.display_title }}@TAAGEKAMMERET.dk</a></td>
+            <td><a href="mailto:{{ p.display_title }}@TAAGEKAMMERET.dk">{{ p.display_title }}@{% tket %}.dk</a></td>
         </tr>
         {% endfor %}
     </tbody>
@@ -121,7 +121,7 @@
 <p>FU'erne har desuden den ære at dele løbesedler ud til samtlige
     borde og andre velegnede steder på hele Naturvidenskab.
     Løbeseddeltjanserne tildeles FU'erne under mødet om torsdagen, og
-    sedlerne forventes at være ude inden kl. 11.Og så opfyldning af
+    sedlerne forventes at være ude inden kl. 11. Og så opfyldning af
     kæleskabet klares normalt af FU'erne. Nuværende og gamle FU'er er
     samlet i en eksklusiv forening ved navn FU'ernes Central Komite
     (FUCK). Tidligere FU'er, som nu er i bestyrelsen, er naturligvis
