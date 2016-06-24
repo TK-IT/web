@@ -23,6 +23,8 @@ def tk_prefix(age):
 
 @python_2_unicode_compatible
 class Group(models.Model):
+    REGEXP_MAILING_LIST = 'no$public$address'
+
     name = models.CharField(max_length=25, blank=True, null=True)
     regexp = models.CharField(max_length=50)
     matchtest = models.TextField()
