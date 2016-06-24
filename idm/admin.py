@@ -78,6 +78,7 @@ class ProfileAdmin(admin.ModelAdmin):
     )
     list_filter = [MailingListFilter, 'allow_direct_email', 'gone']
     inlines = [ProfileTitleAdmin]
+    search_fields = ['name', 'email']
 
     def get_titles(self, profile):
         titles = list(profile.title_set.all())
@@ -111,6 +112,7 @@ class TitleAdmin(admin.ModelAdmin):
     list_display = (
         'get_display_title', 'profile_link', 'get_period')
     list_filter = ['kind', TitleRootFilter, ('period', TitlePeriodFilter)]
+    search_fields = ['profile__name']
 
     def profile_link(self, title):
         return format_html(
