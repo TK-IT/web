@@ -12,7 +12,7 @@ class ProfileTitleAdmin(admin.TabularInline):
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'get_titles', 'email', 'on_mailing_list', 'accepterdirektemail',
+        'name', 'get_titles', 'email', 'on_mailing_list', 'allow_direct_email',
     )
     inlines = [ProfileTitleAdmin]
 
