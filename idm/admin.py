@@ -1,3 +1,4 @@
+# encoding: utf8
 from django.core import urlresolvers
 from django.contrib import admin
 from django.utils.html import format_html
