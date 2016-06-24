@@ -12,13 +12,15 @@ class ProfileTitleAdmin(admin.TabularInline):
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
-        'navn', 'title', 'email', 'accepteremail', 'accepterdirektemail',
+        'navn', 'get_titles', 'email', 'accepteremail', 'accepterdirektemail',
     )
     inlines = [ProfileTitleAdmin]
 
-    def title(self, profile):
+    def get_titles(self, profile):
         return ' '.join(
             sorted(t.display_title() for t in profile.title_set.all()))
+
+    get_titles.short_description = 'Titles'
 
 
 class GroupAdmin(admin.ModelAdmin):
