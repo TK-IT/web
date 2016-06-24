@@ -29,6 +29,26 @@ class MailingListFilter(admin.SimpleListFilter):
             return queryset.exclude(groups__regexp=Group.REGEXP_MAILING_LIST)
 
 
+class TitleRootFilter(admin.SimpleListFilter):
+    title = 'Titel'
+    parameter_name = 'title'
+
+    def lookups(self, request, model_admin):
+        values = self._values()
+        tr = dict(KASS='KA$$')
+        return [(v, tr.get(v, v)) for v in values]
+
+    def _values(self):
+        eight = 'CERM FORM INKA KASS NF PR SEKR VC'.split()
+        fu = 'FUAN EFUIT'.split()
+        old = 'TVC BEST'.split()
+        return eight + fu + old
+
+    def queryset(self, request, queryset):
+        if self.value() in self._values():
+            return queryset.filter(root=self.value())
+
+
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
         'name', 'get_titles', 'email', 'on_mailing_list', 'allow_direct_email',
@@ -58,7 +78,7 @@ class GroupAdmin(admin.ModelAdmin):
 class TitleAdmin(admin.ModelAdmin):
     list_display = (
         'get_display_title', 'profile_link', 'period')
-    list_filter = ['kind', 'period']
+    list_filter = ['kind', TitleRootFilter, 'period']
 
     def profile_link(self, title):
         return format_html(
