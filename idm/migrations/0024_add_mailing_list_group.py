@@ -21,9 +21,6 @@ def add_mailing_list_group(apps, schema_editor):
                  for i, in qs.values_list('id')]
     if relations:
         Profile.groups.through.objects.bulk_create(relations)
-    else:
-        raise ValueError("No people added to %s" % (g,))
-
 
 class Migration(migrations.Migration):
 
