@@ -21,6 +21,7 @@ html_tk = (
 
 html_tket = html_tk + '<span style="vertical-align: 0.057em">ET</span>'
 
+html_tkets = html_tket + 's'
 
 @register.simple_tag
 def tk(monospace=None):
@@ -30,6 +31,10 @@ def tk(monospace=None):
 @register.simple_tag
 def tket():
     return mark_safe('<span class="tk-brand">' + html_tket + '</span>')
+
+@register.simple_tag
+def tkets():
+    return mark_safe('<span class="tk-brand">' + html_tkets + '</span>')
 
 @register.filter
 def gfyearPP(gfyear):
