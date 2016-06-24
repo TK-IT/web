@@ -33,6 +33,8 @@ class TitleAdmin(admin.ModelAdmin):
     list_display = (
         '__str__', 'profile', 'period', 'root', 'kind', 'display_title')
 
+    list_filter = ['kind', 'period']
+
 
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Group, GroupAdmin)
