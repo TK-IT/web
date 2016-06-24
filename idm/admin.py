@@ -10,10 +10,28 @@ class ProfileTitleAdmin(admin.TabularInline):
     model = Title
 
 
+class MailingListFilter(admin.SimpleListFilter):
+    title = 'Hængerlisten'
+    parameter_name = 'on_mailing_list'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('1', 'Ja'),
+            ('0', 'Nej'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == '1':
+            return queryset.filter(groups__regexp=Group.REGEXP_MAILING_LIST)
+        if self.value() == '0':
+            return queryset.exclude(groups__regexp=Group.REGEXP_MAILING_LIST)
+
+
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
         'name', 'get_titles', 'email', 'on_mailing_list', 'allow_direct_email',
     )
+    list_filter = [MailingListFilter, 'allow_direct_email', 'gone']
     inlines = [ProfileTitleAdmin]
 
     def get_titles(self, profile):
