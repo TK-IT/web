@@ -12,6 +12,7 @@ import tkweb.apps.jubi.urls
 import tkweb.apps.redirect.urls
 import django.views.static
 import django.views.defaults
+import tkweb.views
 
 
 urlpatterns = [
@@ -26,7 +27,7 @@ urlpatterns = [
         views.flatpage, {'url': '/om/'},
         name='om'),
     url(r'^bestfu/$',
-        views.flatpage, {'url': '/bestfu/'},
+        tkweb.views.bestfu,
         name='bestfu'),
     url(r'^arrangementer/$',
         views.flatpage, {'url': '/arrangementer/'},
