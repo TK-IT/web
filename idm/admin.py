@@ -51,7 +51,8 @@ class TitleRootFilter(admin.SimpleListFilter):
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'get_titles', 'email', 'on_mailing_list', 'allow_direct_email',
+        'name', 'get_titles', 'get_email',
+        'on_mailing_list', 'allow_direct_email',
     )
     list_filter = [MailingListFilter, 'allow_direct_email', 'gone']
     inlines = [ProfileTitleAdmin]
@@ -62,6 +63,14 @@ class ProfileAdmin(admin.ModelAdmin):
             return ' '.join(sorted(t.display_title() for t in titles))
 
     get_titles.short_description = 'Titler'
+
+    def get_email(self, profile):
+        if profile.email:
+            return format_html(
+                '<a href="mailto:{}">{}</a>', profile.email, profile.email)
+
+    get_email.short_description = 'Emailadresse'
+    get_email.admin_order_field = 'email'
 
     def on_mailing_list(self, profile):
         return profile.groups.filter(regexp=Group.REGEXP_MAILING_LIST).exists()
