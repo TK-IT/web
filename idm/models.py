@@ -82,5 +82,8 @@ class Title(models.Model):
     def display_title(self):
         return '%s%s' % (tk_prefix(self.age), self.root)
 
+    class Meta:
+        ordering = ['-period', 'kind', 'root']
+
     def __str__(self):
         return '%s %s' % (self.display_title(), self.profile)
