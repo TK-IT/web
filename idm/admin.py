@@ -1,4 +1,6 @@
+from django.core import urlresolvers
 from django.contrib import admin
+from django.utils.html import format_html
 
 from idm.models import (
     Profile, Group, tk_prefix,
@@ -55,9 +57,23 @@ class GroupAdmin(admin.ModelAdmin):
 
 class TitleAdmin(admin.ModelAdmin):
     list_display = (
-        '__str__', 'profile', 'period', 'root', 'kind', 'display_title')
-
+        'get_display_title', 'profile_link', 'period')
     list_filter = ['kind', 'period']
+
+    def profile_link(self, title):
+        return format_html(
+            '<a href="{}">{}</a>',
+            urlresolvers.reverse('admin:idm_profile_change',
+                                 args=(title.profile_id,)),
+            title.profile)
+
+    profile_link.short_description = 'Person'
+    profile_link.admin_order_field = 'profile'
+
+    def get_display_title(self, title):
+        return title.display_title()
+
+    get_display_title.short_description = 'Titel'
 
 
 admin.site.register(Profile, ProfileAdmin)
