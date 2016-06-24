@@ -52,7 +52,6 @@ class Profile(models.Model):
     town = models.CharField(max_length=25, blank=True, null=True)
     country = models.CharField(max_length=50, blank=True, null=True)
     gone = models.BooleanField(blank=True)
-    gone_janej = models.CharField(max_length=3, choices=JANEJ)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     note = models.TextField(blank=True, null=True)
 
