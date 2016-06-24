@@ -23,15 +23,15 @@ def tk_prefix(age):
 
 @python_2_unicode_compatible
 class Group(models.Model):
-    navn = models.CharField(max_length=25, blank=True, null=True)
+    name = models.CharField(max_length=25, blank=True, null=True)
     regexp = models.CharField(max_length=50)
     matchtest = models.TextField()
 
     class Meta:
-        ordering = ['navn']
+        ordering = ['name']
 
     def __str__(self):
-        return self.navn
+        return self.name
 
 
 @python_2_unicode_compatible
@@ -41,27 +41,27 @@ class Profile(models.Model):
         ('nej', 'nej'),
     )
 
-    navn = models.CharField(max_length=50, blank=True, null=True)
+    name = models.CharField(max_length=50, blank=True, null=True)
     email = models.CharField(max_length=50, blank=True, null=True)
     accepteremail = models.CharField(max_length=3, blank=True, null=True,
                                      choices=JANEJ)
     accepterdirektemail = models.CharField(max_length=3, choices=JANEJ)
-    gade = models.CharField(max_length=50, blank=True, null=True)
-    husnr = models.CharField(max_length=15, blank=True, null=True)
-    postnr = models.CharField(max_length=10, blank=True, null=True)
-    postby = models.CharField(max_length=25, blank=True, null=True)
-    land = models.CharField(max_length=50, blank=True, null=True)
+    street_name = models.CharField(max_length=50, blank=True, null=True)
+    house_number = models.CharField(max_length=15, blank=True, null=True)
+    postal_code = models.CharField(max_length=10, blank=True, null=True)
+    town = models.CharField(max_length=25, blank=True, null=True)
+    country = models.CharField(max_length=50, blank=True, null=True)
     gone = models.CharField(max_length=3, choices=JANEJ)
-    tlf = models.CharField(max_length=20, blank=True, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
     note = models.TextField(blank=True, null=True)
 
     groups = models.ManyToManyField(Group, blank=True)
 
     class Meta:
-        ordering = ['navn']
+        ordering = ['name']
 
     def __str__(self):
-        return self.navn
+        return self.name
 
 
 @python_2_unicode_compatible

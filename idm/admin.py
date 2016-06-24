@@ -12,7 +12,7 @@ class ProfileTitleAdmin(admin.TabularInline):
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
-        'navn', 'get_titles', 'email', 'accepteremail', 'accepterdirektemail',
+        'name', 'get_titles', 'email', 'accepteremail', 'accepterdirektemail',
     )
     inlines = [ProfileTitleAdmin]
 
@@ -25,7 +25,7 @@ class ProfileAdmin(admin.ModelAdmin):
 
 class GroupAdmin(admin.ModelAdmin):
     list_display = (
-        'navn', 'regexp', 'matchtest',
+        'name', 'regexp', 'matchtest',
     )
 
 
