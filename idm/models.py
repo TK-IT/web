@@ -25,12 +25,15 @@ def tk_prefix(age):
 class Group(models.Model):
     REGEXP_MAILING_LIST = 'no$public$address'
 
-    name = models.CharField(max_length=25, blank=True, null=True)
-    regexp = models.CharField(max_length=50)
-    matchtest = models.TextField()
+    name = models.CharField(max_length=25, blank=True, null=True,
+                            verbose_name="Navn")
+    regexp = models.CharField(max_length=50, verbose_name="Regulært udtryk")
+    matchtest = models.TextField(verbose_name="Eksempler")
 
     class Meta:
         ordering = ['name']
+        verbose_name = 'gruppe'
+        verbose_name_plural = verbose_name + 'r'
 
     def __str__(self):
         return self.name
@@ -43,22 +46,33 @@ class Profile(models.Model):
         ('nej', 'nej'),
     )
 
-    name = models.CharField(max_length=50, blank=True, null=True)
-    email = models.CharField(max_length=50, blank=True, null=True)
-    allow_direct_email = models.BooleanField(blank=True)
-    street_name = models.CharField(max_length=50, blank=True, null=True)
-    house_number = models.CharField(max_length=15, blank=True, null=True)
-    postal_code = models.CharField(max_length=10, blank=True, null=True)
-    town = models.CharField(max_length=25, blank=True, null=True)
-    country = models.CharField(max_length=50, blank=True, null=True)
-    gone = models.BooleanField(blank=True)
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
-    note = models.TextField(blank=True, null=True)
+    name = models.CharField(max_length=50, blank=True, null=True,
+                            verbose_name="Navn")
+    email = models.CharField(max_length=50, blank=True, null=True,
+                             verbose_name="Emailadresse")
+    allow_direct_email = models.BooleanField(
+        blank=True, verbose_name="Tillad emails til titel")
+    street_name = models.CharField(max_length=50, blank=True, null=True,
+                                   verbose_name="Gade")
+    house_number = models.CharField(max_length=15, blank=True, null=True,
+                                    verbose_name="Husnr.")
+    postal_code = models.CharField(max_length=10, blank=True, null=True,
+                                   verbose_name="Postnr.")
+    town = models.CharField(max_length=25, blank=True, null=True,
+                            verbose_name="By")
+    country = models.CharField(max_length=50, blank=True, null=True,
+                               verbose_name="Land")
+    gone = models.BooleanField(blank=True, verbose_name="Afdød")
+    phone_number = models.CharField(max_length=20, blank=True, null=True,
+                                    verbose_name="Telefonnr.")
+    note = models.TextField(blank=True, null=True, verbose_name="Note")
 
-    groups = models.ManyToManyField(Group, blank=True)
+    groups = models.ManyToManyField(Group, blank=True, verbose_name="Grupper")
 
     class Meta:
         ordering = ['name']
+        verbose_name = 'person'
+        verbose_name_plural = verbose_name + 'er'
 
     def __str__(self):
         return self.name
@@ -70,9 +84,9 @@ class Title(models.Model):
     KIND = [(BEST, 'BEST'), (FU, 'FU'), (EFU, 'EFU')]
 
     profile = models.ForeignKey('Profile')
-    period = models.IntegerField()
-    root = models.CharField(max_length=10)
-    kind = models.CharField(max_length=10, choices=KIND)
+    period = models.IntegerField(verbose_name='Årgang')
+    root = models.CharField(max_length=10, verbose_name='Titel')
+    kind = models.CharField(max_length=10, choices=KIND, verbose_name='Slags')
 
     @property
     def age(self):
@@ -83,6 +97,8 @@ class Title(models.Model):
 
     class Meta:
         ordering = ['-period', 'kind', 'root']
+        verbose_name = 'titel'
+        verbose_name_plural = 'titler'
 
     def __str__(self):
         return '%s %s' % (self.display_title(), self.profile)
