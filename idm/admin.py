@@ -61,7 +61,7 @@ def period_display_prefix(period, name):
 
 class TitlePeriodFilter(admin.AllValuesFieldListFilter):
     def choices(self, cl):
-        for choice in super().choices(cl):
+        for choice in super(TitlePeriodFilter, self).choices(cl):
             try:
                 period = int(choice['display'])
             except ValueError:
@@ -118,7 +118,7 @@ class GroupAdminForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(GroupAdminForm, self).__init__(*args, **kwargs)
         if self.instance.pk:
             qs = self.instance.profile_set.all()
             self.initial['members'] = qs.values_list('pk', flat=True)
@@ -141,7 +141,7 @@ class GroupAdmin(admin.ModelAdmin):
         Override save_model to also update Group.profile_set.
         """
         # Based on http://stackoverflow.com/a/21480139/1570972
-        super().save_model(request, obj, form, change)
+        super(GroupAdmin, self).save_model(request, obj, form, change)
         obj.profile_set.clear()
         obj.profile_set.add(*form.cleaned_data['members'])
 
