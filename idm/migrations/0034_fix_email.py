@@ -8,7 +8,8 @@ def fix_emails(apps, schema_editor):
     Profile = apps.get_model('idm', 'Profile')
     save = []
     for p in Profile.objects.all():
-        e = p.email.replace('&#064;', '@')
+        e = p.email
+        e = e.replace('&#064;', '@')
         if e != p.email:
             p.email = e
             save.append(p)
