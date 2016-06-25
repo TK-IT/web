@@ -20,7 +20,8 @@
         <tr>
             <td>{{ p.display_title }}</td>
             <td>{{ p.profile.name }}</td>
-            <td><a href="mailto:{{ p.display_title }}@TAAGEKAMMERET.dk">{{ p.display_title }}@{% tket %}.dk</a></td>
+            <td><a href="mailto:{{ p.email_local_part }}@TAAGEKAMMERET.dk">
+                {{ p.email_local_part }}@{% tket %}.dk</a></td>
         </tr>
         {% endfor %}
     </tbody>
@@ -112,7 +113,8 @@
         <tr>
             <td>{{ p.display_title }}</td>
             <td>{{ p.profile.name }}</td>
-            <td><a href="mailto:{{ p.display_title }}@TAAGEKAMMERET.dk">{{ p.display_title }}@{% tket %}.dk</a></td>
+            <td><a href="mailto:{{ p.email_local_part }}@TAAGEKAMMERET.dk">
+                {{ p.email_local_part }}@{% tket %}.dk</a></td>
         </tr>
         {% endfor %}
     </tbody>
