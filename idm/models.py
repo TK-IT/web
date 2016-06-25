@@ -45,6 +45,18 @@ class Group(models.Model):
                               validators=[validate_regex_pattern])
     matchtest = models.TextField(verbose_name="Eksempler", blank=True)
 
+    def clean(self):
+        if self.matchtest and self.regexp:
+            not_accepted = []
+            for example in self.matchtest.split(','):
+                mo = re.fullmatch(self.regexp, example)
+                if mo is None:
+                    not_accepted.append(example)
+            if not_accepted:
+                # Tie the error to the regexp field
+                raise ValidationError(
+                    {'regexp': "Failed examples: %s" % ','.join(not_accepted)})
+
     class Meta:
         ordering = ['name']
         verbose_name = 'gruppe'
