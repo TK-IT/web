@@ -1,6 +1,9 @@
 # encoding: utf8
 from __future__ import unicode_literals
 
+import re
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from constance import config
@@ -23,13 +26,23 @@ def tk_prefix(age, sup_fn=None):
         return 'T%sO' % sup_fn(age - 3)
 
 
+# Remember to update the migrations that refer to this function
+# if it is moved to a different file.
+def validate_regex_pattern(value):
+    try:
+        re.compile(value)
+    except re.error as exn:
+        raise ValidationError('Invalid regex pattern: %s' % (exn,))
+
+
 @python_2_unicode_compatible
 class Group(models.Model):
     REGEXP_MAILING_LIST = 'no$public$address'
 
     name = models.CharField(max_length=25, blank=True, null=True,
                             verbose_name="Navn")
-    regexp = models.CharField(max_length=50, verbose_name="Regulært udtryk")
+    regexp = models.CharField(max_length=50, verbose_name="Regulært udtryk",
+                              validators=[validate_regex_pattern])
     matchtest = models.TextField(verbose_name="Eksempler")
 
     class Meta:
