@@ -1,4 +1,5 @@
 # encoding: utf8
+from django import forms
 from django.core import urlresolvers
 from django.contrib import admin
 from django.utils.html import format_html
@@ -104,7 +105,28 @@ class ProfileAdmin(admin.ModelAdmin):
     on_mailing_list.boolean = True
 
 
+class GroupAdminForm(forms.ModelForm):
+    class Meta:
+        model = Group
+        fields = ['name', 'regexp', 'matchtest']
+
+    members = forms.ModelMultipleChoiceField(
+        Profile.objects.all(),
+        widget=admin.widgets.FilteredSelectMultiple('personer', False),
+        required=False,
+        label='Medlemmer',
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            qs = self.instance.profile_set.all()
+            self.initial['members'] = qs.values_list('pk', flat=True)
+
+
 class GroupAdmin(admin.ModelAdmin):
+    form = GroupAdminForm
+
     list_display = (
         'name', 'regexp', 'matchtest', 'members',
     )
@@ -113,6 +135,15 @@ class GroupAdmin(admin.ModelAdmin):
         return group.profile_set.count() or None
 
     members.short_description = 'Medlemmer'
+
+    def save_model(self, request, obj, form, change):
+        """
+        Override save_model to also update Group.profile_set.
+        """
+        # Based on http://stackoverflow.com/a/21480139/1570972
+        super().save_model(request, obj, form, change)
+        obj.profile_set.clear()
+        obj.profile_set.add(*form.cleaned_data['members'])
 
 
 class TitleAdmin(admin.ModelAdmin):
