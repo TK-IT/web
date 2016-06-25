@@ -90,8 +90,11 @@ class Title(models.Model):
     def age(self):
         return config.GFYEAR - self.period
 
+    def display_root(self):
+        return self.root.replace('KASS', 'KA$$')
+
     def display_title(self):
-        return '%s%s' % (tk_prefix(self.age), self.root)
+        return '%s%s' % (tk_prefix(self.age), self.display_root())
 
     class Meta:
         ordering = ['-period', 'kind', 'root']
