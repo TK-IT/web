@@ -7,18 +7,21 @@ from django.utils.encoding import python_2_unicode_compatible
 from constance import config
 
 
-def tk_prefix(age):
-    def sup(n):
-        digits = '⁰¹²³⁴⁵⁶⁷⁸⁹'
-        return ''.join(digits[int(i)] for i in str(n))
+def unicode_superscript(n):
+    digits = '⁰¹²³⁴⁵⁶⁷⁸⁹'
+    return ''.join(digits[int(i)] for i in str(n))
 
+
+def tk_prefix(age, sup_fn=None):
+    if sup_fn is None:
+        sup_fn = unicode_superscript
     prefix = ['K', '', 'G', 'B', 'O', 'TO']
     if age < -1:
-        return 'K%s' % sup(-age)
+        return 'K%s' % sup_fn(-age)
     elif age + 1 < len(prefix):
         return prefix[age + 1]
     else:
-        return 'T%sO' % sup(age - 3)
+        return 'T%sO' % sup_fn(age - 3)
 
 
 @python_2_unicode_compatible
