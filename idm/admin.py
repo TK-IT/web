@@ -106,8 +106,13 @@ class ProfileAdmin(admin.ModelAdmin):
 
 class GroupAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'regexp', 'matchtest',
+        'name', 'regexp', 'matchtest', 'members',
     )
+
+    def members(self, group):
+        return group.profile_set.count() or None
+
+    members.short_description = 'Medlemmer'
 
 
 class TitleAdmin(admin.ModelAdmin):
