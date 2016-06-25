@@ -1,6 +1,7 @@
 # encoding: utf8
 from django import forms
 from django.core import urlresolvers
+from django.db.models import Q
 from django.contrib import admin
 from django.utils.html import format_html
 from constance import config
@@ -30,6 +31,54 @@ class MailingListFilter(admin.SimpleListFilter):
             return queryset.filter(groups__regexp=Group.REGEXP_MAILING_LIST)
         if self.value() == '0':
             return queryset.exclude(groups__regexp=Group.REGEXP_MAILING_LIST)
+
+
+class EmailAddressFilter(admin.SimpleListFilter):
+    title = 'Email-udbyder'
+    parameter_name = 'email_address'
+
+    def domains(self):
+        return [
+            ('AU', 'au', ['.au.dk', 'inano.dk', 'iha.dk', 'asb.dk']),
+            ('Google', 'google', ['gmail.com']),
+            ('Hotmail', 'hotmail',
+             'live.dk live.com hotmail.dk hotmail.com msn.com'.split()),
+            # ('Yahoo', 'yahoo', 'yahoo.com yahoo.dk'.split()),
+            # ('Skolekom', 'skolekom', ['skolekom.dk']),
+            # ('Apple', 'apple', 'me.com icloud.com'.split()),
+            ('TDC', 'tdc', '.mail.dk .tdc.dk .tele.dk tdcadsl.dk'.split()),
+        ]
+
+    def lookups(self, request, model_admin):
+        for label, key, domains in self.domains():
+            yield (key, label)
+        yield ('others', 'Andre')
+        yield ('empty', '(Ingen)')
+
+    def match_domains(self, domains):
+        o = []
+        for d in domains:
+            if d.startswith('.'):
+                o.append(Q(email__iendswith=d) | Q(email__iendswith='@'+d[1:]))
+            else:
+                o.append(Q(email__iendswith='@'+d))
+        r = o[0]
+        for q in o[1:]:
+            r = r | q
+        return r
+
+    def queryset(self, request, queryset):
+        v = self.value()
+        if v == 'empty':
+            return queryset.filter(email='')
+        for label, key, domains in self.domains():
+            if v == key:
+                return queryset.filter(self.match_domains(domains))
+            elif v == 'others':
+                queryset = queryset.exclude(self.match_domains(domains))
+        if v == 'others':
+            queryset = queryset.exclude(email='')
+        return queryset
 
 
 class TitleRootFilter(admin.SimpleListFilter):
@@ -78,7 +127,8 @@ class ProfileAdmin(admin.ModelAdmin):
         'name', 'get_titles', 'get_email',
         'on_mailing_list', 'allow_direct_email',
     )
-    list_filter = [MailingListFilter, 'allow_direct_email', 'gone', 'groups']
+    list_filter = [MailingListFilter, 'allow_direct_email', 'gone', 'groups',
+                   EmailAddressFilter]
     inlines = [ProfileTitleAdmin]
     search_fields = ['name', 'email']
     filter_horizontal = ['groups']
