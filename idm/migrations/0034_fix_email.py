@@ -10,6 +10,7 @@ def fix_emails(apps, schema_editor):
     for p in Profile.objects.all():
         e = p.email
         e = e.replace('&#064;', '@')
+        e = e.replace(' ', '')
         if e != p.email:
             p.email = e
             save.append(p)
