@@ -44,11 +44,6 @@ class Group(models.Model):
 
 @python_2_unicode_compatible
 class Profile(models.Model):
-    JANEJ = (
-        ('ja', 'ja'),
-        ('nej', 'nej'),
-    )
-
     name = models.CharField(max_length=50, blank=True, null=True,
                             verbose_name="Navn")
     email = models.CharField(max_length=50, blank=True, null=True,
