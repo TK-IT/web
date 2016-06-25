@@ -39,8 +39,7 @@ def validate_regex_pattern(value):
 class Group(models.Model):
     REGEXP_MAILING_LIST = 'no$public$address'
 
-    name = models.CharField(max_length=25, blank=True, null=True,
-                            verbose_name="Navn")
+    name = models.CharField(max_length=25, verbose_name="Navn")
     regexp = models.CharField(max_length=50, verbose_name="Regulært udtryk",
                               validators=[validate_regex_pattern])
     matchtest = models.TextField(verbose_name="Eksempler", blank=True)
@@ -68,26 +67,23 @@ class Group(models.Model):
 
 @python_2_unicode_compatible
 class Profile(models.Model):
-    name = models.CharField(max_length=50, blank=True, null=True,
-                            verbose_name="Navn")
-    email = models.CharField(max_length=50, blank=True, null=True,
-                             verbose_name="Emailadresse")
+    name = models.CharField(max_length=50, verbose_name="Navn")
+    email = models.EmailField(max_length=50, blank=True,
+                              verbose_name="Emailadresse")
     allow_direct_email = models.BooleanField(
         blank=True, verbose_name="Tillad emails til titel")
-    street_name = models.CharField(max_length=50, blank=True, null=True,
+    street_name = models.CharField(max_length=50, blank=True,
                                    verbose_name="Gade")
-    house_number = models.CharField(max_length=15, blank=True, null=True,
+    house_number = models.CharField(max_length=15, blank=True,
                                     verbose_name="Husnr.")
-    postal_code = models.CharField(max_length=10, blank=True, null=True,
+    postal_code = models.CharField(max_length=10, blank=True,
                                    verbose_name="Postnr.")
-    town = models.CharField(max_length=25, blank=True, null=True,
-                            verbose_name="By")
-    country = models.CharField(max_length=50, blank=True, null=True,
-                               verbose_name="Land")
+    town = models.CharField(max_length=25, blank=True, verbose_name="By")
+    country = models.CharField(max_length=50, blank=True, verbose_name="Land")
     gone = models.BooleanField(blank=True, verbose_name="Afdød")
-    phone_number = models.CharField(max_length=20, blank=True, null=True,
+    phone_number = models.CharField(max_length=20, blank=True,
                                     verbose_name="Telefonnr.")
-    note = models.TextField(blank=True, null=True, verbose_name="Note")
+    note = models.TextField(blank=True, verbose_name="Note")
 
     groups = models.ManyToManyField(Group, blank=True, verbose_name="Grupper")
 
