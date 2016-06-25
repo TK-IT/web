@@ -80,6 +80,7 @@ class ProfileAdmin(admin.ModelAdmin):
     list_filter = [MailingListFilter, 'allow_direct_email', 'gone']
     inlines = [ProfileTitleAdmin]
     search_fields = ['name', 'email']
+    filter_horizontal = ['groups']
 
     def get_titles(self, profile):
         titles = list(profile.title_set.all())
