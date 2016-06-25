@@ -78,7 +78,7 @@ class ProfileAdmin(admin.ModelAdmin):
         'name', 'get_titles', 'get_email',
         'on_mailing_list', 'allow_direct_email',
     )
-    list_filter = [MailingListFilter, 'allow_direct_email', 'gone']
+    list_filter = [MailingListFilter, 'allow_direct_email', 'gone', 'groups']
     inlines = [ProfileTitleAdmin]
     search_fields = ['name', 'email']
     filter_horizontal = ['groups']
