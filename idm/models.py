@@ -96,6 +96,13 @@ class Title(models.Model):
     def display_title(self):
         return '%s%s' % (tk_prefix(self.age), self.display_root())
 
+    def ascii_root(self):
+        tr = {197: 'AA', 198: 'AE', 216: 'OE', 229: 'aa', 230: 'ae', 248: 'oe'}
+        return self.root.translate(tr)
+
+    def email_local_part(self):
+        return '%s%s' % (tk_prefix(self.age, sup_fn=str), self.ascii_root())
+
     class Meta:
         ordering = ['-period', 'kind', 'root']
         verbose_name = 'titel'
