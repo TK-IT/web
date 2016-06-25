@@ -43,7 +43,7 @@ class Group(models.Model):
                             verbose_name="Navn")
     regexp = models.CharField(max_length=50, verbose_name="Regulært udtryk",
                               validators=[validate_regex_pattern])
-    matchtest = models.TextField(verbose_name="Eksempler")
+    matchtest = models.TextField(verbose_name="Eksempler", blank=True)
 
     class Meta:
         ordering = ['name']
