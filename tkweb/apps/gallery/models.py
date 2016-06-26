@@ -90,7 +90,8 @@ class BaseMedia(models.Model):
                                       verbose_name='Vis på forsiden')
 
     def admin_thumbnail(self):
-        return None
+        if self.type == BaseMedia.IMAGE:
+            return self.image.admin_thumbnail()
 
     admin_thumbnail.short_description = 'Thumbnail'
 
