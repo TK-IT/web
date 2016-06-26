@@ -8,6 +8,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.html import format_html
 from model_utils.managers import InheritanceManager
 from sorl.thumbnail import get_thumbnail
 from versatileimagefield.fields import VersatileImageField
@@ -100,9 +101,10 @@ class Image(BaseMedia):
     file = VersatileImageField(upload_to=file_name)
 
     def admin_thumbnail(self):
-        return u'<img src="%s" />' % (get_thumbnail(self.file, '150x150').url)
+        return format_html('<img src="{}" />',
+                           get_thumbnail(self.file, '150x150').url)
+
     admin_thumbnail.short_description = 'Thumbnail'
-    admin_thumbnail.allow_tags = True
 
     def clean(self):
         self.type = BaseMedia.IMAGE
