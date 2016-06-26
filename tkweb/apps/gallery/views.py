@@ -69,11 +69,13 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
     prev_files = files[1:]+files[:1]
     next_files = files[-1:]+files[:-1]
     file_orders = zip(files, prev_files, next_files)
+    file_count = len(files)
 
     context = {
         'album': album,
         'file_orders': file_orders,
         'start_file': start_file,
+        'file_count': file_count,
     }
     return render(request, 'image.html', context)
 
