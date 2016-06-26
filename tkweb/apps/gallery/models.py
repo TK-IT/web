@@ -26,12 +26,14 @@ class Album(models.Model):
         ordering = ['gfyear', '-eventalbum', 'oldFolder', 'publish_date']
         unique_together = (('gfyear', 'slug'),)
 
-    title = models.CharField(max_length=200)
-    publish_date = models.DateField(blank=True, null=True, default=date.today)
-    eventalbum = models.BooleanField(default=True)
-    gfyear = models.PositiveSmallIntegerField(default=get_gfyear)
-    slug = models.SlugField()
-    description = models.TextField(blank=True)
+    title = models.CharField(max_length=200, verbose_name='Titel')
+    publish_date = models.DateField(blank=True, null=True, default=date.today,
+                                    verbose_name='Udgivelsesdato')
+    eventalbum = models.BooleanField(default=True, verbose_name='Arrangement')
+    gfyear = models.PositiveSmallIntegerField(default=get_gfyear,
+                                              verbose_name='Årgang')
+    slug = models.SlugField(verbose_name='Kort titel')
+    description = models.TextField(blank=True, verbose_name='Beskrivelse')
 
     oldFolder = models.CharField(max_length=200, blank=True)
 
@@ -71,19 +73,25 @@ class BaseMedia(models.Model):
     objects = InheritanceManager()
     album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name='basemedia')
 
-    date = models.DateTimeField(null=True, blank=True)
-    notPublic = models.BooleanField(default=False)
-    caption = models.CharField(max_length=200, blank=True)
+    date = models.DateTimeField(null=True, blank=True, verbose_name='Dato')
+    notPublic = models.BooleanField(default=False, verbose_name='Skjult')
+    caption = models.CharField(
+        max_length=200, blank=True, verbose_name='Overskrift')
 
-    slug = models.SlugField(null=True, blank=True)
+    slug = models.SlugField(null=True, blank=True, verbose_name='Kort titel')
 
-    forcedOrder = models.SmallIntegerField(default=0,
-                                           validators=[MinValueValidator(-FORCEDORDERMAX),
-                                                       MaxValueValidator(FORCEDORDERMAX)])
-    isCoverFile = models.BooleanField(default=False)
+    forcedOrder = models.SmallIntegerField(
+        default=0,
+        validators=[MinValueValidator(-FORCEDORDERMAX),
+                    MaxValueValidator(FORCEDORDERMAX)],
+        verbose_name='Rækkefølge')
+    isCoverFile = models.BooleanField(default=False,
+                                      verbose_name='Vis på forsiden')
 
     def admin_thumbnail(self):
         return None
+
+    admin_thumbnail.short_description = 'Thumbnail'
 
     def __str__(self):
         return '%s' % (self.slug)
