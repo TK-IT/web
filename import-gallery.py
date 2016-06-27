@@ -294,8 +294,8 @@ for yearFolder in os.listdir(rootdir):
         strippedOrgiFileList = [os.path.basename(f) for f in orgiFilelist]
 
         def diff(a, b):
-            b = set(b)
-            return [aa for aa in a if aa.lower() not in (bb.lower() for bb in b)]
+            b_lower = set(x.lower() for x in b)
+            return [x for x in a if x.lower() not in b_lower]
 
         missingFromResized = []
         missingFromOriginale= []
