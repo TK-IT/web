@@ -158,7 +158,8 @@ class ProfileAdmin(admin.ModelAdmin):
     get_email.admin_order_field = 'email'
 
     def on_mailing_list(self, profile):
-        return profile.groups.filter(regexp=Group.REGEXP_MAILING_LIST).exists()
+        return any(g.regexp == Group.REGEXP_MAILING_LIST
+                   for g in profile.groups.all())
 
     on_mailing_list.short_description = 'Hængerlisten'
     on_mailing_list.boolean = True
