@@ -101,9 +101,11 @@ class TitleRootFilter(admin.SimpleListFilter):
             return queryset.filter(root=self.value())
 
 
-def period_display_prefix(period, name):
+def period_display_prefix(period, name, gfyear=None):
+    if gfyear is None:
+        gfyear = config.GFYEAR
     second_half = (period + 1) % 100
-    age = config.GFYEAR - period
+    age = gfyear - period
     prefix = tk_prefix(age)
     return '%s%s %s/%02d' % (prefix, name, period, second_half)
 
