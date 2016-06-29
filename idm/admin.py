@@ -137,6 +137,11 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = ['name', 'email']
     filter_horizontal = ['groups']
 
+    def get_queryset(self, request):
+        qs = super(ProfileAdmin, self).get_queryset(request)
+        qs = qs.prefetch_related('title_set', 'groups')
+        return qs
+
     def get_titles(self, profile):
         titles = list(profile.title_set.all())
         if titles:
