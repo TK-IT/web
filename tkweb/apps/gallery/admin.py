@@ -42,4 +42,13 @@ class AlbumAdmin(admin.ModelAdmin):
                             { 'widget':
                               forms.TextInput(attrs = { 'readOnly': 'True' })}}
 
+    add_form_template = 'admin/gallery/add_form.html'
+
+    def get_inline_instances(self, request, obj=None):
+        if obj is None:
+            # When creating Album, don't display the BaseMedia inlines
+            return []
+        return super(AlbumAdmin, self).get_inline_instances(request, obj)
+
+
 admin.site.register(Album, AlbumAdmin)
