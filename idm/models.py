@@ -106,7 +106,6 @@ class Title(models.Model):
     root = models.CharField(max_length=10, verbose_name='Titel')
     kind = models.CharField(max_length=10, choices=KIND, verbose_name='Slags')
 
-    @property
     def age(self):
         return config.GFYEAR - self.period
 
@@ -114,7 +113,7 @@ class Title(models.Model):
         return self.root.replace('KASS', 'KA$$')
 
     def display_title(self):
-        return '%s%s' % (tk_prefix(self.age), self.display_root())
+        return '%s%s' % (tk_prefix(self.age()), self.display_root())
 
     def ascii_root(self):
         tr = {197: 'AA', 198: 'AE', 216: 'OE', 229: 'aa', 230: 'ae', 248: 'oe'}
