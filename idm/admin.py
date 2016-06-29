@@ -210,6 +210,7 @@ class TitleAdmin(admin.ModelAdmin):
     list_display = (
         'get_display_title', 'profile_link', 'get_period')
     list_filter = ['kind', TitleRootFilter, ('period', TitlePeriodFilter)]
+    list_select_related = ['profile']
     search_fields = ['profile__name']
 
     def profile_link(self, title):
