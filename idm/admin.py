@@ -112,6 +112,7 @@ def period_display_prefix(period, name, gfyear=None):
 
 class TitlePeriodFilter(admin.AllValuesFieldListFilter):
     def choices(self, cl):
+        gfyear = config.GFYEAR
         for choice in super(TitlePeriodFilter, self).choices(cl):
             try:
                 period = int(choice['display'])
@@ -120,7 +121,8 @@ class TitlePeriodFilter(admin.AllValuesFieldListFilter):
             except TypeError:
                 pass
             else:
-                choice['display'] = period_display_prefix(period, 'BEST/FU')
+                choice['display'] = period_display_prefix(
+                    period, 'BEST/FU', gfyear=gfyear)
             yield choice
 
 
