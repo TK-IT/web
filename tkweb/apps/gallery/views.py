@@ -19,7 +19,11 @@ def gallery(request, **kwargs):
     years = allalbums.order_by().values_list('gfyear').distinct()
     years = [y[0] for y in years][::-1]
 
-    latest_year = max(years)
+    try:
+        latest_year = max(years)
+    except (ValueError):
+        raise Http404("No albums exist")
+
     show_year = kwargs.get('gfyear', latest_year)
     show_year = int(show_year) if show_year else None
 
