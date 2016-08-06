@@ -61,19 +61,6 @@ at køre udviklingsserveren med udviklingskonfigurationen skriv:
 I `cmd.exe` på Windows kan man aktivere virtualenv ved at køre
 `venv\Scripts\activate` istedet for `source venv/bin/activate`.
 
-## Python 2+3
-
-Koden er Python 3 med Python 2 kompatibilitet. Det vil for det meste sige at du
-skal
-
-- bruge `from __future__ import unicode_literals` i moduler,
-- dekorere dine klasser med `@python_2_unicode_compatible` og bruge
-`__str__()`.
-
-Se
-[Django dokumentationen](https://docs.djangoproject.com/en/1.8/topics/python3/)
-og issue #31 for motivationen.
-
 ## LESS og CSS
 
 For ikke at have node.js som dependency på serveren er det nødvendigt at have en
