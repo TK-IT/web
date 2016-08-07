@@ -28,9 +28,7 @@ from __future__ import unicode_literals
 
 import os
 from os.path import join
-import sys
 import re
-from datetime import datetime, date, timedelta
 import argparse
 import subprocess
 

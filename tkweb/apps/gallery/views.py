@@ -2,12 +2,11 @@
 from __future__ import absolute_import, unicode_literals, division
 
 from django.contrib.auth.decorators import permission_required
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db.models import Count
 from django.http import Http404
-from django.shortcuts import get_object_or_404, get_list_or_404
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from jfu.http import upload_receive, UploadResponse, JFUResponse
 from tkweb.apps.gallery.models import Album, BaseMedia, Image, GenericFile
