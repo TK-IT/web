@@ -361,7 +361,7 @@ for yearFolder in os.listdir(rootdir):
                     elif ext in (".mp4", ".m4v"):
                         tmpfilename = os.path.splitext(os.path.basename(filepath))[0] + '.mp4'
                         tmpfilepath = os.path.join('/tmp', tmpfilename)
-                        ffargs = ['ffmpeg', '-y', '-i', filepath] + '-c copy -movflags +faststart'.split() + [tmpfilepath]
+                        ffargs = ['./ffmpeg-3.1.1-64bit-static/ffmpeg', '-y', '-i', filepath] + '-c copy -movflags +faststart'.split() + [tmpfilepath]
                         subprocess.check_call(ffargs)
                         op2 = open(tmpfilepath, "rb")
                         file2 = File(op2)
@@ -370,7 +370,7 @@ for yearFolder in os.listdir(rootdir):
                     elif ext in (".avi", ".mov"):
                         tmpfilename = os.path.splitext(os.path.basename(filepath))[0] + '.mp4'
                         tmpfilepath = os.path.join('/tmp', tmpfilename)
-                        ffargs = ['ffmpeg', '-y', '-i', filepath] + '-c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart'.split() + [tmpfilepath]
+                        ffargs = ['./ffmpeg-3.1.1-64bit-static/ffmpeg', '-y', '-i', filepath] + '-c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart'.split() + [tmpfilepath]
                         subprocess.check_call(ffargs)
                         op2 = open(tmpfilepath, "rb")
                         file2 = File(op2)
