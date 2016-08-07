@@ -84,8 +84,8 @@ class BaseMedia(models.Model):
         validators=[MinValueValidator(-FORCEDORDERMAX),
                     MaxValueValidator(FORCEDORDERMAX)],
         verbose_name='Rækkefølge')
-    isCoverFile = models.BooleanField(default=False,
-                                      verbose_name='Vis på forsiden')
+    isCoverFile = models.NullBooleanField(null=True,
+                                          verbose_name='Vis på forsiden')
 
     def admin_thumbnail(self):
         if self.type == BaseMedia.IMAGE:
@@ -116,7 +116,6 @@ class Image(BaseMedia):
                 self.slug = slugify(os.path.splitext(os.path.basename(self.file.name))[0])
             else:
                 self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
-        self.album.clean()
 
 
 class GenericFile(BaseMedia):
@@ -131,7 +130,15 @@ class GenericFile(BaseMedia):
                 self.forcedOrder = FORCEDORDERMAX
             else:
                 self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
-        self.album.clean()
+
+
+@receiver(models.signals.post_save, sender=BaseMedia)
+@receiver(models.signals.post_save, sender=Image)
+@receiver(models.signals.post_save, sender=GenericFile)
+def cleanAlbum(sender, instance, **kwargs):
+    if instance.isCoverFile is None:
+        instance.album.full_clean()
+
 
 @receiver(models.signals.post_save, sender=Image)
 def generateImageThumbnails(sender, instance, **kwargs):
