@@ -32,7 +32,7 @@ import re
 import argparse
 import subprocess
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tkweb.settings.dev")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tkweb.settings.prod")
 
 import django
 from django.core.files import File
