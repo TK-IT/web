@@ -137,10 +137,6 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = ['name', 'email']
     filter_horizontal = ['groups']
 
-    def __init__(self, *args, **kwargs):
-        super(ProfileAdmin, self).__init__(*args, **kwargs)
-        self.gfyear = config.GFYEAR
-
     def get_queryset(self, request):
         qs = super(ProfileAdmin, self).get_queryset(request)
         qs = qs.prefetch_related('title_set', 'groups')
@@ -149,8 +145,7 @@ class ProfileAdmin(admin.ModelAdmin):
     def get_titles(self, profile):
         titles = list(profile.title_set.all())
         if titles:
-            return ' '.join(sorted(
-                t.display_title(gfyear=self.gfyear) for t in titles))
+            return ' '.join(sorted(t.display_title() for t in titles))
 
     get_titles.short_description = 'Titler'
 
