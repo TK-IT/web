@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from constance import config
 
-from idm.models import (
+from tkweb.apps.idm.models import (
     Profile, Group, tk_prefix,
     Title,
 )

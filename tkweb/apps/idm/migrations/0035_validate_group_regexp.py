@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import idm.models
+import tkweb.apps.idm.models
 
 
 class Migration(migrations.Migration):
@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='group',
             name='regexp',
-            field=models.CharField(max_length=50, verbose_name='Regulært udtryk', validators=[idm.models.validate_regex_pattern]),
+            field=models.CharField(max_length=50, verbose_name='Regulært udtryk', validators=[tkweb.apps.idm.models.validate_regex_pattern]),
         ),
     ]
