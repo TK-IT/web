@@ -29,5 +29,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(add_mailing_list_group),
+        migrations.RunPython(add_mailing_list_group,
+                             lambda apps, schema_editor: None)
     ]

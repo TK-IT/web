@@ -11,6 +11,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterField(
+            model_name='group',
+            name='relativ',
+            field=models.IntegerField(default=0),
+        ),
         migrations.RemoveField(
             model_name='group',
             name='relativ',

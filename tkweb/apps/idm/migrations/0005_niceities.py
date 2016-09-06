@@ -22,21 +22,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='profile',
-            name='accepterdirektemail',
-            field=models.CharField(max_length=3, choices=[('ja', 'ja'), ('nej', 'nej')]),
-        ),
-        migrations.AlterField(
-            model_name='profile',
-            name='accepteremail',
-            field=models.CharField(blank=True, max_length=3, null=True, choices=[('ja', 'ja'), ('nej', 'nej')]),
-        ),
-        migrations.AlterField(
-            model_name='profile',
-            name='gone',
-            field=models.CharField(max_length=3, choices=[('ja', 'ja'), ('nej', 'nej')]),
-        ),
-        migrations.AlterField(
-            model_name='profile',
             name='groups',
             field=models.ManyToManyField(to='idm.Group', blank=True),
         ),

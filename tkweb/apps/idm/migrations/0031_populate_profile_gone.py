@@ -20,5 +20,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(populate_profile_gone),
+        migrations.RunPython(populate_profile_gone,
+                             lambda apps, schema_editor: None),
     ]

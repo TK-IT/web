@@ -25,5 +25,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(fix_emails),
+        migrations.RunPython(fix_emails,
+                             lambda apps, schema_editor: None)
     ]

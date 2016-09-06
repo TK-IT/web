@@ -35,5 +35,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(set_title_kind),
+        migrations.RunPython(set_title_kind,
+                             lambda apps, schema_editor: None),
     ]

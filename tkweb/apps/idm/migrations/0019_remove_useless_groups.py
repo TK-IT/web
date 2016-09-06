@@ -16,5 +16,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(remove_useless_groups),
+        migrations.RunPython(remove_useless_groups,
+                             lambda apps, schema_editor: None),
     ]

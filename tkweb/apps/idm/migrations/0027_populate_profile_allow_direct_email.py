@@ -20,5 +20,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(populate_profile_allow_direct_email),
+        migrations.RunPython(populate_profile_allow_direct_email,
+                             lambda apps, schema_editor: None)
     ]

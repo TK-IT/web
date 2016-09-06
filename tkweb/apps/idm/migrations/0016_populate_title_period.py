@@ -22,5 +22,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(populate_title_period),
+        migrations.RunPython(populate_title_period,
+                             lambda apps, schema_editor: None),
     ]

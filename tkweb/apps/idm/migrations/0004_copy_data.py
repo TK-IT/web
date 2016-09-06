@@ -46,6 +46,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(copy_membership),
-        migrations.RunPython(copy_titles),
+        migrations.RunPython(copy_membership,
+                             lambda apps, schema_editor: None),
+        migrations.RunPython(copy_titles,
+                             lambda apps, schema_editor: None),
     ]

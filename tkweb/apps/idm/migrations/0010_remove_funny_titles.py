@@ -28,5 +28,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(remove_funny_titles),
+        migrations.RunPython(remove_funny_titles,
+                             lambda apps, schema_editor: None),
     ]
