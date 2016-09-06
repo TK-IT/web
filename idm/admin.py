@@ -218,10 +218,6 @@ class TitleAdmin(admin.ModelAdmin):
     list_select_related = ['profile']
     search_fields = ['profile__name']
 
-    def __init__(self, *args, **kwargs):
-        super(TitleAdmin, self).__init__(*args, **kwargs)
-        self.gfyear = config.GFYEAR
-
     def profile_link(self, title):
         return format_html(
             '<a href="{}">{}</a>',
@@ -233,13 +229,12 @@ class TitleAdmin(admin.ModelAdmin):
     profile_link.admin_order_field = 'profile'
 
     def get_display_title(self, title):
-        return title.display_title(gfyear=self.gfyear)
+        return title.display_title()
 
     get_display_title.short_description = 'Titel'
 
     def get_period(self, title):
-        return period_display_prefix(
-            title.period, title.get_kind_display(), gfyear=self.gfyear)
+        return period_display_prefix(title.period, title.get_kind_display())
 
     get_period.short_description = 'Årgang'
     get_period.admin_order_field = 'period'
