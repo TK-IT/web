@@ -4,7 +4,7 @@ Websiden er skrevet i Django 1.8 LTS med Bootstrap 3 som frontend framework.
 Den meste funktionalitet kan findes i apps.
 - [`tkweb/apps/gallery`](tkweb/apps/gallery) indeholder galleriet inklusiv
   upload fuktionalitet,
--  [`tkweb/apps/calendar`](tkweb/apps/calendar) henter et icalendar feed og viser
+- [`tkweb/apps/calendar`](tkweb/apps/calendar) henter et icalendar feed og viser
   det som HTML,
 - [`tkweb/apps/jubi`](tkweb/apps/jubi) indeholder jubilæumssiderne som
   [flatpages](https://docs.djangoproject.com/en/1.8/ref/contrib/flatpages/) og
@@ -13,6 +13,8 @@ Den meste funktionalitet kan findes i apps.
   pakken `tket.sty` til at skrive TÅGEKAMMERET med hoppe-danse-skrift,
 - [`tkweb/apps/redirect`](tkweb/apps/redirect) tager sig af vidrestilling af
   URLer fra den gamle PHP-side.
+- [`tkweb/apps/idm`](tkweb/apps/idm) er en ikke-offentlig app til at ændre
+  persondata og maillister.
 
 Under [`templates`](templates) findes Django HTML-templates som er det der
 bliver vist til brugeren.
@@ -78,3 +80,8 @@ For at genere nye CSS filer køres
 cd static-src
 lessc --clean-css --source-map style.less style.min.css
 ```
+
+## Prodekanus
+
+For informationer om siden på prodekanus
+se [readme-prodekanus.md](readme-prodekanus.md).
