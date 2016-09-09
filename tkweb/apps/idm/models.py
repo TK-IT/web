@@ -124,7 +124,8 @@ class Title(models.Model):
         return self.root.translate(tr)
 
     def email_local_part(self):
-        return '%s%s' % (tk_prefix(self.age, sup_fn=str), self.ascii_root())
+        return '%s%s' % (tk_prefix(self.age, sup_fn=str),
+                         self.ascii_root())
 
     class Meta:
         ordering = ['-period', 'kind', 'root']
