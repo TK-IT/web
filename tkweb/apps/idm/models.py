@@ -15,6 +15,8 @@ def unicode_superscript(n):
 
 
 def tk_prefix(age, sup_fn=None):
+    if not isinstance(age, int):
+        raise TypeError(type(age).__name__)
     if sup_fn is None:
         sup_fn = unicode_superscript
     prefix = ['K', '', 'G', 'B', 'O', 'TO']
