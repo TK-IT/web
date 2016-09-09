@@ -62,7 +62,7 @@ class GalleryShowPictureRedirectView(RedirectView):
 
         gfyear = albums[0].gfyear
         album_slug = albums[0].slug
-        images = list(albums[0].images.all())
+        images = list(albums[0].basemedia.all())
 
         if pic_count >= len(images):
             raise Http404("Billedet kan ikke findes")
