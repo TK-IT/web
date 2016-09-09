@@ -53,19 +53,22 @@ body {
 //##
 
 //** gallery.html and album.html
-.thumbcap .caption{
-    background-color: rgb(0,0,0);
-    background-color: rgba(0,0,0,0.5);
-    bottom: 0;
-    left: 0;
-    position: absolute;
-    width: 100%;
-}
 
 .thumbcap {
     width: 100%;
     padding: 0px;
     position:relative;
+    .caption {
+        background-color: @gray;
+        background-color: rgba(0,0,0,0.5);
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        width: 100%;
+        h5 small {
+            color: @text-color;
+        }
+    }
 }
 
 //** gallery.html and album.html: generic files
