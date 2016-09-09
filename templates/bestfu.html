@@ -14,18 +14,22 @@
 <h2>Bestyrelsen</h2>
 <p>{% TKETs %} bestyrelse består af otte personer. For øjeblikket er
     det:</p>
+<div class="row">
+<div class="col-sm-offset-1 col-sm-10 col-md-offset-2 col-md-8 col-lg-offset-3 col-lg-6">
 <table class="table table-condensed">
     <tbody>
         {% for p in best %}
         <tr>
             <td>{{ p.display_title }}</td>
             <td>{{ p.profile.name }}</td>
-            <td><a href="mailto:{{ p.email_local_part }}@TAAGEKAMMERET.dk">
+            <td class="text-right"><a href="mailto:{{ p.email_local_part }}@TAAGEKAMMERET.dk">
                 {{ p.email_local_part }}@{% TKET %}.dk</a></td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
+</div>
 
 <p>Ligesom de græske guder er hvert bestyrelsesmedlem udstyret med et
     ansvarsområde og nogle attributter.</p>
@@ -107,18 +111,22 @@
     med bogstaverne FU.</p>
 
 <p>I år består festudvalget af følgende FU'er:</p>
+<div class="row">
+<div class="col-sm-offset-1 col-sm-10 col-md-offset-2 col-md-8 col-lg-offset-3 col-lg-6">
 <table class="table table-condensed">
     <tbody>
         {% for p in fu %}
         <tr>
             <td>{{ p.display_title }}</td>
             <td>{{ p.profile.name }}</td>
-            <td><a href="mailto:{{ p.email_local_part }}@TAAGEKAMMERET.dk">
+            <td class="text-right"><a href="mailto:{{ p.email_local_part }}@TAAGEKAMMERET.dk">
                 {{ p.email_local_part }}@{% TKET %}.dk</a></td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
+</div>
 
 <p>FU'erne har desuden den ære at dele løbesedler ud til samtlige
     borde og andre velegnede steder på hele Naturvidenskab.
