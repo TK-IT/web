@@ -17,7 +17,8 @@
     <div class="panel panel-default">
       <div class="panel-heading" role="tab" id="heading{{year}}">
         <h4 class="panel-title">
-          <a href="{{year}}">
+            <a {% if year == show_year %} data-toggle="collapse" href="#collapse{{year}}"
+               {% else %} href="{{year}}" {% endif %}>
             {{year|gfyearPPslash}}
           </a>
         </h4>
