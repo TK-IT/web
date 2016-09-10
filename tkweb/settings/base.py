@@ -171,6 +171,11 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
+# Clickjacking middleware
+# -----------------------
+
+X_FRAME_OPTIONS = 'DENY'
+
 # Test
 # ----
 
