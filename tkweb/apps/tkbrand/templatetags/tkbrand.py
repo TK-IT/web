@@ -4,6 +4,10 @@ from __future__ import unicode_literals
 from django import template
 from django.utils.safestring import mark_safe
 from tkweb.apps.tkbrand import util
+import ast
+import logging
+
+logger = logging.getLogger(__name__)
 
 register = template.Library()
 
@@ -87,13 +91,27 @@ def TKETSAA():
 
 
 @register.filter
-def gfyearPP(gfyear):
-    return util.gfyearPP(gfyear)
+def gfyearPP(gfyear, override=None):
+    overridedict = None
+    if override:
+        try:
+            overridedict = ast.literal_eval(override)
+        except:
+            logger.warning('gfyearPP: Malformed override dict. Ignoring. %s',
+                           override)
+    return util.gfyearPP(gfyear, overridedict)
 
 
 @register.filter
-def gfyearPPslash(gfyear):
-    return util.gfyearPPslash(gfyear)
+def gfyearPPslash(gfyear, override=None):
+    overridedict = None
+    if override:
+        try:
+            overridedict = ast.literal_eval(override)
+        except:
+            logger.warning('gfyearPPslash: Malformed override dict. Ignoring. %s',
+                           override)
+    return util.gfyearPPslash(gfyear, overridedict)
 
 
 # For evaluation of tags in flatpages
