@@ -42,5 +42,8 @@
     </a>
   </div> <!-- col-xs-6 -->
   {% endfor %}
+  <div class="col-xs-12">
+    <a href="{% url 'gfyear' gfyear=album.gfyear  %}">Tilbage til {{ album.gfyear|gfyearPPslash }}</a>
+  </div>
 </div> <!-- row -->
 {% endblock content%}
