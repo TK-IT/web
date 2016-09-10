@@ -103,6 +103,9 @@ $(document).keydown(function(e) {
         break;
     case 27: // ESC
         $("#albumlink")[0].click();
+        if(e.target == document.body) {
+            e.preventDefault();
+        }
         break;
     }
 });
