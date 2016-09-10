@@ -19,7 +19,7 @@
         <h4 class="panel-title">
             <a {% if year == show_year %} data-toggle="collapse" href="#collapse{{year}}"
                {% else %} href="{{year}}" {% endif %}>
-            {{ year|gfyearPPslash:"{1960: '60/64'}" }}
+            {{year|gfyearPPslash}}
           </a>
         </h4>
       </div> <!-- panel-heading -->
