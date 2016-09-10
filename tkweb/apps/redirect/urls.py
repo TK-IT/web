@@ -50,5 +50,9 @@ urlpatterns = [
     url(r'(?i)^J60/index.html',
         RedirectView.as_view(url='/J60/', permanent=True), ),
 
+    url(r'^vedtaegter.pdf',
+        RedirectView.as_view(url=STATIC_URL+'vedtaegter.pdf',
+                             permanent=True), ),
+
 
 ]
