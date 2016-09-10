@@ -62,7 +62,7 @@
 		{% endif %}
 			<div class="overlay overlay-top">
         <ol class="breadcrumb">
-					<li><a href="{% url 'gfyear' gfyear=album.gfyear  %}">{{ album.gfyear|gfyearPPslash }}</a></li>
+					<li><a href="{% url 'gfyear' gfyear=album.gfyear  %}">{{ album.gfyear|gfyearPPslash_gallery }}</a></li>
 					<li><a id="albumlink" href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">{{ album.title }}</a></li>
 					<li>{{ forloop.counter }} af {{ file_count }}{% if file.type == "I" %} <span class="hidden-xs">billede{{ file_count|pluralize:"r" }}</span>{% endif %}</li>
 				</ol>

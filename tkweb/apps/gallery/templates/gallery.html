@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load bootstrap3 tkbrand staticfiles %}
 
-{% block title %}{{ show_year|gfyearPPslash }}{% endblock title %}
+{% block title %}{{ show_year|gfyearPPslash_gallery }}{% endblock title %}
 
 {% block canonical_url %}{% url 'gfyear' gfyear=show_year %}{% endblock canonical_url %}
 
 {% block opengraph %}
 <meta property="og:image" content="{{ STATIC_URL }}TKlogo.jpg" />
-<meta property="og:description" content="Oversigt over TÅGEKAMMERETs gallerier fra bestyrelsesåret {{ show_year|gfyearPPslash }}." />
+<meta property="og:description" content="Oversigt over TÅGEKAMMERETs gallerier fra bestyrelsesåret {{ show_year|gfyearPPslash_gallery }}." />
 {% endblock opengraph %}
 
 {% block content %}
@@ -19,7 +19,7 @@
         <h4 class="panel-title">
             <a {% if year == show_year %} data-toggle="collapse" href="#collapse{{year}}"
                {% else %} href="{{year}}" {% endif %}>
-            {{year|gfyearPPslash}}
+            {{ year|gfyearPPslash_gallery }}
           </a>
         </h4>
       </div> <!-- panel-heading -->

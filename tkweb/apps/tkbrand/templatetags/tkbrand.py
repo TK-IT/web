@@ -95,6 +95,15 @@ def gfyearPP(gfyear):
 def gfyearPPslash(gfyear):
     return util.gfyearPPslash(gfyear)
 
+@register.filter
+def gfyearPPslash_gallery(gfyear):
+    """
+    For the gallery app where there is a special multi-year album
+    """
+    if gfyear == 1960:
+        return "60/64"
+    return util.gfyearPPslash(gfyear)
+
 
 # For evaluation of tags in flatpages
 @register.tag(name="evaluate")
