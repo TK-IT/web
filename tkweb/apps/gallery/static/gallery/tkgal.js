@@ -97,6 +97,8 @@ $(document).keydown(function(e) {
         break;
     case 32: // space
         togglePlay();
+    case 27: // ESC
+        $("#albumlink")[0].click();
 		if(e.target == document.body) {
 			e.preventDefault();
 		}
