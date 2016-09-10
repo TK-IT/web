@@ -10,7 +10,7 @@ $(document).ready(function() {
         pauseMedia();
         changeCurrent($(this).attr("href"));
     });
-	
+
 
     function changeCurrent(newimage) {
         // Calculate prev and next images
@@ -51,7 +51,7 @@ $(document).ready(function() {
 
     // Call swipehandler on swipe
     // This requires jquery touchswipe
-	$("body").swipe( { // register swipe anywhere in body
+  $("body").swipe( { // register swipe anywhere in body
         swipeLeft:swipehandler,
         swipeRight:swipehandler,
         allowPageScroll:"auto"
@@ -68,10 +68,10 @@ $(document).ready(function() {
         default:
         }
     }
-	
-	//Load neighbors on pageload
+
+  //Load neighbors on pageload
   loadfirst = $("#tkgal-container > :not(.hidden)").attr("data-permlink");
-	changeCurrent(loadfirst);
+  changeCurrent(loadfirst);
 });
 
 function pauseMedia() {
@@ -97,14 +97,14 @@ $(document).keydown(function(e) {
         break;
     case 32: // space
         togglePlay();
+        if(e.target == document.body) {
+            e.preventDefault();
+        }
+        break;
     case 27: // ESC
         $("#albumlink")[0].click();
-		if(e.target == document.body) {
-			e.preventDefault();
-		}
         break;
     }
 });
 
 $('video').click(function(){ togglePlay(); });
-
