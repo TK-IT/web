@@ -14,7 +14,7 @@ urlpatterns = [
         name='J40historie'),
 
     # J50
-    url(r'^50/resume',
+    url(r'^50/resume$',
         views.flatpage, {'url': '/J50/resume/'},
         name='J50resume'),
     url(r'^50/arrangementer$',
@@ -25,7 +25,7 @@ urlpatterns = [
         name='J50deltagere'),
 
     # J60
-    url(r'^60',
+    url(r'^60$',
         views.flatpage, {'url': '/J60/'},
         name='J60'),
 ]
