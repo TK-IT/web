@@ -145,7 +145,7 @@ class ProfileAdmin(admin.ModelAdmin):
     def get_titles(self, profile):
         titles = list(profile.title_set.all())
         if titles:
-            return ' '.join(sorted(t.display_title() for t in titles))
+            return ' '.join(sorted(t.display_title_and_year() for t in titles))
 
     get_titles.short_description = 'Titler'
 
@@ -224,7 +224,7 @@ class TitleAdmin(admin.ModelAdmin):
     profile_link.admin_order_field = 'profile'
 
     def get_display_title(self, title):
-        return title.display_title()
+        return title.display_title_and_year()
 
     get_display_title.short_description = 'Titel'
 
