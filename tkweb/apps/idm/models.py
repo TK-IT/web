@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from constance import config
+from tkweb.apps.tkbrand.util import gfyearPPslash
 
 
 def unicode_superscript(n):
@@ -118,6 +119,10 @@ class Title(models.Model):
 
     def display_title(self, gfyear=None):
         return '%s%s' % (tk_prefix(self.age(gfyear)), self.display_root())
+
+    def display_title_and_year(self, gfyear=None):
+        return '%s (%s)' % (self.display_title(gfyear),
+                            gfyearPPslash(self.period))
 
     def ascii_root(self):
         tr = {197: 'AA', 198: 'AE', 216: 'OE', 229: 'aa', 230: 'ae', 248: 'oe'}
