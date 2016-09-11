@@ -34,25 +34,44 @@ urlpatterns = [
     url(r'^Billeder/ShowPicture.php',
         GalleryShowPictureRedirectView.as_view(), ),
 
+    url(r'^vedtaegter.pdf',
+        RedirectView.as_view(url=STATIC_URL+'vedtaegter.pdf',
+                             permanent=True), ),
+
+    # J40
     url(r'^tk40/tk40new.php',
-        RedirectView.as_view(url='/J40/', permanent=True), ),
+        RedirectView.as_view(url='/J40/resume/', permanent=True), ),
 
     url(r'^tk40/jubi40_histnew.php',
-        RedirectView.as_view(url='/J40hist/', permanent=True), ),
+        RedirectView.as_view(url='/J40/historie/', permanent=True), ),
 
+    # J50
     url(r'^J50Resume.php',
-        RedirectView.as_view(url='/J50/', permanent=True), ),
+        RedirectView.as_view(url='/J50/resume/', permanent=True), ),
+
+    url(r'^j50/Adresser.php',
+        RedirectView.as_view(url='/J50/deltagere/', permanent=True), ),
+
+    url(r'^j50/Arrangementer.php',
+        RedirectView.as_view(url='/J50/arrangementer/', permanent=True), ),
 
     url(r'^J50Resume/J50-Jubiskrift.pdf',
         RedirectView.as_view(url=STATIC_URL+'jubi/J50/J50-Jubiskrift.pdf',
                              permanent=True), ),
 
+    url(r'^J50Resume/J50-Sangbog.pdf',
+        RedirectView.as_view(url=STATIC_URL+'jubi/J50/J50-Sangbog.pdf',
+                             permanent=True), ),
+
+    url(r'^J50Resume/J50-Revy.pdf',
+        RedirectView.as_view(url=STATIC_URL+'jubi/J50/J50-Revy.pdf',
+                             permanent=True), ),
+
+    # J60
     url(r'(?i)^J60/index.html',
         RedirectView.as_view(url='/J60/', permanent=True), ),
 
-    url(r'^vedtaegter.pdf',
-        RedirectView.as_view(url=STATIC_URL+'vedtaegter.pdf',
+    url(r'^J60/j60brev.pdf',
+        RedirectView.as_view(url=STATIC_URL+'jubi/J60/j60brev.pdf',
                              permanent=True), ),
-
-
 ]
