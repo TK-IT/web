@@ -28,16 +28,8 @@ def gallery(request, **kwargs):
     albums = allalbums.filter(gfyear__exact=show_year).prefetch_related('basemedia').annotate(count=Count('basemedia'))
 
     firstImages = BaseMedia.objects.filter(album__in=albums, isCoverFile=True).prefetch_related('album').select_subclasses()
-
-    albumSets = []
-
-    for a in albums:
-        i = None
-        for fi in firstImages:
-            if fi.album == a:
-                i = fi
-                break
-        albumSets.append((a, i))
+    firstImages = {fi.album: fi for fi in firstImages}
+    albumSets = [(a, firstImages.get(a)) for a in albums]
 
     context = {'years': years,
                'show_year': show_year,
