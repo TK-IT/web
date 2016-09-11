@@ -4,11 +4,15 @@
 
 
 {% block content %}
-<div class="jumbotron">
-    <h1>Oops!</h1>
-    <h2>404 Not Found</h2>
-    <div class="error-details">
-        Sorry, an error has occured, Requested page not found!
+<div class="row">
+    <div class="col-xs-12 ">
+        <div class="jumbotron">
+            <h1>404 Not Found</h1>
+            <h2>Gå et skridt tilbage og bund en bajer!</h2>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-offset-1 col-sm-10 col-lg-offset-2 col-lg-8">
+        <img src="{{ STATIC_URL }}/404.png" class="img-responsive" alt="Gået kold">
     </div>
 </div>
 {% endblock content %}
