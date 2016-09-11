@@ -15,13 +15,12 @@ import os
 
 def gallery(request, **kwargs):
     allalbums = Album.objects.exclude(basemedia__isnull=True)
-    years = allalbums.order_by().values_list('gfyear').distinct()
-    years = [y[0] for y in years][::-1]
-
-    try:
-        latest_year = max(years)
-    except (ValueError):
+    # Without order_by(), distinct() still returns duplicate gfyears.
+    years = allalbums.order_by().values_list('gfyear', flat=True).distinct()
+    years = sorted(years, reverse=True)
+    if not years:
         raise Http404("No albums exist")
+    latest_year = years[0]
 
     show_year = kwargs.get('gfyear', latest_year)
     show_year = int(show_year) if show_year else None
