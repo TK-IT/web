@@ -68,10 +68,10 @@ urlpatterns = [
                              permanent=True), ),
 
     # J60
-    url(r'(?i)^J60/index.html',
+    url(r'^(?i)J60/index.html',
         RedirectView.as_view(url='/J60/', permanent=True), ),
 
-    url(r'^J60/j60brev.pdf',
+    url(r'^(?i)J60/j60brev.pdf',
         RedirectView.as_view(url=STATIC_URL+'jubi/J60/j60brev.pdf',
                              permanent=True), ),
 ]
