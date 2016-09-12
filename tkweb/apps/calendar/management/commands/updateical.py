@@ -13,9 +13,7 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = 'Opdater kalenderen fra iCal'
 
-    def handle(self, *args, **options):
-        Event.objects.all().delete()
-
+    def get_calendar(self):
         url = config.ICAL_URL
 
         try:
@@ -34,12 +32,34 @@ class Command(BaseCommand):
             logger.error("Could not parse response as ical.")
             logger.debug("Response was %s" % (data))
             return
+        return cal
 
-        eventsAdded = False
+    def handle(self, *args, **options):
+        cal = self.get_calendar()
+        if cal is None:
+            return
+
+        def event_key(event):
+            return (event.title, event.date,
+                    event.description, event.facebook)
+
+        previous_events = {}
+        for e in Event.objects.all():
+            k = event_key(e)
+            if k in previous_events:
+                logger.warning("Duplicate event %s, deleting", k)
+                e.delete()
+            else:
+                previous_events[k] = e
+        # At this point, "previous_events"
+        # contains all the events in the database.
+        assert set(Event.objects.all()) == set(previous_events.values())
+
+        same_events = []
+        new_events = []
 
         for component in cal.walk():
             if component.name == "VEVENT":
-                eventsAdded = True
                 title = component.decoded('summary').decode('utf-8')
                 startdatetime = component.decoded('dtstart')
                 if type(startdatetime) is datetime.datetime:
@@ -49,13 +69,42 @@ class Command(BaseCommand):
                 description = component.decoded('description').decode('utf-8')
                 e = Event(title=title, date=startdate, description=description)
                 e.clean()
-                e.save()
+                k = event_key(e)
+                if k in previous_events:
+                    same_events.append(previous_events.pop(k))
+                else:
+                    new_events.append(e)
 
-        if not eventsAdded:
+        # At this point, "previous_events" and "same_events"
+        # contain all the events in the database.
+        assert (set(Event.objects.all()) ==
+                set(previous_events.values()) | set(same_events))
+        # "previous_events" and "same_events" have no events in common.
+        assert len(set(previous_events.values()) & set(same_events)) == 0
+
+        # The "new_events" are events we have not seen before.
+        for e in new_events:
+            e.save()
+
+        if not new_events and not same_events:
+            # Calendar feed empty?
             noEventsText = "The calendar was updated, but it contained no events."
             logger.warning(noEventsText)
-            self.stdout.write(noEventsText)
-        else:
-            finishText = 'The calendar was updated. %s events was imported.' % (Event.objects.count())
-            logger.info(finishText)
-            self.stdout.write(finishText)
+            print(noEventsText, file=self.stdout)
+            return
+
+        # Delete the old events that were not in "cal".
+        previous_event_ids = [e.id for e in previous_events.values()]
+        if previous_event_ids:
+            Event.objects.filter(id__in=previous_event_ids).delete()
+
+        # At this point, "new_events" and "same_events"
+        # contain all the events in the database.
+        assert set(Event.objects.all()) == set(new_events) | set(same_events)
+
+        finishText = ('The calendar was updated. ' +
+                      '%s events deleted, ' % len(previous_event_ids) +
+                      '%s events created, ' % len(new_events) +
+                      '%s left unchanged.' % len(same_events))
+        logger.info(finishText)
+        print(finishText, file=self.stdout)
