@@ -81,7 +81,7 @@ function pauseMedia() {
 }
 
 function togglePlay() {
-    $(".current audio, .current video").each(function(){
+    $(":not(.hidden) > * > audio, :not(.hidden) > * > video").each(function(){
         if (this.paused ? this.play() : this.pause());
     });
 }
