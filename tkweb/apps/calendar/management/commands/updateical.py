@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
-    help = 'Updater kalenderen fra ical'
+    help = 'Opdater kalenderen fra iCal'
 
     def handle(self, *args, **options):
         Event.objects.all().delete()
@@ -24,7 +24,7 @@ class Command(BaseCommand):
             logger.error("%s Did you remember to preprend http(s?):// URL: '%s'" % (e, url))
             return
         except urllib.error.HTTPError as e:
-            logger.error("Recieved HTTP error code %s. URL: '%s'" % (e.code, url))
+            logger.error("Received HTTP error code %s. URL: '%s'" % (e.code, url))
             return
 
         data = response.read().decode('utf-8')
