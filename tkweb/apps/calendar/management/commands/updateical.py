@@ -19,15 +19,14 @@ class Command(BaseCommand):
         url = config.ICAL_URL
 
         try:
-            response = urllib.request.urlopen(url)
+            with urllib.request.urlopen(url) as response:
+                data = response.read().decode('utf-8')
         except ValueError as e:
             logger.error("%s Did you remember to preprend http(s?):// URL: '%s'" % (e, url))
             return
         except urllib.error.HTTPError as e:
             logger.error("Received HTTP error code %s. URL: '%s'" % (e.code, url))
             return
-
-        data = response.read().decode('utf-8')
 
         try:
             cal = Calendar.from_ical(data)
