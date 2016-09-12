@@ -39,7 +39,7 @@ urlpatterns = [
         views.flatpage, {'url': '/ket/'},
         name='ket'),
 
-    url(r'^kalender/',
+    url(r'^kalender/$',
         tkweb.apps.calendar.views.kalender,
         name='kalender'),
 
