@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 from django.conf.urls import url
 from django.views.generic.base import RedirectView
 
-from tkweb.apps.redirect.views import GalleryIndexRedirectView, GalleryShowFolderRedirectView, GalleryShowPictureRedirectView
+from tkweb.apps.redirect.views import (GalleryIndexRedirectView,
+                                       GalleryShowFolderRedirectView,
+                                       GalleryShowPictureRedirectView, http410)
 from tkweb.settings.base import STATIC_URL
 
 urlpatterns = [
@@ -50,7 +52,7 @@ urlpatterns = [
         RedirectView.as_view(url='/J50/resume/', permanent=True), ),
 
     url(r'^j50/Adresser.php',
-        RedirectView.as_view(url='/J50/deltagere/', permanent=True), ),
+        http410),
 
     url(r'^j50/Arrangementer.php',
         RedirectView.as_view(url='/J50/arrangementer/', permanent=True), ),

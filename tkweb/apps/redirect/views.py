@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.views.generic.base import RedirectView
+from django.shortcuts import render
 
 from tkweb.apps.gallery.models import Album
 
@@ -72,3 +73,8 @@ class GalleryShowPictureRedirectView(RedirectView):
         return reverse('image', kwargs={'gfyear': gfyear,
                                         'album_slug': album_slug,
                                         'image_slug': image_slug})
+
+
+def http410(request):
+    context = {"status": "410 Gone"}
+    return render(request, "404.html", context, status=410)

@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}404{% endblock title %}
+{% block title %}{{ status|default:"404 Not Found" }}{% endblock title %}
 
 
 {% block content %}
 <div class="row">
     <div class="col-xs-12 ">
         <div class="jumbotron">
-            <h1>404 Not Found</h1>
+            <h1>{{ status|default:"404 Not Found" }}</h1>
             <h2>Gå et skridt tilbage og bund en bajer!</h2>
         </div>
     </div>
