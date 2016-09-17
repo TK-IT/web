@@ -102,6 +102,13 @@ class BaseMedia(models.Model):
         return '%s' % (self.slug)
 
 class Image(BaseMedia):
+    class Meta:
+        # Use the pre-1.6 save(). This is a workaround for
+        # https://github.com/TK-IT/web/issues/72 This can be removed when the
+        # upstream bug https://code.djangoproject.com/ticket/21670 is closed
+        select_on_save = True
+
+
     file = VersatileImageField(upload_to=file_name)
 
     def admin_thumbnail(self):
@@ -124,6 +131,13 @@ class Image(BaseMedia):
 
 
 class GenericFile(BaseMedia):
+    class Meta:
+        # Use the pre-1.6 save(). This is a workaround for
+        # https://github.com/TK-IT/web/issues/72 This can be removed when the
+        # upstream bug https://code.djangoproject.com/ticket/21670 is closed
+        select_on_save = True
+
+
     originalFile = models.FileField(upload_to=file_name, blank=True)
     file = models.FileField(upload_to=file_name)
 
