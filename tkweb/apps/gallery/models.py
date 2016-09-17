@@ -55,6 +55,11 @@ class BaseMedia(models.Model):
         ordering = ['forcedOrder', 'date', 'slug']
         unique_together = (('album', 'slug'),)
 
+        # Use the pre-1.6 save(). This is a workaround for
+        # https://github.com/TK-IT/web/issues/72 This can be removed when the
+        # upstream bug https://code.djangoproject.com/ticket/21670 is closed
+        select_on_save = True
+
     IMAGE = 'I'
     VIDEO = 'V'
     AUDIO = 'A'
