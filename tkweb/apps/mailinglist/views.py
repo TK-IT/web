@@ -1,12 +1,22 @@
 from django.core.urlresolvers import reverse
+from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
+from django.http import HttpResponseRedirect
 from django.views.generic import FormView
+import django.core.mail
+from django.core.mail import EmailMessage
 from tkweb.apps.mailinglist.forms import EmailForm
+from tkweb.apps.idm.models import Group
 
 
 class EmailFormView(FormView):
-    template_name = 'email_form.html'
+    template_name = 'mailinglist/email_form.html'
     form_class = EmailForm
+
+    @method_decorator(permission_required('mailinglist.send',
+                                          raise_exception=True))
+    def dispatch(self, request, *args, **kwargs):
+        return super(EmailFormView, self).dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse('email_form')
@@ -20,7 +30,7 @@ class EmailFormView(FormView):
             data['text'] = form.perform_wrapping(data['text'],
                                                  data['wrapping'])
             kwargs['data'] = data
-            form = form_class(**kwargs)
+            form = self.get_form_class()(**kwargs)
             return self.render_to_response(self.get_context_data(form=form))
         elif request.POST.get('send') or request.POST.get('only_me'):
             if form.is_valid():
@@ -47,8 +57,10 @@ class EmailFormView(FormView):
 
         recipients = self.get_recipients(form)
 
-        if data['only_me']:
+        if self.request.POST.get('only_me'):
             recipients = [self.request.user.email]
+        else:
+            raise Exception("I will only send to only_me!")
 
         messages = []
         for recipient in recipients:

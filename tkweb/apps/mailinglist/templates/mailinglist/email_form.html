@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Email til hængerlisten{% endblock title %}
+{% block canonical_url %}{% url 'emailsend' %}{% endblock canonical_url %}
+{% block content %}
+<style>input, textarea { background-color: #666; }</style>
+<form method="post">{% csrf_token %}
+    <p>{{ form.sender_name.label_tag }}
+    {{ form.sender_name }}</p>
+    {{ form.sender_name.errors }}
+    <p>{{ form.sender_email.label_tag }}
+    {{ form.sender_email }}@TAAGEKAMMERET.dk</p>
+    {{ form.sender_email.errors }}
+    <p>{{ form.subject.label_tag }}
+    {{ form.subject }}</p>
+    {{ form.subject.errors }}
+    <p>{{ form.text }}</p>
+    {{ form.text.errors }}
+    <p>{{ form.wrapping.label_tag }}
+    {{ form.wrapping }}
+    <input type="submit" name="wrap" value="Ombryd linjer" />
+    </p>
+    {{ form.wrapping.errors }}
+    <input type="submit" name="only_me" value="Send kun til mig" />
+    <input type="submit" name="send" value="Send mail til hængerlisten" />
+</form>
+{% endblock content %}

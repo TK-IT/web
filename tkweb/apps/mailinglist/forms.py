@@ -9,12 +9,22 @@ class EmailForm(forms.Form):
     NONE = 'none'
     WRAPPING = [(LINES, 'linjer'), (PARAGRAPHS, 'afsnit'), (NONE, 'ingen')]
 
-    sender_name = forms.CharField(initial='BEST')
-    sender_email = forms.CharField(initial='BEST')
+    sender_name = forms.CharField(
+        initial='BEST',
+        widget=forms.TextInput(attrs={'size': 10}),
+    )
+    sender_email = forms.CharField(
+        initial='BEST',
+        widget=forms.TextInput(attrs={'size': 10}),
+    )
 
-    subject = forms.CharField()
+    subject = forms.CharField(
+        widget=forms.TextInput(attrs={'size': 50}),
+    )
 
-    text = forms.CharField(widget=forms.Textarea)
+    text = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 20, 'cols': 90}),
+    )
 
     wrapping = forms.ChoiceField(choices=WRAPPING, initial=LINES)
 

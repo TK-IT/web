@@ -10,6 +10,7 @@ import tkweb.apps.calendar.views
 import tkweb.apps.gallery.urls
 import tkweb.apps.jubi.urls
 import tkweb.apps.redirect.urls
+import tkweb.apps.mailinglist.urls
 import django.views.static
 import django.views.defaults
 import tkweb.views
@@ -46,6 +47,10 @@ urlpatterns = [
     url(r'^galleri/',
         include(tkweb.apps.gallery.urls),
         name='gallery'),
+
+    url(r'^email/',
+        include(tkweb.apps.mailinglist.urls),
+        name='mailinglist'),
 
     # Note the missing trailing slash. This catches everything that start with
     # 'j' or 'J'.

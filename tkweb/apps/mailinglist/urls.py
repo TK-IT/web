@@ -1,9 +1,9 @@
 # encoding: utf8
 from __future__ import unicode_literals
 from django.conf.urls import url
-from tkweb.apps.mailinglist.views import EmailSend
+from tkweb.apps.mailinglist.views import EmailFormView
 
 
 urlpatterns = [
-    url('^$', EmailSend.as_view(), name='emailsend'),
+    url('^$', EmailFormView.as_view(), name='emailsend'),
 ]
