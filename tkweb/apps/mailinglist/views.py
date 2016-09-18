@@ -59,8 +59,6 @@ class EmailFormView(FormView):
 
         if self.request.POST.get('only_me'):
             recipients = [self.request.user.email]
-        else:
-            raise Exception("I will only send to only_me!")
 
         messages = []
         for recipient in recipients:
