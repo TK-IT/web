@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Email til hængerlisten{% endblock title %}
-{% block canonical_url %}{% url 'emailsend' %}{% endblock canonical_url %}
+{% block canonical_url %}{% url 'email_form' %}{% endblock canonical_url %}
 {% block content %}
 <style>input, textarea { background-color: #666; }</style>
 <form method="post">{% csrf_token %}
