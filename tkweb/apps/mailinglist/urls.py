@@ -5,5 +5,5 @@ from tkweb.apps.mailinglist.views import EmailFormView
 
 
 urlpatterns = [
-    url('^$', EmailFormView.as_view(), name='emailsend'),
+    url('^$', EmailFormView.as_view(), name='email_form'),
 ]
