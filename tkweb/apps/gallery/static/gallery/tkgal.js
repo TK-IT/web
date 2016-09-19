@@ -60,10 +60,10 @@ $(document).ready(function() {
     function swipehandler(event, direction) {
         switch(direction) {
         case "left":
-            $(".tkgal-next:visible")[0].click();
+            $(".tkgal-next:visible").eq(0).click();
             break;
         case "right":
-            $(".tkgal-prev:visible")[0].click();
+            $(".tkgal-prev:visible").eq(0).click();
             break;
         default:
         }
@@ -90,10 +90,10 @@ function togglePlay() {
 $(document).keydown(function(e) {
     switch(e.which) {
     case 37: // left
-        $(".tkgal-prev:visible")[0].click();
+        $(".tkgal-prev:visible").eq(0).click();
         break;
     case 39: // right
-        $(".tkgal-next:visible")[0].click();
+        $(".tkgal-next:visible").eq(0).click();
         break;
     case 32: // space
         togglePlay();
@@ -102,7 +102,7 @@ $(document).keydown(function(e) {
         }
         break;
     case 27: // ESC
-        $("#albumlink")[0].click();
+        $("#albumlink").eq(0).click();
         if(e.target == document.body) {
             e.preventDefault();
         }
