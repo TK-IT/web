@@ -76,4 +76,8 @@ urlpatterns = [
     url(r'^(?i)J60/j60brev.pdf',
         RedirectView.as_view(url=STATIC_URL+'jubi/J60/j60brev.pdf',
                              permanent=True), ),
+
+    url(r'^(?i)J60/katalog-j60.pdf',
+        RedirectView.as_view(url=STATIC_URL+'jubi/J60/katalog-j60.pdf',
+                             permanent=False), ),
 ]
