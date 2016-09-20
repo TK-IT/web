@@ -11,22 +11,26 @@ class EmailForm(forms.Form):
 
     sender_name = forms.CharField(
         initial='BEST',
-        widget=forms.TextInput(attrs={'size': 10}),
+        widget=forms.TextInput(attrs={'size': 10, 'class': 'form-control'}),
     )
     sender_email = forms.CharField(
         initial='BEST',
-        widget=forms.TextInput(attrs={'size': 10}),
+        widget=forms.TextInput(attrs={'size': 10, 'class': 'form-control'}),
     )
 
     subject = forms.CharField(
-        widget=forms.TextInput(attrs={'size': 50}),
+        widget=forms.TextInput(attrs={'size': 50, 'class': 'form-control'}),
     )
 
     text = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 20, 'cols': 90}),
+        widget=forms.Textarea(attrs={'rows': 20, 'cols': 90, 'class': 'form-control'}),
     )
 
-    wrapping = forms.ChoiceField(choices=WRAPPING, initial=LINES)
+    wrapping = forms.ChoiceField(
+        choices=WRAPPING,
+        initial=LINES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
     @staticmethod
     def perform_wrapping(text, wrapping):

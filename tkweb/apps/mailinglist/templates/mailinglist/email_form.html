@@ -1,26 +1,68 @@
 {% extends 'base.html' %}
+{% load tkbrand %}
 {% block title %}Email til hængerlisten{% endblock title %}
 {% block canonical_url %}{% url 'email_form' %}{% endblock canonical_url %}
 {% block content %}
-<style>input, textarea { background-color: #666; }</style>
-<form method="post">{% csrf_token %}
-    <p>{{ form.sender_name.label_tag }}
-    {{ form.sender_name }}</p>
-    {{ form.sender_name.errors }}
-    <p>{{ form.sender_email.label_tag }}
-    {{ form.sender_email }}@TAAGEKAMMERET.dk</p>
-    {{ form.sender_email.errors }}
-    <p>{{ form.subject.label_tag }}
-    {{ form.subject }}</p>
-    {{ form.subject.errors }}
-    <p>{{ form.text }}</p>
-    {{ form.text.errors }}
-    <p>{{ form.wrapping.label_tag }}
-    {{ form.wrapping }}
-    <input type="submit" name="wrap" value="Ombryd linjer" />
-    </p>
-    {{ form.wrapping.errors }}
-    <input type="submit" name="only_me" value="Send kun til mig" />
-    <input type="submit" name="send" value="Send mail til hængerlisten" />
-</form>
+    <form method="post" class="form-horizontal" >{% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.sender_name.auto_id }}" class="col-xs-4 col-sm-2 control-label">
+                {{ form.sender_name.label }}
+            </label>
+            <div class="col-xs-8 col-sm-5 ">
+                {{ form.sender_name }}
+            </div>
+            <div class="col-xs-12">
+                {{ form.sender_name.errors }}
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="{{ form.sender_email.auto_id }}" class="col-xs-4 col-sm-2 control-label">
+                {{ form.sender_email.label }}
+            </label>
+            <div class="col-xs-4 col-sm-5 ">
+                {{ form.sender_email }}
+            </div>
+            <div class="col-xs-4 col-sm-5 ">
+                <p>@{% TKETAA %}.dk</p>
+            </div>
+            <div class="col-xs-12">
+                {{ form.sender_email.errors }}
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="{{ form.subject.auto_id }}" class="col-xs-4 col-sm-2 control-label">
+                {{ form.subject.label }}
+            </label>
+            <div class="col-xs-8 col-sm-10 ">
+                {{ form.subject }}
+            </div>
+            <div class="col-xs-12">
+                {{ form.subject.errors }}
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-12">
+                {{ form.text }}
+                {{ form.text.errors }}
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="{{ form.wrapping.auto_id }}" class="col-xs-4 col-sm-2 control-label">
+                {{ form.wrapping.label }}
+            </label>
+            <div class="col-xs-4 col-sm-3 col-md-2 ">
+                {{ form.wrapping }}
+            </div>
+            <input type="submit" name="wrap" class="btn btn-default" value="Ombryd linjer" />
+            <div class="col-xs-12">
+                {{ form.wrapping.errors }}
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-12">
+                <input type="submit" name="only_me" class="btn btn-default" value="Send kun til mig" />
+                <input type="submit" name="send" class="btn btn-default" value="Send mail til hængerlisten" />
+            </div>
+        </div>
+    </form>
 {% endblock content %}
