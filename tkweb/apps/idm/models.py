@@ -138,4 +138,4 @@ class Title(models.Model):
         verbose_name_plural = 'titler'
 
     def __str__(self):
-        return '%s %s' % (self.display_title(), self.profile)
+        return '%s %s' % (self.display_title(), getattr(self, 'profile', ''))
