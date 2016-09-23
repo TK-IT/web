@@ -199,7 +199,7 @@ class Profile(models.Model):
     email = models.EmailField(max_length=50, blank=True,
                               verbose_name="Emailadresse")
     allow_direct_email = models.BooleanField(
-        blank=True, verbose_name="Tillad emails til titel")
+        blank=True, default=True, verbose_name="Tillad emails til titel")
     street_name = models.CharField(max_length=50, blank=True,
                                    verbose_name="Gade")
     house_number = models.CharField(max_length=15, blank=True,
