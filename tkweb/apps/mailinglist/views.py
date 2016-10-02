@@ -48,9 +48,17 @@ class EmailFormView(FormView):
         email_addresses = recipients.values_list('email', flat=True)
         return sorted(email_addresses)
 
+    def translate_subject(self, subject):
+        if '[TK' in subject:
+            # No change
+            return subject
+        else:
+            return '[TK] %s' % (subject,)
+
     def form_valid(self, form):
         data = form.cleaned_data
         subject = data['subject']
+        subject = self.translate_subject(subject)
         text = data['wrapped_text']
         from_email = '%s@TAAGEKAMMERET.dk' % (data['sender_email'],)
         from_field = '"%s" <%s>' % (data['sender_name'], from_email)
