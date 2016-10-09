@@ -223,11 +223,25 @@ class Sheet(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
 
+    class Meta:
+        ordering = ['start_date']
+
+    def __str__(self):
+        s = '%s %s-%s' % (self.name, self.start_date, self.end_date)
+        return s.strip()
+
 
 class PurchaseKind(models.Model):
     sheet = models.ForeignKey(Sheet)
+    position = models.PositiveIntegerField()
     name = models.CharField(max_length=200)
     price = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        ordering = ['sheet', 'position']
+
+    def __str__(self):
+        return self.name
 
 
 class SheetRow(models.Model):
@@ -236,8 +250,17 @@ class SheetRow(models.Model):
     name = models.CharField(max_length=200, blank=False, null=True)
     profile = models.ForeignKey(Profile, blank=False, null=True)
 
+    class Meta:
+        ordering = ['sheet', 'position']
+
+    def __str__(self):
+        return self.name
+
 
 class Purchase(models.Model):
     row = models.ForeignKey(SheetRow)
     kind = models.ForeignKey(PurchaseKind)
     count = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ['row', 'kind']
