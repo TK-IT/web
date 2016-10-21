@@ -9,12 +9,15 @@ from tkweb.apps.mailinglist.forms import EmailForm
 from tkweb.apps.idm.models import Group
 
 
+send_permission_required = permission_required(
+    'mailinglist.send', raise_exception=True)
+
+
 class EmailFormView(FormView):
     template_name = 'mailinglist/email_form.html'
     form_class = EmailForm
 
-    @method_decorator(permission_required('mailinglist.send',
-                                          raise_exception=True))
+    @method_decorator(send_permission_required)
     def dispatch(self, request, *args, **kwargs):
         return super(EmailFormView, self).dispatch(request, *args, **kwargs)
 
