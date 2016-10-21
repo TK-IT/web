@@ -9,7 +9,7 @@ class MailinglistAdmin(admin.ModelAdmin):
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.module_name
         return [
-            url(r'^$',
+            url(r'^add/$',
                 RedirectView.as_view(url='/email/', permanent=False),
                 name='%s_%s_add' % info),
         ]
