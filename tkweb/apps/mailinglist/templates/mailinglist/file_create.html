@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load tkbrand %}
+{% block title %}Upload fil{% endblock title %}
+{% block content %}
+<form method="post" class="form-horizontal" enctype="multipart/form-data">{% csrf_token %}
+<div class="form-group">
+    <label for="{{ form.files.auto_id }}" class="col-xs-4 col-sm-2 control-label">
+        Fil:
+    </label>
+    <div class="col-xs-8 col-sm-5 ">
+        {{ form.files }}
+    </div>
+    <div class="col-xs-12">
+        {{ form.files.errors }}
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-xs-12">
+        <input type="submit" class="btn btn-default" value="Upload" />
+    </div>
+</div>
+</form>
+{% endblock content %}

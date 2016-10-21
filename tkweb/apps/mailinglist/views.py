@@ -2,10 +2,11 @@ from django.core.urlresolvers import reverse
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseRedirect
-from django.views.generic import FormView
+from django.views.generic import FormView, ListView
 import django.core.mail
 from django.core.mail import EmailMessage
-from tkweb.apps.mailinglist.forms import EmailForm
+from tkweb.apps.mailinglist.forms import EmailForm, FileForm
+from tkweb.apps.mailinglist.models import SharedFile
 from tkweb.apps.idm.models import Group
 
 
@@ -90,3 +91,27 @@ class EmailFormView(FormView):
         email_backend = django.core.mail.get_connection()
         email_backend.send_messages(messages)
         return HttpResponseRedirect(self.get_success_url())
+
+
+class FileList(ListView):
+    queryset = SharedFile.objects.all()
+    template_name = 'mailinglist/file_list.html'
+
+    @method_decorator(send_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(FileList, self).dispatch(request, *args, **kwargs)
+
+
+class FileCreate(FormView):
+    form_class = FileForm
+    template_name = 'mailinglist/file_create.html'
+
+    @method_decorator(send_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(FileCreate, self).dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        for i in form.cleaned_data['files']:
+            i.creator = self.request.user
+            i.save()
+        return HttpResponseRedirect(reverse('file_list'))

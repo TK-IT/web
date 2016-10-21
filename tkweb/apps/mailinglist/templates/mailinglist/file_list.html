@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load tkbrand %}
+{% block title %}Filer{% endblock title %}
+{% block content %}
+<p><a href="{% url 'file_create' %}">Upload fil</a></p>
+<div class="form-horizontal">
+{% for object in object_list %}
+<div class="form-group">
+    <div class="col-xs-6"><input class="form-control" value="https://www.TAAGEKAMMERET.dk{{ object.file.url }}" /></div>
+    <div class="col-xs-3">{% firstof object.creator.get_full_name object.creator.get_username %}</div>
+    <div class="col-xs-3">{{ object.created_time }}</div>
+</div>
+{% endfor %}
+</div>
+{% endblock content %}

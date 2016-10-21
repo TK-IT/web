@@ -1,6 +1,8 @@
 import re
 import textwrap
 from django import forms
+from multiupload.fields import MultiFileField
+from tkweb.apps.mailinglist.models import SharedFile
 
 
 class EmailForm(forms.Form):
@@ -61,3 +63,11 @@ class EmailForm(forms.Form):
                 raise ValueError("Line wrapping failed (no fixpoint)")
             cleaned_data['wrapped_text'] = t1
         return cleaned_data
+
+
+class FileForm(forms.Form):
+    files = MultiFileField()
+
+    def clean_files(self):
+        files = self.cleaned_data.get('files', [])
+        return [SharedFile(file=file) for file in files]
