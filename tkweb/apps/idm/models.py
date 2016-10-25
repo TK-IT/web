@@ -246,6 +246,8 @@ class Title(models.Model):
         return '%s%s' % (tk_prefix(self.age(gfyear)), self.display_root())
 
     def display_title_and_year(self, gfyear=None):
+        if self.root == 'EFUIT':
+            return self.display_title(gfyear)
         return '%s (%s)' % (self.display_title(gfyear),
                             gfyearPPslash(self.period))
 
