@@ -1,4 +1,38 @@
 {% extends "regnskab/base.html" %}
+{% block head %}
+<style>
+.crosses {
+	display: flex;
+	position: relative;
+	flex-direction: column;
+	flex-wrap: wrap;
+	height: 30px;
+	align-content: flex-start;
+}
+.crosses.column-1 {
+	width: 320px;
+}
+.crosses.column-2 {
+	width: 90px;
+}
+.crosses.column-3 {
+	width: 320px;
+}
+.crosses > .cross {
+	height: 15px;
+	width: 15px;
+}
+.crosses > .count {
+	position: absolute;
+	top: 0;
+	left: 0;
+	line-height: 30px;
+	font-size: 20px;
+	font-weight: bold;
+	box-shadow: 0px 0px 8px #000;
+}
+</style>
+{% endblock %}
 {% block content %}
 <h1>{{ sheet }}</h1>
 <table>
@@ -21,8 +55,10 @@
 <td>{{ row.name|default:row.profile }}</td>
 {% for kind in row.kinds %}
 <td>
-{% for _ in kind.counter %}<span class="cross">X</span>{% endfor %}
-<span class="count">{{ kind.count|floatformat }}</span>
+<span class="crosses column-{{ kind.kind.position }}">
+{% for _ in kind.counter %}<span class="cross">&times;</span>{% endfor %}
+{% if kind.count %}<span class="count">{{ kind.count|floatformat }}</span>{% endif %}
+</span>
 </td>
 {% endfor %}
 </tr>
