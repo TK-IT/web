@@ -119,7 +119,8 @@ class SheetRow(models.Model):
 class Purchase(models.Model):
     row = models.ForeignKey(SheetRow)
     kind = models.ForeignKey(PurchaseKind)
-    count = models.PositiveIntegerField()
+    count = models.DecimalField(max_digits=9, decimal_places=4,
+                                help_text='antal krydser eller brøkdel')
 
     class Meta:
         ordering = ['row', 'kind']
