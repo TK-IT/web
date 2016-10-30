@@ -1,6 +1,6 @@
 from django.db import models
 from tkweb.apps.idm.models import (
-    unicode_superscript, tk_prefix, get_period, parse_bestfu_alias,
+    tk_prefix, parse_bestfu_alias,
 )
 
 
@@ -15,7 +15,7 @@ class Profile(models.Model):
         verbose_name_plural = verbose_name + 'er'
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Title(models.Model):
@@ -66,6 +66,8 @@ class Alias(models.Model):
     profile = models.ForeignKey(Profile)
     period = models.IntegerField(blank=True, null=True, verbose_name='Årgang')
     root = models.CharField(max_length=10, verbose_name='Titel')
+    start_time = models.DateTimeField(blank=True, null=True)
+    end_time = models.DateTimeField(blank=True, null=True)
 
     def display_title(self, gfyear):
         return '%s%s' % (tk_prefix(self.age(gfyear)), self.root)
@@ -79,11 +81,46 @@ class Alias(models.Model):
         return self.display_title()
 
 
+class Payment(models.Model):
+    profile = models.ForeignKey(Profile)
+    time = models.DateTimeField()
+    amount = models.DecimalField(max_digits=9, decimal_places=2)
+    note = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return '%.2f kr.' % self.amount
+
+
 class Sheet(models.Model):
     name = models.CharField(max_length=200, blank=True,
                             help_text='f.eks. HSTR, revy, matlabotanisk have')
     start_date = models.DateField()
     end_date = models.DateField()
+
+    def rows(self):
+        r = []
+        kinds = list(self.purchasekind_set.all())
+        for row in self.sheetrow_set.all():
+            purchases = {
+                p.kind_id: p
+                for p in row.purchase_set.all()
+            }
+            purchase_list = [
+                purchases.get(kind.id, Purchase(row=row, kind=kind, count=0))
+                for kind in kinds
+            ]
+            for p in purchase_list:
+                if p.count % 1 == 0:
+                    p.counter = range(int(p.count))
+                else:
+                    p.counter = None
+            r.append(dict(
+                profile=row.profile,
+                position=row.position,
+                name=row.name,
+                kinds=purchase_list,
+            ))
+        return r
 
     class Meta:
         ordering = ['start_date']
@@ -109,7 +146,7 @@ class PurchaseKind(models.Model):
         verbose_name_plural = verbose_name + 'r'
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class SheetRow(models.Model):
@@ -124,7 +161,7 @@ class SheetRow(models.Model):
         verbose_name_plural = verbose_name + 'e'
 
     def __str__(self):
-        return self.name
+        return self.name or str(self.profile)
 
 
 class Purchase(models.Model):
@@ -133,7 +170,44 @@ class Purchase(models.Model):
     count = models.DecimalField(max_digits=9, decimal_places=4,
                                 help_text='antal krydser eller brøkdel')
 
+    def __str__(self):
+        return '%g× %s' % (self.count, self.kind)
+
     class Meta:
         ordering = ['row', 'kind']
         verbose_name = 'krydser'
         verbose_name_plural = verbose_name
+
+
+class EmailTemplate(models.Model):
+    POUND = 'pound'
+    KIND = [(POUND, 'pound')]
+
+    subject = models.TextField(blank=False)
+    body = models.TextField(blank=False)
+    created_time = models.DateTimeField(auto_now_add=True)
+    kind = models.CharField(max_length=10, choices=KIND)
+
+
+class Email(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL,
+                                null=True, blank=False, related_name='+')
+    template = models.ForeignKey(EmailTemplate, on_delete=models.CASCADE,
+                                 null=True, blank=False)
+    time = models.DateTimeField()
+    recipient_name = models.CharField(max_length=255)
+    recipient_email = models.CharField(max_length=255)
+
+    def __str__(self):
+        return '%s <%s>' % (self.recipient_name, self.recipient_email)
+
+
+class EmailVariable(models.Model):
+    email = models.ForeignKey(Email, on_delete=models.CASCADE)
+    key = models.CharField(max_length=20)
+    value = models.CharField(max_length=255)
+    numeric_value = models.DecimalField(max_digits=9, decimal_places=2,
+                                        null=True, blank=True)
+
+    def __str__(self):
+        return '%s=%s' % (self.key, self.value)

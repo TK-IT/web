@@ -1,0 +1,32 @@
+{% extends "regnskab/base.html" %}
+{% block content %}
+<h1>{{ sheet }}</h1>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Navn</th>
+{% for kind in sheet.purchasekind_set.all %}
+<th>{{ kind.name }}</th>
+{% endfor %}
+</tr>
+</thead>
+<tbody>
+{% for row in sheet.rows %}
+<tr>
+<td>
+{% for kind in row.kinds %}{{ kind.count|floatformat }}
+{% endfor %}
+</td>
+<td>{{ row.name|default:row.profile }}</td>
+{% for kind in row.kinds %}
+<td>
+{% for _ in kind.counter %}<span class="cross">X</span>{% endfor %}
+<span class="count">{{ kind.count|floatformat }}</span>
+</td>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}
