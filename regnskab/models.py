@@ -72,18 +72,23 @@ class Alias(models.Model):
 
     class Meta:
         ordering = ['period', 'root']
+        verbose_name = 'alias'
+        verbose_name_plural = verbose_name + 'er'
 
     def __str__(self):
         return self.display_title()
 
 
 class Sheet(models.Model):
-    name = models.CharField(max_length=200, blank=True)
+    name = models.CharField(max_length=200, blank=True,
+                            help_text='f.eks. HSTR, revy, matlabotanisk have')
     start_date = models.DateField()
     end_date = models.DateField()
 
     class Meta:
         ordering = ['start_date']
+        verbose_name = 'krydsliste'
+        verbose_name_plural = verbose_name + 'r'
 
     def __str__(self):
         s = '%s %s-%s' % (self.name, self.start_date, self.end_date)
@@ -93,11 +98,15 @@ class Sheet(models.Model):
 class PurchaseKind(models.Model):
     sheet = models.ForeignKey(Sheet)
     position = models.PositiveIntegerField()
-    name = models.CharField(max_length=200)
-    price = models.DecimalField(max_digits=12, decimal_places=2)
+    name = models.CharField(max_length=200,
+                            help_text='f.eks. guldøl, guldølskasser')
+    price = models.DecimalField(max_digits=12, decimal_places=2,
+                                help_text='f.eks. 8, 10, 13, 200, 250')
 
     class Meta:
         ordering = ['sheet', 'position']
+        verbose_name = 'prisklasse'
+        verbose_name_plural = verbose_name + 'r'
 
     def __str__(self):
         return self.name
@@ -111,6 +120,8 @@ class SheetRow(models.Model):
 
     class Meta:
         ordering = ['sheet', 'position']
+        verbose_name = 'krydslisteindgang'
+        verbose_name_plural = verbose_name + 'e'
 
     def __str__(self):
         return self.name
@@ -124,3 +135,5 @@ class Purchase(models.Model):
 
     class Meta:
         ordering = ['row', 'kind']
+        verbose_name = 'krydser'
+        verbose_name_plural = verbose_name
