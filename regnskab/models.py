@@ -181,33 +181,33 @@ class Purchase(models.Model):
 
 class EmailTemplate(models.Model):
     POUND = 'pound'
-    KIND = [(POUND, 'pound')]
+    FORMAT = [(POUND, 'pound')]
 
+    name = models.CharField(max_length=255, blank=True)
     subject = models.TextField(blank=False)
     body = models.TextField(blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
-    kind = models.CharField(max_length=10, choices=KIND)
+    format = models.CharField(max_length=10, choices=FORMAT)
+
+    def __str__(self):
+        return self.name or str(self.created_time)
+
+
+class EmailBatch(models.Model):
+    template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL,
+                                 null=True, blank=False)
+    created_time = models.DateTimeField(auto_now_add=True)
+    send_time = models.DateTimeField(null=True, blank=True)
 
 
 class Email(models.Model):
+    batch = models.ForeignKey(EmailBatch, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL,
                                 null=True, blank=False, related_name='+')
-    template = models.ForeignKey(EmailTemplate, on_delete=models.CASCADE,
-                                 null=True, blank=False)
-    time = models.DateTimeField()
+    subject = models.TextField(blank=False)
+    body = models.TextField(blank=False)
     recipient_name = models.CharField(max_length=255)
     recipient_email = models.CharField(max_length=255)
 
     def __str__(self):
         return '%s <%s>' % (self.recipient_name, self.recipient_email)
-
-
-class EmailVariable(models.Model):
-    email = models.ForeignKey(Email, on_delete=models.CASCADE)
-    key = models.CharField(max_length=20)
-    value = models.CharField(max_length=255)
-    numeric_value = models.DecimalField(max_digits=9, decimal_places=2,
-                                        null=True, blank=True)
-
-    def __str__(self):
-        return '%s=%s' % (self.key, self.value)

@@ -29,30 +29,30 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Email',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('time', models.DateTimeField()),
+                ('id', models.AutoField(serialize=False, auto_created=True, verbose_name='ID', primary_key=True)),
+                ('subject', models.TextField()),
+                ('body', models.TextField()),
                 ('recipient_name', models.CharField(max_length=255)),
                 ('recipient_email', models.CharField(max_length=255)),
             ],
         ),
         migrations.CreateModel(
-            name='EmailTemplate',
+            name='EmailBatch',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('subject', models.TextField()),
-                ('body', models.TextField()),
+                ('id', models.AutoField(serialize=False, auto_created=True, verbose_name='ID', primary_key=True)),
                 ('created_time', models.DateTimeField(auto_now_add=True)),
-                ('kind', models.CharField(choices=[('pound', 'pound')], max_length=10)),
+                ('send_time', models.DateTimeField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='EmailVariable',
+            name='EmailTemplate',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('key', models.CharField(max_length=20)),
-                ('value', models.CharField(max_length=255)),
-                ('numeric_value', models.DecimalField(max_digits=9, blank=True, null=True, decimal_places=2)),
-                ('email', models.ForeignKey(to='regnskab.Email')),
+                ('id', models.AutoField(serialize=False, auto_created=True, verbose_name='ID', primary_key=True)),
+                ('name', models.CharField(blank=True, max_length=255)),
+                ('subject', models.TextField()),
+                ('body', models.TextField()),
+                ('created_time', models.DateTimeField(auto_now_add=True)),
+                ('format', models.CharField(choices=[('pound', 'pound')], max_length=10)),
             ],
         ),
         migrations.CreateModel(
@@ -168,14 +168,19 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(to='regnskab.Profile'),
         ),
         migrations.AddField(
-            model_name='email',
-            name='profile',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, related_name='+', null=True, to='regnskab.Profile'),
+            model_name='emailbatch',
+            name='template',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, to='regnskab.EmailTemplate', null=True),
         ),
         migrations.AddField(
             model_name='email',
-            name='template',
-            field=models.ForeignKey(null=True, to='regnskab.EmailTemplate'),
+            name='batch',
+            field=models.ForeignKey(to='regnskab.EmailBatch'),
+        ),
+        migrations.AddField(
+            model_name='email',
+            name='profile',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, to='regnskab.Profile', related_name='+', null=True),
         ),
         migrations.AddField(
             model_name='alias',

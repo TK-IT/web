@@ -1,7 +1,7 @@
 from django.contrib import admin
 from regnskab.models import (
     Profile, Title, Alias, Payment, Sheet, PurchaseKind, SheetRow, Purchase,
-    EmailTemplate, Email, EmailVariable,
+    EmailTemplate, EmailBatch, Email,
 )
 
 
@@ -41,11 +41,11 @@ class EmailTemplateAdmin(admin.ModelAdmin):
     list_display = ('subject', 'created_time')
 
 
+class EmailBatchAdmin(admin.ModelAdmin):
+    pass
+
+
 class EmailAdmin(admin.ModelAdmin):
-    list_display = ('profile', 'template', 'time')
-
-
-class EmailVariableAdmin(admin.ModelAdmin):
     pass
 
 
@@ -58,5 +58,5 @@ admin.site.register(PurchaseKind, PurchaseKindAdmin)
 admin.site.register(SheetRow, SheetRowAdmin)
 admin.site.register(Purchase, PurchaseAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
+admin.site.register(EmailBatch, EmailBatchAdmin)
 admin.site.register(Email, EmailAdmin)
-admin.site.register(EmailVariable, EmailVariableAdmin)

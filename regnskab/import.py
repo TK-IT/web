@@ -66,54 +66,6 @@ def make_profiles(data):
     return {p.name: p for p in profiles}
 
 
-def get_emails(data, profiles):
-    from regnskab.models import Email, EmailVariable
-    emails = []
-    email_variables = []
-
-    purchase_kind_email_var = dict(
-        oel='OEL', xmas='GULD', kasser='KASSER', vand='VAND')
-
-    for o in data:
-        time = datetime.datetime.strptime(o['time'], '%Y-%m-%dT%H:%M:%S%z')
-        v_prices = {}
-        for i, kind in enumerate(o['kinds']):
-            v_prices['P' + purchase_kind_email_var[kind['key']]] = (
-                '%.2f' % kind['price'])
-        for k in o['names']:
-            variables = dict(
-                TITEL=o['titles'].get(k, ''),
-                NAVN=o['names'][k],
-                EMAIL=o['emails'][k],
-                **v_prices)
-            for key, count in o['purchases'].get(k, {}).items():
-                if key == 'kasser':
-                    v = '%.1f' % count
-                else:
-                    v = '%d' % count
-                variables[purchase_kind_email_var[key]] = v
-            variables['ANDET'] = '%.2f' % o['others'].get(k, 0)
-            variables['BETALT'] = '%.2f' % o['payments'].get(k, 0)
-
-            emails.append(Email(
-                profile=profiles[k],
-                time=time,
-                recipient_name=o['names'][k],
-                recipient_email=o['names'][k]))
-            for k, v in variables.items():
-                try:
-                    f = float(v)
-                except ValueError:
-                    f = None
-                email_variables.append(EmailVariable(
-                    email=emails[-1],
-                    key=k,
-                    value=v,
-                    numeric_value=f))
-
-    return emails, email_variables
-
-
 def get_payments(data, profiles):
     from regnskab.models import Payment
     payments = []
@@ -173,14 +125,10 @@ def main():
         data = json.load(fp)
 
     profiles = make_profiles(data)
-    emails, email_variables = get_emails(data, profiles)
     payments = get_payments(data, profiles)
     sheets, purchase_kinds, rows, purchases = get_sheets(data, profiles)
     print("%s rows" % len(rows))
 
-    emails = save_all(emails, unique_attrs=('profile', 'time'), only_new=True)
-    EmailVariable.objects.bulk_create(
-        filter_related(emails, email_variables, 'email'))
     save_all(payments, unique_attrs=('profile', 'time'), bulk=True)
 
     sheets = save_all(sheets, unique_attrs=('start_date', 'end_date'),
