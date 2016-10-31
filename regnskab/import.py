@@ -86,6 +86,10 @@ def get_payments(data, profiles):
     return payments
 
 
+purchase_kind_names = dict(oel='øl', xmas='guldøl', vand='sodavand',
+                           kasser='ølkasser')
+
+
 def get_sheets(data, profiles):
     from regnskab.models import Sheet, SheetRow, PurchaseKind, Purchase
     sheets = []
@@ -98,10 +102,11 @@ def get_sheets(data, profiles):
         sheets.append(sheet)
         kind_map = {}
         for i, kind in enumerate(o['kinds']):
+            name = purchase_kind_names[kind['key']]
             purchase_kinds.append(PurchaseKind(
                 sheet=sheet,
                 position=i+1,
-                name=kind['name'],
+                name=name,
                 price=kind['price']))
             kind_map[kind['key']] = purchase_kinds[-1]
         for i, name in enumerate(sorted(o['purchases'])):
