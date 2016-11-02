@@ -66,12 +66,19 @@ def make_profiles(data):
     return {p.name: p for p in profiles}
 
 
+def strptime(s):
+    try:
+        return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%S%z')
+    except ValueError:
+        return datetime.datetime.strptime(s+'+0100', '%Y-%m-%dT%H:%M:%S%z')
+
+
 def get_payments(data, profiles):
     from regnskab.models import Payment
     payments = []
 
     for o in data:
-        time = datetime.datetime.strptime(o['time'], '%Y-%m-%dT%H:%M:%S%z')
+        time = strptime(o['time'])
         for name, amount in o['payments'].items():
             payments.append(
                 Payment(profile=profiles[name],
@@ -97,7 +104,7 @@ def get_sheets(data, profiles):
     rows = []
     purchases = []
     for o in data:
-        time = datetime.datetime.strptime(o['time'], '%Y-%m-%dT%H:%M:%S%z')
+        time = strptime(o['time'])
         sheet = Sheet(start_date=time.date(), end_date=time.date())
         sheets.append(sheet)
         kind_map = {}
