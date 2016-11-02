@@ -16,10 +16,11 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
-from regnskab.views import SheetCreate, SheetDetail
+from regnskab.views import SheetCreate, SheetDetail, SheetUpdate
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^sheet/new/', SheetCreate.as_view(), name='sheet_create'),
-    url(r'^sheet/(?P<pk>\d+)/', SheetDetail.as_view(), name='sheet'),
+    url(r'^sheet/new/$', SheetCreate.as_view(), name='sheet_create'),
+    url(r'^sheet/(?P<pk>\d+)/$', SheetDetail.as_view(), name='sheet'),
+    url(r'^sheet/(?P<pk>\d+)/edit/$', SheetUpdate.as_view(), name='sheet_update'),
 ]
