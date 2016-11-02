@@ -44,11 +44,14 @@ class Command(BaseCommand):
 
 			flathtml = ''.join(map(html5lib.serialize, bodyels))
 
-			f = FlatPage.objects.create(
+			f, created = FlatPage.objects.update_or_create(
 				url=url,
-				title=title,
-				content=flathtml
+				defaults=dict(
+					title=title,
+					content=flathtml
+				)
 			)
-			FlatPage.sites.through.objects.create(flatpage=f, site_id=1)
+			if created:
+				FlatPage.sites.through.objects.create(flatpage=f, site_id=1)
 
 			print('Imported flatpage %s' % url)
