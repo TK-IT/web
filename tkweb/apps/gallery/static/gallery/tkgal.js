@@ -1,4 +1,8 @@
 $(document).ready(function() {
+    // Set the navbar position as absolute when viewing images. This prevents
+    // the navbar from obscuring the image when using pinch to zoom.
+    $(".navbar-fixed-top").css("position", "absolute");
+
     // Get array of all slugs
     var slugs = $("#tkgal-container > *").map(function() {
         return $(this).attr("data-permlink");
@@ -54,8 +58,9 @@ $(document).ready(function() {
   $("body").swipe( { // register swipe anywhere in body
         swipeLeft:swipehandler,
         swipeRight:swipehandler,
-        allowPageScroll:"auto"
-    });
+        allowPageScroll:"auto",
+        fingers:1
+  });
 
     function swipehandler(event, direction) {
         switch(direction) {
