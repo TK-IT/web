@@ -121,7 +121,7 @@ def get_sheets(data, profiles):
 
 
 def main():
-    from regnskab.models import EmailVariable, Purchase
+    from regnskab.models import Purchase
     parser = argparse.ArgumentParser()
     parser.add_argument('filename')
     args = parser.parse_args()
