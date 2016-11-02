@@ -199,6 +199,10 @@ class EmailBatch(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
     send_time = models.DateTimeField(null=True, blank=True)
 
+    @property
+    def sent(self):
+        return bool(self.send_time)
+
 
 class Email(models.Model):
     batch = models.ForeignKey(EmailBatch, on_delete=models.CASCADE)
