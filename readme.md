@@ -36,6 +36,8 @@ flere moduler der nedarver fra hindanden. Se også under
 Det er en forudsætning at maskinen har en fungerende python installation med
 `pip`.
 
+En mysql installation er også påkrævet så `mysql_client` er tilgængelig, f.eks. skal man installere pakken `libmysqlclient-dev` på Ubuntu/Debian.
+
 Brug nedstående til at klone git-repoet, sættet et python ≥ 3.3 virtualenv op,
 installere alle pakker og oprette en database.
 
