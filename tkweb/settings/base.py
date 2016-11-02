@@ -40,6 +40,7 @@ LOCAL_APPS = [
     'tkweb.apps.tkbrand',
     'tkweb.apps.idm',
     'tkweb.apps.mailinglist',
+    'tkweb.apps.scripts',
 ]
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
