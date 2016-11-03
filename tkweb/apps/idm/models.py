@@ -149,8 +149,10 @@ def parse_bestfu_alias(alias, gfyear):
                 # Translate AE OE AA
                 letter1_int = letter_map.get(letter1, letter1)
                 letter2_int = letter_map.get(letter2, letter2)
-                root = fu_kind + letter1_int + letter2_int
-            return kind, root, period
+                root_int = fu_kind + letter1_int + letter2_int
+                return fu_kind, root_int, period
+            else:
+                return kind, root, period
     raise ValueError(alias)
 
 
