@@ -1,4 +1,35 @@
 // vim:set ft=javascript sw=4 et:
+
+class Cross extends React.Component {
+    render() {
+        return <div className='cross'>"&times;"</div>;
+    }
+}
+
+class Crosses extends React.Component {
+    render() {
+        const crosses = [];
+        for (let i = 0; i < this.props.count; ++i) crosses.push(<Cross key={i} />);
+        return <div className='crosses'>{crosses}</div>;
+    }
+}
+
+class ColumnEntry extends React.Component {
+    getInputValue() {
+        let st = this.state.inputValue;
+        let v = this.props.value;
+        if (parseFloat(st) === v) { return st; }
+        else { return ''+v; }
+    }
+    render() {
+        return <div className='column column-'+this.props.columnKind>
+            <Crosses count={this.props.value} />
+            <input className='column-entry' value={this.getInputValue()}
+                   onChange={e => this.onChange(
+        </div>;
+    }
+}
+
 function init_react() {
     const participants = get_participants();
     const formelement = document.getElementById('id_participants').form;
