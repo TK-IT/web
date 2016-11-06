@@ -1,0 +1,156 @@
+{% extends "regnskab/base.html" %}
+{% block head %}
+<style>
+.crosses {
+	display: flex;
+	position: relative;
+	flex-direction: column;
+	flex-wrap: wrap;
+	height: 30px;
+	align-content: flex-start;
+}
+.crosses.column-1 {
+	width: 225px;
+}
+.crosses.column-2 {
+	width: 90px;
+}
+.crosses.column-3 {
+	width: 225px;
+}
+.crosses > .cross {
+	height: 15px;
+	width: 15px;
+}
+.crosses > .count {
+	position: absolute;
+	top: 0;
+	left: 0;
+	line-height: 30px;
+	font-size: 20px;
+	font-weight: bold;
+	box-shadow: 0px 0px 8px #000;
+}
+
+.sheetrow {
+    display: flex;
+    height: 30px;
+}
+.sheetrow > .summary { width: 30px; }
+.sheetrow > .name { width: 100px; }
+.sheetrow > .column { position: relative; }
+.sheetrow > .column-entry {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 30px;
+    border: 0 none;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.sheetrow > .column-1 { width: 225px; }
+.sheetrow > .column-2 { width: 90px; }
+.sheetrow > .column-3 { width: 225px; }
+.sheetrow > .column-1ks { width: 60px; }
+.sheetrow > .column-2ks { width: 60px; }
+.sheetrow > .column-3ks { width: 60px; }
+
+</style>
+{% endblock %}
+{% block content %}
+<h1>{{ sheet }}</h1>
+
+<div class="sheetrow sheetrow-header">
+    <div class="summary"></div>
+    <div class="name"></div>
+    <div class="column column-1">Øl</div>
+    <div class="column column-1ks">ks</div>
+    <div class="column column-2">Guld</div>
+    <div class="column column-2ks">ks</div>
+    <div class="column column-3">Vand</div>
+    <div class="column column-3ks">ks</div>
+</div>
+
+<div class="sheetrow">
+    <div class="summary"></div>
+    <div class="name">FORM</div>
+    <div class="column column-1">
+        <div class="crosses"><div class="cross">&times;</div><div class="cross">&times;</div><div class="cross">&times;</div><div class="cross">&times;</div><div class="cross">&times;</div><div class="cross">&times;</div></div>
+        <input class="column-entry" value="6" /></div>
+    <div class="column column-1ks">
+        <input class="column-entry" value="1" /></div>
+    </div>
+    <div class="column column-2"><input class="column-entry" /></div>
+    <div class="column column-2ks"><input class="column-entry" /></div>
+    <div class="column column-3"><input class="column-entry" /></div>
+    <div class="column column-3ks"><input class="column-entry" /></div>
+</div>
+
+<div class="sheetrow">
+    <div class="summary"></div>
+    <div class="name">INKA</div>
+    <div class="column column-1"><input class="column-entry" /></div>
+    <div class="column column-1ks"><input class="column-entry" /></div>
+    <div class="column column-2"><input class="column-entry" /></div>
+    <div class="column column-2ks"><input class="column-entry" /></div>
+    <div class="column column-3"><input class="column-entry" /></div>
+    <div class="column column-3ks"><input class="column-entry" /></div>
+</div>
+
+<div class="sheetrow">
+    <div class="summary"></div>
+    <div class="name">EFUIT</div>
+    <div class="column column-1"><input class="column-entry" /></div>
+    <div class="column column-1ks"><input class="column-entry" /></div>
+    <div class="column column-2"><input class="column-entry" /></div>
+    <div class="column column-2ks"><input class="column-entry" /></div>
+    <div class="column column-3"><input class="column-entry" /></div>
+    <div class="column column-3ks"><input class="column-entry" /></div>
+</div>
+
+<div class="sheetrow">
+    <div class="summary"></div>
+    <div class="name">
+        <input class="name-entry" value="US">
+        <select class="person-choice">
+            <option>OFUUS Rasmus Korsgaard Kjeldgaard</option>
+        </select>
+    </div>
+    <div class="column column-1"><input class="column-entry" /></div>
+    <div class="column column-1ks"><input class="column-entry" /></div>
+    <div class="column column-2"><input class="column-entry" /></div>
+    <div class="column column-2ks"><input class="column-entry" /></div>
+    <div class="column column-3"><input class="column-entry" /></div>
+    <div class="column column-3ks"><input class="column-entry" /></div>
+</div>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Navn</th>
+{% for kind in sheet.purchasekind_set.all %}
+<th>{{ kind.name }}</th>
+{% endfor %}
+</tr>
+</thead>
+<tbody>
+{% for row in sheet.rows %}
+<tr>
+<td>
+{% for kind in row.kinds %}{{ kind.count|floatformat }}
+{% endfor %}
+</td>
+<td>{{ row.name|default:row.profile }}</td>
+{% for kind in row.kinds %}
+<td>
+<span class="crosses column-{{ kind.kind.position }}">
+{% for _ in kind.counter %}<span class="cross">&times;</span>{% endfor %}
+{% if kind.count %}<span class="count">{{ kind.count|floatformat }}</span>{% endif %}
+</span>
+</td>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}
