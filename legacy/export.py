@@ -233,14 +233,11 @@ def extract_alias_times(aliases):
                     current_words[blo + i:blo + j], name=name,
                     start_time=current_times[blo + i],
                     stop_time=t)
-                # print("%s remove %s" % (name, result[-1]['alias']))
                 i = j
             current_words[blo:blo+(ahi-alo)] = []
             current_times[blo:blo+(ahi-alo)] = []
-            if blo != bhi:
-                # print("%s add %s" % (name, ' '.join(words[blo:bhi])))
-                current_words[blo:blo] = words[blo:bhi]
-                current_times[blo:blo] = (bhi-blo)*[t]
+            current_words[blo:blo] = words[blo:bhi]
+            current_times[blo:blo] = (bhi-blo)*[t]
 
 
 def get_aliases(persons):
