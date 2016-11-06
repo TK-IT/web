@@ -139,7 +139,6 @@ def main():
     profiles = make_profiles(data)
     payments = get_payments(data, profiles)
     sheets, purchase_kinds, rows, purchases = get_sheets(data, profiles)
-    print("%s rows" % len(rows))
 
     save_all(payments, unique_attrs=('profile', 'time'), bulk=True)
 
@@ -149,7 +148,6 @@ def main():
     purchase_kinds = save_all(purchase_kinds, unique_attrs=('sheet', 'name'),
                               only_new=True)
     rows = filter_related(sheets, rows, 'sheet')
-    print("%s rows" % len(rows))
     rows = save_all(rows, unique_attrs=('sheet', 'name', 'profile'),
                     only_new=True)
     purchases = filter_related(purchase_kinds, purchases, 'kind')
