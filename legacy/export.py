@@ -216,6 +216,24 @@ def extract_alias_or_title(words):
             i = j
 
 
+def extract_by_time(current_times, current_words, **kwargs):
+    assert len(current_times) == len(current_words)
+    i = 0
+    while i < len(current_times):
+        j = i+1
+        while j < len(current_times):
+            if current_times[j] == current_times[i]:
+                j += 1
+            else:
+                break
+        remove_words = current_words[i:j]
+        for a in extract_alias_or_title(remove_words):
+            yield dict(alias=a,
+                       start_time=current_times[i],
+                       **kwargs)
+        i = j
+
+
 def extract_alias_times(aliases, **kwargs):
     current_words = []
     current_times = []
@@ -230,20 +248,9 @@ def extract_alias_times(aliases, **kwargs):
             if op == 'equal':
                 continue
             assert words[:blo] == current_words[:blo]
-            i = 0
-            while i < ahi - alo:
-                j = i+1
-                while j < ahi - alo:
-                    if current_times[blo + j] == current_times[blo + i]:
-                        j += 1
-                    else:
-                        break
-                remove_words = current_words[blo + i:blo + j]
-                for a in extract_alias_or_title(remove_words):
-                    yield dict(alias=a,
-                               start_time=current_times[blo + i],
-                               stop_time=t, **kwargs)
-                i = j
+            yield from extract_by_time(current_times[blo:blo+(ahi-alo)],
+                                       current_words[blo:blo+(ahi-alo)],
+                                       stop_time=t, **kwargs)
             current_words[blo:blo+(ahi-alo)] = words[blo:bhi]
             current_times[blo:blo+(ahi-alo)] = (bhi-blo)*[t]
 
