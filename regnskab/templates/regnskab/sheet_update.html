@@ -6,7 +6,7 @@
 	position: relative;
 	flex-direction: column;
 	flex-wrap: wrap;
-	height: 30px;
+	height: 40px;
 	align-content: flex-start;
 }
 .crosses.column-1 {
@@ -19,14 +19,14 @@
 	width: 225px;
 }
 .crosses > .cross {
-	height: 15px;
-	width: 15px;
+	height: 20px;
+	width: 20px;
 }
 .crosses > .count {
 	position: absolute;
 	top: 0;
 	left: 0;
-	line-height: 30px;
+	line-height: 40px;
 	font-size: 20px;
 	font-weight: bold;
 	box-shadow: 0px 0px 8px #000;
@@ -34,18 +34,33 @@
 
 .sheetrow {
     display: flex;
-    height: 30px;
+    height: 40px;
+    border-bottom: 1px solid #666;
+}
+.sheetrow.sheetrow-header {
+    height: 18px;
 }
 .sheetrow > .summary { width: 30px; }
-.sheetrow > .name { width: 100px; }
-.sheetrow > .column { position: relative; }
-.sheetrow > .column-entry {
+.sheetrow > .name { width: 200px; }
+.sheetrow > .column { position: relative; border-left: 3px solid #333; padding-left: 10px; }
+.sheetrow .column-entry,
+.sheetrow .name-entry,
+.sheetrow .person-choice {
+    box-sizing: border-box;
+    width: 100%;
+    border: 0 none;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: inherit;
+}
+.sheetrow .column-entry {
     position: absolute;
     top: 0;
     left: 0;
-    height: 30px;
-    border: 0 none;
-    background-color: rgba(0, 0, 0, 0.5);
+    height: 100%;
+}
+.sheetrow .person-choice {
+    width: 100%;
+    box-sizing: border-box;
 }
 .sheetrow > .column-1 { width: 225px; }
 .sheetrow > .column-2 { width: 90px; }
@@ -78,7 +93,6 @@
         <input class="column-entry" value="6" /></div>
     <div class="column column-1ks">
         <input class="column-entry" value="1" /></div>
-    </div>
     <div class="column column-2"><input class="column-entry" /></div>
     <div class="column column-2ks"><input class="column-entry" /></div>
     <div class="column column-3"><input class="column-entry" /></div>
