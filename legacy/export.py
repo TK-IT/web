@@ -197,6 +197,12 @@ def is_title(titel):
 
 
 def extract_alias_or_title(words):
+    '''
+    >>> list(extract_alias_or_title("Den harmoniske række OFORM".split()))
+    ['Den harmoniske række', 'OFORM']
+    >>> list(extract_alias_or_title("BFUET GEFUIT".split()))
+    ['BFUET', 'GEFUIT']
+    '''
     i = 0
     while i < len(words):
         if is_title(words[i]):
