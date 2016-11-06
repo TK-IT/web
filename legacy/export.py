@@ -196,6 +196,17 @@ def is_title(titel):
     return certain
 
 
+def extract_alias_or_title(words, **kwargs):
+    if not (all(is_title(w) for w in remove_words) or
+            all(not is_title(w) for w in remove_words)):
+        print("Odd title: %s" % ' '.join(remove_words))
+    if all(is_title(w) for w in remove_words):
+        for w in remove_words:
+            yield dict(alias=w, **kwargs)
+    else:
+        yield dict(alias=' '.join(remove_words), **kwargs)
+
+
 def extract_alias_times(aliases):
     current_words = []
     current_times = []
@@ -218,23 +229,10 @@ def extract_alias_times(aliases):
                         j += 1
                     else:
                         break
-                remove_words = current_words[blo + i:blo + j]
-                if not (all(is_title(w) for w in remove_words) or
-                        all(not is_title(w) for w in remove_words)):
-                    print("Odd title: %s" % ' '.join(remove_words))
-                if all(is_title(w) for w in remove_words):
-                    for w in remove_words:
-                        yield dict(
-                            name=name,
-                            alias=w,
-                            start_time=current_times[blo + i],
-                            stop_time=t)
-                else:
-                    yield dict(
-                        name=name,
-                        alias=' '.join(remove_words),
-                        start_time=current_times[blo + i],
-                        stop_time=t)
+                yield from extract_alias_or_title(
+                    current_words[blo + i:blo + j], name=name,
+                    start_time=current_times[blo + i],
+                    stop_time=t)
                 # print("%s remove %s" % (name, result[-1]['alias']))
                 i = j
             current_words[blo:blo+(ahi-alo)] = []
