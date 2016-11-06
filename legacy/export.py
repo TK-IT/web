@@ -7,8 +7,7 @@ import datetime
 import subprocess
 import collections
 
-import regnskab
-from regnskab import Regnskab
+from .base import Regnskab, read_regnskab, Person
 
 
 def progress(elements, n=None):
@@ -50,7 +49,7 @@ def read_regnskab_revisions(gitdir):
     objects = ['%s:regnskab.dat' % r for r in revisions]
     for t, fp in zip(times, cat_file(progress(objects), gitdir)):
         try:
-            r = regnskab.read_regnskab(fp)
+            r = read_regnskab(fp)
         except ValueError as exn:
             # print('\n%s: %s' % (type(exn).__name__, exn))
             continue
@@ -72,7 +71,7 @@ def read_regnskab_backups(gitdir):
     for t, f in zip(mtimes, progress(files)):
         with open(f.path, 'rb') as fp:
             try:
-                r = regnskab.read_regnskab(fp)
+                r = read_regnskab(fp)
             except ValueError as exn:
                 raise exn
                 # print('\n%s: %s' % (type(exn).__name__, exn))
@@ -388,7 +387,7 @@ def get_data(gitdir):
 
     for i, (t2, r2) in enumerate(regnskab_dat):
         assert all(isinstance(ps, tuple) for ps in leaf_navn.values())
-        assert all(isinstance(p[0], regnskab.Person) and
+        assert all(isinstance(p[0], Person) and
                    isinstance(p[1], datetime.datetime)
                    for ps in leaf_navn.values() for p in ps)
         assert len(set(email_to_navn.values())) == len(email_to_navn)
