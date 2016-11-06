@@ -56,6 +56,8 @@
     top: 0;
     left: 0;
     height: 100%;
+    font-size: 20px;
+    font-weight: bold;
 }
 .sheetrow .person-choice {
     width: 100%;
