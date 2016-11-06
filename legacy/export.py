@@ -7,7 +7,7 @@ import datetime
 import subprocess
 import collections
 
-from .base import Regnskab, read_regnskab, Person
+from legacy.base import Regnskab, read_regnskab, Person
 
 
 def progress(elements, n=None):
