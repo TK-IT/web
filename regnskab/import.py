@@ -152,6 +152,7 @@ def main():
                     only_new=True)
     purchases = filter_related(purchase_kinds, purchases, 'kind')
     purchases = filter_related(rows, purchases, 'row')
+    print("Create %s purchases" % len(purchases))
     Purchase.objects.bulk_create(purchases)
 
 
