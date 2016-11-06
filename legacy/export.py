@@ -196,58 +196,62 @@ def is_title(titel):
     return certain
 
 
+def extract_alias_times(aliases):
+    current_words = []
+    current_times = []
+    for t, a in aliases:
+        words = [w.lstrip('-') for w in a.split()]
+        if current_words == words:
+            continue
+        a_copy = list(current_words)
+        matcher = difflib.SequenceMatcher(
+            a=a_copy, b=words)
+        for op, alo, ahi, blo, bhi in matcher.get_opcodes():
+            if op == 'equal':
+                continue
+            assert words[:blo] == current_words[:blo]
+            i = 0
+            while i < ahi - alo:
+                j = i+1
+                while j < ahi - alo:
+                    if current_times[blo + j] == current_times[blo + i]:
+                        j += 1
+                    else:
+                        break
+                remove_words = current_words[blo + i:blo + j]
+                if not (all(is_title(w) for w in remove_words) or
+                        all(not is_title(w) for w in remove_words)):
+                    print("Odd title: %s" % ' '.join(remove_words))
+                if all(is_title(w) for w in remove_words):
+                    for w in remove_words:
+                        yield dict(
+                            name=name,
+                            alias=w,
+                            start_time=current_times[blo + i],
+                            stop_time=t)
+                else:
+                    yield dict(
+                        name=name,
+                        alias=' '.join(remove_words),
+                        start_time=current_times[blo + i],
+                        stop_time=t)
+                # print("%s remove %s" % (name, result[-1]['alias']))
+                i = j
+            current_words[blo:blo+(ahi-alo)] = []
+            current_times[blo:blo+(ahi-alo)] = []
+            if blo != bhi:
+                # print("%s add %s" % (name, ' '.join(words[blo:bhi])))
+                current_words[blo:blo] = words[blo:bhi]
+                current_times[blo:blo] = (bhi-blo)*[t]
+
+
 def get_aliases(persons):
     result = []
     for person_history in persons:
         name = person_history[-1][0].navn
         aliases = ([(t, p.aliaser) for p, t in person_history] +
                    [(None, '')])
-        current_words = []
-        current_times = []
-        for t, a in aliases:
-            words = [w.lstrip('-') for w in a.split()]
-            if current_words == words:
-                continue
-            a_copy = list(current_words)
-            matcher = difflib.SequenceMatcher(
-                a=a_copy, b=words)
-            for op, alo, ahi, blo, bhi in matcher.get_opcodes():
-                if op == 'equal':
-                    continue
-                assert words[:blo] == current_words[:blo]
-                i = 0
-                while i < ahi - alo:
-                    j = i+1
-                    while j < ahi - alo:
-                        if current_times[blo + j] == current_times[blo + i]:
-                            j += 1
-                        else:
-                            break
-                    remove_words = current_words[blo + i:blo + j]
-                    if not (all(is_title(w) for w in remove_words) or
-                            all(not is_title(w) for w in remove_words)):
-                        print("Odd title: %s" % ' '.join(remove_words))
-                    if all(is_title(w) for w in remove_words):
-                        for w in remove_words:
-                            result.append(dict(
-                                name=name,
-                                alias=w,
-                                start_time=current_times[blo + i],
-                                stop_time=t))
-                    else:
-                        result.append(dict(
-                            name=name,
-                            alias=' '.join(remove_words),
-                            start_time=current_times[blo + i],
-                            stop_time=t))
-                    # print("%s remove %s" % (name, result[-1]['alias']))
-                    i = j
-                current_words[blo:blo+(ahi-alo)] = []
-                current_times[blo:blo+(ahi-alo)] = []
-                if blo != bhi:
-                    # print("%s add %s" % (name, ' '.join(words[blo:bhi])))
-                    current_words[blo:blo] = words[blo:bhi]
-                    current_times[blo:blo] = (bhi-blo)*[t]
+        result.extend(extract_alias_times(aliases))
     return result
 
 
