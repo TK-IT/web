@@ -62,8 +62,18 @@ def transform_file(input_filename, output_filename, fn, exn_fn):
             else:
                 print(exn)
         else:
+            if isinstance(result, dict):
+                code = result['code']
+                map = result['map']
+                mapname = output_filename + '.map'
+                basename = os.path.basename(mapname)
+                code += '/*# sourceMappingURL=%s*/\n' % basename
+                with open(mapname, 'w') as fp:
+                    fp.write(json.dumps(map, indent=2))
+            else:
+                code = result
             with open(output_filename, 'w') as fp:
-                fp.write(result)
+                fp.write(code)
 
     return transformer
 
@@ -75,8 +85,9 @@ def babel_compile(source):
 
 @compiler('.es6x', '.js')
 def babel_jsx_compile(source):
-    r = dukpy.babel.babel_compile(source, presets=['es2015', 'stage-0', 'react'])
-    return r['code']
+    r = dukpy.babel.babel_compile(source, presets=['es2015', 'stage-0', 'react'],
+                                  sourceMaps=True)
+    return r
 
 
 def send_message_to_vim(servername, message):
