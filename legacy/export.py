@@ -200,11 +200,17 @@ def extract_alias_or_title(words, **kwargs):
     if not (all(is_title(w) for w in remove_words) or
             all(not is_title(w) for w in remove_words)):
         print("Odd title: %s" % ' '.join(remove_words))
-    if all(is_title(w) for w in remove_words):
-        for w in remove_words:
-            yield dict(alias=w, **kwargs)
-    else:
-        yield dict(alias=' '.join(remove_words), **kwargs)
+    i = 0
+    while i < len(words):
+        if is_title(words[i]):
+            yield dict(alias=words[i], **kwargs)
+            i += 1
+        else:
+            j = i+1
+            while j < len(words) and not is_title(words[j]):
+                j += 1
+            yield dict(alias=' '.join(words[i:j]), **kwargs)
+            i = j
 
 
 def extract_alias_times(aliases):
