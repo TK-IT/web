@@ -216,7 +216,7 @@ def extract_alias_or_title(words):
             i = j
 
 
-def extract_alias_times(aliases):
+def extract_alias_times(aliases, **kwargs):
     current_words = []
     current_times = []
     for t, a in aliases:
@@ -240,9 +240,9 @@ def extract_alias_times(aliases):
                         break
                 remove_words = current_words[blo + i:blo + j]
                 for a in extract_alias_or_title(remove_words):
-                    yield dict(alias=a, name=name,
+                    yield dict(alias=a,
                                start_time=current_times[blo + i],
-                               stop_time=t)
+                               stop_time=t, **kwargs)
                 i = j
             current_words[blo:blo+(ahi-alo)] = []
             current_times[blo:blo+(ahi-alo)] = []
@@ -256,7 +256,7 @@ def get_aliases(persons):
         name = person_history[-1][0].navn
         aliases = ([(t, p.aliaser) for p, t in person_history] +
                    [(None, '')])
-        result.extend(extract_alias_times(aliases))
+        result.extend(extract_alias_times(aliases, name=name))
     return result
 
 
