@@ -253,6 +253,7 @@ def extract_alias_times(aliases, **kwargs):
                                        stop_time=t, **kwargs)
             current_words[blo:blo+(ahi-alo)] = words[blo:bhi]
             current_times[blo:blo+(ahi-alo)] = (bhi-blo)*[t]
+        assert words == current_words
 
 
 def get_aliases(persons):
