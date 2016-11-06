@@ -197,9 +197,6 @@ def is_title(titel):
 
 
 def extract_alias_or_title(words):
-    if not (all(is_title(w) for w in words) or
-            all(not is_title(w) for w in words)):
-        print("Odd title: %s" % ' '.join(words))
     i = 0
     while i < len(words):
         if is_title(words[i]):
