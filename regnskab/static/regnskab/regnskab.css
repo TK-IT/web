@@ -1,0 +1,71 @@
+<style>
+.crosses {
+	display: flex;
+	position: relative;
+	flex-direction: column;
+	flex-wrap: wrap;
+	height: 40px;
+	align-content: flex-start;
+}
+.crosses.column-1 {
+	width: 225px;
+}
+.crosses.column-2 {
+	width: 90px;
+}
+.crosses.column-3 {
+	width: 225px;
+}
+.crosses > .cross {
+	height: 20px;
+	width: 20px;
+}
+.crosses > .count {
+	position: absolute;
+	top: 0;
+	left: 0;
+	line-height: 40px;
+	font-size: 20px;
+	font-weight: bold;
+	box-shadow: 0px 0px 8px #000;
+}
+
+.sheetrow {
+    display: flex;
+    height: 40px;
+    border-bottom: 1px solid #666;
+}
+.sheetrow.sheetrow-header {
+    height: 18px;
+}
+.sheetrow > .summary { width: 30px; }
+.sheetrow > .name { width: 200px; }
+.sheetrow > .column { position: relative; border-left: 3px solid #333; }
+.sheetrow > .column,
+.sheetrow .column-entry { padding-left: 10px; }
+.sheetrow .column-entry,
+.sheetrow .name-entry,
+.sheetrow .person-choice {
+    box-sizing: border-box;
+    width: 100%;
+    border: 0 none;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: inherit;
+}
+.sheetrow .column-entry {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+}
+.sheetrow .person-choice {
+    width: 100%;
+    box-sizing: border-box;
+}
+.sheetrow > .column-1 { width: 225px; }
+.sheetrow > .column-2 { width: 90px; }
+.sheetrow > .column-3 { width: 225px; }
+.sheetrow > .column-1ks { width: 60px; }
+.sheetrow > .column-2ks { width: 60px; }
+.sheetrow > .column-3ks { width: 60px; }
+

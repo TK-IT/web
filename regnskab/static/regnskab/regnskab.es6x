@@ -1,0 +1,15 @@
+// vim:set ft=javascript sw=4 et:
+function init_react() {
+    const participants = get_participants();
+    const formelement = document.getElementById('id_participants').form;
+    hide_all(participants.map(p => document.getElementById(`id_p${p.id}-locations`)));
+    hide_all(participants.map(p => document.getElementById(`p${p.id}`)));
+    hide(document.querySelector('.participants'));
+    hide_all(document.querySelectorAll('.participant-name'));
+    const event_form_div = document.createElement('div');
+    event_form_div.className = 'event_form';
+    formelement.insertBefore(event_form_div, formelement.firstChild);
+    ReactDOM.render(<EventForm participants={participants} />, event_form_div);
+}
+
+window.addEventListener('load', init_react, false);
