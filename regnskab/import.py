@@ -5,6 +5,17 @@ import argparse
 import datetime
 
 
+def progress(elements, n=None):
+    if n is None:
+        elements = list(elements)
+        n = len(elements)
+    w = len(str(n))
+    for i, x in enumerate(elements):
+        print('\r\x1B[K(%s/%s) %s' % (str(i+1).rjust(w), n, x), end='')
+        yield x
+    print('')
+
+
 def save_all(objects, unique_attrs=None, only_new=False, bulk=False):
     if not objects:
         return []
@@ -18,7 +29,7 @@ def save_all(objects, unique_attrs=None, only_new=False, bulk=False):
 
         main_model = type(objects[0])
         existing_dict = {key(o): o for o in main_model.objects.all()}
-        for o in objects:
+        for o in progress(objects):
             try:
                 e = existing_dict[key(o)]
             except KeyError:
@@ -33,7 +44,7 @@ def save_all(objects, unique_attrs=None, only_new=False, bulk=False):
         if bulk:
             type(new[0]).objects.bulk_create(new)
         else:
-            for o in new:
+            for o in progress(new):
                 o.save()
     if only_new:
         return new
@@ -44,7 +55,7 @@ def save_all(objects, unique_attrs=None, only_new=False, bulk=False):
 def filter_related(parent_objects, related_objects, related_field):
     parent_objects = set(parent_objects)
     new = []
-    for o in related_objects:
+    for o in progress(related_objects):
         r = getattr(o, related_field)
         if r.pk and r in parent_objects:
             setattr(o, related_field, r)
