@@ -2,45 +2,64 @@
 
 class Cross extends React.Component {
     render() {
-        return <div className='cross'>"&times;"</div>;
+        return <div className='cross'>&times;</div>;
     }
 }
 
 class Crosses extends React.Component {
     render() {
         const crosses = [];
-        for (let i = 0; i < this.props.count; ++i) crosses.push(<Cross key={i} />);
+        for (let i = 0; i < Math.min(this.props.count, this.props.maxCount); ++i)
+            crosses.push(<Cross key={i} />);
         return <div className='crosses'>{crosses}</div>;
     }
 }
 
 class ColumnEntry extends React.Component {
+    state = {
+        inputValue: ''
+    }
     getInputValue() {
-        let st = this.state.inputValue;
         let v = this.props.value;
+        if (v === null) return '';
+        let st = this.state.inputValue;
         if (parseFloat(st) === v) { return st; }
         else { return ''+v; }
     }
+    onChange(s) {
+        if (s === '') {
+            this.setState({inputValue: ''});
+            this.props.onChange(null);
+        }
+        if (!/\d+\.?\d*/.exec(s)) return;
+        let v = parseFloat(s);
+        this.setState({inputValue: s});
+        this.props.onChange(v);
+    }
     render() {
-        return <div className='column column-'+this.props.columnKind>
-            <Crosses count={this.props.value} />
+        return <div className={'column column-'+this.props.columnKind}>
+            <Crosses count={this.props.value} maxCount={30} />
             <input className='column-entry' value={this.getInputValue()}
-                   onChange={e => this.onChange(
+                   onChange={e => this.onChange(e.target.value)} />
         </div>;
     }
 }
 
+class Main extends React.Component {
+    state = {
+        value: null
+    };
+    render() {
+        return <div className='sheetrow'><ColumnEntry columnKind={'1'} value={this.state.value}
+            onChange={v => this.setState({value: v})} /></div>;
+    }
+}
+
 function init_react() {
-    const participants = get_participants();
-    const formelement = document.getElementById('id_participants').form;
-    hide_all(participants.map(p => document.getElementById(`id_p${p.id}-locations`)));
-    hide_all(participants.map(p => document.getElementById(`p${p.id}`)));
-    hide(document.querySelector('.participants'));
-    hide_all(document.querySelectorAll('.participant-name'));
-    const event_form_div = document.createElement('div');
-    event_form_div.className = 'event_form';
-    formelement.insertBefore(event_form_div, formelement.firstChild);
-    ReactDOM.render(<EventForm participants={participants} />, event_form_div);
+    const container = document.createElement('div');
+    // container.className = 'event_form';
+    document.body.appendChild(container);
+    ReactDOM.render(<Main />, container);
 }
 
 window.addEventListener('load', init_react, false);
