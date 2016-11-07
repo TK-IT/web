@@ -208,7 +208,7 @@ class GroupAdmin(admin.ModelAdmin):
 
 class TitleAdmin(admin.ModelAdmin):
     list_display = (
-        'get_display_title', 'profile_link', 'get_period')
+        'get_display_title', 'profile_link', 'get_period', 'get_email')
     list_filter = ['kind', TitleRootFilter, ('period', TitlePeriodFilter)]
     list_select_related = ['profile']
     search_fields = ['profile__name']
@@ -222,6 +222,15 @@ class TitleAdmin(admin.ModelAdmin):
 
     profile_link.short_description = 'Person'
     profile_link.admin_order_field = 'profile'
+
+    def get_email(self, title):
+        profile = title.profile
+        if profile.email:
+            return format_html(
+                '<a href="mailto:{}">{}</a>', profile.email, profile.email)
+
+    get_email.short_description = 'Emailadresse'
+    get_email.admin_order_field = 'profile__email'
 
     def get_display_title(self, title):
         return title.display_title_and_year()
