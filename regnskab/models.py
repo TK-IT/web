@@ -18,6 +18,12 @@ class Profile(models.Model):
         return str(self.name)
 
 
+class SheetStatus(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    start_time = models.DateTimeField(blank=True, null=True)
+    end_time = models.DateTimeField(blank=True, null=True)
+
+
 class Title(models.Model):
     BEST, FU, EFU = 'BEST', 'FU', 'EFU'
     KIND = [(BEST, 'BEST'), (FU, 'FU'), (EFU, 'EFU')]
