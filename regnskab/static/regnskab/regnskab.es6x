@@ -88,7 +88,6 @@ function make_utility_function(query) {
 
 function filter_persons(persons, query) {
     if (query === '') {
-        console.log("No query");
         return persons.map(p => ({'display': p.name + ' ' + p.titles.join(' '), 'person': p}));
     }
     let utility = make_utility_function(query);
@@ -98,7 +97,6 @@ function filter_persons(persons, query) {
         (a[0][0] !== b[0][0] ?
          (a[0][0] - b[0][0]) :
          (a[1].sort_key - b[1].sort_key)));
-    console.log(persons_keyed);
     let r = persons_keyed.map(
         x => ({'display': (x[0][1] + ' ' + x[1].name).trim(),
                'person': x[1]}));
@@ -183,9 +181,6 @@ class Name extends React.Component {
     onNameChange(v) {
         let p = (this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id) ?
             this.getChoices(v)[0].person.id : this.props.personValue;
-        if (this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id) {
-            console.log("onNameChange: at first, switching from", this.props.personValue, "to", p);
-        }
         this.props.onChange(p, v);
     }
     getChoices(query) {
@@ -193,7 +188,6 @@ class Name extends React.Component {
         return filter_persons_cached(this.props.persons, query);
     }
     render() {
-        console.log(`Render <Name nameValue=${this.props.nameValue} personValue=${this.props.personValue}>`);
         return <div className='name'>
             <input className='name-entry'
                 value={this.props.nameValue}
@@ -205,28 +199,82 @@ class Name extends React.Component {
     }
 }
 
-class Main extends React.Component {
-    state = {
-        value: null,
-        nameValue: '',
-        personValue: null
-    };
+class SheetRow extends React.Component {
     render() {
-        let persons = window.TK_PROFILES;
+        let columnKind = ['1', '1ks', '2', '2ks', '3', '3ks'];
+        let columns = this.props.columns.map((v, i) =>
+            <ColumnEntry columnKind={columnKind[i]}
+                value={v} key={columnKind[i]}
+                onChange={v => this.props.onChange(i, v)} />);
         return <div className='sheetrow'>
-            <ColumnEntry columnKind={'1'} value={this.state.value}
-                onChange={v => this.setState({value: v})} />
-            <Name persons={persons} nameValue={this.state.nameValue}
-                personValue={this.state.personValue}
-                onChange={(p, n) => {console.log(p, n); this.setState({personValue: p, nameValue: n})}} />
+            <div className='summary' />
+            <Name persons={this.props.persons} nameValue={this.props.nameValue}
+                personValue={this.props.personValue}
+                onChange={this.props.onChangeName} />
+            {columns}
         </div>;
     }
 }
 
+class Sheet extends React.Component {
+    state = {
+        rows: [this.empty_row()]
+    }
+
+    empty_row() {
+        return {nameValue: '', personValue: null, columns: [null, null, null, null, null, null]};
+    }
+
+    onChangeCell(i, j, v) {
+        this.state.rows[i].columns[j] = v;
+        if (i === this.state.rows.length-1) this.state.rows.push(this.empty_row());
+        this.setState({});
+    }
+
+    onChangeName(i, p, n) {
+        this.state.rows[i].nameValue = n;
+        this.state.rows[i].personValue = p;
+        if (i === this.state.rows.length-1) this.state.rows.push(this.empty_row());
+        this.setState({});
+    }
+
+    render() {
+        let rows = [];
+        for (let i = 0; i < this.state.rows.length; ++i) {
+            let data = this.state.rows[i];
+            rows.push(<SheetRow key={i}
+                persons={this.props.persons}
+                columns={data.columns}
+                nameValue={data.nameValue}
+                personValue={data.personValue}
+                onChange={this.onChangeCell.bind(this, i)}
+                onChangeName={this.onChangeName.bind(this, i)} />);
+        }
+        return <div className='sheet'>
+            <div className="sheetrow sheetrow-header">
+                <div className="summary"></div>
+                <div className="name"></div>
+                <div className="column column-1">Øl</div>
+                <div className="column column-1ks">ks</div>
+                <div className="column column-2">Guld</div>
+                <div className="column column-2ks">ks</div>
+                <div className="column column-3">Vand</div>
+                <div className="column column-3ks">ks</div>
+            </div>
+            {rows}
+        </div>;
+    }
+}
+
+class Main extends React.Component {
+    render() {
+        let persons = window.TK_PROFILES;
+        return <Sheet persons={persons} />;
+    }
+}
+
 function init_react() {
-    const container = document.createElement('div');
-    // container.className = 'event_form';
-    document.body.appendChild(container);
+    const container = document.getElementById('sheet-container');
     ReactDOM.render(<Main />, container);
 }
 

@@ -13,68 +13,7 @@ href="{% static 'regnskab/regnskab.css' %}" />
 {% block content %}
 <h1>{{ sheet }}</h1>
 
-<div class="sheetrow sheetrow-header">
-    <div class="summary"></div>
-    <div class="name"></div>
-    <div class="column column-1">Øl</div>
-    <div class="column column-1ks">ks</div>
-    <div class="column column-2">Guld</div>
-    <div class="column column-2ks">ks</div>
-    <div class="column column-3">Vand</div>
-    <div class="column column-3ks">ks</div>
-</div>
-
-<div class="sheetrow">
-    <div class="summary"></div>
-    <div class="name">FORM</div>
-    <div class="column column-1">
-        <div class="crosses"><div class="cross">&times;</div><div class="cross">&times;</div><div class="cross">&times;</div><div class="cross">&times;</div><div class="cross">&times;</div><div class="cross">&times;</div></div>
-        <input class="column-entry" value="6" /></div>
-    <div class="column column-1ks">
-        <input class="column-entry" value="1" /></div>
-    <div class="column column-2"><input class="column-entry" /></div>
-    <div class="column column-2ks"><input class="column-entry" /></div>
-    <div class="column column-3"><input class="column-entry" /></div>
-    <div class="column column-3ks"><input class="column-entry" /></div>
-</div>
-
-<div class="sheetrow">
-    <div class="summary"></div>
-    <div class="name">INKA</div>
-    <div class="column column-1"><input class="column-entry" /></div>
-    <div class="column column-1ks"><input class="column-entry" /></div>
-    <div class="column column-2"><input class="column-entry" /></div>
-    <div class="column column-2ks"><input class="column-entry" /></div>
-    <div class="column column-3"><input class="column-entry" /></div>
-    <div class="column column-3ks"><input class="column-entry" /></div>
-</div>
-
-<div class="sheetrow">
-    <div class="summary"></div>
-    <div class="name">EFUIT</div>
-    <div class="column column-1"><input class="column-entry" /></div>
-    <div class="column column-1ks"><input class="column-entry" /></div>
-    <div class="column column-2"><input class="column-entry" /></div>
-    <div class="column column-2ks"><input class="column-entry" /></div>
-    <div class="column column-3"><input class="column-entry" /></div>
-    <div class="column column-3ks"><input class="column-entry" /></div>
-</div>
-
-<div class="sheetrow">
-    <div class="summary"></div>
-    <div class="name">
-        <input class="name-entry" value="US">
-        <select class="person-choice">
-            <option>OFUUS Rasmus Korsgaard Kjeldgaard</option>
-        </select>
-    </div>
-    <div class="column column-1"><input class="column-entry" /></div>
-    <div class="column column-1ks"><input class="column-entry" /></div>
-    <div class="column column-2"><input class="column-entry" /></div>
-    <div class="column column-2ks"><input class="column-entry" /></div>
-    <div class="column column-3"><input class="column-entry" /></div>
-    <div class="column column-3ks"><input class="column-entry" /></div>
-</div>
+<div id="sheet-container"></div>
 
 <table>
 <thead>
