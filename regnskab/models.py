@@ -1,4 +1,5 @@
 from django.db import models
+from regnskab import config
 from tkweb.apps.idm.models import (
     tk_prefix, parse_bestfu_alias,
 )
