@@ -1,5 +1,123 @@
 // vim:set ft=javascript sw=4 et:
 
+function prefix_to_age(p) {
+    let v = {'K': -1, 'G': 1, 'B': 2, 'O': 3, 'T': 1};
+    let pattern = /([KGBOT])([0-9]*)/g;
+    let mo;
+    let age = 0;
+    while ((mo = pattern.exec(p)) !== null) {
+        let c = (mo[2] === '') ? 1 : parseInt(mo[2]);
+        age += c * v[mo[1]];
+    }
+    return age;
+}
+
+function age_to_prefix(age) {
+    let m = ['K', '', 'G', 'B', 'O', 'TO'];
+    if (-1 <= age && age <= 4) return m[age + 1];
+    else if (age < 0) return 'K' + (-age);
+    else return 'T' + (age - 3) + 'O';
+}
+
+function make_utility_function(query) {
+    function all_prefixes(s) {
+        // Map e.g. "FORM" to "F|FO|FOR|FORM"
+        let p = [];
+        for (let i = 1; i <= s.length; ++i) p.push(s.substring(0, i));
+        return p.join('|');
+    }
+
+    let tk_prefix = '[KGBOT][KGBOT0-9]*';
+    let best_list = 'CERM FORM INKA KASS NF PR SEKR VC'.split(' ');
+    // best_prefix is a regex that matches any prefix of a BEST title
+    let best_prefix = best_list.map(all_prefixes).join('|');
+    // Map first letter to BEST title, e.g. best_map['F'] === 'FORM'
+    let best_map = {};
+    for (let t of best_list) best_map[t.charAt(0)] = t;
+    // fu_two_letters is a regex that matches the last two letters of a FU title
+    let fu_two_letters = '[A-ZÆØÅ]{2}';
+
+    // Regex matching optional TK prefix followed by a prefix of a BEST title.
+    let re_best = new RegExp(`^(${tk_prefix}|)(${best_prefix})$`);
+    // Regex matching optional TK prefix followed by FU title.
+    let re_fu = new RegExp(`^(?:(${tk_prefix}|)FU)?(${fu_two_letters})$`);
+
+    // Does the query case insensitively match BEST or FU title?
+    let q_upper = query.toUpperCase();
+    let mo_best = re_best.exec(q_upper);
+    let mo_fu = re_fu.exec(q_upper);
+
+    // `filters` is a list of functions used to determine if query matches title.
+    let filters = [];
+    if (mo_best) {
+        let prefix = age_to_prefix(prefix_to_age(mo_best[1]));
+        let best_search = best_map[mo_best[2].charAt(0)];
+        filters.push(t => (t === prefix + best_search));
+    }
+    if (mo_fu) {
+        let fu_search = 'FU' + mo_fu[2];
+        if (mo_fu[1]) {
+            // Query has a TK prefix => exact match on person
+            let prefix = age_to_prefix(prefix_to_age(mo_fu[1]));
+            filters.push(t => (t === prefix + fu_search));
+        } else {
+            // Query has no TK prefix => suffix search
+            filters.push(t => (t.substring(t.length-4, t.length) === fu_search));
+        }
+    }
+    // Fallback: case sensitive search in title
+    filters.push(t => (t.indexOf(query) !== -1));
+
+    return function utility(person) {
+        // Return [j, title],
+        // where j is the index of the function in filters that matched
+        // and title is the title that matched.
+        for (let i = 0; i < filters.length; ++i) {
+            for (let title of person.titles) {
+                if (filters[i](title)) {
+                    return [i, title];
+                }
+            }
+            if (filters[i](person.name)) {
+                return [i, ''];
+            }
+        }
+        return [filters.length, ''];
+    }
+}
+
+function filter_persons(persons, query) {
+    if (query === '') {
+        console.log("No query");
+        return persons.map(p => ({'display': p.name, 'person': p}));
+    }
+    let utility = make_utility_function(query);
+    let persons_keyed = [];
+    for (let p of persons) persons_keyed.push([utility(p), p]);
+    persons_keyed.sort((a, b) =>
+        (a[0][0] !== b[0][0] ?
+         (a[0][0] - b[0][0]) :
+         (a[1].sort_key - b[1].sort_key)));
+    console.log(persons_keyed);
+    let r = persons_keyed.map(
+        x => ({'display': (x[0][1] + ' ' + x[1].name).trim(),
+               'person': x[1]}));
+    return r;
+}
+
+let filter_persons_cached = (function () {
+    let cached_persons = null;
+    let results = null;
+    return function filter_persons_cached(persons, query) {
+        if (persons !== cached_persons) {
+            cached_persons = persons;
+            results = {};
+        }
+        if (!(query in results)) results[query] = filter_persons(persons, query);
+        return results[query];
+    };
+})();
+
 class Cross extends React.Component {
     render() {
         return <div className='cross'>&times;</div>;
@@ -45,13 +163,64 @@ class ColumnEntry extends React.Component {
     }
 }
 
+class PersonChoice extends React.Component {
+    render() {
+        let options = this.props.choices.map(
+            ({display, person}) =>
+            <option value={person.id} key={person.id}>{display}</option>);
+        let value = this.props.value;
+        if (value === null) value = this.props.choices[0].id;
+        return <select className='person-choice' value={value}
+            onChange={e => this.props.onChange(e.target.value)}>
+            {options}</select>;
+    }
+}
+
+class Name extends React.Component {
+    onPersonChange(v) {
+        this.props.onChange(v, this.props.nameValue);
+    }
+    onNameChange(v) {
+        let p = (this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id) ?
+            this.getChoices(v)[0].person.id : this.props.personValue;
+        if (this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id) {
+            console.log("onNameChange: at first, switching from", this.props.personValue, "to", p);
+        }
+        this.props.onChange(p, v);
+    }
+    getChoices(query) {
+        if (typeof query === 'undefined') query = this.props.nameValue;
+        return filter_persons_cached(this.props.persons, query);
+    }
+    render() {
+        console.log(`Render <Name nameValue=${this.props.nameValue} personValue=${this.props.personValue}>`);
+        return <div className='name'>
+            <input className='name-entry'
+                value={this.props.nameValue}
+                onChange={e => this.onNameChange(e.target.value)} />
+            <PersonChoice choices={this.getChoices()}
+                value={this.props.personValue}
+                onChange={v => this.onPersonChange(v)} />
+        </div>;
+    }
+}
+
 class Main extends React.Component {
     state = {
-        value: null
+        value: null,
+        nameValue: '',
+        personValue: null
     };
     render() {
-        return <div className='sheetrow'><ColumnEntry columnKind={'1'} value={this.state.value}
-            onChange={v => this.setState({value: v})} /></div>;
+        let persons = [
+        ];
+        return <div className='sheetrow'>
+            <ColumnEntry columnKind={'1'} value={this.state.value}
+                onChange={v => this.setState({value: v})} />
+            <Name persons={persons} nameValue={this.state.nameValue}
+                personValue={this.state.personValue}
+                onChange={(p, n) => {console.log(p, n); this.setState({personValue: p, nameValue: n})}} />
+        </div>;
     }
 }
 
