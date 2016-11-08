@@ -275,7 +275,7 @@ def extract_status_times(statuses, name):
         start = group[0][0]
         end = group[-1][0]
         if not skjul:
-            yield dict(name=name, start=start, end=end)
+            yield dict(name=name, start_time=start, end_time=end)
 
 
 def get_statuses(persons):
