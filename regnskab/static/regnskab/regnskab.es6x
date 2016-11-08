@@ -89,7 +89,7 @@ function make_utility_function(query) {
 function filter_persons(persons, query) {
     if (query === '') {
         console.log("No query");
-        return persons.map(p => ({'display': p.name, 'person': p}));
+        return persons.map(p => ({'display': p.name + ' ' + p.titles.join(' '), 'person': p}));
     }
     let utility = make_utility_function(query);
     let persons_keyed = [];
@@ -212,8 +212,7 @@ class Main extends React.Component {
         personValue: null
     };
     render() {
-        let persons = [
-        ];
+        let persons = window.TK_PROFILES;
         return <div className='sheetrow'>
             <ColumnEntry columnKind={'1'} value={this.state.value}
                 onChange={v => this.setState({value: v})} />

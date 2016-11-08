@@ -6,6 +6,9 @@ href="{% static 'regnskab/regnskab.css' %}" />
 <script src="{% static 'react/react.js' %}"></script>
 <script src="{% static 'react/react-dom.js' %}"></script>
 <script src="{% static 'regnskab/regnskab.js' %}"></script>
+<script>window.TK_PROFILES = (
+{{ profiles_json|safe }});
+</script>
 {% endblock %}
 {% block content %}
 <h1>{{ sheet }}</h1>
