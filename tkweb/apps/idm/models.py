@@ -1,3 +1,6 @@
+import re
+
+
 def unicode_superscript(n):
     digits = '⁰¹²³⁴⁵⁶⁷⁸⁹'
     return ''.join(digits[int(i)] for i in str(n))
