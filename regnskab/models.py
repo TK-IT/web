@@ -34,7 +34,9 @@ class Title(models.Model):
     root = models.CharField(max_length=10, verbose_name='Titel')
     kind = models.CharField(max_length=10, choices=KIND, verbose_name='Slags')
 
-    def age(self, gfyear):
+    def age(self, gfyear=None):
+        if gfyear is None:
+            gfyear = config.GFYEAR
         return gfyear - self.period
 
     def display_root(self):
@@ -42,6 +44,10 @@ class Title(models.Model):
 
     def display_title(self, gfyear=None):
         return '%s%s' % (tk_prefix(self.age(gfyear)), self.display_root())
+
+    def input_title(self, gfyear=None):
+        # The title as it would be typed
+        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str), root)
 
     def display_title_and_year(self, gfyear=None):
         return '%s (%02d/%02d)' % (self.display_title(gfyear),
@@ -76,8 +82,20 @@ class Alias(models.Model):
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
 
-    def display_title(self, gfyear):
-        return '%s%s' % (tk_prefix(self.age(gfyear)), self.root)
+    def age(self, gfyear=None):
+        if gfyear is None:
+            gfyear = config.GFYEAR
+        return gfyear - self.period
+
+    def display_root(self):
+        return self.root
+
+    def display_title(self, gfyear=None):
+        return '%s%s' % (tk_prefix(self.age(gfyear)), self.display_root())
+
+    def input_title(self, gfyear=None):
+        # The title as it would be typed
+        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str), root)
 
     class Meta:
         ordering = ['period', 'root']
