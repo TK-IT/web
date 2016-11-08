@@ -4,6 +4,7 @@ import json
 import difflib
 import argparse
 import datetime
+import itertools
 import subprocess
 import collections
 
@@ -250,7 +251,7 @@ def extract_alias_times(aliases, **kwargs):
             assert words[:blo] == current_words[:blo]
             yield from extract_by_time(current_times[blo:blo+(ahi-alo)],
                                        current_words[blo:blo+(ahi-alo)],
-                                       stop_time=t, **kwargs)
+                                       end_time=t, **kwargs)
             current_words[blo:blo+(ahi-alo)] = words[blo:bhi]
             current_times[blo:blo+(ahi-alo)] = (bhi-blo)*[t]
         assert words == current_words
@@ -264,6 +265,26 @@ def get_aliases(persons):
                     for p, t in person_history] +
                    [(None, '')])
         result.extend(extract_alias_times(aliases, name=name))
+    return result
+
+
+def extract_status_times(statuses, name):
+    groups = itertools.groupby(statuses, key=lambda x: x[1])
+    for skjul, group in groups:
+        group = list(group)
+        start = group[0][0]
+        end = group[-1][0]
+        if not skjul:
+            yield dict(name=name, start=start, end=end)
+
+
+def get_statuses(persons):
+    result = []
+    for person_history in persons:
+        name = person_history[-1][0].navn
+        statuses = [(t, p.skjul) for p, t in person_history]
+        statuses.append((None, person_history[-1][0].skjul))
+        result.extend(extract_status_times(statuses, name=name))
     return result
 
 
@@ -282,16 +303,28 @@ def main():
 
     aliases = get_aliases(persons)
     aliases = [
-        dict(name=a['name'],
-             alias=a['alias'],
-             start_time=a['start_time'] and
-             a['start_time'].strftime('%Y-%m-%dT%H:%M:%S%z'),
-             stop_time=a['stop_time'] and
-             a['stop_time'].strftime('%Y-%m-%dT%H:%M:%S%z'))
-        for a in aliases]
+        dict(name=o['name'],
+             alias=o['alias'],
+             start_time=o['start_time'] and
+             o['start_time'].strftime('%Y-%m-%dT%H:%M:%S%z'),
+             end_time=o['end_time'] and
+             o['end_time'].strftime('%Y-%m-%dT%H:%M:%S%z'))
+        for o in aliases]
 
     with open('regnskab-aliases.json', 'w') as fp:
         json.dump(aliases, fp, indent=2)
+
+    statuses = get_statuses(persons)
+    statuses = [
+        dict(name=o['name'],
+             start_time=o['start_time'] and
+             o['start_time'].strftime('%Y-%m-%dT%H:%M:%S%z'),
+             end_time=o['end_time'] and
+             o['end_time'].strftime('%Y-%m-%dT%H:%M:%S%z'))
+        for o in statuses]
+
+    with open('regnskab-statuses.json', 'w') as fp:
+        json.dump(statuses, fp, indent=2)
 
     name_counter = collections.Counter(p[-1][0].navn for p in persons)
     name_dups = {k: v for k, v in name_counter.items() if v > 1}
