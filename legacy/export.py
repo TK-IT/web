@@ -260,7 +260,8 @@ def get_aliases(persons):
     result = []
     for person_history in persons:
         name = person_history[-1][0].navn
-        aliases = ([(t, p.aliaser) for p, t in person_history] +
+        aliases = ([(t, '%s %s' % (p.titel, p.aliaser))
+                    for p, t in person_history] +
                    [(None, '')])
         result.extend(extract_alias_times(aliases, name=name))
     return result
