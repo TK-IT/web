@@ -420,6 +420,7 @@ def get_data(gitdir):
     # regnskab_dat = check_regnskab(regnskab_dat)
 
     dead_leaves = []
+    deleted_leaves = []
     leaf_navn = {}
     email_to_navn = {}
     configs = {}
@@ -483,6 +484,7 @@ def get_data(gitdir):
                     assert not (alive(p) and alive(p2))
             matches[ex] = p
         match_persons = {p: ex for ex, p in matches.items()}
+        new_leaves = {}
         for p in r2.personer:
             if p in forget:
                 continue
@@ -494,9 +496,17 @@ def get_data(gitdir):
                 history = leaf_navn.pop(ex)
                 if history[-1][0].email:
                     email_to_navn.pop(history[-1][0].email)
-            leaf_navn[p.navn] = history + ((p, t2),)
+            new_leaves[p.navn] = history + ((p, t2),)
             if p.email:
                 email_to_navn[p.email] = p.navn
+        deleted_leaves.extend(leaf_navn.values())
+        for v in leaf_navn.values():
+            if v[-1][0].email:
+                del email_to_navn[v[-1][0].email]
+        leaf_navn = new_leaves
+    if deleted_leaves:
+        print("%s deleted leaves, most recent on %s" %
+              (len(deleted_leaves), deleted_leaves[-1][-1][1]))
     return list(leaf_navn.values()), configs
 
 
