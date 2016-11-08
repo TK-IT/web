@@ -14,9 +14,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Alias',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('period', models.IntegerField(verbose_name='Årgang', blank=True, null=True)),
-                ('root', models.CharField(verbose_name='Titel', max_length=10)),
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
+                ('period', models.IntegerField(blank=True, null=True, verbose_name='Årgang')),
+                ('root', models.CharField(max_length=10, verbose_name='Titel')),
                 ('start_time', models.DateTimeField(blank=True, null=True)),
                 ('end_time', models.DateTimeField(blank=True, null=True)),
             ],
@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Email',
             fields=[
-                ('id', models.AutoField(serialize=False, auto_created=True, verbose_name='ID', primary_key=True)),
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
                 ('subject', models.TextField()),
                 ('body', models.TextField()),
                 ('recipient_name', models.CharField(max_length=255)),
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='EmailBatch',
             fields=[
-                ('id', models.AutoField(serialize=False, auto_created=True, verbose_name='ID', primary_key=True)),
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
                 ('created_time', models.DateTimeField(auto_now_add=True)),
                 ('send_time', models.DateTimeField(blank=True, null=True)),
             ],
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='EmailTemplate',
             fields=[
-                ('id', models.AutoField(serialize=False, auto_created=True, verbose_name='ID', primary_key=True)),
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
                 ('name', models.CharField(blank=True, max_length=255)),
                 ('subject', models.TextField()),
                 ('body', models.TextField()),
@@ -58,18 +58,18 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Payment',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
                 ('time', models.DateTimeField()),
-                ('amount', models.DecimalField(max_digits=9, decimal_places=2)),
+                ('amount', models.DecimalField(decimal_places=2, max_digits=9)),
                 ('note', models.CharField(blank=True, max_length=255)),
             ],
         ),
         migrations.CreateModel(
             name='Profile',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(verbose_name='Navn', max_length=50)),
-                ('email', models.EmailField(verbose_name='Emailadresse', blank=True, max_length=50)),
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
+                ('name', models.CharField(max_length=50, verbose_name='Navn')),
+                ('email', models.EmailField(blank=True, max_length=50, verbose_name='Emailadresse')),
             ],
             options={
                 'verbose_name_plural': 'personer',
@@ -80,8 +80,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Purchase',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('count', models.DecimalField(help_text='antal krydser eller brøkdel', max_digits=9, decimal_places=4)),
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
+                ('count', models.DecimalField(help_text='antal krydser eller brøkdel', decimal_places=4, max_digits=9)),
             ],
             options={
                 'verbose_name_plural': 'krydser',
@@ -92,10 +92,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PurchaseKind',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
                 ('position', models.PositiveIntegerField()),
                 ('name', models.CharField(help_text='f.eks. guldøl, guldølskasser', max_length=200)),
-                ('price', models.DecimalField(help_text='f.eks. 8, 10, 13, 200, 250', max_digits=12, decimal_places=2)),
+                ('price', models.DecimalField(help_text='f.eks. 8, 10, 13, 200, 250', decimal_places=2, max_digits=12)),
             ],
             options={
                 'verbose_name_plural': 'prisklasser',
@@ -106,7 +106,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Sheet',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
                 ('name', models.CharField(help_text='f.eks. HSTR, revy, matlabotanisk have', max_length=200, blank=True)),
                 ('start_date', models.DateField()),
                 ('end_date', models.DateField()),
@@ -120,7 +120,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SheetRow',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
                 ('position', models.PositiveIntegerField()),
                 ('name', models.CharField(null=True, max_length=200)),
                 ('profile', models.ForeignKey(null=True, to='regnskab.Profile')),
@@ -133,12 +133,21 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='SheetStatus',
+            fields=[
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
+                ('start_time', models.DateTimeField(blank=True, null=True)),
+                ('end_time', models.DateTimeField(blank=True, null=True)),
+                ('profile', models.ForeignKey(to='regnskab.Profile')),
+            ],
+        ),
+        migrations.CreateModel(
             name='Title',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
                 ('period', models.IntegerField(verbose_name='Årgang')),
-                ('root', models.CharField(verbose_name='Titel', max_length=10)),
-                ('kind', models.CharField(choices=[('BEST', 'BEST'), ('FU', 'FU'), ('EFU', 'EFU')], verbose_name='Slags', max_length=10)),
+                ('root', models.CharField(max_length=10, verbose_name='Titel')),
+                ('kind', models.CharField(choices=[('BEST', 'BEST'), ('FU', 'FU'), ('EFU', 'EFU')], max_length=10, verbose_name='Slags')),
                 ('profile', models.ForeignKey(to='regnskab.Profile')),
             ],
             options={
@@ -170,7 +179,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='emailbatch',
             name='template',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, to='regnskab.EmailTemplate', null=True),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, null=True, to='regnskab.EmailTemplate'),
         ),
         migrations.AddField(
             model_name='email',
@@ -180,7 +189,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='email',
             name='profile',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, to='regnskab.Profile', related_name='+', null=True),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, null=True, to='regnskab.Profile', related_name='+'),
         ),
         migrations.AddField(
             model_name='alias',
