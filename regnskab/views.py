@@ -11,7 +11,6 @@ class SheetCreate(FormView):
     template_name = 'regnskab/sheet_create.html'
 
     def get_initial(self):
-        names = 'øl guldøl vand'.split()
         vand_price = 8
         øl_price = 10
         guld_price = 13
