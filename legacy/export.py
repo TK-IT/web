@@ -334,6 +334,9 @@ def main():
     by_navn = {p[-1][0].navn: p for p in persons}
     assert len(by_navn) == len(persons)
 
+    # TODO: Use p.gaeld to determine payments
+    # rather than depending on p.senest.betalt
+
     resets = {}
 
     for person_idx, person_history in enumerate(persons):
