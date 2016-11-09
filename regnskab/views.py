@@ -10,6 +10,24 @@ class SheetCreate(FormView):
     form_class = SheetCreateForm
     template_name = 'regnskab/sheet_create.html'
 
+    def get_initial(self):
+        names = 'øl guldøl vand'.split()
+        vand_price = 8
+        øl_price = 10
+        guld_price = 13
+        vandkasse_price = 25*vand_price
+        ølkasse_price = 25*øl_price
+        guldkasse_price = ølkasse_price + 30*(guld_price - øl_price)
+        kinds = [
+            ('øl', øl_price),
+            ('ølkasse', ølkasse_price),
+            ('guldøl', guld_price),
+            ('guldølkasse', guldkasse_price),
+            ('sodavand', vand_price),
+            ('sodavandkasse', vandkasse_price),
+        ]
+        return dict(kinds='\n'.join('%s %s' % x for x in kinds))
+
     def form_valid(self, form):
         data = form.cleaned_data
         s = Sheet(name=data['name'],
