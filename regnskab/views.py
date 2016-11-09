@@ -44,14 +44,14 @@ class SheetDetail(TemplateView):
         return context_data
 
 
-class SheetUpdate(TemplateView):
+class SheetRowUpdate(TemplateView):
     template_name = 'regnskab/sheet_update.html'
 
     def get_sheet(self):
         return get_object_or_404(Sheet.objects, pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
-        context_data = super(SheetUpdate, self).get_context_data(**kwargs)
+        context_data = super(SheetRowUpdate, self).get_context_data(**kwargs)
         context_data['sheet'] = self.get_sheet()
 
         current_qs = SheetStatus.objects.filter(end_time=None)
