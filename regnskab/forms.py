@@ -1,6 +1,7 @@
 import collections
 from django import forms
 from django.core.exceptions import ValidationError
+from regnskab.models import EmailTemplate, EmailBatch
 
 
 class SheetCreateForm(forms.Form):
@@ -28,3 +29,15 @@ class SheetCreateForm(forms.Form):
         if dups:
             raise ValidationError("Duplicate names: %r" % (dups,))
         return kinds
+
+
+class EmailTemplateForm(forms.ModelForm):
+    class Meta:
+        model = EmailTemplate
+        fields = ('name', 'subject', 'body', 'format')
+
+
+class EmailBatchForm(forms.ModelForm):
+    class Meta:
+        model = EmailBatch
+        fields = ('template',)

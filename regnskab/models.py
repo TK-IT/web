@@ -1,4 +1,9 @@
+import collections
+from decimal import Decimal
+
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import F
 from regnskab import config
 from tkweb.apps.idm.models import (
     tk_prefix, parse_bestfu_alias,
@@ -204,6 +209,23 @@ class Purchase(models.Model):
         verbose_name_plural = verbose_name
 
 
+def compute_balance():
+    balance = collections.defaultdict(Decimal)
+    purchase_qs = Purchase.objects.all()
+    purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'))
+    purchase_qs = purchase_qs.annotate(amount=F('count') * F('kind__price'))
+    purchase_qs = purchase_qs.values_list('profile_id', 'amount')
+    for profile, amount in purchase_qs:
+        print(profile, amount)
+        balance[profile] += amount
+    payment_qs = Payment.objects.all()
+    payment_qs = payment_qs.values_list('profile_id', 'amount')
+    for profile, amount in payment_qs:
+        print(profile, -amount)
+        balance[profile] -= amount
+    return balance
+
+
 class EmailTemplate(models.Model):
     POUND = 'pound'
     FORMAT = [(POUND, 'pound')]
@@ -223,10 +245,20 @@ class EmailBatch(models.Model):
                                  null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
     send_time = models.DateTimeField(null=True, blank=True)
+    sheet_set = models.ManyToManyField(Sheet, blank=True,
+                                       verbose_name='krydslister')
+    payment_set = models.ManyToManyField(Payment, blank=True,
+                                         verbose_name='betalinger')
 
     @property
     def sent(self):
         return bool(self.send_time)
+
+    def regenerate_emails(self):
+        if self.template is None:
+            raise ValidationError("template required to generate emails")
+        payments = self.payment_set.all()
+        sheets = self.sheet_set.all()
 
 
 class Email(models.Model):

@@ -16,11 +16,30 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
-from regnskab.views import SheetCreate, SheetDetail, SheetRowUpdate
+from regnskab.views import (
+    SheetCreate, SheetDetail, SheetRowUpdate,
+    EmailTemplateList, EmailTemplateUpdate, EmailTemplateCreate,
+    EmailBatchList, EmailBatchUpdate, EmailDetail,
+    ProfileDetail,
+)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^sheet/new/$', SheetCreate.as_view(), name='sheet_create'),
     url(r'^sheet/(?P<pk>\d+)/$', SheetDetail.as_view(), name='sheet'),
     url(r'^sheet/(?P<pk>\d+)/edit/$', SheetRowUpdate.as_view(), name='sheet_update'),
+    url(r'^email/template/$', EmailTemplateList.as_view(),
+        name='email_template_list'),
+    url(r'^email/template/(?P<pk>\d+)/$', EmailTemplateUpdate.as_view(),
+        name='email_template_update'),
+    url(r'^email/template/new/$', EmailTemplateCreate.as_view(),
+        name='email_template_create'),
+    url(r'^email/$', EmailBatchList.as_view(),
+        name='email_batch_list'),
+    url(r'^email/(?P<pk>\d+)/$', EmailBatchUpdate.as_view(),
+        name='email_batch_update'),
+    url(r'^email/(?P<pk>\d+)/(?P<profile>\d+)/$', EmailDetail.as_view(),
+        name='email_detail'),
+    url(r'^profile/(?P<pk>\d+)/$', ProfileDetail.as_view(),
+        name='profile_detail'),
 ]

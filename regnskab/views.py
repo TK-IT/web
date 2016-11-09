@@ -1,8 +1,21 @@
+from decimal import Decimal
 import json
+
+from django.db import models
+from django.db.models import F, Value
+from django.db.models.functions import Concat
 from django.shortcuts import redirect, get_object_or_404
-from django.views.generic import TemplateView, FormView
-from regnskab.forms import SheetCreateForm
-from regnskab.models import Sheet, SheetRow, SheetStatus, parse_bestfu_alias, Profile, Alias
+from django.views.generic import (
+    TemplateView, FormView, ListView, CreateView, UpdateView, DetailView,
+)
+from regnskab.forms import (
+    SheetCreateForm, EmailTemplateForm, EmailBatchForm,
+)
+from regnskab.models import (
+    Sheet, SheetRow, SheetStatus, parse_bestfu_alias, Profile, Alias,
+    EmailTemplate, EmailBatch, Email,
+    Purchase, Payment,
+)
 from regnskab import config
 
 
@@ -106,4 +119,91 @@ class SheetRowUpdate(TemplateView):
             x['sort_key'] = i
         context_data['profiles_json'] = json.dumps(profiles, indent=2)
 
+        return context_data
+
+
+class EmailTemplateList(ListView):
+    template_name = 'regnskab/email_template_list.html'
+    queryset = EmailTemplate.objects.all()
+
+
+class EmailTemplateUpdate(UpdateView):
+    template_name = 'regnskab/email_template_form.html'
+    queryset = EmailTemplate.objects.all()
+    form_class = EmailTemplateForm
+
+
+class EmailTemplateCreate(CreateView):
+    template_name = 'regnskab/email_template_form.html'
+    queryset = EmailTemplate.objects.all()
+    form_class = EmailTemplateForm
+
+
+class EmailBatchList(ListView):
+    template_name = 'regnskab/email_batch_list.html'
+    queryset = EmailBatch.objects.all()
+
+
+class EmailBatchUpdate(UpdateView):
+    template_name = 'regnskab/email_batch_form.html'
+    queryset = EmailBatch.objects.all()
+    form_class = EmailBatchForm
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.regenerate_emails()
+        context_data = self.get_context_data(
+            form=form,
+            success=True,
+        )
+        return self.render_to_response(context_data)
+
+
+class EmailDetail(DetailView):
+    template_name = 'regnskab/email_detail.html'
+
+    def get_object(self):
+        return get_object_or_404(
+            Email,
+            batch_id=self.kwargs['pk'],
+            profile_id=self.kwargs['profile'])
+
+
+class ProfileDetail(TemplateView):
+    template_name = 'regnskab/profile_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context_data = super(ProfileDetail, self).get_context_data(**kwargs)
+
+        profile = get_object_or_404(Profile.objects, pk=self.kwargs['pk'])
+        context_data['profile'] = profile
+
+        purchase_qs = Purchase.objects.all()
+        purchase_qs = purchase_qs.filter(row__profile=profile)
+        purchase_qs = purchase_qs.annotate(amount=F('kind__price') * F('count'))
+        purchase_qs = purchase_qs.annotate(balance_change=F('amount'))
+        purchase_qs = purchase_qs.annotate(
+            name=Concat(F('count'), Value('x '), F('kind__name'),
+                        output_field=models.CharField()))
+        purchase_qs = purchase_qs.annotate(date=F('row__sheet__end_date'))
+        purchase_qs = purchase_qs.values('date', 'name', 'amount', 'balance_change')
+        purchases = list(purchase_qs)
+
+        payment_qs = Payment.objects.all()
+        payment_qs = payment_qs.filter(profile=profile)
+        payment_qs = payment_qs.annotate(name=Value('betaling', output_field=models.CharField()))
+        payment_qs = payment_qs.annotate(balance_change=-1 * F('amount'))
+        payment_qs = payment_qs.values('time', 'name', 'amount', 'balance_change')
+        payments = list(payment_qs)
+
+        rows = payments + purchases
+        for row in rows:
+            if 'date' not in row:
+                row['date'] = row['time'].date()
+        rows.sort(key=lambda x: x['date'])
+        balance = Decimal()
+        for row in rows:
+            balance += row['balance_change']
+            row['balance'] = balance
+        context_data['rows'] = rows
         return context_data

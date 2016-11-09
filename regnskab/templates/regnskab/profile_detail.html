@@ -1,0 +1,24 @@
+{% extends "regnskab/base.html" %}
+{% block content %}
+<h1>{{ profile }}</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Tidspunkt</th>
+            <th>Beskrivelse</th>
+            <th>Beløb</th>
+            <th>Balance</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+        <tr>
+            <td>{{ row.date }}</td>
+            <td>{{ row.name }}</td>
+            <td>{{ row.amount }}</td>
+            <td>{{ row.balance }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
