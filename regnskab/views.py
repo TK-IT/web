@@ -5,6 +5,7 @@ import json
 from django.db import models
 from django.db.models import F, Value
 from django.db.models.functions import Concat
+from django.template.defaultfilters import floatformat
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
     TemplateView, FormView, ListView, CreateView, UpdateView, DetailView,
@@ -206,11 +207,8 @@ class ProfileDetail(TemplateView):
         purchase_qs = purchase_qs.filter(row__profile=profile)
         purchase_qs = purchase_qs.annotate(amount=F('kind__price') * F('count'))
         purchase_qs = purchase_qs.annotate(balance_change=F('amount'))
-        purchase_qs = purchase_qs.annotate(
-            name=Concat(F('count'), Value('x '), F('kind__name'),
-                        output_field=models.CharField()))
         purchase_qs = purchase_qs.annotate(date=F('row__sheet__end_date'))
-        purchase_qs = purchase_qs.values('date', 'name', 'amount', 'balance_change')
+        purchase_qs = purchase_qs.values('date', 'count', 'kind__name', 'amount', 'balance_change')
         purchases = list(purchase_qs)
 
         payment_qs = Payment.objects.all()
@@ -224,10 +222,13 @@ class ProfileDetail(TemplateView):
         for row in rows:
             if 'date' not in row:
                 row['date'] = row['time'].date()
+            if 'name' not in row:
+                row['name'] = '%gx %s' % (row['count'], row['kind__name'])
+            row['amount'] = floatformat(row['amount'], 2)
         rows.sort(key=lambda x: x['date'])
         balance = Decimal()
         for row in rows:
             balance += row['balance_change']
-            row['balance'] = balance
+            row['balance'] = floatformat(balance, 2)
         context_data['rows'] = rows
         return context_data
