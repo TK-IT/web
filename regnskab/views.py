@@ -1,3 +1,4 @@
+import datetime
 from decimal import Decimal
 import json
 
@@ -15,6 +16,7 @@ from regnskab.models import (
     Sheet, SheetRow, SheetStatus, parse_bestfu_alias, Profile, Alias,
     EmailTemplate, EmailBatch, Email,
     Purchase, Payment,
+    compute_balance,
 )
 from regnskab import config
 
@@ -167,6 +169,28 @@ class EmailDetail(DetailView):
             Email,
             batch_id=self.kwargs['pk'],
             profile_id=self.kwargs['profile'])
+
+
+class ProfileList(TemplateView):
+    template_name = 'regnskab/profile_list.html'
+
+    def get_context_data(self, **kwargs):
+        context_data = super(ProfileList, self).get_context_data(**kwargs)
+        qs = Profile.objects.all()
+        qs = qs.prefetch_related('sheetstatus_set')
+        profiles = list(qs)
+        balances = compute_balance()
+        for p in profiles:
+            p.balance = balances.get(p.id)
+            now = datetime.datetime.now()
+            statuses = sorted(p.sheetstatus_set.all(),
+                              key=lambda s: (s.end_time or now))
+            if statuses:
+                p.status = statuses[-1]
+            else:
+                p.status = None
+        context_data['object_list'] = profiles
+        return context_data
 
 
 class ProfileDetail(TemplateView):
