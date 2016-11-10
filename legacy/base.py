@@ -52,6 +52,11 @@ class Priser(PriserBase):
     FMT = '>ffff'
 
 
+def get_amount(priser, forbrug):
+    return sum(getattr(priser, k) * getattr(forbrug, k)
+               for k in Priser._fields) + forbrug.andet
+
+
 class Config(ConfigBase):
     SSKJUL, SKURSIV, SNORMAL = range(3)
     SM_ALLE, SM_TILMELDTE, SM_NORMAL, SM_TEST, SM_SPOERG = range(5)

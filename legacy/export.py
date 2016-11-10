@@ -8,7 +8,7 @@ import itertools
 import subprocess
 import collections
 
-from legacy.base import Regnskab, read_regnskab, Person
+from legacy.base import Regnskab, read_regnskab, Person, get_amount, Forbrug
 
 
 def progress(elements, n=None):
@@ -337,11 +337,27 @@ def main():
     # TODO: Use p.gaeld to determine payments
     # rather than depending on p.senest.betalt
 
+    # for person_history in persons:
+    #     gaeld = 0
+    #     p1 = Forbrug(0, 0, 0, 0, 0, 0)
+    #     for p2, t in person_history:
+    #         prices, config = configs[t]
+    #         diff = p2.total - p1
+    #         if min(diff.oel, diff.xmas, diff.vand, diff.kasser) < -0.1:
+    #             diff = Forbrug(0, 0, 0, 0, 0, betalt=gaeld - p2.gaeld)
+    #         p1 = p2.total
+    #         gaeld += get_amount(prices, diff) - diff.betalt
+    #         print('%s\t%s\t%.2f\t%.2f\t%s' %
+    #               (t, person_history[-1][0].navn, gaeld, p2.gaeld, diff))
+    #         if abs(gaeld - p2.gaeld) > 0.02:
+    #             print("Difference too great")
+
     resets = {}
 
     for person_idx, person_history in enumerate(persons):
         name = person_history[-1][0].navn
         i = 0
+        gæld = 0
         while i < len(person_history):
             p, t = person_history[i]
             if not any(p.senest):
