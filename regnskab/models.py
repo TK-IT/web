@@ -29,6 +29,12 @@ class SheetStatus(models.Model):
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
 
+    def since(self):
+        if self.end_time:
+            return 'ikke siden %s' % (self.end_time.date(),)
+        else:
+            return 'siden %s' % (self.start_time.date(),)
+
 
 class Title(models.Model):
     BEST, FU, EFU = 'BEST', 'FU', 'EFU'
