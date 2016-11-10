@@ -20,7 +20,7 @@ from regnskab.views import (
     SheetCreate, SheetDetail, SheetRowUpdate,
     EmailTemplateList, EmailTemplateUpdate, EmailTemplateCreate,
     EmailBatchList, EmailBatchUpdate, EmailDetail,
-    ProfileDetail,
+    ProfileList, ProfileDetail,
 )
 
 urlpatterns = [
@@ -40,6 +40,8 @@ urlpatterns = [
         name='email_batch_update'),
     url(r'^email/(?P<pk>\d+)/(?P<profile>\d+)/$', EmailDetail.as_view(),
         name='email_detail'),
+    url(r'^profile/$', ProfileList.as_view(),
+        name='profile_list'),
     url(r'^profile/(?P<pk>\d+)/$', ProfileDetail.as_view(),
         name='profile_detail'),
 ]
