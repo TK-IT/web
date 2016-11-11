@@ -23,6 +23,29 @@ def progress(elements, n=None):
     sys.stderr.write('\n')
 
 
+def read_regnskab_revisions_gitpython(gitdir):
+    from git import Repo
+    repo = Repo(gitdir)
+    master = repo.branches[0]
+    commits = [master.commit]
+    while commits[-1].parents:
+        commits.append(commits[-1].parents[0])
+    commits.reverse()
+    times = [c.authored_datetime for c in commits]
+    blobs = [c.tree.join('regnskab.dat') for c in commits]
+
+    prev_sha = None
+    for t, blob in zip(progress(times), blobs):
+        if blob.binsha == prev_sha:
+            continue
+        prev_sha = blob.binsha
+        try:
+            r = read_regnskab(blob.data_stream)
+        except ValueError as exn:
+            continue
+        yield t, r
+
+
 def read_regnskab_revisions(gitdir):
     def cat_file(objects, gitdir):
         for o in objects:
