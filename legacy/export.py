@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import json
 import difflib
 import argparse
@@ -17,9 +18,9 @@ def progress(elements, n=None):
         n = len(elements)
     w = len(str(n))
     for i, x in enumerate(elements):
-        print('\r\x1B[K(%s/%s) %s' % (str(i+1).rjust(w), n, x), end='')
+        sys.stderr.write('\r\x1B[K(%s/%s) %s' % (str(i+1).rjust(w), n, x))
         yield x
-    print('')
+    sys.stderr.write('\n')
 
 
 def cat_file(objects, gitdir):
