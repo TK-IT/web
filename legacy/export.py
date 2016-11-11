@@ -23,16 +23,15 @@ def progress(elements, n=None):
     sys.stderr.write('\n')
 
 
-def cat_file(objects, gitdir):
-    for o in objects:
-        p = subprocess.Popen(
-            ('git', 'cat-file', 'blob', o),
-            cwd=gitdir, stdout=subprocess.PIPE)
-        with p:
-            yield p.stdout
-
-
 def read_regnskab_revisions(gitdir):
+    def cat_file(objects, gitdir):
+        for o in objects:
+            p = subprocess.Popen(
+                ('git', 'cat-file', 'blob', o),
+                cwd=gitdir, stdout=subprocess.PIPE)
+            with p:
+                yield p.stdout
+
     proc = subprocess.Popen(
         ('git', 'log', '--pretty=%H %aI', 'HEAD', '--', 'regnskab.dat'),
         universal_newlines=True,
