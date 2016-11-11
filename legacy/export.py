@@ -71,7 +71,9 @@ def read_regnskab_revisions(gitdir):
     times.reverse()
 
     objects = ['%s:regnskab.dat' % r for r in revisions]
-    for t, fp in zip(times, cat_file(progress(objects), gitdir)):
+    # progress(...) must be in first argument to zip,
+    # since zip stops when first stream is exhausted.
+    for fp, t in zip(cat_file(progress(objects), gitdir), times):
         try:
             r = read_regnskab(fp)
         except ValueError as exn:
