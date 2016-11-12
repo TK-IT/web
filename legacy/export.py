@@ -9,7 +9,9 @@ import itertools
 import subprocess
 import collections
 
-from legacy.base import Regnskab, read_regnskab, Person, get_amount, Forbrug
+from legacy.base import (
+    Regnskab, read_regnskab, Person, get_amount, Forbrug, alder,
+)
 
 
 def progress(elements, n=None):
@@ -320,6 +322,15 @@ def check_name_unique(persons):
         raise Exception()
 
 
+def get_gfyear(regnskab, base=('Rasmus Villemoes', 2002, 'KASS')):
+    name, year, title = base
+    p = next(p for p in regnskab.personer if p.navn == name)
+    age, title_ = alder(p.titel)
+    if title_ != title:
+        raise ValueError((p, title))
+    return year + age
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('gitdir')
@@ -333,6 +344,9 @@ def main():
     #                  p.navn, p.aliaser, p.email)
     #                 for ps in persons
     #                 for p in [ps[-1][0]]))
+    gfyear = {k: get_gfyear(r) for k, r in regnskab_history}
+    gfyear_list = [gfyear[k] for k in sorted(regnskab_history.keys())]
+    assert gfyear_list == sorted(gfyear_list)
 
     write_aliases(persons)
     write_statuses(persons)
