@@ -312,7 +312,7 @@ def write_statuses(persons):
         json.dump(statuses, fp, indent=2)
 
 
-def check_name_unique(persons)
+def check_name_unique(persons):
     name_counter = collections.Counter(p[-1][0].navn for p in persons)
     name_dups = {k: v for k, v in name_counter.items() if v > 1}
     if name_dups:
