@@ -372,7 +372,8 @@ def main():
         data_source = heapq.merge(*data_sources)
 
     persons, regnskab_history = get_data(data_source)
-    person_history = get_person_history(persons)
+    by_time = get_person_history(persons)
+    all_names = sorted(by_time[max(by_time.keys())].keys())
     persons.sort(key=lambda ps: (ps[-1][1], ps[-1][0]))
     # print('\n'.join('%s %s %s %s %s' %
     #                 (ps[-1][1], ps[0][1],
@@ -407,6 +408,11 @@ def main():
     #             print("Difference too great")
 
     resets = {}
+
+    prev = {}
+    for time in sorted(by_time.keys()):
+        persons = by_time[time]
+
 
     for person_idx, person_history in enumerate(persons):
         name = person_history[-1][0].navn
