@@ -347,10 +347,7 @@ def check_name_unique(persons):
 
 def get_gfyear(regnskab, base=('Bjarke Skjernaa', 1999, 'KASS')):
     name, year, title = base
-    try:
-        p = next(p for p in regnskab.personer if p.navn == name)
-    except StopIteration:
-        return 2001
+    p = next(p for p in regnskab.personer if p.navn == name)
     age, title_ = alder(p.titel)
     if title_ != title:
         raise ValueError((p, title))
