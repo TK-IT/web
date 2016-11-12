@@ -109,25 +109,6 @@ def read_regnskab_backups(gitdir):
             yield t, r
 
 
-def fix_person_name(person):
-    d = person._asdict()
-    for k in ('navn', 'email'):
-        name = d[k]
-        name = name.lstrip('\'')
-        while '\b' in name:
-            name = re.sub(r'.\b', '', name, 1)
-        if name == 'Mette Lysgaard Schultz':
-            name = 'Mette Lysgaard Schulz'
-        d[k] = name
-    return type(person)(**d)
-
-
-def fix_names(iterable):
-    for time, (personer, priser, config) in iterable:
-        personer = [fix_person_name(p) for p in personer]
-        yield time, Regnskab(personer, priser, config)
-
-
 def match(old, new, attr):
     old_by_attr = {getattr(p, attr): p
                    for p in old}
@@ -426,6 +407,25 @@ def main():
 
     with open('regnskab-history.json', 'w') as fp:
         json.dump(output, fp, indent=2)
+
+
+def fix_person_name(person):
+    d = person._asdict()
+    for k in ('navn', 'email'):
+        name = d[k]
+        name = name.lstrip('\'')
+        while '\b' in name:
+            name = re.sub(r'.\b', '', name, 1)
+        if name == 'Mette Lysgaard Schultz':
+            name = 'Mette Lysgaard Schulz'
+        d[k] = name
+    return type(person)(**d)
+
+
+def fix_names(iterable):
+    for time, (personer, priser, config) in iterable:
+        personer = [fix_person_name(p) for p in personer]
+        yield time, Regnskab(personer, priser, config)
 
 
 def get_data(gitdir):
