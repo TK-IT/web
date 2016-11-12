@@ -298,6 +298,20 @@ def write_aliases(persons):
         json.dump(aliases, fp, indent=2)
 
 
+def write_statuses(persons):
+    statuses = get_statuses(persons)
+    statuses = [
+        dict(name=o['name'],
+             start_time=o['start_time'] and
+             o['start_time'].strftime('%Y-%m-%dT%H:%M:%S%z'),
+             end_time=o['end_time'] and
+             o['end_time'].strftime('%Y-%m-%dT%H:%M:%S%z'))
+        for o in statuses]
+
+    with open('regnskab-statuses.json', 'w') as fp:
+        json.dump(statuses, fp, indent=2)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('gitdir')
@@ -313,18 +327,7 @@ def main():
     #                 for p in [ps[-1][0]]))
 
     write_aliases(persons)
-
-    statuses = get_statuses(persons)
-    statuses = [
-        dict(name=o['name'],
-             start_time=o['start_time'] and
-             o['start_time'].strftime('%Y-%m-%dT%H:%M:%S%z'),
-             end_time=o['end_time'] and
-             o['end_time'].strftime('%Y-%m-%dT%H:%M:%S%z'))
-        for o in statuses]
-
-    with open('regnskab-statuses.json', 'w') as fp:
-        json.dump(statuses, fp, indent=2)
+    write_statuses(persons)
 
     name_counter = collections.Counter(p[-1][0].navn for p in persons)
     name_dups = {k: v for k, v in name_counter.items() if v > 1}
