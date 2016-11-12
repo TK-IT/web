@@ -94,7 +94,9 @@ def read_regnskab_backups(gitdir):
     # for f, a, b in zip(files, dates, expected_dates):
     #     if a != b:
     #         print("Date mismatch: %s != %s" % (a, b))
-    for t, f in zip(mtimes, progress(files)):
+    # progress(...) must be in first argument to zip,
+    # since zip stops when first stream is exhausted.
+    for f, t in zip(progress(files), mtimes):
         with open(f.path, 'rb') as fp:
             try:
                 r = read_regnskab(fp)
