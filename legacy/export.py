@@ -174,26 +174,30 @@ def opdater_titel_broken(titel):
 
 def is_title(titel):
     certain, next_title = opdater_titel_broken(titel)
+    age, root = alder(titel)
+    if certain != (age is not None):
+        raise Exception("opdater_titel and alder disagree on %s" % titel)
     return certain
 
 
-def extract_alias_or_title(words):
+def extract_alias_or_title(periods, words):
     '''
-    >>> list(extract_alias_or_title("Den harmoniske række OFORM".split()))
-    ['Den harmoniske række', 'OFORM']
-    >>> list(extract_alias_or_title("BFUET GEFUIT".split()))
-    ['BFUET', 'GEFUIT']
+    >>> list(extract_alias_or_title([None, None, None, 2013],
+    ...                             "Den harmoniske række FORM".split()))
+    [(None, 'Den harmoniske række'), (2013, 'FORM')]
+    >>> list(extract_alias_or_title([2013, 2014], "FUET EFUIT".split()))
+    [(2013, 'FUET'), (2014, 'EFUIT')]
     '''
     i = 0
     while i < len(words):
-        if is_title(words[i]):
-            yield words[i]
+        if periods[i] is not None:
+            yield (periods[i], words[i])
             i += 1
         else:
             j = i+1
-            while j < len(words) and not is_title(words[j]):
+            while j < len(words) and periods[j] is None:
                 j += 1
-            yield ' '.join(words[i:j])
+            yield (None, ' '.join(words[i:j]))
             i = j
 
 
@@ -208,18 +212,32 @@ def extract_by_time(current_times, current_words, **kwargs):
             else:
                 break
         remove_words = current_words[i:j]
-        for a in extract_alias_or_title(remove_words):
-            yield dict(alias=a,
+        for period, root in extract_alias_or_title(*zip(*remove_words)):
+            yield dict(period=period, root=root,
                        start_time=current_times[i],
                        **kwargs)
         i = j
 
 
+def parse_alias(title, gfyear):
+    FAUX = 'FUDRNF FULUBULU KBO BFUDI GT GP BETTY'.split()
+    age, root = alder(title)
+    if age is None or root in ('', 'EFUIT') or title in FAUX:
+        return None, title
+    if age > 22:
+        # Broken legacy handling of T19O which is upgraded to T29O
+        q, r = divmod(age - 22, 10)
+        if r == 0:
+            age = 22 + q
+    return gfyear - age, root
+
+
 def extract_alias_times(aliases, **kwargs):
     current_words = []
     current_times = []
-    for t, a in aliases:
-        words = [w.lstrip('-') for w in a.split()]
+    for gfyear, t, a in aliases:
+        words = [w.lstrip('-') for w in a.split() if w.lstrip('-')]
+        words = [parse_alias(w, gfyear) for w in words]
         if current_words == words:
             continue
         a_copy = list(current_words)
@@ -237,13 +255,14 @@ def extract_alias_times(aliases, **kwargs):
         assert words == current_words
 
 
-def get_aliases(persons):
+def get_aliases(persons, gfyears):
     result = []
     for person_history in persons:
         name = person_history[-1][0].navn
-        aliases = ([(t, '%s %s' % (p.titel, p.aliaser))
+        aliases = ([(gfyears[t], t,
+                     '%s %s' % (p.titel, p.aliaser.replace(',', ' ')))
                     for p, t in person_history] +
-                   [(None, '')])
+                   [(None, None, '')])
         result.extend(extract_alias_times(aliases, name=name))
     return result
 
@@ -285,19 +304,21 @@ def get_person_history(persons):
     return h
 
 
-def write_aliases(persons):
-    aliases = get_aliases(persons)
-    aliases = [
-        dict(name=o['name'],
-             alias=o['alias'],
-             start_time=o['start_time'] and
-             o['start_time'].strftime('%Y-%m-%dT%H:%M:%S%z'),
-             end_time=o['end_time'] and
-             o['end_time'].strftime('%Y-%m-%dT%H:%M:%S%z'))
-        for o in aliases]
+def write_aliases(persons, gfyears):
+    aliases = get_aliases(persons, gfyears)
+    dicts = []
+    for o in aliases:
+        dicts.append(dict(
+            name=o['name'],
+            period=o['period'],
+            root=o['root'],
+            start_time=o['start_time'] and
+            o['start_time'].strftime('%Y-%m-%dT%H:%M:%S%z'),
+            end_time=o['end_time'] and
+            o['end_time'].strftime('%Y-%m-%dT%H:%M:%S%z')))
 
     with open('regnskab-aliases.json', 'w') as fp:
-        json.dump(aliases, fp, indent=2)
+        json.dump(dicts, fp, indent=2)
 
 
 def write_statuses(persons):
@@ -344,11 +365,12 @@ def main():
     #                  p.navn, p.aliaser, p.email)
     #                 for ps in persons
     #                 for p in [ps[-1][0]]))
-    gfyear = {k: get_gfyear(r) for k, r in regnskab_history}
-    gfyear_list = [gfyear[k] for k in sorted(regnskab_history.keys())]
-    assert gfyear_list == sorted(gfyear_list)
+    gfyears = {k: get_gfyear(r) for k, r in regnskab_history.items()}
+    gfyear_list = [gfyears[k] for k in sorted(regnskab_history.keys())]
+    if gfyear_list != sorted(gfyear_list):
+        raise Exception("gfyear not sorted")
 
-    write_aliases(persons)
+    write_aliases(persons, gfyears)
     write_statuses(persons)
     check_name_unique(persons)
 
