@@ -266,19 +266,24 @@ def get_statuses(persons):
     return result
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('gitdir')
-    args = parser.parse_args()
+def get_person_history(persons):
+    h = {}
+    for x in persons:
+        name = x[-1][0].navn
+        for p, t in x:
+            h.setdefault(t, {})[name] = p
+    names = [
+        set(h[t].keys())
+        for t in sorted(h.keys())
+    ]
+    for n1, n2 in zip(names[:-1], names[1:]):
+        d = n1 - n2
+        if d:
+            raise ValueError(d)
+    return h
 
-    persons, configs = get_data(args.gitdir)
-    persons.sort(key=lambda ps: (ps[-1][1], ps[-1][0]))
-    # print('\n'.join('%s %s %s %s %s' %
-    #                 (ps[-1][1], ps[0][1],
-    #                  p.navn, p.aliaser, p.email)
-    #                 for ps in persons
-    #                 for p in [ps[-1][0]]))
 
+def write_aliases(persons):
     aliases = get_aliases(persons)
     aliases = [
         dict(name=o['name'],
@@ -291,6 +296,23 @@ def main():
 
     with open('regnskab-aliases.json', 'w') as fp:
         json.dump(aliases, fp, indent=2)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('gitdir')
+    args = parser.parse_args()
+
+    persons, regnskab_history = get_data(args.gitdir)
+    person_history = get_person_history(persons)
+    persons.sort(key=lambda ps: (ps[-1][1], ps[-1][0]))
+    # print('\n'.join('%s %s %s %s %s' %
+    #                 (ps[-1][1], ps[0][1],
+    #                  p.navn, p.aliaser, p.email)
+    #                 for ps in persons
+    #                 for p in [ps[-1][0]]))
+
+    write_aliases(persons)
 
     statuses = get_statuses(persons)
     statuses = [
@@ -319,7 +341,7 @@ def main():
     #     gaeld = 0
     #     p1 = Forbrug(0, 0, 0, 0, 0, 0)
     #     for p2, t in person_history:
-    #         prices, config = configs[t]
+    #         prices = regnskab_history[t].priser
     #         diff = p2.total - p1
     #         if min(diff.oel, diff.xmas, diff.vand, diff.kasser) < -0.1:
     #             diff = Forbrug(0, 0, 0, 0, 0, betalt=gaeld - p2.gaeld)
@@ -371,7 +393,7 @@ def main():
     KINDS = ['oel', 'xmas', 'vand', 'kasser']
     output = []
     for freeze_time, email_persons in email_batches:
-        prices, config = configs[freeze_time]
+        prices = regnskab_history[freeze_time].priser
         purchase_kinds = [
             dict(key=k, price=getattr(prices, k))
             for k in KINDS]
@@ -437,7 +459,7 @@ def get_data(gitdir):
     deleted_leaves = []
     leaf_navn = {}
     email_to_navn = {}
-    configs = {}
+    regnskab_history = {}
 
     def get_predecessors(p):
         pred_navn = [p.navn]
@@ -460,7 +482,7 @@ def get_data(gitdir):
                    for ps in leaf_navn.values()
                    for p in [ps[-1][0]] if p.email)
 
-        configs[t2] = (r2.priser, r2.config)
+        regnskab_history[t2] = r2
 
         matches = {}
         forget = set()
@@ -521,7 +543,7 @@ def get_data(gitdir):
     if deleted_leaves:
         print("%s deleted leaves, most recent on %s" %
               (len(deleted_leaves), deleted_leaves[-1][-1][1]))
-    return list(leaf_navn.values()), configs
+    return list(leaf_navn.values()), regnskab_history
 
 
 if __name__ == "__main__":
