@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import json
+import heapq
 import difflib
 import argparse
 import datetime
@@ -93,7 +94,8 @@ def read_regnskab_backups(gitdir):
     mtimes = [f.stat().st_mtime for f in files]
     if mtimes != sorted(set(mtimes)):
         raise ValueError("Duplicate/not sorted modification times")
-    mtimes = [datetime.datetime.fromtimestamp(m) for m in mtimes]
+    mtimes = [datetime.datetime.fromtimestamp(m, datetime.timezone.utc)
+              for m in mtimes]
     # expected_dates = [m.strftime('%y%m%d') for m in mtimes]
     # for f, a, b in zip(files, dates, expected_dates):
     #     if a != b:
@@ -220,7 +222,7 @@ def extract_by_time(current_times, current_words, **kwargs):
 
 
 def parse_alias(title, gfyear):
-    FAUX = 'FUDRNF FULUBULU KBO BFUDI GT GP BETTY'.split()
+    FAUX = 'FUDRNF FULUBULU KBO BFUDI GT GP BETTY FUTOKASS'.split()
     age, root = alder(title)
     if age is None or root in ('', 'EFUIT') or title in FAUX:
         return None, title
@@ -343,9 +345,12 @@ def check_name_unique(persons):
         raise Exception()
 
 
-def get_gfyear(regnskab, base=('Rasmus Villemoes', 2002, 'KASS')):
+def get_gfyear(regnskab, base=('Bjarke Skjernaa', 1999, 'KASS')):
     name, year, title = base
-    p = next(p for p in regnskab.personer if p.navn == name)
+    try:
+        p = next(p for p in regnskab.personer if p.navn == name)
+    except StopIteration:
+        return 2001
     age, title_ = alder(p.titel)
     if title_ != title:
         raise ValueError((p, title))
@@ -354,10 +359,22 @@ def get_gfyear(regnskab, base=('Rasmus Villemoes', 2002, 'KASS')):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('gitdir')
+    parser.add_argument('-g', '--git-dir')
+    parser.add_argument('-b', '--backup-dir')
     args = parser.parse_args()
+    data_sources = []
+    if args.git_dir:
+        data_sources.append(read_regnskab_revisions(args.git_dir))
+    if args.backup_dir:
+        data_sources.append(read_regnskab_backups(args.backup_dir))
+    if not data_sources:
+        parser.error("must specify at least one data source")
+    if len(data_sources) == 1:
+        data_source = data_sources[0]
+    else:
+        data_source = heapq.merge(*data_sources)
 
-    persons, regnskab_history = get_data(args.gitdir)
+    persons, regnskab_history = get_data(data_source)
     person_history = get_person_history(persons)
     persons.sort(key=lambda ps: (ps[-1][1], ps[-1][0]))
     # print('\n'.join('%s %s %s %s %s' %
@@ -490,10 +507,17 @@ def fix_names(iterable):
         yield time, Regnskab(personer, priser, config)
 
 
-def get_data(gitdir):
-    # regnskab_dat = read_regnskab_revisions(gitdir)
-    regnskab_dat = read_regnskab_backups(gitdir)
+def remove_duplicates(iterable):
+    prev = None
+    for t, r in iterable:
+        if r != prev:
+            yield t, r
+        prev = r
+
+
+def get_data(regnskab_dat):
     regnskab_dat = fix_names(regnskab_dat)
+    regnskab_dat = remove_duplicates(regnskab_dat)
 
     dead_leaves = []
     deleted_leaves = []
