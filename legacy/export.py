@@ -128,38 +128,6 @@ def fix_names(iterable):
         yield time, Regnskab(personer, priser, config)
 
 
-def merge_empty(iterable):
-    for time, (personer, priser, config) in iterable:
-        nonempty = [p for p in personer if any(p.total) or p.gaeld]
-        nonempty_navn = {p.navn for p in nonempty}
-        nonempty_email = {p.email for p in nonempty}
-        personer = [p for p in personer
-                    if any(p.total) or p.gaeld or
-                    (p.navn not in nonempty_navn and
-                     p.email not in nonempty_email)]
-        if personer:
-            yield time, Regnskab(personer, priser, config)
-
-
-def check_regnskab(iterable):
-    for time, r in iterable:
-        navn_count = collections.Counter(p.navn for p in r.personer
-                                         if any(p.total) or p.gaeld)
-        navn_dups = [k for k, v in navn_count.items() if v > 1]
-        if navn_dups:
-            for navn in navn_dups:
-                print(navn)
-                print('\n'.join(str(p) for p in r.personer if p.navn == navn))
-            raise ValueError(navn_dups)
-        email_count = collections.Counter(
-            p.email for p in r.personer
-            if (any(p.total) or p.gaeld) and p.email)
-        email_dups = [k for k, v in email_count.items() if v > 1]
-        if email_dups:
-            raise ValueError(email_dups)
-        yield time, r
-
-
 def match(old, new, attr):
     old_by_attr = {getattr(p, attr): p
                    for p in old}
@@ -464,8 +432,6 @@ def get_data(gitdir):
     # regnskab_dat = read_regnskab_revisions(gitdir)
     regnskab_dat = read_regnskab_backups(gitdir)
     regnskab_dat = fix_names(regnskab_dat)
-    # regnskab_dat = merge_empty(regnskab_dat)
-    # regnskab_dat = check_regnskab(regnskab_dat)
 
     dead_leaves = []
     deleted_leaves = []
