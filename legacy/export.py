@@ -89,6 +89,8 @@ def read_regnskab_backups(gitdir):
                    key=lambda f: f.name)
     dates = [re.match(pattern, f.name).group(1) for f in files]
     mtimes = [f.stat().st_mtime for f in files]
+    if mtimes != sorted(set(mtimes)):
+        raise ValueError("Duplicate/not sorted modification times")
     mtimes = [datetime.datetime.fromtimestamp(m) for m in mtimes]
     # expected_dates = [m.strftime('%y%m%d') for m in mtimes]
     # for f, a, b in zip(files, dates, expected_dates):
