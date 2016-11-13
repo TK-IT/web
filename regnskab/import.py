@@ -101,6 +101,12 @@ def get_payments(data, profiles):
                         time=time,
                         amount=-amount,
                         note='Andet'))
+        for name, amount in o['corrections'].items():
+            payments.append(
+                Payment(profile=profiles[name],
+                        time=time,
+                        amount=-amount,
+                        note='Korrigering'))
     return payments
 
 
