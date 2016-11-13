@@ -1,0 +1,22 @@
+{% extends "regnskab/base.html" %}
+{% block content %}
+<h1>Personer</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Navn</th>
+            <th>På krydslisten</th>
+            <th>Balance</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for person in object_list %}
+        <tr>
+            <td><a href="{% url 'profile_detail' pk=row.pk %}">{{ row.name }}</a></td>
+            <td>{{ row.status }}</td>
+            <td align=right>{{ row.balance }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
