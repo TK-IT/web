@@ -6,6 +6,7 @@ from regnskab.models import EmailTemplate, EmailBatch
 
 class SheetCreateForm(forms.Form):
     name = forms.CharField(max_length=200, required=False)
+    period = forms.IntegerField()
     start_date = forms.DateField()
     end_date = forms.DateField()
     kinds = forms.CharField(widget=forms.Textarea)

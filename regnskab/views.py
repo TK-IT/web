@@ -41,13 +41,15 @@ class SheetCreate(FormView):
             ('sodavand', vand_price),
             ('sodavandkasse', vandkasse_price),
         ]
-        return dict(kinds='\n'.join('%s %s' % x for x in kinds))
+        return dict(kinds='\n'.join('%s %s' % x for x in kinds),
+                    period=config.GFYEAR)
 
     def form_valid(self, form):
         data = form.cleaned_data
         s = Sheet(name=data['name'],
                   start_date=data['start_date'],
-                  end_date=data['end_date'])
+                  end_date=data['end_date'],
+                  period=data['period'])
         s.save()
         for i, kind in enumerate(data['kinds']):
             s.purchasekind_set.create(
