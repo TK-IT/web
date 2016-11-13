@@ -35,7 +35,7 @@ def main():
         except KeyError:
             continue
         aliases.append(
-            Alias(profile=p, period=None, root=o['alias'],
+            Alias(profile=p, period=o['period'], root=o['root'],
                   start_time=strptime(o['start_time']),
                   end_time=strptime(o['end_time'])))
     print("Create %s aliases" % len(aliases))
