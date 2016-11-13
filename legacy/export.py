@@ -427,12 +427,6 @@ def main():
         changes.extend(dict(
             time=times[i],
         ) for i in resets)
-        prev = {}
-        persons = by_time[time]
-        gf = gfyears[time]
-        if prev_gf != gf:
-            prev = {}
-        prev_gf = gf
 
     for person_idx, person_history in enumerate(persons):
         name = person_history[-1][0].navn
