@@ -13,7 +13,13 @@
     <tbody>
         {% for row in rows %}
         <tr>
-            <td>{{ row.date }}</td>
+            <td>
+                {% if row.sheet %}
+                <a class="sheet-link" href="{% url 'sheet' pk=row.sheet %}">{{ row.date }}</a>
+                {% else %}
+                {{ row.date }}
+                {% endif %}
+            </td>
             <td>{{ row.name }}</td>
             <td align=right>{{ row.amount }}</td>
             <td align=right>{{ row.balance }}</td>

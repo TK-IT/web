@@ -1,10 +1,9 @@
-import datetime
+import itertools
 from decimal import Decimal
 import json
 
 from django.db import models
 from django.db.models import F, Value
-from django.db.models.functions import Concat
 from django.utils import timezone
 from django.template.defaultfilters import floatformat
 from django.shortcuts import redirect, get_object_or_404
@@ -191,6 +190,11 @@ class ProfileList(TemplateView):
                 p.status = statuses[-1]
             else:
                 p.status = None
+        profiles.sort(
+            key=lambda p: (p.status is None,
+                           p.status and p.status.end_time is not None,
+                           p.name))
+
         context_data['object_list'] = profiles
         return context_data
 
@@ -209,8 +213,12 @@ class ProfileDetail(TemplateView):
         purchase_qs = purchase_qs.annotate(amount=F('kind__price') * F('count'))
         purchase_qs = purchase_qs.annotate(balance_change=F('amount'))
         purchase_qs = purchase_qs.annotate(date=F('row__sheet__end_date'))
-        purchase_qs = purchase_qs.values('date', 'count', 'kind__name', 'amount', 'balance_change')
+        purchase_qs = purchase_qs.annotate(sheet=F('row__sheet__pk'))
+        purchase_qs = purchase_qs.values(
+            'sheet', 'date', 'count', 'kind__name', 'amount', 'balance_change')
         purchases = list(purchase_qs)
+        for o in purchases:
+            o['name'] = '%s× %s' % (floatformat(o['count']), o['kind__name'])
 
         payment_qs = Payment.objects.all()
         payment_qs = payment_qs.filter(profile=profile)
@@ -218,18 +226,28 @@ class ProfileDetail(TemplateView):
         payment_qs = payment_qs.annotate(balance_change=-1 * F('amount'))
         payment_qs = payment_qs.values('time', 'name', 'amount', 'balance_change')
         payments = list(payment_qs)
+        for o in payments:
+            o['date'] = o['time'].date()
 
-        rows = payments + purchases
-        for row in rows:
-            if 'date' not in row:
-                row['date'] = row['time'].date()
-            if 'name' not in row:
-                row['name'] = '%gx %s' % (row['count'], row['kind__name'])
-            row['amount'] = floatformat(row['amount'], 2)
-        rows.sort(key=lambda x: x['date'])
+        row_data = payments + purchases
+
+        def key(x):
+            return (x['date'], 'sheet' in x, x.get('sheet'))
+
+        row_data.sort(key=key)
+        row_iter = itertools.groupby(row_data, key=key)
+        rows = []
         balance = Decimal()
-        for row in rows:
-            balance += row['balance_change']
-            row['balance'] = floatformat(balance, 2)
+        for (date, b, sheet), xs in row_iter:
+            xs = list(xs)
+            amount = sum(x['amount'] for x in xs)
+            balance += sum(x['balance_change'] for x in xs)
+            rows.append(dict(
+                date=date,
+                sheet=sheet,
+                name=', '.join(x['name'] for x in xs),
+                amount=floatformat(amount, 2),
+                balance=floatformat(balance, 2),
+            ))
         context_data['rows'] = rows
         return context_data

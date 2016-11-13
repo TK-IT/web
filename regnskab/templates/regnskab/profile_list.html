@@ -12,9 +12,10 @@
     <tbody>
         {% for person in object_list %}
         <tr>
-            <td><a href="{% url 'profile_detail' pk=row.pk %}">{{ row.name }}</a></td>
-            <td>{{ row.status }}</td>
-            <td align=right>{{ row.balance }}</td>
+            <td><a class="profile-link"
+                    href="{% url 'profile_detail' pk=person.pk %}">{{ person.name }}</a></td>
+            <td>{{ person.status.since }}</td>
+            <td align=right>{{ person.balance|floatformat:2 }}</td>
         </tr>
         {% endfor %}
     </tbody>
