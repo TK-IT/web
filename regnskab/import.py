@@ -131,7 +131,8 @@ def get_sheets(data, profiles):
     purchases = []
     for o in data:
         time = strptime(o['time'])
-        sheet = Sheet(start_date=time.date(), end_date=time.date())
+        sheet = Sheet(start_date=time.date(), end_date=time.date(),
+                      period=o['period'])
         sheets.append(sheet)
         kind_map = {}
         for i, kind in enumerate(o['kinds']):

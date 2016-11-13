@@ -522,6 +522,7 @@ def main():
                 corrections[name] = correction
         output.append(dict(
             time=time.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            period=gfyears[time],
             names=names,
             emails=emails,
             titles=titles,

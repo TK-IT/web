@@ -132,6 +132,7 @@ class Sheet(models.Model):
                             help_text='f.eks. HSTR, revy, matlabotanisk have')
     start_date = models.DateField()
     end_date = models.DateField()
+    period = models.IntegerField(verbose_name='Årgang')
 
     def rows(self):
         r = []
