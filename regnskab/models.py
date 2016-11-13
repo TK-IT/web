@@ -266,6 +266,7 @@ class EmailBatch(models.Model):
             raise ValidationError("template required to generate emails")
         payments = self.payment_set.all()
         sheets = self.sheet_set.all()
+        # TODO
 
 
 class Email(models.Model):
