@@ -5,6 +5,7 @@ import json
 from django.db import models
 from django.db.models import F, Value
 from django.db.models.functions import Concat
+from django.utils import timezone
 from django.template.defaultfilters import floatformat
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
@@ -183,7 +184,7 @@ class ProfileList(TemplateView):
         balances = compute_balance()
         for p in profiles:
             p.balance = balances.get(p.id)
-            now = datetime.datetime.now()
+            now = timezone.now()
             statuses = sorted(p.sheetstatus_set.all(),
                               key=lambda s: (s.end_time or now))
             if statuses:
