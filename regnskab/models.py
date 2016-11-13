@@ -58,7 +58,7 @@ class Title(models.Model):
 
     def input_title(self, gfyear=None):
         # The title as it would be typed
-        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str), root)
+        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str), self.root)
 
     def display_title_and_year(self, gfyear=None):
         return '%s (%02d/%02d)' % (self.display_title(gfyear),
@@ -106,7 +106,9 @@ class Alias(models.Model):
 
     def input_title(self, gfyear=None):
         # The title as it would be typed
-        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str), root)
+        if self.period is None:
+            return self.root
+        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str), self.root)
 
     class Meta:
         ordering = ['period', 'root']
