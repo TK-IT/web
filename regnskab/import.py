@@ -44,8 +44,17 @@ def save_all(objects, unique_attrs=None, only_new=False, bulk=False):
         if bulk:
             type(new[0]).objects.bulk_create(new)
         else:
-            for o in progress(new):
-                o.save()
+            if type(new[0]).objects.all().exists() or not unique_attrs:
+                for o in progress(new):
+                    o.save()
+            else:
+                # No objects exist in database,
+                # so we might just bulk insert them
+                # and retrieve the pks in bulk.
+                type(new[0]).objects.bulk_create(new)
+                pks = {key(o): o.id for o in type(new[0]).objects.all()}
+                for o in new:
+                    o.id = pks[key(o)]
     if only_new:
         return new
     else:
