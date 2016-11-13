@@ -108,16 +108,17 @@ class SheetRowUpdate(TemplateView):
             for title in p.title_set.all():
                 t_k = (in_current, TITLE_ORDER[title.kind], -title.period, title.root)
                 k = min(k, t_k)
-                t.append(title.input_title())
+                t.append(title.input_title(config.GFYEAR))
             for title in aliases.get(p.id, ()):
                 try:
-                    kind, root, period = parse_bestfu_alias(title.root, config.GFYEAR)
+                    kind, root, period = parse_bestfu_alias(
+                        title.input_title(config.GFYEAR), config.GFYEAR)
                 except ValueError:
                     pass
                 else:
                     t_k = (in_current, TITLE_ORDER[kind], -period, root)
                     k = min(k, t_k)
-                t.append(title.root)
+                t.append(title.input_title(config.GFYEAR))
             profiles.append(dict(titles=t, sort_key=k, name=p.name, id=p.pk))
         profiles.sort(key=lambda x: x['sort_key'])
         for i, x in enumerate(profiles):
