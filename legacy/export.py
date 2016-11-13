@@ -373,15 +373,13 @@ def main():
 
     persons, regnskab_history = get_data(data_source)
     by_time = get_person_history(persons)
-    all_names = sorted(by_time[max(by_time.keys())].keys())
+    all_times = sorted(by_time.keys())
+    # The set of people is monotonically increasing,
+    # so the latest regnskab has all the names.
+    all_names = sorted(by_time[all_times[-1]].keys())
     persons.sort(key=lambda ps: (ps[-1][1], ps[-1][0]))
-    # print('\n'.join('%s %s %s %s %s' %
-    #                 (ps[-1][1], ps[0][1],
-    #                  p.navn, p.aliaser, p.email)
-    #                 for ps in persons
-    #                 for p in [ps[-1][0]]))
     gfyears = {k: get_gfyear(r) for k, r in regnskab_history.items()}
-    gfyear_list = [gfyears[k] for k in sorted(regnskab_history.keys())]
+    gfyear_list = [gfyears[k] for k in all_times]
     if gfyear_list != sorted(gfyear_list):
         raise Exception("gfyear not sorted")
 
@@ -407,12 +405,34 @@ def main():
     #         if abs(gaeld - p2.gaeld) > 0.02:
     #             print("Difference too great")
 
-    resets = {}
+    def sub_all_persons(persons):
+        return {n: p.total - p.senest for n, p in persons.items()}
 
-    prev = {}
-    for time in sorted(by_time.keys()):
+    def allclose(a, b):
+        d = []
+        for n in set(a.keys()) | set(b.keys()):
+            x = a.get(n, Forbrug(0, 0, 0, 0, 0, 0))
+            y = b.get(n, Forbrug(0, 0, 0, 0, 0, 0))
+            d.append(abs(x - y))
+        return sum(d**2) < 1e-3
+
+    gfs = itertools.groupby(all_times, key=lambda t: gfyears[t])
+    changes = []
+    for gfyear, times in gfs:
+        times = list(times)
+        subs = [sub_all_persons(by_time[t]) for t in times]
+        resets = [i-1 for i in range(1, len(subs))
+                  if not allclose(subs[i-1], subs[i])]
+        print(gfyear, allclose(subs[0], {}), resets[0])
+        changes.extend(dict(
+            time=times[i],
+        ) for i in resets)
+        prev = {}
         persons = by_time[time]
-
+        gf = gfyears[time]
+        if prev_gf != gf:
+            prev = {}
+        prev_gf = gf
 
     for person_idx, person_history in enumerate(persons):
         name = person_history[-1][0].navn
