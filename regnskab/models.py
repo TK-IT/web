@@ -222,12 +222,10 @@ def compute_balance():
     purchase_qs = purchase_qs.annotate(amount=F('count') * F('kind__price'))
     purchase_qs = purchase_qs.values_list('profile_id', 'amount')
     for profile, amount in purchase_qs:
-        print(profile, amount)
         balance[profile] += amount
     payment_qs = Payment.objects.all()
     payment_qs = payment_qs.values_list('profile_id', 'amount')
     for profile, amount in payment_qs:
-        print(profile, -amount)
         balance[profile] -= amount
     return balance
 
