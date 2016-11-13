@@ -28,6 +28,7 @@ class Person(PersonBase):
 
 class Forbrug(ForbrugBase):
     FMT = '>fiiiff'
+    ZERO = object()
 
     def __add__(self, other):
         if type(self) != type(other):
@@ -35,6 +36,8 @@ class Forbrug(ForbrugBase):
         return type(self)(*[a+b for a, b in zip(self, other)])
 
     def __sub__(self, other):
+        if other is Forbrug.ZERO:
+            return self
         if type(self) != type(other):
             raise TypeError(type(other))
         return type(self)(*[a-b for a, b in zip(self, other)])

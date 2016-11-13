@@ -19,11 +19,21 @@ def progress(elements, n=None):
     if n is None:
         elements = list(elements)
         n = len(elements)
-    w = len(str(n))
+    progress.active += 1
+    progress.total += n
+    progress.w = len(str(progress.total))
     for i, x in enumerate(elements):
-        sys.stderr.write('\r\x1B[K(%s/%s) %s' % (str(i+1).rjust(w), n, x))
+        progress.current += 1
+        sys.stderr.write('\r\x1B[K(%s/%s) %s' %
+                         (str(progress.current).rjust(progress.w),
+                          progress.total, x))
         yield x
-    sys.stderr.write('\n')
+    progress.active -= 1
+    if not progress.active:
+        sys.stderr.write('\n')
+        progress.current = progress.total = 0
+
+progress.active = progress.current = progress.total = 0
 
 
 def read_regnskab_revisions_gitpython(gitdir):
@@ -345,9 +355,14 @@ def check_name_unique(persons):
         raise Exception()
 
 
-def get_gfyear(regnskab, base=('Bjarke Skjernaa', 1999, 'KASS')):
-    name, year, title = base
-    p = next(p for p in regnskab.personer if p.navn == name)
+def get_gfyear(regnskab,
+               base=(('Bjarke Skjernaa', 'Bjarke Skjer'), 1999, 'KASS')):
+    names, year, title = base
+    try:
+        p = next(p for p in regnskab.personer if p.navn in names)
+    except StopIteration:
+        print('\n'.join(sorted(p.navn for p in regnskab.personer)))
+        raise
     age, title_ = alder(p.titel)
     if title_ != title:
         raise ValueError((p, title))
@@ -414,60 +429,69 @@ def main():
             x = a.get(n, Forbrug(0, 0, 0, 0, 0, 0))
             y = b.get(n, Forbrug(0, 0, 0, 0, 0, 0))
             d.append(abs(x - y))
-        return sum(d**2) < 1e-3
+        return sum(v**2 for v in d) < 1e-3
+
+    def dict_minus(a, b):
+        # return {k: v - b.get(k, type(v).ZERO) for k, v in a.items()}
+        return {k: a[k] - v for k, v in b.items()}
 
     gfs = itertools.groupby(all_times, key=lambda t: gfyears[t])
-    changes = []
+    resets = []
     for gfyear, times in gfs:
         times = list(times)
         subs = [sub_all_persons(by_time[t]) for t in times]
-        resets = [i-1 for i in range(1, len(subs))
-                  if not allclose(subs[i-1], subs[i])]
-        print(gfyear, allclose(subs[0], {}), resets[0])
-        changes.extend(dict(
+        reset_index = [i-1 for i in range(1, len(subs))
+                       if not allclose(subs[i-1], subs[i])]
+        # subs[0] should be all zero
+        # reset_index[0] is the index of the last that's equal to index 0
+        if not reset_index:
+            print(gfyear, len(subs), subs[0])
+            continue
+        print(gfyear, allclose(subs[0], {}), reset_index[0])
+        forbrug_diff = [dict_minus(subs[reset_index[i]+1], subs[reset_index[i]])
+                        for i in range(len(reset_index))]
+        resets.extend(dict(
             time=times[i],
-        ) for i in resets)
+            forbrug_diff=f,
+        ) for i, f in zip(reset_index, forbrug_diff))
+        resets.append(dict(
+            time=times[-1],
+            forbrug_diff={name: person.senest
+                          for name, person in by_time[times[-1]].items()}))
 
-    for person_idx, person_history in enumerate(persons):
-        name = person_history[-1][0].navn
-        i = 0
-        gæld = 0
-        while i < len(person_history):
-            p, t = person_history[i]
-            if not any(p.senest):
-                # Everything was just reset and we do not have any data yet
-                i += 1
-                continue
-            d = p.total - p.senest
-            j = i+1
-            k = i
-            prev_senest = p.senest
-            while j < len(person_history):
-                p2 = person_history[j][0]
-                d2 = p2.total - p2.senest
-                if abs(d - d2) > 0.01:
-                    break
-                if abs(p2.senest - prev_senest) > 0.01:
-                    k = j
-                prev_senest = p2.senest
-                j += 1
-            # "senest" was reset at time t corresponding to index i
-            resets.setdefault(t, []).append((person_idx, i, k, j))
-            i = j
-
-    email_batches = []
-    for t in sorted(resets):
-        freeze_time = max(
-            persons[person_idx][person_freeze][1]
-            for person_idx, i, person_freeze, j in resets[t])
-        email_persons = [(person_idx, persons[person_idx][k][0])
-                         for person_idx, i, k, j in resets[t]]
-        email_batches.append((freeze_time, email_persons))
+    resets[0]['gæld_diff'] = {name: person.gaeld
+                              for name, person in
+                              by_time[resets[0]['time']].items()}
+    for i in range(1, len(resets)):
+        prev_time = resets[i-1]['time']
+        time = resets[i]['time']
+        gæld_diff = {}
+        for name, person in by_time[time].items():
+            try:
+                prev_person = by_time[prev_time][name]
+            except KeyError:
+                prev = 0
+            else:
+                prev = prev_person.gaeld
+            gæld_diff[name] = person.gaeld - prev
+            forbrug = resets[i]['forbrug_diff'][name]
+            if any(forbrug):
+                purchases = get_amount(regnskab_history[time].priser,
+                                       forbrug)
+                expected_diff = purchases - forbrug.betalt
+                # print('%s\t%s\t%.2f\t%s\t%.2f\t%.2f\t%.2f\t%.2f' %
+                #       (gfyears[time], time, expected_diff-gæld_diff[name] + 0.001,
+                #        name, person.gaeld, prev, gæld_diff[name],
+                #        expected_diff))
+        resets[i]['gæld_diff'] = gæld_diff
 
     KINDS = ['oel', 'xmas', 'vand', 'kasser']
     output = []
-    for freeze_time, email_persons in email_batches:
-        prices = regnskab_history[freeze_time].priser
+    for o in resets:
+        time = o['time']
+        forbrug = o['forbrug_diff']
+        gæld = o['gæld_diff']
+        prices = regnskab_history[time].priser
         purchase_kinds = [
             dict(key=k, price=getattr(prices, k))
             for k in KINDS]
@@ -477,29 +501,36 @@ def main():
         emails = {}
         titles = {}
         others = {}
-        for idx, p in email_persons:
-            name = persons[idx][-1][0].navn
+        corrections = {}
+        for name in forbrug.keys():
+            p = by_time[time][name]
             names[name] = p.navn
             emails[name] = p.email
             if p.titel and not p.titel.startswith('-'):
                 titles[name] = p.titel.split()[0]
             if p.senest.betalt:
                 payments[name] = p.senest.betalt
-            if p.senest.andet:
-                others[name] = p.senest.andet
             for k in KINDS:
-                a = getattr(p.senest, k)
+                a = getattr(forbrug[name], k)
                 if a:
                     purchases.setdefault(name, {})[k] = a
+            if p.senest.andet:
+                others[name] = p.senest.andet
+            purchase_amount = get_amount(prices, forbrug[name])
+            correction = gæld[name] - (purchase_amount - p.senest.betalt)
+            if abs(correction) > 0.001:
+                corrections[name] = correction
         output.append(dict(
-            time=freeze_time.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            time=time.strftime('%Y-%m-%dT%H:%M:%S%z'),
             names=names,
             emails=emails,
             titles=titles,
             kinds=purchase_kinds,
             payments=payments,
             purchases=purchases,
-            others=others))
+            others=others,
+            corrections=corrections,
+        ))
 
     with open('regnskab-history.json', 'w') as fp:
         json.dump(output, fp, indent=2)
@@ -535,6 +566,7 @@ def remove_duplicates(iterable):
 def get_data(regnskab_dat):
     regnskab_dat = fix_names(regnskab_dat)
     regnskab_dat = remove_duplicates(regnskab_dat)
+    # regnskab_dat = ((t, r) for t, r in regnskab_dat for o in [get_gfyear(r)])
 
     dead_leaves = []
     deleted_leaves = []
