@@ -1,6 +1,6 @@
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -13,7 +13,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function prefix_to_age(p) {
     var v = { 'K': -1, 'G': 1, 'B': 2, 'O': 3, 'T': 1 };
     var pattern = /([KGBOT])([0-9]*)/g;
-    var mo = undefined;
+    var mo = void 0;
     var age = 0;
     while ((mo = pattern.exec(p)) !== null) {
         var c = mo[2] === '' ? 1 : parseInt(mo[2]);
@@ -195,7 +195,7 @@ function filter_persons(persons, query) {
     return r;
 }
 
-var filter_persons_cached = (function () {
+var filter_persons_cached = function () {
     var cached_persons = null;
     var results = null;
     return function filter_persons_cached(persons, query) {
@@ -206,15 +206,15 @@ var filter_persons_cached = (function () {
         if (!(query in results)) results[query] = filter_persons(persons, query);
         return results[query];
     };
-})();
+}();
 
-var Cross = (function (_React$PureComponent) {
+var Cross = function (_React$PureComponent) {
     _inherits(Cross, _React$PureComponent);
 
     function Cross() {
         _classCallCheck(this, Cross);
 
-        return _possibleConstructorReturn(this, Object.getPrototypeOf(Cross).apply(this, arguments));
+        return _possibleConstructorReturn(this, (Cross.__proto__ || Object.getPrototypeOf(Cross)).apply(this, arguments));
     }
 
     _createClass(Cross, [{
@@ -229,15 +229,15 @@ var Cross = (function (_React$PureComponent) {
     }]);
 
     return Cross;
-})(React.PureComponent);
+}(React.PureComponent);
 
-var Crosses = (function (_React$PureComponent2) {
+var Crosses = function (_React$PureComponent2) {
     _inherits(Crosses, _React$PureComponent2);
 
     function Crosses() {
         _classCallCheck(this, Crosses);
 
-        return _possibleConstructorReturn(this, Object.getPrototypeOf(Crosses).apply(this, arguments));
+        return _possibleConstructorReturn(this, (Crosses.__proto__ || Object.getPrototypeOf(Crosses)).apply(this, arguments));
     }
 
     _createClass(Crosses, [{
@@ -255,13 +255,13 @@ var Crosses = (function (_React$PureComponent2) {
     }]);
 
     return Crosses;
-})(React.PureComponent);
+}(React.PureComponent);
 
-var ColumnEntry = (function (_React$Component) {
+var ColumnEntry = function (_React$Component) {
     _inherits(ColumnEntry, _React$Component);
 
     function ColumnEntry() {
-        var _Object$getPrototypeO;
+        var _ref;
 
         var _temp, _this3, _ret4;
 
@@ -271,7 +271,7 @@ var ColumnEntry = (function (_React$Component) {
             args[_key] = arguments[_key];
         }
 
-        return _ret4 = (_temp = (_this3 = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(ColumnEntry)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this3), _this3.state = {
+        return _ret4 = (_temp = (_this3 = _possibleConstructorReturn(this, (_ref = ColumnEntry.__proto__ || Object.getPrototypeOf(ColumnEntry)).call.apply(_ref, [this].concat(args))), _this3), _this3.state = {
             inputValue: ''
         }, _temp), _possibleConstructorReturn(_this3, _ret4);
     }
@@ -324,15 +324,15 @@ var ColumnEntry = (function (_React$Component) {
     }]);
 
     return ColumnEntry;
-})(React.Component);
+}(React.Component);
 
-var PersonChoice = (function (_React$Component2) {
+var PersonChoice = function (_React$Component2) {
     _inherits(PersonChoice, _React$Component2);
 
     function PersonChoice() {
         _classCallCheck(this, PersonChoice);
 
-        return _possibleConstructorReturn(this, Object.getPrototypeOf(PersonChoice).apply(this, arguments));
+        return _possibleConstructorReturn(this, (PersonChoice.__proto__ || Object.getPrototypeOf(PersonChoice)).apply(this, arguments));
     }
 
     _createClass(PersonChoice, [{
@@ -349,9 +349,9 @@ var PersonChoice = (function (_React$Component2) {
         value: function render() {
             var _this6 = this;
 
-            var options = this.props.choices.map(function (_ref) {
-                var display = _ref.display;
-                var person = _ref.person;
+            var options = this.props.choices.map(function (_ref2) {
+                var display = _ref2.display;
+                var person = _ref2.person;
                 return React.createElement(
                     'option',
                     { value: person.id, key: person.id },
@@ -372,15 +372,15 @@ var PersonChoice = (function (_React$Component2) {
     }]);
 
     return PersonChoice;
-})(React.Component);
+}(React.Component);
 
-var Name = (function (_React$Component3) {
+var Name = function (_React$Component3) {
     _inherits(Name, _React$Component3);
 
     function Name() {
         _classCallCheck(this, Name);
 
-        return _possibleConstructorReturn(this, Object.getPrototypeOf(Name).apply(this, arguments));
+        return _possibleConstructorReturn(this, (Name.__proto__ || Object.getPrototypeOf(Name)).apply(this, arguments));
     }
 
     _createClass(Name, [{
@@ -423,23 +423,24 @@ var Name = (function (_React$Component3) {
     }]);
 
     return Name;
-})(React.Component);
+}(React.Component);
 
-var SheetRow = (function (_React$Component4) {
+var SheetRow = function (_React$Component4) {
     _inherits(SheetRow, _React$Component4);
 
     function SheetRow() {
         _classCallCheck(this, SheetRow);
 
-        return _possibleConstructorReturn(this, Object.getPrototypeOf(SheetRow).apply(this, arguments));
+        return _possibleConstructorReturn(this, (SheetRow.__proto__ || Object.getPrototypeOf(SheetRow)).apply(this, arguments));
     }
 
     _createClass(SheetRow, [{
         key: 'shouldComponentUpdate',
         value: function shouldComponentUpdate(nextProps, nextState) {
-            var b = !(this.props.nameValue === nextProps.nameValue && this.props.personValue === nextProps.personValue);
-            console.log(b);
-            return b;
+            if (this.props.nameValue !== nextProps.nameValue || this.props.personValue !== nextProps.personValue) return true;
+            for (var i = 0; i < nextProps.columns.length; ++i) {
+                if (nextProps.columns[i] !== this.props.columns[i]) return true;
+            }return false;
         }
     }, {
         key: 'render',
@@ -467,7 +468,7 @@ var SheetRow = (function (_React$Component4) {
     }]);
 
     return SheetRow;
-})(React.Component);
+}(React.Component);
 
 function load_form_state() {
     var field = document.getElementById('tk_rows');
@@ -481,11 +482,11 @@ function save_form_state(o) {
     field.value = JSON.stringify(o);
 }
 
-var Sheet = (function (_React$Component5) {
+var Sheet = function (_React$Component5) {
     _inherits(Sheet, _React$Component5);
 
     function Sheet() {
-        var _Object$getPrototypeO2;
+        var _ref3;
 
         var _temp2, _this11, _ret5;
 
@@ -495,7 +496,7 @@ var Sheet = (function (_React$Component5) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret5 = (_temp2 = (_this11 = _possibleConstructorReturn(this, (_Object$getPrototypeO2 = Object.getPrototypeOf(Sheet)).call.apply(_Object$getPrototypeO2, [this].concat(args))), _this11), _this11.state = {
+        return _ret5 = (_temp2 = (_this11 = _possibleConstructorReturn(this, (_ref3 = Sheet.__proto__ || Object.getPrototypeOf(Sheet)).call.apply(_ref3, [this].concat(args))), _this11), _this11.state = {
             rows: _this11.get_initial_rows()
         }, _temp2), _possibleConstructorReturn(_this11, _ret5);
     }
@@ -504,7 +505,7 @@ var Sheet = (function (_React$Component5) {
         key: 'get_initial_rows',
         value: function get_initial_rows() {
             var rows = load_form_state();
-            if (rows.length === 0 || rows[rows.length - 1] !== this.empty_row()) rows.push(this.empty_row());
+            if (rows.length === 0 || rows[rows.length - 1].name !== '') rows.push(this.empty_row());
             return rows;
         }
     }, {
@@ -516,6 +517,7 @@ var Sheet = (function (_React$Component5) {
     }, {
         key: 'onChangeCell',
         value: function onChangeCell(i, j, v) {
+            this.state.rows[i].counts = [].slice.call(this.state.rows[i].counts);
             this.state.rows[i].counts[j] = v;
             if (i === this.state.rows.length - 1) this.state.rows.push(this.empty_row());
             save_form_state(this.state.rows);
@@ -604,15 +606,15 @@ var Sheet = (function (_React$Component5) {
     }]);
 
     return Sheet;
-})(React.Component);
+}(React.Component);
 
-var Main = (function (_React$Component6) {
+var Main = function (_React$Component6) {
     _inherits(Main, _React$Component6);
 
     function Main() {
         _classCallCheck(this, Main);
 
-        return _possibleConstructorReturn(this, Object.getPrototypeOf(Main).apply(this, arguments));
+        return _possibleConstructorReturn(this, (Main.__proto__ || Object.getPrototypeOf(Main)).apply(this, arguments));
     }
 
     _createClass(Main, [{
@@ -624,7 +626,7 @@ var Main = (function (_React$Component6) {
     }]);
 
     return Main;
-})(React.Component);
+}(React.Component);
 
 function init_react() {
     var container = document.getElementById('sheet-container');
