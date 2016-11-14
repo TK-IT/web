@@ -210,7 +210,7 @@ class Profile(models.Model):
                                    verbose_name="Postnr.")
     town = models.CharField(max_length=25, blank=True, verbose_name="By")
     country = models.CharField(max_length=50, blank=True, verbose_name="Land")
-    gone = models.BooleanField(blank=True, verbose_name="Afdød")
+    gone = models.BooleanField(blank=True, verbose_name="Afdød", default=False)
     phone_number = models.CharField(max_length=20, blank=True,
                                     verbose_name="Telefonnr.")
     note = models.TextField(blank=True, verbose_name="Note")
