@@ -60,7 +60,7 @@ MIDDLEWARE_CLASSES = (
 #     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 # ]
 
-ROOT_URLCONF = 'regnskab.urls'
+ROOT_URLCONF = 'regnskabsite.urls'
 
 TEMPLATES = [
     {
@@ -78,7 +78,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'regnskab.wsgi.application'
+WSGI_APPLICATION = 'regnskabsite.wsgi.application'
 
 
 # Database

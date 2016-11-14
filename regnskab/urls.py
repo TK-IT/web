@@ -14,7 +14,6 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url
-from django.contrib import admin
 
 from regnskab.views import (
     SheetCreate, SheetDetail, SheetRowUpdate,
@@ -24,7 +23,6 @@ from regnskab.views import (
 )
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
     url(r'^sheet/new/$', SheetCreate.as_view(), name='sheet_create'),
     url(r'^sheet/(?P<pk>\d+)/$', SheetDetail.as_view(), name='sheet'),
     url(r'^sheet/(?P<pk>\d+)/edit/$', SheetRowUpdate.as_view(), name='sheet_update'),
