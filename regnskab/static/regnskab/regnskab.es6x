@@ -270,6 +270,8 @@ class Sheet extends React.Component {
     }
 
     onChangeCell(i, j, v) {
+        this.state.rows[i].counts = [].slice.call(
+            this.state.rows[i].counts);
         this.state.rows[i].counts[j] = v;
         if (i === this.state.rows.length-1) this.state.rows.push(this.empty_row());
         save_form_state(this.state.rows);
