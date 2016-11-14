@@ -2,6 +2,7 @@ import itertools
 from decimal import Decimal
 import json
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Value
 from django.utils import timezone
@@ -85,10 +86,7 @@ class SheetRowUpdate(TemplateView):
     def get_sheet(self):
         return get_object_or_404(Sheet.objects, pk=self.kwargs['pk'])
 
-    def get_context_data(self, **kwargs):
-        context_data = super(SheetRowUpdate, self).get_context_data(**kwargs)
-        context_data['sheet'] = self.get_sheet()
-
+    def get_profiles(self):
         current_qs = SheetStatus.objects.filter(end_time=None)
         current = set(current_qs.values_list('profile_id', flat=True))
         profiles_qs = Profile.objects.all()
@@ -123,9 +121,120 @@ class SheetRowUpdate(TemplateView):
         profiles.sort(key=lambda x: x['sort_key'])
         for i, x in enumerate(profiles):
             x['sort_key'] = i
+        return profiles
+
+    def get_context_data(self, **kwargs):
+        context_data = super(SheetRowUpdate, self).get_context_data(**kwargs)
+        sheet = context_data['sheet'] = self.get_sheet()
+        profiles = self.get_profiles()
         context_data['profiles_json'] = json.dumps(profiles, indent=2)
+        row_objects = sheet.rows()
+        row_data = []
+        for r in row_objects:
+            counts = []
+            for k in r['kinds']:
+                counts.append(float(k.count) if k.id else None)
+
+            row_data.append(dict(
+                profile_id=r['profile'].id,
+                name=r['name'],
+                counts=counts,
+            ))
+        context_data['rows_json'] = json.dumps(row_data, indent=2)
 
         return context_data
+
+    def post_invalid(self, request, message):
+        return self.render_to_response(
+            self.get_context_data(error=message))
+
+    def clean(self, data_json):
+        sheet = self.get_sheet()
+        kinds = list(sheet.purchasekind_set.all())
+        try:
+            row_data = json.loads(data_json)
+        except Exception as exn:
+            raise ValidationError(str(exn))
+
+        KEYS = {'profile_id', 'name', 'counts'}
+        for row in row_data:
+            if set(row.keys()) != KEYS:
+                raise ValidationError("Invalid keys %s" % (set(row.keys()),))
+            counts = row['counts']
+            if not isinstance(counts, list):
+                raise ValidationError("Wrong type of counts %s" % (counts,))
+            if len(counts) != len(kinds):
+                raise ValidationError("Wrong number of counts %s" % (counts,))
+            if any(c is not None for c in counts):
+                if not row['name']:
+                    raise ValidationError("Name must not be empty")
+                if not row['profile_id']:
+                    raise ValidationError("Unknown name/profile")
+
+        profile_ids = set(row['profile_id'] for row in row_data
+                          if row['profile_id'] is not None)
+        profiles = {
+            p.id: p for p in Profile.objects.filter(id__in=sorted(profile_ids))
+        }
+        missing = profile_ids - set(profiles.keys())
+        if missing:
+            raise ValidationError("Unknown profile IDs %s" % (missing,))
+        return [
+            dict(profile=profiles[row['profile_id']],
+                 name=row['name'],
+                 position=i + 1,
+                 kinds=[Purchase(kind=kind, count=c or 0)
+                        for kind, c in zip(kinds, row['counts'])])
+            for i, row in enumerate(row_data)
+            if any(c is not None for c in row['counts'])
+        ]
+
+    def save_rows(self, rows):
+        def data(r):
+            return (r['profile'].id, r['name'], r['position'],
+                    [(p.kind_id, p.count) for p in r['kinds']])
+
+        sheet = self.get_sheet()
+        existing = sheet.rows()
+
+        delete = []
+        save = []
+
+        for r_new, r_old in zip(rows, existing):
+            if data(r_new) != data(r_old):
+                delete.append(r_old)
+                save.append(r_new)
+        delete.extend(existing[len(rows):])
+        save.extend(rows[len(existing):])
+
+        save_rows = []
+        save_purchases = []
+        for o in save:
+            save_rows.append(SheetRow(
+                sheet=sheet, profile=o['profile'],
+                name=o['name'], position=o['position']))
+            for c in o['kinds']:
+                if c.count:
+                    c.row = save_rows[-1]
+                    save_purchases.append(c)
+
+        # print("Create %s, delete %s" % (len(save_rows), len(delete)))
+        delete_ids = set(d['id'] for d in delete if d['id'])
+        SheetRow.objects.filter(id__in=delete_ids).delete()
+        for o in save_rows:
+            o.save()
+        for o in save_purchases:
+            o.row = o.row  # Update o.row_id
+        Purchase.objects.bulk_create(save_purchases)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            row_objects = self.clean(request.POST['data'])
+        except ValidationError as exn:
+            return self.post_invalid(request, str(exn))
+        self.save_rows(row_objects)
+        return self.render_to_response(
+            self.get_context_data(saved=True))
 
 
 class EmailTemplateList(ListView):

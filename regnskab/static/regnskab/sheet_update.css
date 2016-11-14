@@ -17,7 +17,9 @@
 }
 .crosses > .cross {
 	height: 20px;
-	width: 20px;
+	width: 15px;
+	text-align: center;
+	line-height: 20px;
 }
 .crosses > .count {
 	position: absolute;
@@ -39,8 +41,8 @@
 }
 .sheetrow > .summary { width: 30px; }
 .sheetrow > .name { width: 200px; }
-.sheetrow > .column { position: relative; border-left: 3px solid #333; }
-.sheetrow > .column,
+.sheetrow > .column { position: relative; border-left: 3px solid #333; box-sizing: padding-box; }
+.sheetrow.sheetrow-header > .column,
 .sheetrow .column-entry { padding-left: 10px; }
 .sheetrow .column-entry,
 .sheetrow .name-entry,

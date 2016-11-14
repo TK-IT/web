@@ -13,36 +13,13 @@ href="{% static 'regnskab/sheet_update.css' %}" />
 {% block content %}
 <h1>{{ sheet }}</h1>
 
-<div id="sheet-container"></div>
+{% if saved %}<p class="success-message">Krydslisten er gemt!</p>{% endif %}
 
-<table>
-<thead>
-<tr>
-<th></th>
-<th>Navn</th>
-{% for kind in sheet.purchasekind_set.all %}
-<th>{{ kind.name }}</th>
-{% endfor %}
-</tr>
-</thead>
-<tbody>
-{% for row in sheet.rows %}
-<tr>
-<td>
-{% for kind in row.kinds %}{{ kind.count|floatformat }}
-{% endfor %}
-</td>
-<td>{{ row.name|default:row.profile }}</td>
-{% for kind in row.kinds %}
-<td>
-<span class="crosses column-{{ kind.kind.position }}">
-{% for _ in kind.counter %}<span class="cross">&times;</span>{% endfor %}
-{% if kind.count %}<span class="count">{{ kind.count|floatformat }}</span>{% endif %}
-</span>
-</td>
-{% endfor %}
-</tr>
-{% endfor %}
-</tbody>
-</table>
+{% if error %}<p>Der er sket en fejl. {{ error }}</p>{% endif %}
+
+<form method="post">{% csrf_token %}
+<input type="hidden" name="data" id="tk_rows" value="{{ rows_json }}" />
+<div id="sheet-container"></div>
+<input type="submit" value="Gem" />
+</form>
 {% endblock %}

@@ -49,11 +49,6 @@ function make_utility_function(query) {
 
     // `filters` is a list of functions used to determine if query matches title.
     let filters = [];
-    if (mo_best) {
-        let prefix = age_to_prefix(prefix_to_age(mo_best[1]));
-        let best_search = best_map[mo_best[2].charAt(0)];
-        filters.push(t => (t === prefix + best_search));
-    }
     if (mo_fu) {
         let fu_search = 'FU' + mo_fu[2];
         if (mo_fu[1]) {
@@ -64,6 +59,11 @@ function make_utility_function(query) {
             // Query has no TK prefix => suffix search
             filters.push(t => (t.substring(t.length-4, t.length) === fu_search));
         }
+    }
+    if (mo_best) {
+        let prefix = age_to_prefix(prefix_to_age(mo_best[1]));
+        let best_search = best_map[mo_best[2].charAt(0)];
+        filters.push(t => (t === prefix + best_search));
     }
     // Fallback: case sensitive search in title
     filters.push(t => (t.indexOf(query) !== -1));
@@ -138,8 +138,8 @@ class ColumnEntry extends React.Component {
     getInputValue() {
         let v = this.props.value;
         if (v === null) return '';
-        let st = this.state.inputValue;
-        if (parseFloat(st) === v) { return st; }
+        let st = this.state.inputValue.replace(/,/g, '.');
+        if (parseFloat(st) === v) { return this.state.inputValue; }
         else { return ''+v; }
     }
     onChange(s) {
@@ -147,8 +147,9 @@ class ColumnEntry extends React.Component {
             this.setState({inputValue: ''});
             this.props.onChange(null);
         }
-        if (!/\d+\.?\d*/.exec(s)) return;
-        let v = parseFloat(s);
+        let st = s.replace(/,/g, '.');
+        if (!/\d+\.?\d*/.exec(st)) return;
+        let v = parseFloat(st);
         this.setState({inputValue: s});
         this.props.onChange(v);
     }
@@ -216,37 +217,63 @@ class SheetRow extends React.Component {
     }
 }
 
+function load_form_state() {
+    let field = document.getElementById('tk_rows');
+    if (field.value === '') return [];
+    var o = JSON.parse(field.value);
+    return o;
+}
+
+function save_form_state(o) {
+    let field = document.getElementById('tk_rows');
+    field.value = JSON.stringify(o);
+}
+
 class Sheet extends React.Component {
     state = {
-        rows: [this.empty_row()]
+        rows: this.get_initial_rows()
+    }
+
+    get_initial_rows() {
+        let rows = load_form_state();
+        if (rows.length === 0 || rows[rows.length-1] !== this.empty_row())
+            rows.push(this.empty_row());
+        return rows;
     }
 
     empty_row() {
-        return {nameValue: '', personValue: null, columns: [null, null, null, null, null, null]};
+        return {name: '', profile_id: null,
+                counts: [null, null, null, null, null, null]};
     }
 
     onChangeCell(i, j, v) {
-        this.state.rows[i].columns[j] = v;
+        this.state.rows[i].counts[j] = v;
         if (i === this.state.rows.length-1) this.state.rows.push(this.empty_row());
+        save_form_state(this.state.rows);
         this.setState({});
     }
 
     onChangeName(i, p, n) {
-        this.state.rows[i].nameValue = n;
-        this.state.rows[i].personValue = p;
+        this.state.rows[i].name = n;
+        this.state.rows[i].profile_id = p;
         if (i === this.state.rows.length-1) this.state.rows.push(this.empty_row());
+        save_form_state(this.state.rows);
         this.setState({});
     }
 
     render() {
         let rows = [];
+        let counts = [0, 0, 0, 0, 0, 0];
         for (let i = 0; i < this.state.rows.length; ++i) {
             let data = this.state.rows[i];
+            for (let j = 0; j < counts.length; ++j)
+                if (data.counts[j] !== null)
+                    counts[j] += data.counts[j];
             rows.push(<SheetRow key={i}
                 persons={this.props.persons}
-                columns={data.columns}
-                nameValue={data.nameValue}
-                personValue={data.personValue}
+                columns={data.counts}
+                nameValue={data.name}
+                personValue={data.profile_id}
                 onChange={this.onChangeCell.bind(this, i)}
                 onChangeName={this.onChangeName.bind(this, i)} />);
         }
@@ -254,12 +281,12 @@ class Sheet extends React.Component {
             <div className="sheetrow sheetrow-header">
                 <div className="summary"></div>
                 <div className="name"></div>
-                <div className="column column-1">Øl</div>
-                <div className="column column-1ks">ks</div>
-                <div className="column column-2">Guld</div>
-                <div className="column column-2ks">ks</div>
-                <div className="column column-3">Vand</div>
-                <div className="column column-3ks">ks</div>
+                <div className="column column-1">Øl ({counts[0]})</div>
+                <div className="column column-1ks">ks ({counts[1]})</div>
+                <div className="column column-2">Guld ({counts[2]})</div>
+                <div className="column column-2ks">ks ({counts[3]})</div>
+                <div className="column column-3">Vand ({counts[4]})</div>
+                <div className="column column-3ks">ks ({counts[5]})</div>
             </div>
             {rows}
         </div>;

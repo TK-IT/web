@@ -167,8 +167,9 @@ class Sheet(models.Model):
                 else:
                     p.counter = None
             r.append(dict(
+                id=row.id,
                 profile=row.profile,
-                position=row.position,
+                position=row.position,  # needed?
                 name=row.name,
                 kinds=purchase_list,
             ))
