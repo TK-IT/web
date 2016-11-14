@@ -72,14 +72,25 @@ function make_utility_function(query) {
     var re_best = new RegExp('^(' + tk_prefix + '|)(' + best_prefix + ')$');
     // Regex matching optional TK prefix followed by FU title.
     var re_fu = new RegExp('^(?:(' + tk_prefix + '|)FU)?(' + fu_two_letters + ')$');
+    // Regex matching optional TK prefix followed by FUAN.
+    var re_fuan = new RegExp('^(' + tk_prefix + '|)AN$');
 
     // Does the query case insensitively match BEST or FU title?
     var q_upper = query.toUpperCase();
     var mo_best = re_best.exec(q_upper);
     var mo_fu = re_fu.exec(q_upper);
+    var mo_fuan = re_fuan.exec(q_upper);
 
     // `filters` is a list of functions used to determine if query matches title.
     var filters = [];
+    if (mo_fuan) {
+        (function () {
+            var prefix = age_to_prefix(prefix_to_age(mo_fuan[1]));
+            filters.push(function (t) {
+                return t === prefix + 'FUAN';
+            });
+        })();
+    }
     if (mo_fu) {
         (function () {
             var fu_search = 'FU' + mo_fu[2];
@@ -263,7 +274,7 @@ var ColumnEntry = function (_React$Component) {
     function ColumnEntry() {
         var _ref;
 
-        var _temp, _this3, _ret4;
+        var _temp, _this3, _ret5;
 
         _classCallCheck(this, ColumnEntry);
 
@@ -271,9 +282,9 @@ var ColumnEntry = function (_React$Component) {
             args[_key] = arguments[_key];
         }
 
-        return _ret4 = (_temp = (_this3 = _possibleConstructorReturn(this, (_ref = ColumnEntry.__proto__ || Object.getPrototypeOf(ColumnEntry)).call.apply(_ref, [this].concat(args))), _this3), _this3.state = {
+        return _ret5 = (_temp = (_this3 = _possibleConstructorReturn(this, (_ref = ColumnEntry.__proto__ || Object.getPrototypeOf(ColumnEntry)).call.apply(_ref, [this].concat(args))), _this3), _this3.state = {
             inputValue: ''
-        }, _temp), _possibleConstructorReturn(_this3, _ret4);
+        }, _temp), _possibleConstructorReturn(_this3, _ret5);
     }
 
     _createClass(ColumnEntry, [{
@@ -458,7 +469,6 @@ var SheetRow = function (_React$Component4) {
             return React.createElement(
                 'div',
                 { className: 'sheetrow' },
-                React.createElement('div', { className: 'summary' }),
                 React.createElement(Name, { persons: this.props.persons, nameValue: this.props.nameValue,
                     personValue: this.props.personValue,
                     onChange: this.props.onChangeName }),
@@ -488,7 +498,7 @@ var Sheet = function (_React$Component5) {
     function Sheet() {
         var _ref3;
 
-        var _temp2, _this11, _ret5;
+        var _temp2, _this11, _ret6;
 
         _classCallCheck(this, Sheet);
 
@@ -496,9 +506,9 @@ var Sheet = function (_React$Component5) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret5 = (_temp2 = (_this11 = _possibleConstructorReturn(this, (_ref3 = Sheet.__proto__ || Object.getPrototypeOf(Sheet)).call.apply(_ref3, [this].concat(args))), _this11), _this11.state = {
+        return _ret6 = (_temp2 = (_this11 = _possibleConstructorReturn(this, (_ref3 = Sheet.__proto__ || Object.getPrototypeOf(Sheet)).call.apply(_ref3, [this].concat(args))), _this11), _this11.state = {
             rows: _this11.get_initial_rows()
-        }, _temp2), _possibleConstructorReturn(_this11, _ret5);
+        }, _temp2), _possibleConstructorReturn(_this11, _ret6);
     }
 
     _createClass(Sheet, [{
@@ -555,7 +565,6 @@ var Sheet = function (_React$Component5) {
                 React.createElement(
                     'div',
                     { className: 'sheetrow sheetrow-header' },
-                    React.createElement('div', { className: 'summary' }),
                     React.createElement('div', { className: 'name' }),
                     React.createElement(
                         'div',
