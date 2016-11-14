@@ -93,7 +93,7 @@ class Title(models.Model):
 class Alias(models.Model):
     profile = models.ForeignKey(Profile)
     period = models.IntegerField(blank=True, null=True, verbose_name='Årgang')
-    root = models.CharField(max_length=10, verbose_name='Titel')
+    root = models.CharField(max_length=200, verbose_name='Titel')
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
