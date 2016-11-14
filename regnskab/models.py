@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F
+from django.contrib.auth.models import User
 from regnskab import config
 from tkweb.apps.idm.models import (
     tk_prefix, parse_bestfu_alias,
@@ -28,6 +29,9 @@ class SheetStatus(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                   null=True, blank=False)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     def since(self):
         if self.end_time:
@@ -92,6 +96,9 @@ class Alias(models.Model):
     root = models.CharField(max_length=10, verbose_name='Titel')
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                   null=True, blank=False)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     def age(self, gfyear=None):
         if gfyear is None:
@@ -124,6 +131,9 @@ class Payment(models.Model):
     time = models.DateTimeField()
     amount = models.DecimalField(max_digits=9, decimal_places=2)
     note = models.CharField(max_length=255, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                   null=True, blank=False)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return '%.2f kr.' % self.amount
@@ -135,6 +145,9 @@ class Sheet(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     period = models.IntegerField(verbose_name='Årgang')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                   null=True, blank=False)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     def rows(self):
         r = []
@@ -240,8 +253,10 @@ class EmailTemplate(models.Model):
     name = models.CharField(max_length=255, blank=True)
     subject = models.TextField(blank=False)
     body = models.TextField(blank=False)
-    created_time = models.DateTimeField(auto_now_add=True)
     format = models.CharField(max_length=10, choices=FORMAT)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                   null=True, blank=False)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name or str(self.created_time)
@@ -250,12 +265,14 @@ class EmailTemplate(models.Model):
 class EmailBatch(models.Model):
     template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL,
                                  null=True, blank=False)
-    created_time = models.DateTimeField(auto_now_add=True)
     send_time = models.DateTimeField(null=True, blank=True)
     sheet_set = models.ManyToManyField(Sheet, blank=True,
                                        verbose_name='krydslister')
     payment_set = models.ManyToManyField(Payment, blank=True,
                                          verbose_name='betalinger')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                   null=True, blank=False)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     @property
     def sent(self):
