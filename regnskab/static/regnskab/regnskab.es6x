@@ -216,11 +216,13 @@ class Name extends React.Component {
 
 class SheetRow extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
-        let b = !(
-            this.props.nameValue === nextProps.nameValue &&
-            this.props.personValue === nextProps.personValue);
-        console.log(b);
-        return b;
+        if (this.props.nameValue !== nextProps.nameValue ||
+            this.props.personValue !== nextProps.personValue)
+            return true;
+        for (let i = 0; i < nextProps.columns.length; ++i)
+            if (nextProps.columns[i] !== this.props.columns[i])
+                return true;
+        return false;
     }
     render() {
         let columnKind = ['1', '1ks', '2', '2ks', '3', '3ks'];
