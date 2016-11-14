@@ -104,7 +104,7 @@ class SheetRowUpdate(TemplateView):
             in_current = 0 if p.id in current else 1
             k = (in_current, 3, p.name)
             for title in p.title_set.all():
-                t_k = (in_current, TITLE_ORDER[title.kind], -title.period, title.root)
+                t_k = (in_current, -title.period, TITLE_ORDER[title.kind], title.root)
                 k = min(k, t_k)
                 t.append(title.input_title(config.GFYEAR))
             for title in aliases.get(p.id, ()):
@@ -114,7 +114,7 @@ class SheetRowUpdate(TemplateView):
                 except ValueError:
                     pass
                 else:
-                    t_k = (in_current, TITLE_ORDER[kind], -period, root)
+                    t_k = (in_current, -period, TITLE_ORDER[kind], root)
                     k = min(k, t_k)
                 t.append(title.input_title(config.GFYEAR))
             profiles.append(dict(titles=t, sort_key=k, name=p.name, id=p.pk))
