@@ -1,44 +1,53 @@
 {% extends "regnskab/base.html" %}
 {% block head %}
 <style>
+.sheet {
+	border-collapse: collapse;
+}
+.sheet td, .sheet th {
+	border-bottom: 1px solid #666;
+	font-weight: normal;
+}
 .crosses {
 	display: flex;
 	position: relative;
 	flex-direction: column;
 	flex-wrap: wrap;
-	height: 30px;
+	height: 40px;
 	align-content: flex-start;
+	width: 60px;
+	border-left: 3px solid #333;
 }
-.crosses.column-1 {
+.crosses.column-øl {
 	width: 225px;
 }
-.crosses.column-2 {
+.crosses.column-guldøl {
 	width: 90px;
 }
-.crosses.column-3 {
+.crosses.column-sodavand {
 	width: 225px;
 }
 .crosses > .cross {
-	height: 15px;
 	width: 15px;
+	line-height: 20px;
+	height: 20px;
 }
 .crosses > .count {
 	position: absolute;
 	top: 0;
-	left: 0;
-	line-height: 30px;
+	left: 10px;
+	line-height: 40px;
 	font-size: 20px;
 	font-weight: bold;
-	box-shadow: 0px 0px 8px #000;
 }
 </style>
 {% endblock %}
 {% block content %}
 <h1>{{ sheet }}</h1>
-<table>
+<table class="sheet">
 <thead>
 <tr>
-<th></th>
+<!--<th></th>-->
 <th>Navn</th>
 {% for kind in sheet.purchasekind_set.all %}
 <th>{{ kind.name }}</th>
@@ -48,14 +57,16 @@
 <tbody>
 {% for row in sheet.rows %}
 <tr>
+<!--
 <td>
 {% for kind in row.kinds %}{{ kind.count|floatformat }}
 {% endfor %}
 </td>
-<td>{{ row.name|default:row.profile }}</td>
+-->
+<td>{{ row.name }}<br />{{ row.profile }}</td>
 {% for kind in row.kinds %}
 <td>
-<span class="crosses column-{{ kind.kind.position }}">
+<span class="crosses column-{{ kind.kind.name }}">
 {% for _ in kind.counter %}<span class="cross">&times;</span>{% endfor %}
 {% if kind.count %}<span class="count">{{ kind.count|floatformat }}</span>{% endif %}
 </span>
