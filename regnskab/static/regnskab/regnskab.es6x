@@ -41,14 +41,21 @@ function make_utility_function(query) {
     let re_best = new RegExp(`^(${tk_prefix}|)(${best_prefix})$`);
     // Regex matching optional TK prefix followed by FU title.
     let re_fu = new RegExp(`^(?:(${tk_prefix}|)FU)?(${fu_two_letters})$`);
+    // Regex matching optional TK prefix followed by FUAN.
+    let re_fuan = new RegExp(`^(${tk_prefix}|)AN$`);
 
     // Does the query case insensitively match BEST or FU title?
     let q_upper = query.toUpperCase();
     let mo_best = re_best.exec(q_upper);
     let mo_fu = re_fu.exec(q_upper);
+    let mo_fuan = re_fuan.exec(q_upper);
 
     // `filters` is a list of functions used to determine if query matches title.
     let filters = [];
+    if (mo_fuan) {
+        let prefix = age_to_prefix(prefix_to_age(mo_fuan[1]));
+        filters.push(t => (t === prefix + 'FUAN'));
+    }
     if (mo_fu) {
         let fu_search = 'FU' + mo_fu[2];
         if (mo_fu[1]) {
