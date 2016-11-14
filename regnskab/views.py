@@ -334,12 +334,14 @@ class ProfileDetail(TemplateView):
 
         payment_qs = Payment.objects.all()
         payment_qs = payment_qs.filter(profile=profile)
-        payment_qs = payment_qs.annotate(name=Value('betaling', output_field=models.CharField()))
+        payment_qs = payment_qs.annotate(name=F('note'))
         payment_qs = payment_qs.annotate(balance_change=-1 * F('amount'))
         payment_qs = payment_qs.values('time', 'name', 'amount', 'balance_change')
         payments = list(payment_qs)
         for o in payments:
             o['date'] = o['time'].date()
+            if not o['name']:
+                o['name'] = 'Betaling'
 
         row_data = payments + purchases
 
@@ -352,7 +354,7 @@ class ProfileDetail(TemplateView):
         balance = Decimal()
         for (date, b, sheet), xs in row_iter:
             xs = list(xs)
-            amount = sum(x['amount'] for x in xs)
+            amount = sum(x['balance_change'] for x in xs)
             balance += sum(x['balance_change'] for x in xs)
             rows.append(dict(
                 date=date,
