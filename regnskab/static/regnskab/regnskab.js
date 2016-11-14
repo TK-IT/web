@@ -1,0 +1,634 @@
+'use strict';
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+// vim:set ft=javascript sw=4 et:
+
+function prefix_to_age(p) {
+    var v = { 'K': -1, 'G': 1, 'B': 2, 'O': 3, 'T': 1 };
+    var pattern = /([KGBOT])([0-9]*)/g;
+    var mo = undefined;
+    var age = 0;
+    while ((mo = pattern.exec(p)) !== null) {
+        var c = mo[2] === '' ? 1 : parseInt(mo[2]);
+        age += c * v[mo[1]];
+    }
+    return age;
+}
+
+function age_to_prefix(age) {
+    var m = ['K', '', 'G', 'B', 'O', 'TO'];
+    if (-1 <= age && age <= 4) return m[age + 1];else if (age < 0) return 'K' + -age;else return 'T' + (age - 3) + 'O';
+}
+
+function make_utility_function(query) {
+    function all_prefixes(s) {
+        // Map e.g. "FORM" to "F|FO|FOR|FORM"
+        var p = [];
+        for (var i = 1; i <= s.length; ++i) {
+            p.push(s.substring(0, i));
+        }return p.join('|');
+    }
+
+    var tk_prefix = '[KGBOT][KGBOT0-9]*';
+    var best_list = 'CERM FORM INKA KASS NF PR SEKR VC'.split(' ');
+    // best_prefix is a regex that matches any prefix of a BEST title
+    var best_prefix = best_list.map(all_prefixes).join('|');
+    // Map first letter to BEST title, e.g. best_map['F'] === 'FORM'
+    var best_map = {};
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+        for (var _iterator = best_list[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var t = _step.value;
+            best_map[t.charAt(0)] = t;
+        } // fu_two_letters is a regex that matches the last two letters of a FU title
+    } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+            }
+        } finally {
+            if (_didIteratorError) {
+                throw _iteratorError;
+            }
+        }
+    }
+
+    var fu_two_letters = '[A-ZÆØÅ]{2}';
+
+    // Regex matching optional TK prefix followed by a prefix of a BEST title.
+    var re_best = new RegExp('^(' + tk_prefix + '|)(' + best_prefix + ')$');
+    // Regex matching optional TK prefix followed by FU title.
+    var re_fu = new RegExp('^(?:(' + tk_prefix + '|)FU)?(' + fu_two_letters + ')$');
+
+    // Does the query case insensitively match BEST or FU title?
+    var q_upper = query.toUpperCase();
+    var mo_best = re_best.exec(q_upper);
+    var mo_fu = re_fu.exec(q_upper);
+
+    // `filters` is a list of functions used to determine if query matches title.
+    var filters = [];
+    if (mo_fu) {
+        (function () {
+            var fu_search = 'FU' + mo_fu[2];
+            if (mo_fu[1]) {
+                (function () {
+                    // Query has a TK prefix => exact match on person
+                    var prefix = age_to_prefix(prefix_to_age(mo_fu[1]));
+                    filters.push(function (t) {
+                        return t === prefix + fu_search;
+                    });
+                })();
+            } else {
+                // Query has no TK prefix => suffix search
+                filters.push(function (t) {
+                    return t.substring(t.length - 4, t.length) === fu_search;
+                });
+            }
+        })();
+    }
+    if (mo_best) {
+        (function () {
+            var prefix = age_to_prefix(prefix_to_age(mo_best[1]));
+            var best_search = best_map[mo_best[2].charAt(0)];
+            filters.push(function (t) {
+                return t === prefix + best_search;
+            });
+        })();
+    }
+    // Fallback: case sensitive search in title
+    filters.push(function (t) {
+        return t.indexOf(query) !== -1;
+    });
+
+    return function utility(person) {
+        // Return [j, title],
+        // where j is the index of the function in filters that matched
+        // and title is the title that matched.
+        for (var i = 0; i < filters.length; ++i) {
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = person.titles[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var title = _step2.value;
+
+                    if (filters[i](title)) {
+                        return [i, title];
+                    }
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
+            }
+
+            if (filters[i](person.name)) {
+                return [i, ''];
+            }
+        }
+        return [filters.length, ''];
+    };
+}
+
+function filter_persons(persons, query) {
+    if (query === '') {
+        return persons.map(function (p) {
+            return { 'display': p.name + ' ' + p.titles.join(' '), 'person': p };
+        });
+    }
+    var utility = make_utility_function(query);
+    var persons_keyed = [];
+    var _iteratorNormalCompletion3 = true;
+    var _didIteratorError3 = false;
+    var _iteratorError3 = undefined;
+
+    try {
+        for (var _iterator3 = persons[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+            var p = _step3.value;
+            persons_keyed.push([utility(p), p]);
+        }
+    } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                _iterator3.return();
+            }
+        } finally {
+            if (_didIteratorError3) {
+                throw _iteratorError3;
+            }
+        }
+    }
+
+    persons_keyed.sort(function (a, b) {
+        return a[0][0] !== b[0][0] ? a[0][0] - b[0][0] : a[1].sort_key - b[1].sort_key;
+    });
+    var r = persons_keyed.map(function (x) {
+        return { 'display': (x[0][1] + ' ' + x[1].name).trim(),
+            'person': x[1] };
+    });
+    return r;
+}
+
+var filter_persons_cached = (function () {
+    var cached_persons = null;
+    var results = null;
+    return function filter_persons_cached(persons, query) {
+        if (persons !== cached_persons) {
+            cached_persons = persons;
+            results = {};
+        }
+        if (!(query in results)) results[query] = filter_persons(persons, query);
+        return results[query];
+    };
+})();
+
+var Cross = (function (_React$PureComponent) {
+    _inherits(Cross, _React$PureComponent);
+
+    function Cross() {
+        _classCallCheck(this, Cross);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(Cross).apply(this, arguments));
+    }
+
+    _createClass(Cross, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement(
+                'div',
+                { className: 'cross' },
+                '×'
+            );
+        }
+    }]);
+
+    return Cross;
+})(React.PureComponent);
+
+var Crosses = (function (_React$PureComponent2) {
+    _inherits(Crosses, _React$PureComponent2);
+
+    function Crosses() {
+        _classCallCheck(this, Crosses);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(Crosses).apply(this, arguments));
+    }
+
+    _createClass(Crosses, [{
+        key: 'render',
+        value: function render() {
+            var crosses = [];
+            for (var i = 0; i < Math.min(this.props.count, this.props.maxCount); ++i) {
+                crosses.push(React.createElement(Cross, { key: i }));
+            }return React.createElement(
+                'div',
+                { className: 'crosses' },
+                crosses
+            );
+        }
+    }]);
+
+    return Crosses;
+})(React.PureComponent);
+
+var ColumnEntry = (function (_React$Component) {
+    _inherits(ColumnEntry, _React$Component);
+
+    function ColumnEntry() {
+        var _Object$getPrototypeO;
+
+        var _temp, _this3, _ret4;
+
+        _classCallCheck(this, ColumnEntry);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret4 = (_temp = (_this3 = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(ColumnEntry)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this3), _this3.state = {
+            inputValue: ''
+        }, _temp), _possibleConstructorReturn(_this3, _ret4);
+    }
+
+    _createClass(ColumnEntry, [{
+        key: 'shouldComponentUpdate',
+        value: function shouldComponentUpdate(nextProps, nextState) {
+            return this.props.value !== nextProps.value || this.state.inputValue !== nextState.inputValue || this.props.columnKind !== nextProps.columnKind;
+        }
+    }, {
+        key: 'getInputValue',
+        value: function getInputValue() {
+            var v = this.props.value;
+            if (v === null) return '';
+            var st = this.state.inputValue.replace(/,/g, '.');
+            if (parseFloat(st) === v) {
+                return this.state.inputValue;
+            } else {
+                return '' + v;
+            }
+        }
+    }, {
+        key: 'onChange',
+        value: function onChange(s) {
+            if (s === '') {
+                this.setState({ inputValue: '' });
+                this.props.onChange(null);
+            }
+            var st = s.replace(/,/g, '.');
+            if (!/\d+\.?\d*/.exec(st)) return;
+            var v = parseFloat(st);
+            this.setState({ inputValue: s });
+            this.props.onChange(v);
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var _this4 = this;
+
+            return React.createElement(
+                'div',
+                { className: 'column column-' + this.props.columnKind },
+                React.createElement(Crosses, { count: this.props.value, maxCount: 30 }),
+                React.createElement('input', { className: 'column-entry', value: this.getInputValue(),
+                    onChange: function onChange(e) {
+                        return _this4.onChange(e.target.value);
+                    } })
+            );
+        }
+    }]);
+
+    return ColumnEntry;
+})(React.Component);
+
+var PersonChoice = (function (_React$Component2) {
+    _inherits(PersonChoice, _React$Component2);
+
+    function PersonChoice() {
+        _classCallCheck(this, PersonChoice);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(PersonChoice).apply(this, arguments));
+    }
+
+    _createClass(PersonChoice, [{
+        key: 'shouldComponentUpdate',
+        value: function shouldComponentUpdate(nextProps, nextState) {
+            if (this.props.value !== nextProps.value) return true;
+            if (this.props.choices.length !== nextProps.choices.length) return true;
+            for (var i = 0; i < nextProps.choices.length; ++i) {
+                if (this.props.choices[i].display !== nextProps.choices[i].display || this.props.choices[i].id !== nextProps.choices[i].id) return true;
+            }return false;
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var _this6 = this;
+
+            var options = this.props.choices.map(function (_ref) {
+                var display = _ref.display;
+                var person = _ref.person;
+                return React.createElement(
+                    'option',
+                    { value: person.id, key: person.id },
+                    display
+                );
+            });
+            var value = this.props.value;
+            if (value === null) value = this.props.choices[0].id;
+            return React.createElement(
+                'select',
+                { className: 'person-choice', value: value,
+                    onChange: function onChange(e) {
+                        return _this6.props.onChange(e.target.value);
+                    } },
+                options
+            );
+        }
+    }]);
+
+    return PersonChoice;
+})(React.Component);
+
+var Name = (function (_React$Component3) {
+    _inherits(Name, _React$Component3);
+
+    function Name() {
+        _classCallCheck(this, Name);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(Name).apply(this, arguments));
+    }
+
+    _createClass(Name, [{
+        key: 'onPersonChange',
+        value: function onPersonChange(v) {
+            this.props.onChange(v, this.props.nameValue);
+        }
+    }, {
+        key: 'onNameChange',
+        value: function onNameChange(v) {
+            var p = this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id ? this.getChoices(v)[0].person.id : this.props.personValue;
+            this.props.onChange(p, v);
+        }
+    }, {
+        key: 'getChoices',
+        value: function getChoices(query) {
+            if (typeof query === 'undefined') query = this.props.nameValue;
+            return filter_persons_cached(this.props.persons, query);
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var _this8 = this;
+
+            return React.createElement(
+                'div',
+                { className: 'name' },
+                React.createElement('input', { className: 'name-entry',
+                    value: this.props.nameValue,
+                    onChange: function onChange(e) {
+                        return _this8.onNameChange(e.target.value);
+                    } }),
+                React.createElement(PersonChoice, { choices: this.getChoices(),
+                    value: this.props.personValue,
+                    onChange: function onChange(v) {
+                        return _this8.onPersonChange(v);
+                    } })
+            );
+        }
+    }]);
+
+    return Name;
+})(React.Component);
+
+var SheetRow = (function (_React$Component4) {
+    _inherits(SheetRow, _React$Component4);
+
+    function SheetRow() {
+        _classCallCheck(this, SheetRow);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(SheetRow).apply(this, arguments));
+    }
+
+    _createClass(SheetRow, [{
+        key: 'shouldComponentUpdate',
+        value: function shouldComponentUpdate(nextProps, nextState) {
+            var b = !(this.props.nameValue === nextProps.nameValue && this.props.personValue === nextProps.personValue);
+            console.log(b);
+            return b;
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var _this10 = this;
+
+            var columnKind = ['1', '1ks', '2', '2ks', '3', '3ks'];
+            var columns = this.props.columns.map(function (v, i) {
+                return React.createElement(ColumnEntry, { columnKind: columnKind[i],
+                    value: v, key: columnKind[i],
+                    onChange: function onChange(v) {
+                        return _this10.props.onChange(i, v);
+                    } });
+            });
+            return React.createElement(
+                'div',
+                { className: 'sheetrow' },
+                React.createElement('div', { className: 'summary' }),
+                React.createElement(Name, { persons: this.props.persons, nameValue: this.props.nameValue,
+                    personValue: this.props.personValue,
+                    onChange: this.props.onChangeName }),
+                columns
+            );
+        }
+    }]);
+
+    return SheetRow;
+})(React.Component);
+
+function load_form_state() {
+    var field = document.getElementById('tk_rows');
+    if (field.value === '') return [];
+    var o = JSON.parse(field.value);
+    return o;
+}
+
+function save_form_state(o) {
+    var field = document.getElementById('tk_rows');
+    field.value = JSON.stringify(o);
+}
+
+var Sheet = (function (_React$Component5) {
+    _inherits(Sheet, _React$Component5);
+
+    function Sheet() {
+        var _Object$getPrototypeO2;
+
+        var _temp2, _this11, _ret5;
+
+        _classCallCheck(this, Sheet);
+
+        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            args[_key2] = arguments[_key2];
+        }
+
+        return _ret5 = (_temp2 = (_this11 = _possibleConstructorReturn(this, (_Object$getPrototypeO2 = Object.getPrototypeOf(Sheet)).call.apply(_Object$getPrototypeO2, [this].concat(args))), _this11), _this11.state = {
+            rows: _this11.get_initial_rows()
+        }, _temp2), _possibleConstructorReturn(_this11, _ret5);
+    }
+
+    _createClass(Sheet, [{
+        key: 'get_initial_rows',
+        value: function get_initial_rows() {
+            var rows = load_form_state();
+            if (rows.length === 0 || rows[rows.length - 1] !== this.empty_row()) rows.push(this.empty_row());
+            return rows;
+        }
+    }, {
+        key: 'empty_row',
+        value: function empty_row() {
+            return { name: '', profile_id: null,
+                counts: [null, null, null, null, null, null] };
+        }
+    }, {
+        key: 'onChangeCell',
+        value: function onChangeCell(i, j, v) {
+            this.state.rows[i].counts[j] = v;
+            if (i === this.state.rows.length - 1) this.state.rows.push(this.empty_row());
+            save_form_state(this.state.rows);
+            this.setState({});
+        }
+    }, {
+        key: 'onChangeName',
+        value: function onChangeName(i, p, n) {
+            this.state.rows[i].name = n;
+            this.state.rows[i].profile_id = p;
+            if (i === this.state.rows.length - 1) this.state.rows.push(this.empty_row());
+            save_form_state(this.state.rows);
+            this.setState({});
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var rows = [];
+            var counts = [0, 0, 0, 0, 0, 0];
+            for (var i = 0; i < this.state.rows.length; ++i) {
+                var data = this.state.rows[i];
+                for (var j = 0; j < counts.length; ++j) {
+                    if (data.counts[j] !== null) counts[j] += data.counts[j];
+                }rows.push(React.createElement(SheetRow, { key: i,
+                    persons: this.props.persons,
+                    columns: data.counts,
+                    nameValue: data.name,
+                    personValue: data.profile_id,
+                    onChange: this.onChangeCell.bind(this, i),
+                    onChangeName: this.onChangeName.bind(this, i) }));
+            }
+            return React.createElement(
+                'div',
+                { className: 'sheet' },
+                React.createElement(
+                    'div',
+                    { className: 'sheetrow sheetrow-header' },
+                    React.createElement('div', { className: 'summary' }),
+                    React.createElement('div', { className: 'name' }),
+                    React.createElement(
+                        'div',
+                        { className: 'column column-1' },
+                        'Øl (',
+                        counts[0],
+                        ')'
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'column column-1ks' },
+                        'ks (',
+                        counts[1],
+                        ')'
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'column column-2' },
+                        'Guld (',
+                        counts[2],
+                        ')'
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'column column-2ks' },
+                        'ks (',
+                        counts[3],
+                        ')'
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'column column-3' },
+                        'Vand (',
+                        counts[4],
+                        ')'
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'column column-3ks' },
+                        'ks (',
+                        counts[5],
+                        ')'
+                    )
+                ),
+                rows
+            );
+        }
+    }]);
+
+    return Sheet;
+})(React.Component);
+
+var Main = (function (_React$Component6) {
+    _inherits(Main, _React$Component6);
+
+    function Main() {
+        _classCallCheck(this, Main);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(Main).apply(this, arguments));
+    }
+
+    _createClass(Main, [{
+        key: 'render',
+        value: function render() {
+            var persons = window.TK_PROFILES;
+            return React.createElement(Sheet, { persons: persons });
+        }
+    }]);
+
+    return Main;
+})(React.Component);
+
+function init_react() {
+    var container = document.getElementById('sheet-container');
+    ReactDOM.render(React.createElement(Main, null), container);
+}
+
+window.addEventListener('load', init_react, false);/*# sourceMappingURL=regnskab.js.map*/
