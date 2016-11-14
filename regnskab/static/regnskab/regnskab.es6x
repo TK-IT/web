@@ -259,7 +259,7 @@ class Sheet extends React.Component {
 
     get_initial_rows() {
         let rows = load_form_state();
-        if (rows.length === 0 || rows[rows.length-1] !== this.empty_row())
+        if (rows.length === 0 || rows[rows.length-1].name !== '')
             rows.push(this.empty_row());
         return rows;
     }
