@@ -116,13 +116,13 @@ let filter_persons_cached = (function () {
     };
 })();
 
-class Cross extends React.Component {
+class Cross extends React.PureComponent {
     render() {
         return <div className='cross'>&times;</div>;
     }
 }
 
-class Crosses extends React.Component {
+class Crosses extends React.PureComponent {
     render() {
         const crosses = [];
         for (let i = 0; i < Math.min(this.props.count, this.props.maxCount); ++i)
@@ -132,6 +132,11 @@ class Crosses extends React.Component {
 }
 
 class ColumnEntry extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        return this.props.value !== nextProps.value ||
+            this.state.inputValue !== nextState.inputValue ||
+            this.props.columnKind !== nextProps.columnKind;
+    }
     state = {
         inputValue: ''
     }
@@ -163,6 +168,15 @@ class ColumnEntry extends React.Component {
 }
 
 class PersonChoice extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        if (this.props.value !== nextProps.value) return true;
+        if (this.props.choices.length !== nextProps.choices.length) return true;
+        for (let i = 0; i < nextProps.choices.length; ++i)
+            if (this.props.choices[i].display !== nextProps.choices[i].display ||
+                this.props.choices[i].id !== nextProps.choices[i].id)
+                return true;
+        return false;
+    }
     render() {
         let options = this.props.choices.map(
             ({display, person}) =>
@@ -201,6 +215,13 @@ class Name extends React.Component {
 }
 
 class SheetRow extends React.Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        let b = !(
+            this.props.nameValue === nextProps.nameValue &&
+            this.props.personValue === nextProps.personValue);
+        console.log(b);
+        return b;
+    }
     render() {
         let columnKind = ['1', '1ks', '2', '2ks', '3', '3ks'];
         let columns = this.props.columns.map((v, i) =>
