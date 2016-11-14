@@ -238,7 +238,6 @@ class SheetRow extends React.Component {
                 value={v} key={columnKind[i]}
                 onChange={v => this.props.onChange(i, v)} />);
         return <div className='sheetrow'>
-            <div className='summary' />
             <Name persons={this.props.persons} nameValue={this.props.nameValue}
                 personValue={this.props.personValue}
                 onChange={this.props.onChangeName} />
@@ -311,7 +310,6 @@ class Sheet extends React.Component {
         }
         return <div className='sheet'>
             <div className="sheetrow sheetrow-header">
-                <div className="summary"></div>
                 <div className="name"></div>
                 <div className="column column-1">Øl ({counts[0]})</div>
                 <div className="column column-1ks">ks ({counts[1]})</div>
