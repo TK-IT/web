@@ -26,7 +26,7 @@ from regnskab.models import (
 
 
 regnskab_permission_required = permission_required(
-    'regnskab.access', raise_exception=True)
+    'regnskab.add_sheetrow', raise_exception=True)
 
 
 class SheetCreate(FormView):
