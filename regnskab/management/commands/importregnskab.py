@@ -3,7 +3,7 @@ from ._private import RegnskabCommand
 
 import json
 from regnskab.legacy.export import export_data
-from regnskab.legacy.import_sheets import import_sheets
+from regnskab.legacy.import_sheets import import_sheets, import_profiles
 from regnskab.legacy.import_aliases import import_aliases
 from regnskab.legacy.import_statuses import import_statuses
 
@@ -15,10 +15,11 @@ class Command(RegnskabCommand):
         parser.add_argument('-i', '--json-input')
         parser.add_argument('-o', '--json-output')
         parser.add_argument('-f', '--save', action='store_true')
+        parser.add_argument('-p', '--save-profiles', action='store_true')
 
     def handle(self, *args, **options):
         input_options = 'backup_dir git_dir json_input'.split()
-        output_options = 'json_output save'.split()
+        output_options = 'json_output save save_profiles'.split()
         self.at_least_one(options, input_options)
         self.at_least_one(options, output_options)
         if options['json_input']:
@@ -38,6 +39,8 @@ class Command(RegnskabCommand):
                 json.dump(
                     dict(sheets=sheets, aliases=aliases, statuses=statuses),
                     fp, indent=2)
+        if options['save_profiles']:
+            import_profiles(sheets, self)
         if options['save']:
             import_sheets(sheets, self)
             import_aliases(aliases, self.stdout)

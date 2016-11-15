@@ -91,6 +91,27 @@ def make_profiles(data, save_all):
     return {p.name: p for p in profiles}
 
 
+def get_existing_profiles(data, helper):
+    from regnskab.models import Profile
+    profiles = get_profiles(data)
+    existing = {p.name: p for p in Profile.objects.all()}
+    existing_email = [(p.name, p.email, existing.get(p.name, Profile(email=None)).email)
+                      for p in profiles]
+    wrong_email = [x for x in existing_email
+                   if x[2] is not None and x[1] != x[2]]
+    if wrong_email:
+        with open('wrong-email.json', 'w') as fp:
+            json.dump(wrong_email, fp, indent=2)
+        helper.stderr.write("Wrong emails written to wrong-email.json\n")
+    new = [(name, email) for name, email, e in existing_email if e is None]
+    if new:
+        with open('new-profiles.json', 'w') as fp:
+            json.dump(new, fp, indent=2)
+        helper.stderr.write("Unknown profiles written to new-profiles.json\n")
+        raise Exception("Unknown profiles")
+    return {p.name: existing[p.name] for p in profiles}
+
+
 def strptime(s):
     try:
         return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%S%z')
@@ -170,12 +191,16 @@ def main():
     import_sheets(data, Helper)
 
 
+def import_profiles(data, helper):
+    make_profiles(data, helper.save_all)
+
+
 def import_sheets(data, helper):
     from regnskab.models import Purchase
     save_all = helper.save_all
     filter_related = helper.filter_related
 
-    profiles = make_profiles(data, save_all)
+    profiles = get_existing_profiles(data, helper)
     payments = get_payments(data, profiles)
     sheets, purchase_kinds, rows, purchases = get_sheets(data, profiles)
 
