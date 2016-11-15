@@ -247,6 +247,10 @@ class Title(models.Model):
     def display_title(self, gfyear=None):
         return '%s%s' % (tk_prefix(self.age(gfyear)), self.display_root())
 
+    def input_title(self, gfyear=None):
+        # The title as it would be typed
+        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str), self.root)
+
     def display_title_and_year(self, gfyear=None):
         if self.root == 'EFUIT':
             return self.display_title(gfyear)
