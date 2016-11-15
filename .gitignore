@@ -2,3 +2,5 @@
 /venv
 __pycache__
 .*.swp
+/regnskab.egg-info
+/dist

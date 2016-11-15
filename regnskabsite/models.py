@@ -1,4 +1,6 @@
 import re
+from django.db import models
+from regnskabsite import config
 
 
 def unicode_superscript(n):
@@ -143,3 +145,67 @@ def parse_bestfu_alias(alias, gfyear):
                 root = fu_kind + letter1_int + letter2_int
             return kind, root, period
     raise ValueError(alias)
+
+
+class Profile(models.Model):
+    name = models.CharField(max_length=50, verbose_name="Navn")
+    email = models.EmailField(max_length=50, blank=True,
+                              verbose_name="Emailadresse")
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'person'
+        verbose_name_plural = verbose_name + 'er'
+
+    def __str__(self):
+        return str(self.name)
+
+
+class Title(models.Model):
+    BEST, FU, EFU = 'BEST', 'FU', 'EFU'
+    KIND = [(BEST, 'BEST'), (FU, 'FU'), (EFU, 'EFU')]
+
+    profile = models.ForeignKey('Profile')
+    period = models.IntegerField(verbose_name='Årgang')
+    root = models.CharField(max_length=10, verbose_name='Titel')
+    kind = models.CharField(max_length=10, choices=KIND, verbose_name='Slags')
+
+    def age(self, gfyear=None):
+        if gfyear is None:
+            gfyear = config.GFYEAR
+        return gfyear - self.period
+
+    def display_root(self):
+        return self.root.replace('KASS', 'KA$$')
+
+    def display_title(self, gfyear=None):
+        return '%s%s' % (tk_prefix(self.age(gfyear)), self.display_root())
+
+    def input_title(self, gfyear=None):
+        # The title as it would be typed
+        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str), self.root)
+
+    def display_title_and_year(self, gfyear=None):
+        return '%s (%02d/%02d)' % (self.display_title(gfyear),
+                                   self.period % 100, (self.period+1) % 100)
+
+    def ascii_root(self):
+        tr = {197: 'AA', 198: 'AE', 216: 'OE', 229: 'aa', 230: 'ae', 248: 'oe'}
+        return self.root.translate(tr)
+
+    def email_local_part(self, gfyear=None):
+        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str),
+                         self.ascii_root())
+
+    @classmethod
+    def parse(cls, title, gfyear, **kwargs):
+        kind, root, period = parse_bestfu_alias(title, gfyear)
+        return cls(period=period, root=root, kind=kind, **kwargs)
+
+    class Meta:
+        ordering = ['-period', 'kind', 'root']
+        verbose_name = 'titel'
+        verbose_name_plural = 'titler'
+
+    def __str__(self):
+        return '%s %s' % (self.display_title(), getattr(self, 'profile', ''))

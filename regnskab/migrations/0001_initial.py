@@ -3,11 +3,17 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
+from regnskab.models import Profile
+
+
+profile_app = Profile._meta.app_label
+profile_path = profile_app + '.' + Profile.__name__
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
+        (profile_app, '0001_initial'),
     ]
 
     operations = [
@@ -65,19 +71,6 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='Profile',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, verbose_name='Navn')),
-                ('email', models.EmailField(max_length=50, blank=True, verbose_name='Emailadresse')),
-            ],
-            options={
-                'ordering': ['name'],
-                'verbose_name_plural': 'personer',
-                'verbose_name': 'person',
-            },
-        ),
-        migrations.CreateModel(
             name='Purchase',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -124,7 +117,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('position', models.PositiveIntegerField()),
                 ('name', models.CharField(max_length=200, null=True)),
-                ('profile', models.ForeignKey(null=True, to='regnskab.Profile')),
+                ('profile', models.ForeignKey(null=True, to=profile_path)),
                 ('sheet', models.ForeignKey(to='regnskab.Sheet')),
             ],
             options={
@@ -139,23 +132,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('start_time', models.DateTimeField(blank=True, null=True)),
                 ('end_time', models.DateTimeField(blank=True, null=True)),
-                ('profile', models.ForeignKey(to='regnskab.Profile')),
+                ('profile', models.ForeignKey(to=profile_path)),
             ],
-        ),
-        migrations.CreateModel(
-            name='Title',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('period', models.IntegerField(verbose_name='Årgang')),
-                ('root', models.CharField(max_length=10, verbose_name='Titel')),
-                ('kind', models.CharField(max_length=10, choices=[('BEST', 'BEST'), ('FU', 'FU'), ('EFU', 'EFU')], verbose_name='Slags')),
-                ('profile', models.ForeignKey(to='regnskab.Profile')),
-            ],
-            options={
-                'ordering': ['-period', 'kind', 'root'],
-                'verbose_name_plural': 'titler',
-                'verbose_name': 'titel',
-            },
         ),
         migrations.AddField(
             model_name='purchasekind',
@@ -175,7 +153,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='payment',
             name='profile',
-            field=models.ForeignKey(to='regnskab.Profile'),
+            field=models.ForeignKey(to=profile_path),
         ),
         migrations.AddField(
             model_name='emailbatch',
@@ -200,11 +178,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='email',
             name='profile',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='regnskab.Profile', related_name='+'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=profile_path, related_name='+'),
         ),
         migrations.AddField(
             model_name='alias',
             name='profile',
-            field=models.ForeignKey(to='regnskab.Profile'),
+            field=models.ForeignKey(to=profile_path),
         ),
     ]

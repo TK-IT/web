@@ -5,14 +5,6 @@ from regnskab.models import (
 )
 
 
-class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email')
-
-
-class TitleAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'profile', 'period', 'kind')
-
-
 class AliasAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'profile', 'period', 'start_time', 'end_time')
 
@@ -49,8 +41,6 @@ class EmailAdmin(admin.ModelAdmin):
     pass
 
 
-admin.site.register(Profile, ProfileAdmin)
-admin.site.register(Title, TitleAdmin)
 admin.site.register(Alias, AliasAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(Sheet, SheetAdmin)

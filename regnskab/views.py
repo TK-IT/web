@@ -19,8 +19,8 @@ from regnskab.models import (
     EmailTemplate, EmailBatch, Email,
     Purchase, Payment,
     compute_balance,
+    config,
 )
-from regnskab import config
 
 
 class SheetCreate(FormView):

@@ -43,9 +43,15 @@ def main():
 
 
 if __name__ == "__main__":
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if os.path.exists('manage.py'):
+        BASE_DIR = '.'
+    else:
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.append(os.path.join(BASE_DIR, 'venv/lib/python3.5/site-packages'))
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "regnskab.settings")
+    with open(os.path.join(BASE_DIR, 'manage.py')) as fp:
+        settings_line = next(l for l in fp
+                             if 'DJANGO_SETTINGS_MODULE' in l)
+        eval(settings_line.strip())
     import django
     django.setup()
     main()
