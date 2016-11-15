@@ -14,7 +14,8 @@ class PaymentAdmin(admin.ModelAdmin):
 
 
 class SheetAdmin(admin.ModelAdmin):
-    pass
+    def has_add_permission(self, request):
+        return False
 
 
 class PurchaseKindAdmin(admin.ModelAdmin):
@@ -34,7 +35,8 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 
 
 class EmailBatchAdmin(admin.ModelAdmin):
-    pass
+    def has_add_permission(self, request):
+        return False
 
 
 class EmailAdmin(admin.ModelAdmin):
@@ -44,9 +46,9 @@ class EmailAdmin(admin.ModelAdmin):
 admin.site.register(Alias, AliasAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(Sheet, SheetAdmin)
-admin.site.register(PurchaseKind, PurchaseKindAdmin)
-admin.site.register(SheetRow, SheetRowAdmin)
-admin.site.register(Purchase, PurchaseAdmin)
+# admin.site.register(PurchaseKind, PurchaseKindAdmin)
+# admin.site.register(SheetRow, SheetRowAdmin)
+# admin.site.register(Purchase, PurchaseAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(EmailBatch, EmailBatchAdmin)
-admin.site.register(Email, EmailAdmin)
+# admin.site.register(Email, EmailAdmin)
