@@ -82,7 +82,8 @@ def get_profiles(data):
     emails = {}
     for o in data:
         emails.update(o['emails'])
-    return [Profile(name=name, email=email) for name, email in emails.items()]
+    return [Profile(name=name, email=email if '@' in email else '')
+            for name, email in emails.items()]
 
 
 def make_profiles(data, save_all):
@@ -103,7 +104,8 @@ def get_existing_profiles(data, helper):
         with open('wrong-email.json', 'w') as fp:
             json.dump(wrong_email, fp, indent=2)
         helper.stderr.write("Wrong emails written to wrong-email.json\n")
-    new = [(name, email) for name, email, e in existing_email if e is None]
+    new = sorted((name, email) for name, email, e in existing_email
+                 if e is None)
     if new:
         with open('new-profiles.json', 'w') as fp:
             json.dump(new, fp, indent=2)

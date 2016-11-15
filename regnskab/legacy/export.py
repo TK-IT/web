@@ -381,7 +381,9 @@ def main():
         json.dump(output, fp, indent=2)
 
 
-def export_data(git_dir, backup_dir):
+def export_data(git_dir, backup_dir, name_trans=None):
+    if name_trans is None:
+        name_trans = {}
     data_sources = []
     if git_dir:
         data_sources.append(read_regnskab_revisions(git_dir))
@@ -394,7 +396,7 @@ def export_data(git_dir, backup_dir):
     else:
         data_source = heapq.merge(*data_sources)
 
-    persons, regnskab_history = get_data(data_source)
+    persons, regnskab_history = get_data(data_source, name_trans)
     by_time = get_person_history(persons)
     all_times = sorted(by_time.keys())
     # The set of people is monotonically increasing,
@@ -544,7 +546,7 @@ def export_data(git_dir, backup_dir):
     return output, aliases, statuses
 
 
-def fix_person_name(person):
+def fix_person_name(person, name_trans):
     d = person._asdict()
     for k in ('navn', 'email'):
         name = d[k]
@@ -553,13 +555,14 @@ def fix_person_name(person):
             name = re.sub(r'.\b', '', name, 1)
         if name == 'Mette Lysgaard Schultz':
             name = 'Mette Lysgaard Schulz'
+        name = name_trans.get(name, name)
         d[k] = name
     return type(person)(**d)
 
 
-def fix_names(iterable):
+def fix_names(iterable, name_trans):
     for time, (personer, priser, config) in iterable:
-        personer = [fix_person_name(p) for p in personer]
+        personer = [fix_person_name(p, name_trans) for p in personer]
         yield time, Regnskab(personer, priser, config)
 
 
@@ -571,8 +574,9 @@ def remove_duplicates(iterable):
         prev = r
 
 
-def get_data(regnskab_dat):
-    regnskab_dat = fix_names(regnskab_dat)
+def get_data(regnskab_dat, name_trans):
+    assert isinstance(name_trans, dict)
+    regnskab_dat = fix_names(regnskab_dat, name_trans)
     regnskab_dat = remove_duplicates(regnskab_dat)
     # regnskab_dat = ((t, r) for t, r in regnskab_dat for o in [get_gfyear(r)])
 
@@ -638,7 +642,7 @@ def get_data(regnskab_dat):
                 elif not alive(p2):
                     forget.add(p2)
                 else:
-                    assert not (alive(p) and alive(p2))
+                    assert not (alive(p) and alive(p2)), (t2, p, p2)
             matches[ex] = p
         match_persons = {p: ex for ex, p in matches.items()}
         new_leaves = {}

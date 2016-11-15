@@ -13,6 +13,7 @@ class Command(RegnskabCommand):
         parser.add_argument('-b', '--backup-dir')
         parser.add_argument('-g', '--git-dir')
         parser.add_argument('-i', '--json-input')
+        parser.add_argument('-n', '--name-trans')
         parser.add_argument('-o', '--json-output')
         parser.add_argument('-f', '--save', action='store_true')
         parser.add_argument('-p', '--save-profiles', action='store_true')
@@ -26,14 +27,24 @@ class Command(RegnskabCommand):
             if options['backup_dir'] or options['git_dir']:
                 raise CommandError('--json-input cannot be mixed with other ' +
                                    'input options')
+            if options['name_trans']:
+                raise CommandError('--json-input cannot be mixed with ' +
+                                   '--name-trans')
             with open(options['json_input']) as fp:
                 input_json = json.load(fp)
             sheets = input_json['sheets']
             aliases = input_json['aliases']
             statuses = input_json['statuses']
         else:
+            name_trans = {}
+            if options['name_trans']:
+                with open(options['name_trans']) as fp:
+                    for line in fp:
+                        o = json.loads(line)
+                        name_trans[o[0]] = o[1]
             sheets, aliases, statuses = export_data(
-                git_dir=options['git_dir'], backup_dir=options['backup_dir'])
+                git_dir=options['git_dir'], backup_dir=options['backup_dir'],
+                name_trans=name_trans)
         if options['json_output']:
             with open(options['json_output'], 'w') as fp:
                 json.dump(
