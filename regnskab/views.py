@@ -6,6 +6,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Value
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import permission_required
 from django.template.defaultfilters import floatformat
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
@@ -23,9 +25,17 @@ from regnskab.models import (
 )
 
 
+regnskab_permission_required = permission_required(
+    'regnskab.access', raise_exception=True)
+
+
 class SheetCreate(FormView):
     form_class = SheetCreateForm
     template_name = 'regnskab/sheet_create.html'
+
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     def get_initial(self):
         vand_price = 8
@@ -63,6 +73,10 @@ class SheetCreate(FormView):
 class SheetDetail(TemplateView):
     template_name = 'regnskab/sheet_detail.html'
 
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     def get(self, request, *args, **kwargs):
         s = self.get_sheet()
         qs = SheetRow.objects.filter(sheet=s)
@@ -82,6 +96,10 @@ class SheetDetail(TemplateView):
 
 class SheetRowUpdate(TemplateView):
     template_name = 'regnskab/sheet_update.html'
+
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     def get_sheet(self):
         return get_object_or_404(Sheet.objects, pk=self.kwargs['pk'])
@@ -241,11 +259,19 @@ class EmailTemplateList(ListView):
     template_name = 'regnskab/email_template_list.html'
     queryset = EmailTemplate.objects.all()
 
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
 
 class EmailTemplateUpdate(UpdateView):
     template_name = 'regnskab/email_template_form.html'
     queryset = EmailTemplate.objects.all()
     form_class = EmailTemplateForm
+
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
 
 class EmailTemplateCreate(CreateView):
@@ -253,16 +279,28 @@ class EmailTemplateCreate(CreateView):
     queryset = EmailTemplate.objects.all()
     form_class = EmailTemplateForm
 
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
 
 class EmailBatchList(ListView):
     template_name = 'regnskab/email_batch_list.html'
     queryset = EmailBatch.objects.all()
+
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
 
 class EmailBatchUpdate(UpdateView):
     template_name = 'regnskab/email_batch_form.html'
     queryset = EmailBatch.objects.all()
     form_class = EmailBatchForm
+
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         self.object = form.save()
@@ -277,6 +315,10 @@ class EmailBatchUpdate(UpdateView):
 class EmailDetail(DetailView):
     template_name = 'regnskab/email_detail.html'
 
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     def get_object(self):
         return get_object_or_404(
             Email,
@@ -286,6 +328,10 @@ class EmailDetail(DetailView):
 
 class ProfileList(TemplateView):
     template_name = 'regnskab/profile_list.html'
+
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context_data = super(ProfileList, self).get_context_data(**kwargs)
@@ -313,6 +359,10 @@ class ProfileList(TemplateView):
 
 class ProfileDetail(TemplateView):
     template_name = 'regnskab/profile_detail.html'
+
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context_data = super(ProfileDetail, self).get_context_data(**kwargs)
