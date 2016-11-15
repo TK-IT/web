@@ -76,3 +76,6 @@ urlpatterns = [
         include(tkweb.apps.redirect.urls), ),
 
 ]
+
+if 'regnskab' in settings.INSTALLED_APPS:
+    urlpatterns.append(url(r'^regnskab/', include('regnskab.urls')))
