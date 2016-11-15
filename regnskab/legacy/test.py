@@ -1,7 +1,7 @@
 import time
 import argparse
-from legacy.export import read_regnskab_revisions_gitpython
-from legacy.export import read_regnskab_revisions
+from regnskab.legacy.export import read_regnskab_revisions_gitpython
+from regnskab.legacy.export import read_regnskab_revisions
 
 
 def main():

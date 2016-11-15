@@ -10,7 +10,7 @@ import itertools
 import subprocess
 import collections
 
-from legacy.base import (
+from regnskab.legacy.base import (
     Regnskab, read_regnskab, Person, get_amount, Forbrug, alder,
 )
 
@@ -316,7 +316,7 @@ def get_person_history(persons):
     return h
 
 
-def write_aliases(persons, gfyears):
+def get_alias_dicts(persons, gfyears):
     aliases = get_aliases(persons, gfyears)
     dicts = []
     for o in aliases:
@@ -328,12 +328,10 @@ def write_aliases(persons, gfyears):
             o['start_time'].strftime('%Y-%m-%dT%H:%M:%S%z'),
             end_time=o['end_time'] and
             o['end_time'].strftime('%Y-%m-%dT%H:%M:%S%z')))
-
-    with open('regnskab-aliases.json', 'w') as fp:
-        json.dump(dicts, fp, indent=2)
+    return dicts
 
 
-def write_statuses(persons):
+def get_status_dicts(persons):
     statuses = get_statuses(persons)
     statuses = [
         dict(name=o['name'],
@@ -342,9 +340,7 @@ def write_statuses(persons):
              end_time=o['end_time'] and
              o['end_time'].strftime('%Y-%m-%dT%H:%M:%S%z'))
         for o in statuses]
-
-    with open('regnskab-statuses.json', 'w') as fp:
-        json.dump(statuses, fp, indent=2)
+    return statuses
 
 
 def check_name_unique(persons):
@@ -374,13 +370,25 @@ def main():
     parser.add_argument('-g', '--git-dir')
     parser.add_argument('-b', '--backup-dir')
     args = parser.parse_args()
-    data_sources = []
-    if args.git_dir:
-        data_sources.append(read_regnskab_revisions(args.git_dir))
-    if args.backup_dir:
-        data_sources.append(read_regnskab_backups(args.backup_dir))
-    if not data_sources:
+    if not args.git_dir and not args.backup_dir:
         parser.error("must specify at least one data source")
+    output, aliases, statuses = export_data(args.git_dir, args.backup_dir)
+    with open('regnskab-aliases.json', 'w') as fp:
+        json.dump(aliases, fp, indent=2)
+    with open('regnskab-statuses.json', 'w') as fp:
+        json.dump(statuses, fp, indent=2)
+    with open('regnskab-history.json', 'w') as fp:
+        json.dump(output, fp, indent=2)
+
+
+def export_data(git_dir, backup_dir):
+    data_sources = []
+    if git_dir:
+        data_sources.append(read_regnskab_revisions(git_dir))
+    if backup_dir:
+        data_sources.append(read_regnskab_backups(backup_dir))
+    if not data_sources:
+        raise ValueError("At least one data source is required")
     if len(data_sources) == 1:
         data_source = data_sources[0]
     else:
@@ -398,8 +406,6 @@ def main():
     if gfyear_list != sorted(gfyear_list):
         raise Exception("gfyear not sorted")
 
-    write_aliases(persons, gfyears)
-    write_statuses(persons)
     check_name_unique(persons)
 
     # TODO: Use p.gaeld to determine payments
@@ -533,8 +539,9 @@ def main():
             corrections=corrections,
         ))
 
-    with open('regnskab-history.json', 'w') as fp:
-        json.dump(output, fp, indent=2)
+    aliases = get_alias_dicts(persons, gfyears)
+    statuses = get_status_dicts(persons)
+    return output, aliases, statuses
 
 
 def fix_person_name(person):

@@ -1,7 +1,7 @@
 import json
 import argparse
 
-from legacy.base import Regnskab, read_regnskab, Person
+from regnskab.legacy.base import Regnskab, read_regnskab, Person
 
 
 def main():

@@ -5,9 +5,9 @@ import argparse
 import datetime
 
 
-def get_profiles_without_aliases():
+def get_profiles_without_data():
     from regnskab.models import Profile
-    return {p.name: p for p in Profile.objects.filter(alias=None)}
+    return {p.name: p for p in Profile.objects.filter(sheetstatus=None)}
 
 
 def strptime(s):
@@ -19,7 +19,6 @@ def strptime(s):
 
 
 def main():
-    from regnskab.models import Alias
     parser = argparse.ArgumentParser()
     parser.add_argument('filename')
     args = parser.parse_args()
@@ -27,19 +26,24 @@ def main():
     with open(args.filename) as fp:
         data = json.load(fp)
 
-    profiles = get_profiles_without_aliases()
-    aliases = []
+    import_statuses(data, sys.stdout)
+
+
+def import_statuses(data, fp):
+    from regnskab.models import SheetStatus
+    profiles = get_profiles_without_data()
+    objects = []
     for o in data:
         try:
             p = profiles[o['name']]
         except KeyError:
             continue
-        aliases.append(
-            Alias(profile=p, period=o['period'], root=o['root'],
-                  start_time=strptime(o['start_time']),
-                  end_time=strptime(o['end_time'])))
-    print("Create %s aliases" % len(aliases))
-    Alias.objects.bulk_create(aliases)
+        objects.append(
+            SheetStatus(profile=p,
+                        start_time=strptime(o['start_time']),
+                        end_time=strptime(o['end_time'])))
+    fp.write("Create %s statuses\n" % len(objects))
+    SheetStatus.objects.bulk_create(objects)
 
 
 if __name__ == "__main__":

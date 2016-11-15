@@ -5,71 +5,76 @@ import argparse
 import datetime
 
 
-def progress(elements, n=None):
-    if n is None:
-        elements = list(elements)
-        n = len(elements)
-    w = len(str(n))
-    for i, x in enumerate(elements):
-        print('\r\x1B[K(%s/%s) %s' % (str(i+1).rjust(w), n, x), end='')
-        yield x
-    print('')
+class Helper:
+    stdout = sys.stdout
+    stderr = sys.stderr
 
+    @staticmethod
+    def progress(elements, n=None):
+        if n is None:
+            elements = list(elements)
+            n = len(elements)
+        w = len(str(n))
+        for i, x in enumerate(elements):
+            print('\r\x1B[K(%s/%s) %s' % (str(i+1).rjust(w), n, x), end='')
+            yield x
+        print('')
 
-def save_all(objects, unique_attrs=None, only_new=False, bulk=False):
-    if not objects:
-        return []
-    existing = []
-    new = []
-    if unique_attrs:
-        unique_attrs = tuple(unique_attrs)
+    @staticmethod
+    def save_all(objects, unique_attrs=None, only_new=False, bulk=False):
+        if not objects:
+            return []
+        existing = []
+        new = []
+        if unique_attrs:
+            unique_attrs = tuple(unique_attrs)
 
-        def key(o):
-            return tuple(getattr(o, k) for k in unique_attrs)
+            def key(o):
+                return tuple(getattr(o, k) for k in unique_attrs)
 
-        main_model = type(objects[0])
-        existing_dict = {key(o): o for o in main_model.objects.all()}
-        for o in progress(objects):
-            try:
-                e = existing_dict[key(o)]
-            except KeyError:
-                new.append(o)
-            else:
-                existing.append(e)
-    else:
-        new.extend(objects)
-
-    if new:
-        print("Save %s %s objects" % (len(new), type(new[0]).__name__))
-        if bulk:
-            type(new[0]).objects.bulk_create(new)
+            main_model = type(objects[0])
+            existing_dict = {key(o): o for o in main_model.objects.all()}
+            for o in Helper.progress(objects):
+                try:
+                    e = existing_dict[key(o)]
+                except KeyError:
+                    new.append(o)
+                else:
+                    existing.append(e)
         else:
-            if type(new[0]).objects.all().exists() or not unique_attrs:
-                for o in progress(new):
-                    o.save()
-            else:
-                # No objects exist in database,
-                # so we might just bulk insert them
-                # and retrieve the pks in bulk.
+            new.extend(objects)
+
+        if new:
+            print("Save %s %s objects" % (len(new), type(new[0]).__name__))
+            if bulk:
                 type(new[0]).objects.bulk_create(new)
-                pks = {key(o): o.id for o in type(new[0]).objects.all()}
-                for o in new:
-                    o.id = pks[key(o)]
-    if only_new:
+            else:
+                if type(new[0]).objects.all().exists() or not unique_attrs:
+                    for o in Helper.progress(new):
+                        o.save()
+                else:
+                    # No objects exist in database,
+                    # so we might just bulk insert them
+                    # and retrieve the pks in bulk.
+                    type(new[0]).objects.bulk_create(new)
+                    pks = {key(o): o.id for o in type(new[0]).objects.all()}
+                    for o in new:
+                        o.id = pks[key(o)]
+        if only_new:
+            return new
+        else:
+            return new + existing
+
+    @staticmethod
+    def filter_related(parent_objects, related_objects, related_field):
+        parent_objects = set(parent_objects)
+        new = []
+        for o in Helper.progress(related_objects):
+            r = getattr(o, related_field)
+            if r.pk and r in parent_objects:
+                setattr(o, related_field, r)
+                new.append(o)
         return new
-    else:
-        return new + existing
-
-
-def filter_related(parent_objects, related_objects, related_field):
-    parent_objects = set(parent_objects)
-    new = []
-    for o in progress(related_objects):
-        r = getattr(o, related_field)
-        if r.pk and r in parent_objects:
-            setattr(o, related_field, r)
-            new.append(o)
-    return new
 
 
 def get_profiles(data):
@@ -80,7 +85,7 @@ def get_profiles(data):
     return [Profile(name=name, email=email) for name, email in emails.items()]
 
 
-def make_profiles(data):
+def make_profiles(data, save_all):
     profiles = get_profiles(data)
     profiles = save_all(profiles, ['name'])
     return {p.name: p for p in profiles}
@@ -155,7 +160,6 @@ def get_sheets(data, profiles):
 
 
 def main():
-    from regnskab.models import Purchase
     parser = argparse.ArgumentParser()
     parser.add_argument('filename')
     args = parser.parse_args()
@@ -163,7 +167,15 @@ def main():
     with open(args.filename) as fp:
         data = json.load(fp)
 
-    profiles = make_profiles(data)
+    import_sheets(data, Helper)
+
+
+def import_sheets(data, helper):
+    from regnskab.models import Purchase
+    save_all = helper.save_all
+    filter_related = helper.filter_related
+
+    profiles = make_profiles(data, save_all)
     payments = get_payments(data, profiles)
     sheets, purchase_kinds, rows, purchases = get_sheets(data, profiles)
 
@@ -179,7 +191,7 @@ def main():
                     only_new=True)
     purchases = filter_related(purchase_kinds, purchases, 'kind')
     purchases = filter_related(rows, purchases, 'row')
-    print("Create %s purchases" % len(purchases))
+    helper.stdout.write("Create %s purchases\n" % len(purchases))
     Purchase.objects.bulk_create(purchases)
 
 
