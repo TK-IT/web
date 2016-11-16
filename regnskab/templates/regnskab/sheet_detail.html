@@ -43,7 +43,13 @@
 </style>
 {% endblock %}
 {% block content %}
-<h1>{{ sheet }}</h1>
+{% if sheet.legacy_style %}
+<h1>Opgørelsen {{ sheet.end_date }}</h1>
+<p>Denne opgørelse er fra det gamle INKA-program (før 2017) og viser hvad folk
+har krydset på alle krydslisterne siden sidst regningen blev gjort op.</p>
+{% else %}
+<h1>Krydslisten {{ sheet }}</h1>
+{% endif %}
 <table class="sheet">
 <thead>
 <tr>
@@ -63,7 +69,10 @@
 {% endfor %}
 </td>
 -->
-<td>{{ row.name }}<br />{{ row.profile }}</td>
+<td>
+{% if not sheet.legacy_style %}{{ row.name }}<br />{% endif %}
+{{ row.profile }}
+</td>
 {% for kind in row.kinds %}
 <td>
 <span class="crosses column-{{ kind.kind.name }}">
