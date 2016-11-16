@@ -216,9 +216,11 @@ def extract_by_time(current_times, current_words, **kwargs):
 
 
 def parse_alias(title, gfyear):
-    FAUX = 'FUDRNF FULUBULU KBO BFUDI GT GP BETTY FUTOKASS'.split()
+    if title.startswith('-'):
+        return None, title.lstrip('-')
+    is_title = opdater_titel_broken(title)[0]
     age, root = alder(title)
-    if age is None or root in ('', 'EFUIT') or title in FAUX:
+    if not is_title or root in ('', 'EFUIT'):
         return None, title
     if age > 22:
         # Broken legacy handling of T19O which is upgraded to T29O
@@ -232,7 +234,7 @@ def extract_alias_times(aliases, **kwargs):
     current_words = []
     current_times = []
     for gfyear, t, a in aliases:
-        words = [w.lstrip('-') for w in a.split() if w.lstrip('-')]
+        words = a.split()
         words = [parse_alias(w, gfyear) for w in words]
         if current_words == words:
             continue
