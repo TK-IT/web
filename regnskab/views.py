@@ -17,7 +17,7 @@ from regnskab.forms import (
     SheetCreateForm, EmailTemplateForm, EmailBatchForm,
 )
 from regnskab.models import (
-    Sheet, SheetRow, SheetStatus, parse_bestfu_alias, Profile, Alias,
+    Sheet, SheetRow, SheetStatus, parse_bestfu_alias, Profile, Alias, Title,
     EmailTemplate, EmailBatch, Email,
     Purchase, Payment,
     compute_balance,
@@ -335,6 +335,11 @@ class ProfileList(TemplateView):
 
     def get_context_data(self, **kwargs):
         context_data = super(ProfileList, self).get_context_data(**kwargs)
+        title_qs = Title.objects.all().order_by('period')
+        titles = {}
+        for t in title_qs:
+            # Override any older profiles
+            titles[t.profile_id] = t
         qs = Profile.objects.all()
         qs = qs.prefetch_related('sheetstatus_set')
         profiles = list(qs)
@@ -348,10 +353,14 @@ class ProfileList(TemplateView):
                 p.status = statuses[-1]
             else:
                 p.status = None
+            p.title = titles.get(p.id)
         profiles.sort(
             key=lambda p: (p.status is None,
                            p.status and p.status.end_time is not None,
-                           p.name))
+                           p.name if not p.status or p.status.end_time else
+                           (p.title is None,
+                            (-p.title.period, p.title.kind, p.title.root)
+                            if p.title else p.name)))
 
         context_data['object_list'] = profiles
         return context_data
