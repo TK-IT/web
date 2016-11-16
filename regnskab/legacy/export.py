@@ -439,9 +439,7 @@ def export_data(git_dir, backup_dir, name_trans=None):
         # subs[0] should be all zero
         # reset_index[0] is the index of the last that's equal to index 0
         if not reset_index:
-            print(gfyear, len(subs), subs[0])
             continue
-        print(gfyear, allclose(subs[0], {}), reset_index[0])
         forbrug_diff = [dict_minus(subs[reset_index[i]+1], subs[reset_index[i]])
                         for i in range(len(reset_index))]
         resets.extend(dict(
