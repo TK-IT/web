@@ -109,7 +109,7 @@ class Sheet(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
 
     def rows(self):
-        r = []
+        result = []
         kinds = list(self.purchasekind_set.all())
         for row in self.sheetrow_set.all():
             purchases = {
@@ -125,14 +125,41 @@ class Sheet(models.Model):
                     p.counter = range(int(p.count))
                 else:
                     p.counter = None
-            r.append(dict(
+            result.append(dict(
                 id=row.id,
                 profile=row.profile,
                 position=row.position,  # needed?
                 name=row.name,
                 kinds=purchase_list,
             ))
-        return r
+        profile_ids = set(row['profile'] for row in result)
+        title_qs = Title.objects.filter(profile_id__in=profile_ids)
+        title_qs = title_qs.filter(period__lte=self.period)
+        title_qs = title_qs.exclude(root='EFUIT', period__lt=self.period)
+        title_qs = title_qs.order_by('period')
+        titles = {}
+        for t in title_qs:
+            # Override older titles
+            titles[t.profile_id] = t
+
+        for row in result:
+            try:
+                title = row['title'] = titles[row['profile'].id]
+            except KeyError:
+                title = row['title'] = None
+                continue
+            row['display_title'] = title.display_title(self.period)
+
+        if self.legacy_style:
+            # Sort rows by title, period
+            def key(row):
+                return (row['title'] is None,
+                        row['title'] and (-row['title'].period,
+                                          row['title'].kind,
+                                          row['title'].root))
+
+            result.sort(key=key)
+        return result
 
     def legacy_style(self):
         try:
