@@ -1,0 +1,36 @@
+{% extends "regnskab/base.html" %}
+{% block content %}
+<h1>Email-udsendelser</h1>
+<p>
+<a href="{% url 'email_batch_create' %}">Ny udsendelse</a>
+</p>
+<table>
+    <thead>
+        <tr>
+            <th>Oprettet</th>
+            <th>Skabelon</th>
+            <th>Sendt</th>
+            <th>Krydslister</th>
+            <th>Betalinger</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in object_list %}
+        <tr>
+            <td><a href="{% url 'email_batch_update' pk=o.pk %}">
+                    {{ o.created_time }}</a></td>
+            <td>{{ o.template.name }}</td>
+            <td>
+                {% if o.send_time %}
+                {{ o.send_time }}
+                {% else %}
+                ikke endnu
+                {% endif %}
+            </td>
+            <td>{{ o.sheet_count }}</td>
+            <td>{{ o.payment_count }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
