@@ -111,12 +111,18 @@ class Sheet(models.Model):
     def rows(self):
         result = []
         kinds = list(self.purchasekind_set.all())
+        kind_dict = {kind.id: kind for kind in kinds}
         sheetrow_qs = self.sheetrow_set.all()
+        sheetrow_qs = sheetrow_qs.select_related('profile')
+        sheetrow_qs = sheetrow_qs.prefetch_related('purchase_set')
         for row in sheetrow_qs:
             purchases = {
                 p.kind_id: p
                 for p in row.purchase_set.all()
             }
+            for purchase in purchases.values():
+                # Use cached kind
+                purchase.kind = kind_dict[purchase.kind_id]
             purchase_list = [
                 purchases.get(kind.id, Purchase(row=row, kind=kind, count=0))
                 for kind in kinds
