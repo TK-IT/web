@@ -134,6 +134,13 @@ class Sheet(models.Model):
             ))
         return r
 
+    def legacy_style(self):
+        try:
+            return self._legacy_style
+        except AttributeError:
+            self._legacy_style = (len(self.purchasekind_set.all()) == 4)
+            return self._legacy_style
+
     class Meta:
         ordering = ['start_date']
         verbose_name = 'krydsliste'
