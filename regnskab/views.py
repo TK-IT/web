@@ -412,15 +412,27 @@ class ProfileDetail(TemplateView):
         rows = []
         balance = Decimal()
         for (date, b, sheet), xs in row_iter:
-            xs = list(xs)
-            amount = sum(x['balance_change'] for x in xs)
-            balance += sum(x['balance_change'] for x in xs)
-            rows.append(dict(
-                date=date,
-                sheet=sheet,
-                name=', '.join(x['name'] for x in xs),
-                amount=floatformat(amount, 2),
-                balance=floatformat(balance, 2),
-            ))
+            if sheet:
+                xs = list(xs)
+                amount = sum(x['balance_change'] for x in xs)
+                balance += sum(x['balance_change'] for x in xs)
+                rows.append(dict(
+                    date=date,
+                    sheet=sheet,
+                    name=', '.join(x['name'] for x in xs),
+                    amount=floatformat(amount, 2),
+                    balance=floatformat(balance, 2),
+                ))
+            else:
+                for x in xs:
+                    amount = x['balance_change']
+                    balance += amount
+                    rows.append(dict(
+                        date=date,
+                        sheet=sheet,
+                        name=x['name'],
+                        amount=floatformat(amount, 2),
+                        balance=floatformat(balance, 2),
+                    ))
         context_data['rows'] = rows
         return context_data
