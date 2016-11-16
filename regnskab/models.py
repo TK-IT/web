@@ -111,7 +111,8 @@ class Sheet(models.Model):
     def rows(self):
         result = []
         kinds = list(self.purchasekind_set.all())
-        for row in self.sheetrow_set.all():
+        sheetrow_qs = self.sheetrow_set.all()
+        for row in sheetrow_qs:
             purchases = {
                 p.kind_id: p
                 for p in row.purchase_set.all()
