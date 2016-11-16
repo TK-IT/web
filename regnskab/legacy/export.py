@@ -123,19 +123,6 @@ def read_regnskab_backups(gitdir):
             yield t, r
 
 
-def match(old, new, attr):
-    old_by_attr = {getattr(p, attr): p
-                   for p in old}
-    matched = []
-    not_matched = []
-    for p in new:
-        try:
-            matched.append((old_by_attr.pop(getattr(p, attr)), p))
-        except KeyError:
-            not_matched.append(p)
-    return matched, not_matched, list(old_by_attr.values())
-
-
 def alive(p):
     return any(p.senest) or any(p.total) or p.gaeld
 
