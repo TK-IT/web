@@ -55,4 +55,4 @@ class Command(RegnskabCommand):
         if options['save']:
             import_sheets(sheets, self)
             import_aliases(aliases, self.stdout)
-            import_statuses(aliases, self.stdout)
+            import_statuses(statuses, self.stdout)
