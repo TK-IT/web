@@ -11,13 +11,17 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 // vim:set ft=javascript sw=4 et:
 
 function prefix_to_age(p) {
-    var v = { 'K': -1, 'G': 1, 'B': 2, 'O': 3, 'T': 1 };
-    var pattern = /([KGBOT])([0-9]*)/g;
+    // Assume p matches tk_prefix in make_utility_function.
+    var base_value = { 'K': -1, 'G': 1, 'B': 2, 'O': 3, 'T': 1, '': 1 };
+    var pattern = /([KGBOT])([0-9]*)|([0-9]+)/g;
     var mo = void 0;
     var age = 0;
     while ((mo = pattern.exec(p)) !== null) {
-        var c = mo[2] === '' ? 1 : parseInt(mo[2]);
-        age += c * v[mo[1]];
+        var exp_string = (mo[2] || '') + (mo[3] || '') || '1';
+        var exp = parseInt(exp_string);
+        // If p starts with a digit, assume an initial 'T' is omitted.
+        var base = mo[1] || 'T';
+        age += exp * base_value[base];
     }
     return age;
 }
@@ -36,7 +40,7 @@ function make_utility_function(query) {
         }return p.join('|');
     }
 
-    var tk_prefix = '[KGBOT][KGBOT0-9]*';
+    var tk_prefix = '[KGBOT][KGBOT0-9]*|[0-9]*O';
     var best_list = 'CERM FORM INKA KASS NF PR SEKR VC'.split(' ');
     // best_prefix is a regex that matches any prefix of a BEST title
     var best_prefix = best_list.map(all_prefixes).join('|');

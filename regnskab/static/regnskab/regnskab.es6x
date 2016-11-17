@@ -1,13 +1,17 @@
 // vim:set ft=javascript sw=4 et:
 
 function prefix_to_age(p) {
-    let v = {'K': -1, 'G': 1, 'B': 2, 'O': 3, 'T': 1};
-    let pattern = /([KGBOT])([0-9]*)/g;
+    // Assume p matches tk_prefix in make_utility_function.
+    let base_value = {'K': -1, 'G': 1, 'B': 2, 'O': 3, 'T': 1, '': 1};
+    let pattern = /([KGBOT])([0-9]*)|([0-9]+)/g;
     let mo;
     let age = 0;
     while ((mo = pattern.exec(p)) !== null) {
-        let c = (mo[2] === '') ? 1 : parseInt(mo[2]);
-        age += c * v[mo[1]];
+        let exp_string = ((mo[2] || '') + (mo[3] || '')) || '1';
+        let exp = parseInt(exp_string);
+        // If p starts with a digit, assume an initial 'T' is omitted.
+        let base = mo[1] || 'T';
+        age += exp * base_value[base];
     }
     return age;
 }
@@ -27,7 +31,7 @@ function make_utility_function(query) {
         return p.join('|');
     }
 
-    let tk_prefix = '[KGBOT][KGBOT0-9]*';
+    let tk_prefix = '[KGBOT][KGBOT0-9]*|[0-9]*O';
     let best_list = 'CERM FORM INKA KASS NF PR SEKR VC'.split(' ');
     // best_prefix is a regex that matches any prefix of a BEST title
     let best_prefix = best_list.map(all_prefixes).join('|');
