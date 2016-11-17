@@ -356,6 +356,15 @@ var PersonChoice = function (_React$Component2) {
             }return false;
         }
     }, {
+        key: 'onChange',
+        value: function onChange(i) {
+            var _props$choices$i = this.props.choices[i];
+            var display = _props$choices$i.display;
+            var person = _props$choices$i.person;
+
+            this.props.onChange(person.id);
+        }
+    }, {
         key: 'render',
         value: function render() {
             var _this6 = this;
@@ -375,7 +384,7 @@ var PersonChoice = function (_React$Component2) {
                 'select',
                 { className: 'person-choice', value: value,
                     onChange: function onChange(e) {
-                        return _this6.props.onChange(e.target.value);
+                        return _this6.onChange(e.target.selectedIndex);
                     } },
                 options
             );

@@ -184,6 +184,10 @@ class PersonChoice extends React.Component {
                 return true;
         return false;
     }
+    onChange(i) {
+        let {display, person} = this.props.choices[i];
+        this.props.onChange(person.id);
+    }
     render() {
         let options = this.props.choices.map(
             ({display, person}) =>
@@ -191,7 +195,7 @@ class PersonChoice extends React.Component {
         let value = this.props.value;
         if (value === null) value = this.props.choices[0].id;
         return <select className='person-choice' value={value}
-            onChange={e => this.props.onChange(e.target.value)}>
+            onChange={e => this.onChange(e.target.selectedIndex)}>
             {options}</select>;
     }
 }
