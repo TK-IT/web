@@ -189,6 +189,8 @@ class SheetRowUpdate(TemplateView):
                     raise ValidationError("Name must not be empty")
                 if not row['profile_id']:
                     raise ValidationError("Unknown name/profile")
+                if not isinstance(row['profile_id'], int):
+                    raise ValidationError("profile_id must be an int")
 
         profile_ids = set(row['profile_id'] for row in row_data
                           if row['profile_id'] is not None)
