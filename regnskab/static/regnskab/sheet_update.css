@@ -41,7 +41,7 @@
 }
 .sheetrow > .summary { width: 30px; }
 .sheetrow > .name { width: 200px; }
-.sheetrow > .column { position: relative; border-left: 3px solid #333; box-sizing: padding-box; }
+.sheetrow > .column { position: relative; border-left: 3px solid #333; box-sizing: border-box; }
 .sheetrow.sheetrow-header > .column,
 .sheetrow .column-entry { padding-left: 10px; }
 .sheetrow .column-entry,
