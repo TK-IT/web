@@ -147,25 +147,26 @@ class SheetRowUpdate(TemplateView):
         sheet = context_data['sheet'] = self.get_sheet()
         profiles = self.get_profiles()
         context_data['profiles_json'] = json.dumps(profiles, indent=2)
-        row_objects = sheet.rows()
-        row_data = []
-        for r in row_objects:
-            counts = []
-            for k in r['kinds']:
-                counts.append(float(k.count) if k.id else None)
+        if 'rows_json' not in context_data:
+            row_objects = sheet.rows()
+            row_data = []
+            for r in row_objects:
+                counts = []
+                for k in r['kinds']:
+                    counts.append(float(k.count) if k.id else None)
 
-            row_data.append(dict(
-                profile_id=r['profile'].id,
-                name=r['name'],
-                counts=counts,
-            ))
-        context_data['rows_json'] = json.dumps(row_data, indent=2)
+                row_data.append(dict(
+                    profile_id=r['profile'].id,
+                    name=r['name'],
+                    counts=counts,
+                ))
+            context_data['rows_json'] = json.dumps(row_data, indent=2)
 
         return context_data
 
     def post_invalid(self, request, message):
         return self.render_to_response(
-            self.get_context_data(error=message))
+            self.get_context_data(error=message, rows_json=request.POST['data']))
 
     def clean(self, data_json):
         sheet = self.get_sheet()
