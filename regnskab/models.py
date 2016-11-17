@@ -157,7 +157,7 @@ class Sheet(models.Model):
                 continue
             row['display_title'] = title.display_title(self.period)
 
-        if self.legacy_style:
+        if self.legacy_style():
             # Sort rows by title, period
             def key(row):
                 return (row['title'] is None,
