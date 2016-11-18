@@ -68,6 +68,8 @@ class Alias(models.Model):
         return self.root
 
     def display_title(self, gfyear=None):
+        if self.period is None:
+            return self.root
         return '%s%s' % (tk_prefix(self.age(gfyear)), self.display_root())
 
     def input_title(self, gfyear=None):
