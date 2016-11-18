@@ -20,3 +20,12 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('regnskab.urls')),
 ]
+
+try:
+    import debug_toolbar
+except ImportError:
+    pass
+else:
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]
