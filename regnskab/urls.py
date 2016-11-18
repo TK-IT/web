@@ -20,6 +20,7 @@ from regnskab.views import (
     EmailTemplateList, EmailTemplateUpdate, EmailTemplateCreate,
     EmailBatchList, EmailBatchUpdate, EmailDetail,
     ProfileList, ProfileDetail,
+    PaymentBatchCreate,
 )
 
 urlpatterns = [
@@ -42,4 +43,6 @@ urlpatterns = [
         name='profile_list'),
     url(r'^profile/(?P<pk>\d+)/$', ProfileDetail.as_view(),
         name='profile_detail'),
+    url(r'^payment/$', PaymentBatchCreate.as_view(),
+        name='payment_batch_create'),
 ]

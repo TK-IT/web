@@ -1,7 +1,7 @@
 import collections
 from django import forms
 from django.core.exceptions import ValidationError
-from regnskab.models import EmailTemplate, EmailBatch
+from regnskab.models import EmailTemplate, EmailBatch, config
 
 
 class SheetCreateForm(forms.Form):
@@ -42,3 +42,34 @@ class EmailBatchForm(forms.ModelForm):
     class Meta:
         model = EmailBatch
         fields = ('template',)
+
+
+class PaymentBatchForm(forms.Form):
+    def __init__(self, **kwargs):
+        amounts = kwargs.pop('amounts')
+        super().__init__(**kwargs)
+        self._profiles = []
+        GFYEAR = config.GFYEAR
+        for profile, amount in amounts:
+            p = 'profile%d_' % profile.id
+            t = profile.title
+            if t:
+                n = '%s %s' % (t.display_title(GFYEAR), profile.name)
+            else:
+                n = profile.name
+            self.fields[p + 'paid'] = forms.BooleanField(
+                required=False, label='%s betalt' % n)
+            self.fields[p + 'amount'] = forms.FloatField(
+                initial=amount, label='%s beløb' % n)
+            self._profiles.append(profile)
+
+    def profile_fields(self):
+        for profile in self._profiles:
+            p = 'profile%d_' % profile.id
+            yield (profile, self[p + 'amount'], self[p + 'paid'])
+
+    def profile_data(self):
+        data = self.cleaned_data
+        for profile in self._profiles:
+            p = 'profile%d_' % profile.id
+            yield (profile, data[p + 'amount'], data[p + 'paid'])

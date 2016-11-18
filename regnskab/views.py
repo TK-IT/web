@@ -15,6 +15,7 @@ from django.views.generic import (
 )
 from regnskab.forms import (
     SheetCreateForm, EmailTemplateForm, EmailBatchForm,
+    PaymentBatchForm,
 )
 from regnskab.models import (
     Sheet, SheetRow, SheetStatus, parse_bestfu_alias, Profile, Alias, Title,
@@ -463,3 +464,31 @@ class ProfileDetail(TemplateView):
                     ))
         context_data['rows'] = rows
         return context_data
+
+
+class PaymentBatchCreate(FormView):
+    form_class = PaymentBatchForm
+    template_name = 'regnskab/payment_batch_form.html'
+
+    def get_initial_amounts(self):
+        profiles = get_profiles(only_current=True)
+        balances = compute_balance(
+            profile_ids=set(p.id for p in profiles))
+        for p in profiles:
+            yield (p, balances[p.id])
+
+    def get_form_kwargs(self, **kwargs):
+        r = super().__init__(**kwargs)
+        kwargs['amounts'] = self.get_initial_amounts()
+        return kwargs
+
+    def form_valid(self, form):
+        payments = []
+        now = timezone.now()
+        for profile, amount, paid in form.profile_data():
+            if paid:
+                payments.append(Payment(
+                    profile=profile, time=now, amount=amount,
+                    created_by=self.request.user))
+        Payment.objects.bulk_create(payments)
+        return redirect('payment_batch_create')
