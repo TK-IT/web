@@ -54,13 +54,15 @@ class PaymentBatchForm(forms.Form):
             p = 'profile%d_' % profile.id
             t = profile.title
             if t:
-                n = '%s %s' % (t.display_title(GFYEAR), profile.name)
+                profile.display_name = (
+                    '%s %s' % (t.display_title(GFYEAR), profile.name))
             else:
-                n = profile.name
+                profile.display_name = profile.name
             self.fields[p + 'paid'] = forms.BooleanField(
-                required=False, label='%s betalt' % n)
+                required=False, label='%s betalt' % profile.display_name)
             self.fields[p + 'amount'] = forms.FloatField(
-                initial=amount, label='%s beløb' % n)
+                initial=amount, label='%s beløb' % profile.display_name,
+                widget=forms.TextInput())
             self._profiles.append(profile)
 
     def profile_fields(self):
