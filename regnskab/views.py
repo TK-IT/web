@@ -470,6 +470,10 @@ class PaymentBatchCreate(FormView):
     form_class = PaymentBatchForm
     template_name = 'regnskab/payment_batch_form.html'
 
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     def get_initial_amounts(self):
         profiles = get_profiles(only_current=True)
         balances = compute_balance(
