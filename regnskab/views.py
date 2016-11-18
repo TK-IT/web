@@ -29,6 +29,46 @@ regnskab_permission_required = permission_required(
     'regnskab.add_sheetrow', raise_exception=True)
 
 
+def get_profiles(only_current):
+    current_qs = SheetStatus.objects.filter(end_time=None)
+    current = set(current_qs.values_list('profile_id', flat=True))
+
+    qs = Profile.objects.all()
+    if only_current:
+        qs = qs.filter(id__in=current)
+    qs = qs.prefetch_related('title_set')
+    TITLE_ORDER = dict(BEST=0, FU=1, EFU=2)
+
+    def title_key(t):
+        return (-t.period, TITLE_ORDER[t.kind], t.root)
+
+    def current_key(title, profile):
+        if profile.title is None:
+            return (1, profile.name)
+        else:
+            return (0, title_key(profile.title), profile.name)
+
+    def key(profile):
+        if profile.in_current:
+            return (0, current_key(profile.title, profile))
+        else:
+            return (1, profile.name)
+
+    profiles = []
+    for profile in qs:
+        titles = list(profile.title_set.all())
+        if titles:
+            profile.title = max(titles, key=lambda t: t.period)
+        else:
+            profile.title = None
+        profile.in_current = profile.id in current
+        if only_current:
+            assert profile.in_current
+        profiles.append(profile)
+    profiles.sort(key=key)
+    return profiles
+
+
 class SheetCreate(FormView):
     form_class = SheetCreateForm
     template_name = 'regnskab/sheet_create.html'
@@ -105,41 +145,24 @@ class SheetRowUpdate(TemplateView):
         return get_object_or_404(Sheet.objects, pk=self.kwargs['pk'])
 
     def get_profiles(self):
-        current_qs = SheetStatus.objects.filter(end_time=None)
-        current = set(current_qs.values_list('profile_id', flat=True))
-        profiles_qs = Profile.objects.all()
-        profiles_qs = profiles_qs.prefetch_related('title_set')
-        TITLE_ORDER = dict(BEST=0, FU=1, EFU=2)
-
+        profiles = get_profiles(only_current=False)
         alias_qs = Alias.objects.filter(end_time=None)
         aliases = {}
         for a in alias_qs:
             aliases.setdefault(a.profile_id, []).append(a)
 
-        profiles = []
+        TITLE_ORDER = dict(BEST=0, FU=1, EFU=2)
         GFYEAR = config.GFYEAR
-        for p in profiles_qs:
-            t = []
-            in_current = 0 if p.id in current else 1
-            k = (in_current, 3, p.name)
+
+        for i, profile in enumerate(profiles):
+            titles = []
             for title in p.title_set.all():
-                t_k = (in_current, -title.period, TITLE_ORDER[title.kind], title.root)
-                k = min(k, t_k)
-                t.append(title.input_title(GFYEAR))
+                titles.append(title)
             for title in aliases.get(p.id, ()):
-                try:
-                    kind, root, period = parse_bestfu_alias(
-                        title.input_title(GFYEAR), GFYEAR)
-                except ValueError:
-                    pass
-                else:
-                    t_k = (in_current, -period, TITLE_ORDER[kind], root)
-                    k = min(k, t_k)
-                t.append(title.input_title(GFYEAR))
-            profiles.append(dict(titles=t, sort_key=k, name=p.name, id=p.pk))
-        profiles.sort(key=lambda x: x['sort_key'])
-        for i, x in enumerate(profiles):
-            x['sort_key'] = i
+                titles.append(title)
+            title_input = [t.input_title(GFYEAR) for t in titles]
+            profiles.append(dict(titles=title_input, sort_key=i, name=p.name,
+                                 id=p.pk, in_current=p.in_current))
         return profiles
 
     def get_context_data(self, **kwargs):
