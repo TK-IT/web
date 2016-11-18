@@ -478,9 +478,9 @@ class PaymentBatchCreate(FormView):
             yield (p, balances[p.id])
 
     def get_form_kwargs(self, **kwargs):
-        r = super().__init__(**kwargs)
-        kwargs['amounts'] = self.get_initial_amounts()
-        return kwargs
+        r = super().get_form_kwargs(**kwargs)
+        r['amounts'] = self.get_initial_amounts()
+        return r
 
     def form_valid(self, form):
         payments = []
