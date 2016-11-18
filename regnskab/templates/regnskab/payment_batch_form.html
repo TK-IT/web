@@ -1,7 +1,35 @@
 {% extends "regnskab/base.html" %}
+{% block head %}
+<script>
+function init() {
+    var table = document.getElementById('payment_form');
+    var tbody = table.tBodies[0];
+    var rows = tbody.rows;
+    for (var i = 0; i < rows.length; ++i) {
+        var paid_cell = rows[i].cells[0];
+        var amount_cell = rows[i].cells[2];
+        var paid_input = paid_cell.querySelector('input');
+        var amount_input = amount_cell.querySelector('input');
+        amount_input.addEventListener('input', function () {paid_input.checked=true}, false);
+    }
+}
+window.addEventListener('load', init, false);
+</script>
+{% endblock %}
 {% block content %}
 <form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Opret" />
+    <table id="payment_form">
+        <thead><tr><th></th><th>Navn</th><th>Betalt beløb</th></tr></thead>
+        <tbody>
+    {% for profile, amount, paid in form.profile_fields %}
+    <tr>
+        <td>{{ paid }}{{ paid.errors }}</td>
+        <td><label for="{{ paid.id_for_label }}">{{ profile.display_name }}</label></td>
+        <td>{{ amount }}</td>
+    </tr>
+    {% endfor %}
+        </tbody>
+    </table>
+    <input type="submit" value="Gem betalinger" />
 </form>
 {% endblock %}
