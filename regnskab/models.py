@@ -234,15 +234,19 @@ class Purchase(models.Model):
         verbose_name_plural = verbose_name
 
 
-def compute_balance():
+def compute_balance(profile_ids=None):
     balance = collections.defaultdict(Decimal)
     purchase_qs = Purchase.objects.all()
+    if profile_ids:
+        purchase_qs = purchase_qs.filter(row__profile_id__in=profile_ids)
     purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'))
     purchase_qs = purchase_qs.annotate(amount=F('count') * F('kind__price'))
     purchase_qs = purchase_qs.values_list('profile_id', 'amount')
     for profile, amount in purchase_qs:
         balance[profile] += amount
     payment_qs = Payment.objects.all()
+    if profile_ids:
+        payment_qs = payment_qs.filter(profile_id__in=profile_ids)
     payment_qs = payment_qs.values_list('profile_id', 'amount')
     for profile, amount in payment_qs:
         balance[profile] -= amount
