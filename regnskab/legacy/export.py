@@ -186,9 +186,6 @@ def opdater_titel_broken(titel):
 
 def is_title(titel):
     certain, next_title = opdater_titel_broken(titel)
-    age, root = alder(titel)
-    if certain != (age is not None):
-        raise Exception("opdater_titel and alder disagree on %s" % titel)
     return certain
 
 
