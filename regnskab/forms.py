@@ -60,8 +60,13 @@ class PaymentBatchForm(forms.Form):
                 profile.display_name = profile.name
             self.fields[p + 'paid'] = forms.BooleanField(
                 required=False, label='%s betalt' % profile.display_name)
+            amount_str = '%g' % amount
+            try:
+                int(amount_str)
+            except ValueError:
+                amount_str = '%.2f' % amount
             self.fields[p + 'amount'] = forms.FloatField(
-                initial=amount, label='%s beløb' % profile.display_name,
+                initial=amount_str, label='%s beløb' % profile.display_name,
                 widget=forms.TextInput())
             self._profiles.append(profile)
 
