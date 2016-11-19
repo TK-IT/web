@@ -155,16 +155,18 @@ class SheetRowUpdate(TemplateView):
         TITLE_ORDER = dict(BEST=0, FU=1, EFU=2)
         GFYEAR = config.GFYEAR
 
+        result = []
         for i, profile in enumerate(profiles):
             titles = []
-            for title in p.title_set.all():
+            for title in profile.title_set.all():
                 titles.append(title)
-            for title in aliases.get(p.id, ()):
+            for title in aliases.get(profile.id, ()):
                 titles.append(title)
             title_input = [t.input_title(GFYEAR) for t in titles]
-            profiles.append(dict(titles=title_input, sort_key=i, name=p.name,
-                                 id=p.pk, in_current=p.in_current))
-        return profiles
+            result.append(dict(
+                titles=title_input, sort_key=i, name=profile.name,
+                id=profile.pk, in_current=profile.in_current))
+        return result
 
     def get_context_data(self, **kwargs):
         context_data = super(SheetRowUpdate, self).get_context_data(**kwargs)
