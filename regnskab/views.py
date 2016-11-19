@@ -152,7 +152,6 @@ class SheetRowUpdate(TemplateView):
         for a in alias_qs:
             aliases.setdefault(a.profile_id, []).append(a)
 
-        TITLE_ORDER = dict(BEST=0, FU=1, EFU=2)
         GFYEAR = config.GFYEAR
 
         result = []
