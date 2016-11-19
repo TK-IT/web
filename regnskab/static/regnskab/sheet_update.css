@@ -5,6 +5,7 @@
 	flex-wrap: wrap;
 	height: 40px;
 	align-content: flex-start;
+	overflow: hidden;
 }
 .crosses.column-1 {
 	width: 225px;
