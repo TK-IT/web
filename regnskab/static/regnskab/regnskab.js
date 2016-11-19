@@ -563,7 +563,7 @@ var Sheet = function (_React$Component5) {
             for (var i = 0; i < this.state.rows.length; ++i) {
                 var data = this.state.rows[i];
                 for (var j = 0; j < counts.length; ++j) {
-                    if (data.counts[j] !== null) counts[j] += data.counts[j];
+                    counts[j] += data.counts[j] || 0;
                 }rows.push(React.createElement(SheetRow, { key: i,
                     persons: this.props.persons,
                     columns: data.counts,

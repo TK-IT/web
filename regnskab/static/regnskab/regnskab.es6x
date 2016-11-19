@@ -306,8 +306,7 @@ class Sheet extends React.Component {
         for (let i = 0; i < this.state.rows.length; ++i) {
             let data = this.state.rows[i];
             for (let j = 0; j < counts.length; ++j)
-                if (data.counts[j] !== null)
-                    counts[j] += data.counts[j];
+                counts[j] += (data.counts[j] || 0);
             rows.push(<SheetRow key={i}
                 persons={this.props.persons}
                 columns={data.counts}
