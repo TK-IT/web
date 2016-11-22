@@ -387,6 +387,12 @@ def get_data(git_dir, backup_dir, name_trans=None):
     return persons, regnskab_history
 
 
+def check_gfyear_sorted(iterable):
+    gfyear_list = list(iterable)
+    if gfyear_list != sorted(gfyear_list):
+        raise Exception("gfyear not sorted")
+
+
 def export_data(git_dir, backup_dir, name_trans=None):
     persons, regnskab_history = get_data(git_dir, backup_dir, name_trans)
     by_time = get_person_history(persons)
@@ -396,9 +402,7 @@ def export_data(git_dir, backup_dir, name_trans=None):
     all_names = sorted(by_time[all_times[-1]].keys())
     persons.sort(key=lambda ps: (ps[-1][1], ps[-1][0]))
     gfyears = {k: get_gfyear(r) for k, r in regnskab_history.items()}
-    gfyear_list = [gfyears[k] for k in all_times]
-    if gfyear_list != sorted(gfyear_list):
-        raise Exception("gfyear not sorted")
+    check_gfyear_sorted(gfyears[k] for k in all_times)
 
     def sub_all_persons(persons):
         return {n: p.total - p.senest for n, p in persons.items()}
