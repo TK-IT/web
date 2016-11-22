@@ -445,38 +445,12 @@ def export_data(git_dir, backup_dir, name_trans=None):
                              for name, person in by_time[t1].items()}
         append_reset(time=t1, forbrug_diff=forbrug_before_gf)
 
-    resets[0]['gæld_diff'] = {name: person.gaeld
-                              for name, person in
-                              by_time[resets[0]['time']].items()}
-    for i in range(1, len(resets)):
-        prev_time = resets[i-1]['time']
-        time = resets[i]['time']
-        gæld_diff = {}
-        for name, person in by_time[time].items():
-            try:
-                prev_person = by_time[prev_time][name]
-            except KeyError:
-                prev = 0
-            else:
-                prev = prev_person.gaeld
-            gæld_diff[name] = person.gaeld - prev
-            forbrug = resets[i]['forbrug_diff'][name]
-            # if any(forbrug):
-            #     purchases = get_amount(regnskab_history[time].priser,
-            #                            forbrug)
-            #     expected_diff = purchases - forbrug.betalt
-            #     print('%s\t%s\t%.2f\t%s\t%.2f\t%.2f\t%.2f\t%.2f' %
-            #           (gfyears[time], time, expected_diff-gæld_diff[name] + 0.001,
-            #            name, person.gaeld, prev, gæld_diff[name],
-            #            expected_diff))
-        resets[i]['gæld_diff'] = gæld_diff
-
     KINDS = ['oel', 'xmas', 'vand', 'kasser']
     output = []
+    balance = {}
     for o in resets:
         time = o['time']
         forbrug = o['forbrug_diff']
-        gæld = o['gæld_diff']
         prices = regnskab_history[time].priser
         purchase_kinds = [
             dict(key=k, price=getattr(prices, k))
@@ -503,9 +477,14 @@ def export_data(git_dir, backup_dir, name_trans=None):
             if forbrug[name].andet:
                 others[name] = forbrug[name].andet
             purchase_amount = get_amount(prices, forbrug[name])
-            correction = gæld[name] - (purchase_amount - p.senest.betalt)
+            new_balance = (balance.get(name, 0) +
+                           (purchase_amount - forbrug[name].betalt))
+            actual_balance = p.gaeld
+            correction = actual_balance - new_balance
             if abs(correction) > 0.001:
                 corrections[name] = correction
+                new_balance += correction
+            balance[name] = new_balance
         output.append(dict(
             time=time.strftime('%Y-%m-%dT%H:%M:%S%z'),
             period=gfyears[time],
