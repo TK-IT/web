@@ -57,7 +57,7 @@ har krydset på alle krydslisterne siden sidst regningen blev gjort op.</p>
 <!--<th></th>-->
 <th>Navn</th>
 {% for kind in sheet.purchasekind_set.all %}
-<th>{{ kind.name }}</th>
+<th>{{ kind.short_name }}</th>
 {% endfor %}
 </tr>
 </thead>
