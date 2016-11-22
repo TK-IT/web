@@ -26,8 +26,7 @@ from regnskab.models import (
 )
 
 
-regnskab_permission_required = permission_required(
-    'regnskab.add_sheetrow', raise_exception=True)
+regnskab_permission_required = permission_required('regnskab.add_sheetrow')
 
 
 def get_profiles(only_current):
