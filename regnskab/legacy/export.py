@@ -425,10 +425,11 @@ def export_data(git_dir, backup_dir, name_trans=None):
     for gfyear, times in gfs:
         times = list(times)
         subs = [sub_all_persons(by_time[t]) for t in times]
-        for i in range(1, len(subs)):
-            if not allclose(subs[i-1], subs[i]):
-                f = dict_minus(subs[i], subs[i-1])
-                resets.append(dict(time=times[i-1], forbrug_diff=f))
+        x = zip(subs[:-1], subs[1:], times[:-1])
+        for s1, s2, t in x:
+            if not allclose(s1, s2):
+                f = dict_minus(s2, s1)
+                resets.append(dict(time=t, forbrug_diff=f))
         resets.append(dict(
             time=times[-1],
             forbrug_diff={name: person.senest
