@@ -431,12 +431,9 @@ def export_data(git_dir, backup_dir, name_trans=None):
         # reset_index[0] is the index of the last that's equal to index 0
         if not reset_index:
             continue
-        forbrug_diff = [dict_minus(subs[reset_index[i]+1], subs[reset_index[i]])
-                        for i in range(len(reset_index))]
-        resets.extend(dict(
-            time=times[i],
-            forbrug_diff=f,
-        ) for i, f in zip(reset_index, forbrug_diff))
+        for i in reset_index:
+            f = dict_minus(subs[i+1], subs[i])
+            resets.append(dict(time=times[i], forbrug_diff=f))
         resets.append(dict(
             time=times[-1],
             forbrug_diff={name: person.senest
