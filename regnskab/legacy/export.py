@@ -367,7 +367,7 @@ def main():
         json.dump(output, fp, indent=2)
 
 
-def export_data(git_dir, backup_dir, name_trans=None):
+def get_data(git_dir, backup_dir, name_trans=None):
     if name_trans is None:
         name_trans = {}
     data_sources = []
@@ -382,9 +382,13 @@ def export_data(git_dir, backup_dir, name_trans=None):
     else:
         data_source = heapq.merge(*data_sources)
 
-    persons, regnskab_history = get_data(data_source, name_trans)
+    persons, regnskab_history = parse_regnskab_dat(data_source, name_trans)
     check_name_unique(persons)
+    return persons, regnskab_history
 
+
+def export_data(git_dir, backup_dir, name_trans=None):
+    persons, regnskab_history = get_data(git_dir, backup_dir, name_trans)
     by_time = get_person_history(persons)
     all_times = sorted(by_time.keys())
     # The set of people is monotonically increasing,
@@ -546,7 +550,7 @@ def remove_duplicates(iterable):
         prev = r
 
 
-def get_data(regnskab_dat, name_trans):
+def parse_regnskab_dat(regnskab_dat, name_trans):
     assert isinstance(name_trans, dict)
     regnskab_dat = fix_names(regnskab_dat, name_trans)
     regnskab_dat = remove_duplicates(regnskab_dat)
