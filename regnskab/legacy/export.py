@@ -396,24 +396,6 @@ def export_data(git_dir, backup_dir, name_trans=None):
 
     check_name_unique(persons)
 
-    # TODO: Use p.gaeld to determine payments
-    # rather than depending on p.senest.betalt
-
-    # for person_history in persons:
-    #     gaeld = 0
-    #     p1 = Forbrug(0, 0, 0, 0, 0, 0)
-    #     for p2, t in person_history:
-    #         prices = regnskab_history[t].priser
-    #         diff = p2.total - p1
-    #         if min(diff.oel, diff.xmas, diff.vand, diff.kasser) < -0.1:
-    #             diff = Forbrug(0, 0, 0, 0, 0, betalt=gaeld - p2.gaeld)
-    #         p1 = p2.total
-    #         gaeld += get_amount(prices, diff) - diff.betalt
-    #         print('%s\t%s\t%.2f\t%.2f\t%s' %
-    #               (t, person_history[-1][0].navn, gaeld, p2.gaeld, diff))
-    #         if abs(gaeld - p2.gaeld) > 0.02:
-    #             print("Difference too great")
-
     def sub_all_persons(persons):
         return {n: p.total - p.senest for n, p in persons.items()}
 
