@@ -383,6 +383,8 @@ def export_data(git_dir, backup_dir, name_trans=None):
         data_source = heapq.merge(*data_sources)
 
     persons, regnskab_history = get_data(data_source, name_trans)
+    check_name_unique(persons)
+
     by_time = get_person_history(persons)
     all_times = sorted(by_time.keys())
     # The set of people is monotonically increasing,
@@ -393,8 +395,6 @@ def export_data(git_dir, backup_dir, name_trans=None):
     gfyear_list = [gfyears[k] for k in all_times]
     if gfyear_list != sorted(gfyear_list):
         raise Exception("gfyear not sorted")
-
-    check_name_unique(persons)
 
     def sub_all_persons(persons):
         return {n: p.total - p.senest for n, p in persons.items()}
