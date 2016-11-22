@@ -582,7 +582,7 @@ var Sheet = function (_React$Component5) {
                     React.createElement(
                         'div',
                         { className: 'column column-1' },
-                        'Øl (',
+                        'øl (',
                         counts[0],
                         ')'
                     ),
@@ -596,7 +596,7 @@ var Sheet = function (_React$Component5) {
                     React.createElement(
                         'div',
                         { className: 'column column-2' },
-                        'Guld (',
+                        'guldøl (',
                         counts[2],
                         ')'
                     ),
@@ -610,7 +610,7 @@ var Sheet = function (_React$Component5) {
                     React.createElement(
                         'div',
                         { className: 'column column-3' },
-                        'Vand (',
+                        'sodavand (',
                         counts[4],
                         ')'
                     ),

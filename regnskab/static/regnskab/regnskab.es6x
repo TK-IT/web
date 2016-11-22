@@ -318,11 +318,11 @@ class Sheet extends React.Component {
         return <div className='sheet'>
             <div className="sheetrow sheetrow-header">
                 <div className="name"></div>
-                <div className="column column-1">Øl ({counts[0]})</div>
+                <div className="column column-1">øl ({counts[0]})</div>
                 <div className="column column-1ks">ks ({counts[1]})</div>
-                <div className="column column-2">Guld ({counts[2]})</div>
+                <div className="column column-2">guldøl ({counts[2]})</div>
                 <div className="column column-2ks">ks ({counts[3]})</div>
-                <div className="column column-3">Vand ({counts[4]})</div>
+                <div className="column column-3">sodavand ({counts[4]})</div>
                 <div className="column column-3ks">ks ({counts[5]})</div>
             </div>
             {rows}
