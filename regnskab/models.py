@@ -195,6 +195,12 @@ class PurchaseKind(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2,
                                 help_text='f.eks. 8, 10, 13, 200, 250')
 
+    @property
+    def short_name(self):
+        if self.name.endswith('kasse'):
+            return 'ks'
+        return self.name
+
     class Meta:
         ordering = ['sheet', 'position']
         verbose_name = 'prisklasse'
