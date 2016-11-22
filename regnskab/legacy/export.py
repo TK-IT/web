@@ -471,12 +471,6 @@ def export_data(git_dir, backup_dir, name_trans=None):
             #            expected_diff))
         resets[i]['gæld_diff'] = gæld_diff
 
-        if prev_time.date() == time.date():
-            from pprint import pprint
-            pprint((prev_time, time))
-            pprint(resets[i-1])
-            pprint(resets[i])
-
     KINDS = ['oel', 'xmas', 'vand', 'kasser']
     output = []
     for o in resets:
