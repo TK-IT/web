@@ -12,7 +12,7 @@ class Command(BaseCommand):
         delete_ids = []
         new = []
         for a in qs:
-            if is_title(a.root):
+            if is_title(a.root) and a.period is not None:
                 self.stdout.write(a.display_title(GFYEAR))
                 if a.root.startswith('FU'):
                     kind = Title.FU
