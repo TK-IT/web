@@ -494,14 +494,14 @@ def export_data(git_dir, backup_dir, name_trans=None):
             emails[name] = p.email
             if p.titel and not p.titel.startswith('-'):
                 titles[name] = p.titel.split()[0]
-            if p.senest.betalt:
-                payments[name] = p.senest.betalt
+            if forbrug[name].betalt:
+                payments[name] = forbrug[name].betalt
             for k in KINDS:
                 a = getattr(forbrug[name], k)
                 if a:
                     purchases.setdefault(name, {})[k] = a
-            if p.senest.andet:
-                others[name] = p.senest.andet
+            if forbrug[name].andet:
+                others[name] = forbrug[name].andet
             purchase_amount = get_amount(prices, forbrug[name])
             correction = gæld[name] - (purchase_amount - p.senest.betalt)
             if abs(correction) > 0.001:
