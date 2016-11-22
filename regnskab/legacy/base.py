@@ -31,6 +31,8 @@ class Forbrug(ForbrugBase):
     ZERO = object()
 
     def __add__(self, other):
+        if other is Forbrug.ZERO:
+            return self
         if type(self) != type(other):
             raise TypeError(type(other))
         return type(self)(*[a+b for a, b in zip(self, other)])
