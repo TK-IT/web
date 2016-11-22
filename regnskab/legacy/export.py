@@ -535,6 +535,8 @@ def parse_regnskab_dat(regnskab_dat, name_trans):
     assert isinstance(name_trans, dict)
     regnskab_dat = fix_names(regnskab_dat, name_trans)
     regnskab_dat = remove_duplicates(regnskab_dat)
+    regnskab_dat = ((t, r) for t, r in regnskab_dat
+                    if t.date() != datetime.date(2008, 5, 3))
     # regnskab_dat = ((t, r) for t, r in regnskab_dat for o in [get_gfyear(r)])
 
     dead_leaves = []
