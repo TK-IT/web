@@ -427,6 +427,9 @@ def export_data(git_dir, backup_dir, name_trans=None):
     resets = []
 
     def append_reset(time, forbrug_diff):
+        if resets and resets[-1]['time'].date() == time.date():
+            same_date = resets.pop()
+            forbrug_diff = dict_add(same_date['forbrug_diff'], forbrug_diff)
         resets.append(dict(time=time, forbrug_diff=forbrug_diff))
 
     forbrug_before_gf = {}
