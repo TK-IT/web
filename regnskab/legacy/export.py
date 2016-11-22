@@ -425,6 +425,10 @@ def export_data(git_dir, backup_dir, name_trans=None):
 
     gfs = itertools.groupby(all_times, key=lambda t: gfyears[t])
     resets = []
+
+    def append_reset(time, forbrug_diff):
+        resets.append(dict(time=time, forbrug_diff=forbrug_diff))
+
     forbrug_before_gf = {}
     for gfyear, times in gfs:
         times_subs = ((t, sub_all_persons(by_time[t]))
@@ -434,11 +438,11 @@ def export_data(git_dir, backup_dir, name_trans=None):
         for t2, s2 in times_subs:
             if not allclose(s1, s2):
                 f = dict_minus(s2, s1)
-                resets.append(dict(time=t1, forbrug_diff=f))
+                append_reset(time=t1, forbrug_diff=f)
             t1, s1 = t2, s2
         forbrug_before_gf = {name: person.senest
                              for name, person in by_time[t1].items()}
-    resets.append(dict(time=t1, forbrug_diff=forbrug_before_gf))
+    append_reset(time=t1, forbrug_diff=forbrug_before_gf)
 
     resets[0]['gæld_diff'] = {name: person.gaeld
                               for name, person in
