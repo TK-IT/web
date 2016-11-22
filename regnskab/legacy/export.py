@@ -432,12 +432,10 @@ def export_data(git_dir, backup_dir, name_trans=None):
             forbrug_diff = dict_add(same_date['forbrug_diff'], forbrug_diff)
         resets.append(dict(time=time, forbrug_diff=forbrug_diff))
 
-    forbrug_before_gf = {}
     for gfyear, times in gfs:
         times_subs = ((t, sub_all_persons(by_time[t]))
                       for t in times)
         t1, s1 = next(times_subs)
-        s1 = dict_add(forbrug_before_gf, s1)
         for t2, s2 in times_subs:
             if not allclose(s1, s2):
                 f = dict_minus(s2, s1)
@@ -445,7 +443,7 @@ def export_data(git_dir, backup_dir, name_trans=None):
             t1, s1 = t2, s2
         forbrug_before_gf = {name: person.senest
                              for name, person in by_time[t1].items()}
-    append_reset(time=t1, forbrug_diff=forbrug_before_gf)
+        append_reset(time=t1, forbrug_diff=forbrug_before_gf)
 
     resets[0]['gæld_diff'] = {name: person.gaeld
                               for name, person in
