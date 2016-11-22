@@ -33,6 +33,7 @@ def progress(elements, n=None):
         sys.stderr.write('\n')
         progress.current = progress.total = 0
 
+
 progress.active = progress.current = progress.total = 0
 
 
@@ -100,7 +101,7 @@ def read_regnskab_backups(gitdir):
     files = sorted((f for f in os.scandir(gitdir)
                     if re.match(pattern, f.name)),
                    key=lambda f: f.name)
-    dates = [re.match(pattern, f.name).group(1) for f in files]
+    # dates = [re.match(pattern, f.name).group(1) for f in files]
     mtimes = [f.stat().st_mtime for f in files]
     if mtimes != sorted(set(mtimes)):
         raise ValueError("Duplicate/not sorted modification times")
@@ -399,7 +400,7 @@ def export_data(git_dir, backup_dir, name_trans=None):
     all_times = sorted(by_time.keys())
     # The set of people is monotonically increasing,
     # so the latest regnskab has all the names.
-    all_names = sorted(by_time[all_times[-1]].keys())
+    # all_names = sorted(by_time[all_times[-1]].keys())
     persons.sort(key=lambda ps: (ps[-1][1], ps[-1][0]))
     gfyears = {k: get_gfyear(r) for k, r in regnskab_history.items()}
     check_gfyear_sorted(gfyears[k] for k in all_times)
@@ -457,14 +458,14 @@ def export_data(git_dir, backup_dir, name_trans=None):
                 prev = prev_person.gaeld
             gæld_diff[name] = person.gaeld - prev
             forbrug = resets[i]['forbrug_diff'][name]
-            if any(forbrug):
-                purchases = get_amount(regnskab_history[time].priser,
-                                       forbrug)
-                expected_diff = purchases - forbrug.betalt
-                # print('%s\t%s\t%.2f\t%s\t%.2f\t%.2f\t%.2f\t%.2f' %
-                #       (gfyears[time], time, expected_diff-gæld_diff[name] + 0.001,
-                #        name, person.gaeld, prev, gæld_diff[name],
-                #        expected_diff))
+            # if any(forbrug):
+            #     purchases = get_amount(regnskab_history[time].priser,
+            #                            forbrug)
+            #     expected_diff = purchases - forbrug.betalt
+            #     print('%s\t%s\t%.2f\t%s\t%.2f\t%.2f\t%.2f\t%.2f' %
+            #           (gfyears[time], time, expected_diff-gæld_diff[name] + 0.001,
+            #            name, person.gaeld, prev, gæld_diff[name],
+            #            expected_diff))
         resets[i]['gæld_diff'] = gæld_diff
 
         if prev_time.date() == time.date():
