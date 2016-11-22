@@ -425,15 +425,10 @@ def export_data(git_dir, backup_dir, name_trans=None):
     for gfyear, times in gfs:
         times = list(times)
         subs = [sub_all_persons(by_time[t]) for t in times]
-        reset_index = [i-1 for i in range(1, len(subs))
-                       if not allclose(subs[i-1], subs[i])]
-        # subs[0] should be all zero
-        # reset_index[0] is the index of the last that's equal to index 0
-        if not reset_index:
-            continue
-        for i in reset_index:
-            f = dict_minus(subs[i+1], subs[i])
-            resets.append(dict(time=times[i], forbrug_diff=f))
+        for i in range(1, len(subs)):
+            if not allclose(subs[i-1], subs[i]):
+                f = dict_minus(subs[i], subs[i-1])
+                resets.append(dict(time=times[i-1], forbrug_diff=f))
         resets.append(dict(
             time=times[-1],
             forbrug_diff={name: person.senest
