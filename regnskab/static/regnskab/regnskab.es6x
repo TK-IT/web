@@ -100,7 +100,7 @@ function first_matching_filter(persons, filters) {
             let r = utility_of_filter(f, p);
             if (r !== null) persons_keyed.push([r, p]);
         }
-        if (persons_keyed !== null) return persons_keyed;
+        if (persons_keyed.length !== 0) return persons_keyed;
     }
     return [];
 }
