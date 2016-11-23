@@ -11,7 +11,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 // vim:set ft=javascript sw=4 et:
 
 function prefix_to_age(p) {
-    // Assume p matches tk_prefix in make_utility_function.
+    // Assume p matches tk_prefix in get_query_filters.
     var base_value = { 'K': -1, 'G': 1, 'B': 2, 'O': 3, 'T': 1, '': 1 };
     var pattern = /([KGBOT])([0-9]*)|([0-9]+)/g;
     var mo = void 0;
@@ -164,40 +164,43 @@ function utility_of_filter(filter, person) {
     return null;
 }
 
-function make_utility_function(filters) {
-    return function utility(person) {
-        // Return [j, title],
-        // where j is the index of the function in filters that matched
-        // and title is the title that matched.
-        for (var i = 0; i < filters.length; ++i) {
-            var r = utility_of_filter(filters[i], person);
-            if (r !== null) return [i, r];
-        }
-        return null;
-    };
-}
-
-function filter_persons(persons, query) {
-    if (query === '') {
-        return [];
-    } else if (query === '*') {
-        return persons.map(function (p) {
-            return { 'display': p.title_name + ' ' + p.titles.join(' '), 'person': p };
-        });
-    }
-    var filters = get_query_filters(query);
-    var utility = make_utility_function(filters);
-    var persons_keyed = [];
+function first_matching_filter(persons, filters) {
     var _iteratorNormalCompletion3 = true;
     var _didIteratorError3 = false;
     var _iteratorError3 = undefined;
 
     try {
-        for (var _iterator3 = persons[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-            var p = _step3.value;
+        for (var _iterator3 = filters[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+            var f = _step3.value;
 
-            var u = utility(p);
-            if (u !== null) persons_keyed.push([utility(p), p]);
+            var persons_keyed = [];
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
+
+            try {
+                for (var _iterator4 = persons[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                    var p = _step4.value;
+
+                    var r = utility_of_filter(f, p);
+                    if (r !== null) persons_keyed.push([r, p]);
+                }
+            } catch (err) {
+                _didIteratorError4 = true;
+                _iteratorError4 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                        _iterator4.return();
+                    }
+                } finally {
+                    if (_didIteratorError4) {
+                        throw _iteratorError4;
+                    }
+                }
+            }
+
+            if (persons_keyed.length !== 0) return persons_keyed;
         }
     } catch (err) {
         _didIteratorError3 = true;
@@ -214,11 +217,24 @@ function filter_persons(persons, query) {
         }
     }
 
+    return [];
+}
+
+function filter_persons(persons, query) {
+    if (query === '') {
+        return [];
+    } else if (query === '*') {
+        return persons.map(function (p) {
+            return { 'display': p.title_name + ' ' + p.titles.join(' '), 'person': p };
+        });
+    }
+    var filters = get_query_filters(query);
+    var persons_keyed = first_matching_filter(persons, filters);
     persons_keyed.sort(function (a, b) {
-        return a[0][0] !== b[0][0] ? a[0][0] - b[0][0] : a[1].sort_key - b[1].sort_key;
+        return a[1].sort_key - b[1].sort_key;
     });
     var r = persons_keyed.map(function (x) {
-        return { 'display': (x[0][1] + ' ' + x[1].name).trim(),
+        return { 'display': (x[0] + ' ' + x[1].name).trim(),
             'person': x[1] };
     });
     return r;
@@ -437,7 +453,8 @@ var Name = function (_React$Component3) {
             if (v === '') {
                 p = null;
             } else if (this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id) {
-                p = this.getChoices(v)[0].person.id;
+                var newChoices = this.getChoices(v);
+                if (newChoices.length === 0) p = null;else p = newChoices[0].person.id;
             } else {
                 p = this.props.personValue;
             }
