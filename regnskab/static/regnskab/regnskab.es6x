@@ -93,7 +93,7 @@ function make_utility_function(query) {
                 return [i, ''];
             }
         }
-        return [filters.length, ''];
+        return null;
     }
 }
 
