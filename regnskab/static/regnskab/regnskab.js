@@ -31,7 +31,7 @@ function age_to_prefix(age) {
     if (-1 <= age && age <= 4) return m[age + 1];else if (age < 0) return 'K' + -age;else return 'T' + (age - 3) + 'O';
 }
 
-function make_utility_function(query) {
+function get_query_filters(query) {
     function all_prefixes(s) {
         // Map e.g. "FORM" to "F|FO|FOR|FORM"
         var p = [];
@@ -127,42 +127,51 @@ function make_utility_function(query) {
     filters.push(function (t) {
         return t.indexOf(query) !== -1;
     });
+    return filters;
+}
 
+function utility_of_filter(filter, person) {
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+
+    try {
+        for (var _iterator2 = person.titles[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var title = _step2.value;
+
+            if (filter(title)) {
+                return title;
+            }
+        }
+    } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                _iterator2.return();
+            }
+        } finally {
+            if (_didIteratorError2) {
+                throw _iteratorError2;
+            }
+        }
+    }
+
+    if (filter(person.name)) {
+        return '';
+    }
+    return null;
+}
+
+function make_utility_function(filters) {
     return function utility(person) {
         // Return [j, title],
         // where j is the index of the function in filters that matched
         // and title is the title that matched.
         for (var i = 0; i < filters.length; ++i) {
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
-
-            try {
-                for (var _iterator2 = person.titles[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var title = _step2.value;
-
-                    if (filters[i](title)) {
-                        return [i, title];
-                    }
-                }
-            } catch (err) {
-                _didIteratorError2 = true;
-                _iteratorError2 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                        _iterator2.return();
-                    }
-                } finally {
-                    if (_didIteratorError2) {
-                        throw _iteratorError2;
-                    }
-                }
-            }
-
-            if (filters[i](person.name)) {
-                return [i, ''];
-            }
+            var r = utility_of_filter(filters[i], person);
+            if (r !== null) return [i, r];
         }
         return null;
     };
@@ -176,7 +185,8 @@ function filter_persons(persons, query) {
             return { 'display': p.title_name + ' ' + p.titles.join(' '), 'person': p };
         });
     }
-    var utility = make_utility_function(query);
+    var filters = get_query_filters(query);
+    var utility = make_utility_function(filters);
     var persons_keyed = [];
     var _iteratorNormalCompletion3 = true;
     var _didIteratorError3 = false;
