@@ -164,14 +164,16 @@ function make_utility_function(query) {
                 return [i, ''];
             }
         }
-        return [filters.length, ''];
+        return null;
     };
 }
 
 function filter_persons(persons, query) {
     if (query === '') {
+        return [];
+    } else if (query === '*') {
         return persons.map(function (p) {
-            return { 'display': p.name + ' ' + p.titles.join(' '), 'person': p };
+            return { 'display': p.title_name + ' ' + p.titles.join(' '), 'person': p };
         });
     }
     var utility = make_utility_function(query);
@@ -183,7 +185,9 @@ function filter_persons(persons, query) {
     try {
         for (var _iterator3 = persons[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
             var p = _step3.value;
-            persons_keyed.push([utility(p), p]);
+
+            var u = utility(p);
+            if (u !== null) persons_keyed.push([utility(p), p]);
         }
     } catch (err) {
         _didIteratorError3 = true;
@@ -373,6 +377,9 @@ var PersonChoice = function (_React$Component2) {
         value: function render() {
             var _this6 = this;
 
+            if (this.props.choices.length === 0) {
+                return null;
+            }
             var options = this.props.choices.map(function (_ref2) {
                 var display = _ref2.display;
                 var person = _ref2.person;
@@ -415,7 +422,15 @@ var Name = function (_React$Component3) {
     }, {
         key: 'onNameChange',
         value: function onNameChange(v) {
-            var p = this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id ? this.getChoices(v)[0].person.id : this.props.personValue;
+            v = v.trim();
+            var p = void 0;
+            if (v === '') {
+                p = null;
+            } else if (this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id) {
+                p = this.getChoices(v)[0].person.id;
+            } else {
+                p = this.props.personValue;
+            }
             this.props.onChange(p, v);
         }
     }, {
