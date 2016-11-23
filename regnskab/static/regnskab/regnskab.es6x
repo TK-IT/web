@@ -193,6 +193,9 @@ class PersonChoice extends React.Component {
         this.props.onChange(person.id);
     }
     render() {
+        if (this.props.choices.length === 0) {
+            return null;
+        }
         let options = this.props.choices.map(
             ({display, person}) =>
             <option value={person.id} key={person.id}>{display}</option>);
