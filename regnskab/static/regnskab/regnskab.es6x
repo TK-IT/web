@@ -217,8 +217,15 @@ class Name extends React.Component {
         this.props.onChange(v, this.props.nameValue);
     }
     onNameChange(v) {
-        let p = (this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id) ?
-            this.getChoices(v)[0].person.id : this.props.personValue;
+        v = v.trim();
+        let p;
+        if (v === '') {
+            p = null;
+        } else if (this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id) {
+            p = this.getChoices(v)[0].person.id;
+        } else {
+            p = this.props.personValue;
+        }
         this.props.onChange(p, v);
     }
     getChoices(query) {
