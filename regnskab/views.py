@@ -161,9 +161,12 @@ class SheetRowUpdate(TemplateView):
             for title in aliases.get(profile.id, ()):
                 titles.append(title)
             titles_input = [t.input_title(GFYEAR) for t in titles]
+            title_input = profile.title and profile.title.input_title(GFYEAR)
+            title_name = ' '.join((title_input or '', profile.name)).strip()
             result.append(dict(
-                titles=titles_input, sort_key=i, name=profile.name,
-                id=profile.pk, in_current=profile.in_current))
+                titles=titles_input, title=title_input, sort_key=i,
+                name=profile.name, title_name=title_name, id=profile.pk,
+                in_current=profile.in_current))
         return result
 
     def get_context_data(self, **kwargs):
