@@ -223,7 +223,9 @@ class Name extends React.Component {
         if (v === '') {
             p = null;
         } else if (this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id) {
-            p = this.getChoices(v)[0].person.id;
+            let newChoices = this.getChoices(v);
+            if (newChoices.length === 0) p = null;
+            else p = newChoices[0].person.id;
         } else {
             p = this.props.personValue;
         }
