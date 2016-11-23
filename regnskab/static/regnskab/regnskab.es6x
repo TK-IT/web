@@ -99,7 +99,9 @@ function make_utility_function(query) {
 
 function filter_persons(persons, query) {
     if (query === '') {
-        return persons.map(p => ({'display': p.name + ' ' + p.titles.join(' '), 'person': p}));
+        return [];
+    } else if (query === '*') {
+        return persons.map(p => ({'display': p.title_name + ' ' + p.titles.join(' '), 'person': p}));
     }
     let utility = make_utility_function(query);
     let persons_keyed = [];
