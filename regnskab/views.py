@@ -160,9 +160,9 @@ class SheetRowUpdate(TemplateView):
                 titles.append(title)
             for title in aliases.get(profile.id, ()):
                 titles.append(title)
-            title_input = [t.input_title(GFYEAR) for t in titles]
+            titles_input = [t.input_title(GFYEAR) for t in titles]
             result.append(dict(
-                titles=title_input, sort_key=i, name=profile.name,
+                titles=titles_input, sort_key=i, name=profile.name,
                 id=profile.pk, in_current=profile.in_current))
         return result
 
