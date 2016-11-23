@@ -105,7 +105,10 @@ function filter_persons(persons, query) {
     }
     let utility = make_utility_function(query);
     let persons_keyed = [];
-    for (let p of persons) persons_keyed.push([utility(p), p]);
+    for (let p of persons) {
+        let u = utility(p);
+        if (u !== null) persons_keyed.push([u, p]);
+    }
     persons_keyed.sort((a, b) =>
         (a[0][0] !== b[0][0] ?
          (a[0][0] - b[0][0]) :
