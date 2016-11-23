@@ -1,7 +1,7 @@
 // vim:set ft=javascript sw=4 et:
 
 function prefix_to_age(p) {
-    // Assume p matches tk_prefix in make_utility_function.
+    // Assume p matches tk_prefix in get_query_filters.
     let base_value = {'K': -1, 'G': 1, 'B': 2, 'O': 3, 'T': 1, '': 1};
     let pattern = /([KGBOT])([0-9]*)|([0-9]+)/g;
     let mo;
@@ -93,17 +93,16 @@ function utility_of_filter(filter, person) {
     return null;
 }
 
-function make_utility_function(filters) {
-    return function utility(person) {
-        // Return [j, title],
-        // where j is the index of the function in filters that matched
-        // and title is the title that matched.
-        for (let i = 0; i < filters.length; ++i) {
-            let r = utility_of_filter(filters[i], person);
-            if (r !== null) return [i, r];
+function first_matching_filter(persons, filters) {
+    for (let f of filters) {
+        let persons_keyed = [];
+        for (let p of persons) {
+            let r = utility_of_filter(f, p);
+            if (r !== null) persons_keyed.push([r, p]);
         }
-        return null;
+        if (persons_keyed !== null) return persons_keyed;
     }
+    return [];
 }
 
 function filter_persons(persons, query) {
@@ -113,18 +112,10 @@ function filter_persons(persons, query) {
         return persons.map(p => ({'display': p.title_name + ' ' + p.titles.join(' '), 'person': p}));
     }
     let filters = get_query_filters(query);
-    let utility = make_utility_function(filters);
-    let persons_keyed = [];
-    for (let p of persons) {
-        let u = utility(p);
-        if (u !== null) persons_keyed.push([u, p]);
-    }
-    persons_keyed.sort((a, b) =>
-        (a[0][0] !== b[0][0] ?
-         (a[0][0] - b[0][0]) :
-         (a[1].sort_key - b[1].sort_key)));
+    let persons_keyed = first_matching_filter(persons, filters);;
+    persons_keyed.sort((a, b) => (a[1].sort_key - b[1].sort_key));
     let r = persons_keyed.map(
-        x => ({'display': (x[0][1] + ' ' + x[1].name).trim(),
+        x => ({'display': (x[0] + ' ' + x[1].name).trim(),
                'person': x[1]}));
     return r;
 }
