@@ -14,12 +14,12 @@ from django.views.generic import (
     TemplateView, FormView, ListView, CreateView, UpdateView, DetailView,
 )
 from regnskab.forms import (
-    SheetCreateForm, EmailTemplateForm, EmailBatchForm,
+    SheetCreateForm, EmailTemplateForm, SessionForm,
     PaymentBatchForm,
 )
 from regnskab.models import (
     Sheet, SheetRow, SheetStatus, parse_bestfu_alias, Profile, Alias, Title,
-    EmailTemplate, EmailBatch, Email,
+    EmailTemplate, Session, Email,
     Purchase, Payment,
     compute_balance,
     config,
@@ -27,6 +27,18 @@ from regnskab.models import (
 
 
 regnskab_permission_required = permission_required('regnskab.add_sheetrow')
+
+
+class Home(TemplateView):
+    template_name = 'regnskab/home.html'
+
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        return context_data
 
 
 def get_profiles(only_current):
@@ -315,19 +327,19 @@ class EmailTemplateCreate(CreateView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class EmailBatchList(ListView):
-    template_name = 'regnskab/email_batch_list.html'
-    queryset = EmailBatch.objects.all()
+class SessionList(ListView):
+    template_name = 'regnskab/session_list.html'
+    queryset = Session.objects.all()
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
 
-class EmailBatchUpdate(UpdateView):
-    template_name = 'regnskab/email_batch_form.html'
-    queryset = EmailBatch.objects.all()
-    form_class = EmailBatchForm
+class SessionUpdate(UpdateView):
+    template_name = 'regnskab/session_form.html'
+    queryset = Session.objects.all()
+    form_class = SessionForm
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
@@ -341,6 +353,17 @@ class EmailBatchUpdate(UpdateView):
             success=True,
         )
         return self.render_to_response(context_data)
+
+
+class EmailList(ListView):
+    template_name = 'regnskab/email_list.html'
+
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return Email.objects.filter(session_id=self.kwargs['pk'])
 
 
 class EmailDetail(DetailView):

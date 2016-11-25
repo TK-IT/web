@@ -88,6 +88,8 @@ class Alias(models.Model):
 
 
 class Payment(models.Model):
+    session = models.ForeignKey('Session', on_delete=models.SET_NULL,
+                                null=True, blank=False)
     profile = models.ForeignKey(Profile)
     time = models.DateTimeField()
     amount = models.DecimalField(max_digits=9, decimal_places=2)
@@ -101,6 +103,8 @@ class Payment(models.Model):
 
 
 class Sheet(models.Model):
+    session = models.ForeignKey('Session', on_delete=models.SET_NULL,
+                                null=True, blank=False)
     name = models.CharField(max_length=200, blank=True,
                             help_text='f.eks. HSTR, revy, matlabotanisk have')
     start_date = models.DateField()
@@ -275,14 +279,10 @@ class EmailTemplate(models.Model):
         return self.name or str(self.created_time)
 
 
-class EmailBatch(models.Model):
-    template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL,
-                                 null=True, blank=False)
+class Session(models.Model):
+    email_template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL,
+                                       null=True, blank=False)
     send_time = models.DateTimeField(null=True, blank=True)
-    sheet_set = models.ManyToManyField(Sheet, blank=True,
-                                       verbose_name='krydslister')
-    payment_set = models.ManyToManyField(Payment, blank=True,
-                                         verbose_name='betalinger')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                    null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
@@ -300,7 +300,7 @@ class EmailBatch(models.Model):
 
 
 class Email(models.Model):
-    batch = models.ForeignKey(EmailBatch, on_delete=models.CASCADE)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL,
                                 null=True, blank=False, related_name='+')
     subject = models.TextField(blank=False)

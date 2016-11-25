@@ -1,7 +1,7 @@
 from django.contrib import admin
 from regnskab.models import (
     Profile, Title, Alias, Payment, Sheet, PurchaseKind, SheetRow, Purchase,
-    EmailTemplate, EmailBatch, Email,
+    EmailTemplate, Session, Email,
 )
 
 
@@ -34,7 +34,7 @@ class EmailTemplateAdmin(admin.ModelAdmin):
     list_display = ('subject', 'created_time')
 
 
-class EmailBatchAdmin(admin.ModelAdmin):
+class SessionAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
@@ -50,5 +50,5 @@ admin.site.register(Sheet, SheetAdmin)
 # admin.site.register(SheetRow, SheetRowAdmin)
 # admin.site.register(Purchase, PurchaseAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
-admin.site.register(EmailBatch, EmailBatchAdmin)
+admin.site.register(Session, SessionAdmin)
 # admin.site.register(Email, EmailAdmin)

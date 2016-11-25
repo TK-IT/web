@@ -1,7 +1,7 @@
 import collections
 from django import forms
 from django.core.exceptions import ValidationError
-from regnskab.models import EmailTemplate, EmailBatch, config
+from regnskab.models import EmailTemplate, Session, config
 
 
 class SheetCreateForm(forms.Form):
@@ -38,9 +38,9 @@ class EmailTemplateForm(forms.ModelForm):
         fields = ('name', 'subject', 'body', 'format')
 
 
-class EmailBatchForm(forms.ModelForm):
+class SessionForm(forms.ModelForm):
     class Meta:
-        model = EmailBatch
+        model = Session
         fields = ('template',)
 
 
