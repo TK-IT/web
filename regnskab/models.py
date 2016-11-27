@@ -310,7 +310,8 @@ Balance = namedtuple('Balance', 'profile_id amount'.split())
 
 class Session(models.Model):
     email_template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL,
-                                       null=True, blank=False)
+                                       null=True, blank=False,
+                                       verbose_name='Emailskabelon')
     period = models.IntegerField(verbose_name='Årgang')
     send_time = models.DateTimeField(null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,

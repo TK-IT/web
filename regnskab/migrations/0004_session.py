@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('send_time', models.DateTimeField(blank=True, null=True)),
                 ('created_time', models.DateTimeField(auto_now_add=True)),
                 ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True)),
-                ('email_template', models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, to='regnskab.EmailTemplate', null=True)),
+                ('email_template', models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, verbose_name='Emailskabelon', to='regnskab.EmailTemplate', null=True)),
                 ('payment_set', models.ManyToManyField(verbose_name='betalinger', to='regnskab.Payment', blank=True)),
                 ('sheet_set', models.ManyToManyField(verbose_name='krydslister', to='regnskab.Sheet', blank=True)),
             ],
