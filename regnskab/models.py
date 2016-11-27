@@ -104,6 +104,21 @@ class Payment(models.Model):
         return '%.2f kr.' % self.amount
 
 
+def get_primary_titles(title_qs=None, period=None):
+    if title_qs is None:
+        title_qs = Title.objects.all()
+    if period is not None:
+        period = config.GFYEAR
+    title_qs = title_qs.filter(period__lte=period)
+    title_qs = title_qs.exclude(root='EFUIT', period__lt=period)
+    title_qs = title_qs.order_by('period')
+    titles = {}
+    for t in title_qs:
+        # Override older titles
+        titles[t.profile_id] = t
+    return titles
+
+
 class Sheet(models.Model):
     session = models.ForeignKey('Session', on_delete=models.SET_NULL,
                                 null=True, blank=False)
@@ -148,14 +163,9 @@ class Sheet(models.Model):
                 kinds=purchase_list,
             ))
         profile_ids = set(row['profile'] for row in result)
-        title_qs = Title.objects.filter(profile_id__in=profile_ids)
-        title_qs = title_qs.filter(period__lte=self.period)
-        title_qs = title_qs.exclude(root='EFUIT', period__lt=self.period)
-        title_qs = title_qs.order_by('period')
-        titles = {}
-        for t in title_qs:
-            # Override older titles
-            titles[t.profile_id] = t
+        titles = get_primary_titles(
+            Title.objects.filter(profile_id__in=profile_ids),
+            self.period)
 
         for row in result:
             try:
@@ -303,10 +313,10 @@ class Session(models.Model):
 
         profiles = {p.id: p for p in Profile.objects.all()}
         balances = compute_balance()
+        titles = get_primary_titles(period=self.period)
         for p in profiles.values():
-            p.balance = balances[p.id]
-
-        # TODO get profile titles, pass them to regenerate_email
+            p.balance = balances.get(p.id)
+            p.primary_title = titles.get(p.id)
 
         payments = self.payment_set.all()
         payments = payments.order_by('profile_id')
@@ -342,8 +352,13 @@ class Session(models.Model):
             else:
                 purchases.setdefault(o.name, []).append(o)
 
+        if profile.primary_title:
+            title = profile.primary_title.display_title(self.period)
+        else:
+            title = None
+
         context = {
-            'TITEL ': profile  # TODO
+            'TITEL ': title + ' ' if title else ''
         }
 
 
