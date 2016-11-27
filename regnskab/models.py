@@ -1,3 +1,5 @@
+import heapq
+import itertools
 import collections
 from decimal import Decimal
 
@@ -282,6 +284,7 @@ class EmailTemplate(models.Model):
 class Session(models.Model):
     email_template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL,
                                        null=True, blank=False)
+    period = models.IntegerField(verbose_name='Årgang')
     send_time = models.DateTimeField(null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                    null=True, blank=False)
@@ -295,11 +298,53 @@ class Session(models.Model):
         return bool(self.send_time)
 
     def regenerate_emails(self):
-        if self.template is None:
+        if self.email_template is None:
             raise ValidationError("template required to generate emails")
+
+        profiles = {p.id: p for p in Profile.objects.all()}
+        balances = compute_balance()
+        for p in profiles.values():
+            p.balance = balances[p.id]
+
+        # TODO get profile titles, pass them to regenerate_email
+
         payments = self.payment_set.all()
-        sheets = self.sheet_set.all()
-        # TODO
+        payments = payments.order_by('profile_id')
+
+        kind_qs = PurchaseKind.objects.filter(sheet__session=self)
+        kind_qs = kind_qs.order_by('name', 'price')
+        kind_groups = itertools.groupby(kind_qs, key=lambda k: k.name)
+        kind_price = {n: set(k.price for k in g)
+                      for n, g in kind_groups}
+
+        purchases = Purchase.objects.filter(
+            sheetrow__sheet__session=self)
+        purchases = purchases.annotate(
+            profile_id=F('row__profile_id'),
+            amount=F('count')*F('kind__price'),
+            name=F('kind__name'),
+            price=F('kind__price'))
+        purchases = purchases.order_by('profile_id', 'name')
+
+        data = heapq.merge(payments, purchases, key=lambda o: o.profile_id)
+        data_by_profile = itertools.groupby(data, key=lambda o: o.profile_id)
+
+        for profile_id, profile_data in data_by_profile:
+            self.regenerate_email(
+                kind_price, profiles[profile_id], profile_data)
+
+    def regenerate_email(self, kind_price, profile, data_iterable):
+        payments = []
+        purchases = {}
+        for o in data_iterable:
+            if isinstance(o, Payment):
+                payments.append(o)
+            else:
+                purchases.setdefault(o.name, []).append(o)
+
+        context = {
+            'TITEL ': profile  # TODO
+        }
 
 
 class Email(models.Model):

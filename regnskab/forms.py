@@ -41,7 +41,7 @@ class EmailTemplateForm(forms.ModelForm):
 class SessionForm(forms.ModelForm):
     class Meta:
         model = Session
-        fields = ('template',)
+        fields = ('email_template',)
 
 
 class PaymentBatchForm(forms.Form):

@@ -347,6 +347,10 @@ class EmailTemplateUpdate(UpdateView):
     queryset = EmailTemplate.objects.all()
     form_class = EmailTemplateForm
 
+    def form_valid(self, form):
+        form.save()
+        return redirect('email_template_list')
+
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
@@ -356,6 +360,10 @@ class EmailTemplateCreate(CreateView):
     template_name = 'regnskab/email_template_form.html'
     queryset = EmailTemplate.objects.all()
     form_class = EmailTemplateForm
+
+    def form_valid(self, form):
+        form.save()
+        return redirect('email_template_list')
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
