@@ -41,6 +41,8 @@ function get_query_filters(query) {
     // fu_two_letters is a regex that matches the last two letters of a FU title
     let fu_two_letters = '[A-ZÆØÅ]{2}';
 
+    // Regex matching just a prefix or part of a shorthand prefix.
+    let re_prefix = new RegExp(`^(${tk_prefix})$|^[0-9]$`);
     // Regex matching optional TK prefix followed by a prefix of a BEST title.
     let re_best = new RegExp(`^(${tk_prefix}|)(${best_prefix})$`);
     // Regex matching optional TK prefix followed by FU title.
@@ -50,6 +52,7 @@ function get_query_filters(query) {
 
     // Does the query case insensitively match BEST or FU title?
     let q_upper = query.toUpperCase();
+    let mo_prefix = re_prefix.exec(q_upper);
     let mo_best = re_best.exec(q_upper);
     let mo_fu = re_fu.exec(q_upper);
     let mo_fuan = re_fuan.exec(q_upper);
@@ -76,8 +79,10 @@ function get_query_filters(query) {
         let best_search = best_map[mo_best[2].charAt(0)];
         filters.push(t => (t === prefix + best_search));
     }
-    // Fallback: case sensitive search in title
-    filters.push(t => (t.indexOf(query) !== -1));
+    if (!mo_prefix) {
+        // Fallback: case sensitive search in title
+        filters.push(t => (t.indexOf(query) !== -1));
+    }
     return filters;
 }
 

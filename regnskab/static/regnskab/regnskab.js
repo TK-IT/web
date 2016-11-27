@@ -72,6 +72,8 @@ function get_query_filters(query) {
 
     var fu_two_letters = '[A-ZÆØÅ]{2}';
 
+    // Regex matching just a prefix or part of a shorthand prefix.
+    var re_prefix = new RegExp('^(' + tk_prefix + ')$|^[0-9]$');
     // Regex matching optional TK prefix followed by a prefix of a BEST title.
     var re_best = new RegExp('^(' + tk_prefix + '|)(' + best_prefix + ')$');
     // Regex matching optional TK prefix followed by FU title.
@@ -81,6 +83,7 @@ function get_query_filters(query) {
 
     // Does the query case insensitively match BEST or FU title?
     var q_upper = query.toUpperCase();
+    var mo_prefix = re_prefix.exec(q_upper);
     var mo_best = re_best.exec(q_upper);
     var mo_fu = re_fu.exec(q_upper);
     var mo_fuan = re_fuan.exec(q_upper);
@@ -123,10 +126,12 @@ function get_query_filters(query) {
             });
         })();
     }
-    // Fallback: case sensitive search in title
-    filters.push(function (t) {
-        return t.indexOf(query) !== -1;
-    });
+    if (!mo_prefix) {
+        // Fallback: case sensitive search in title
+        filters.push(function (t) {
+            return t.indexOf(query) !== -1;
+        });
+    }
     return filters;
 }
 
