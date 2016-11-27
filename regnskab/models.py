@@ -436,6 +436,7 @@ class Session(models.Model):
             'TITEL ': title + ' ' if title else '',
             'NAVN': profile.name,
             'BETALT': format_price(payment_sum),
+            'ANDET': format_price(other_sum),
             'POEL': format_price_set(kind_price.get('øl', ())),
             'PVAND': format_price_set(kind_price.get('sodavand', ())),
             'PGULD': format_price_set(kind_price.get('guldøl', ())),
