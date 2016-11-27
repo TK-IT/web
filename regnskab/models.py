@@ -36,6 +36,14 @@ def _import_profile_title():
 Profile, Title, tk_prefix, config, parse_bestfu_alias = _import_profile_title()
 
 
+def get_inka():
+    try:
+        return Profile.objects.get(title__root='INKA',
+                                   title__period=config.GFYEAR)
+    except Profile.DoesNotExist:
+        return Profile()
+
+
 class SheetStatus(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     start_time = models.DateTimeField(blank=True, null=True)
@@ -291,6 +299,10 @@ class EmailTemplate(models.Model):
         return self.name or str(self.created_time)
 
 
+def format(template, context):
+    return re.sub(r'#([^#]*)#', lambda mo: context[mo.group(1)], template)
+
+
 class Session(models.Model):
     email_template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL,
                                        null=True, blank=False)
@@ -336,7 +348,11 @@ class Session(models.Model):
             price=F('kind__price'))
         purchases = purchases.order_by('profile_id', 'name')
 
-        data = heapq.merge(payments, purchases, key=lambda o: o.profile_id)
+        emails = Email.objects.filter(session=self)
+        emails = emails.order_by('profile_id')
+
+        data = heapq.merge(payments, purchases, emails,
+                           key=lambda o: o.profile_id)
         data_by_profile = itertools.groupby(data, key=lambda o: o.profile_id)
 
         for profile_id, profile_data in data_by_profile:
@@ -344,13 +360,32 @@ class Session(models.Model):
                 kind_price, profiles[profile_id], profile_data)
 
     def regenerate_email(self, kind_price, profile, data_iterable):
-        payments = []
-        purchases = {}
+        payment_sum = 0
+        other_sum = 0
+        purchase_count = collections.defaultdict(float)
+        existing_email = None
+
         for o in data_iterable:
             if isinstance(o, Payment):
-                payments.append(o)
+                if o.amount > 0:
+                    payment_sum += o.amount
+                else:
+                    other_sum -= o.amount
+            elif isinstance(o, Email):
+                assert existing_email is None
+                existing_email = o
+            elif isinstance(o, Purchase):
+                purchase_count[o.name] += o.count
             else:
-                purchases.setdefault(o.name, []).append(o)
+                raise TypeError(type(o))
+
+        kasse_count = purchase_count['ølkasse']
+        if 'guldølkasse' in purchase_count:
+            guld_ratio = kind_price['guldølkasse'] / kind_price['ølkasse']
+            kasse_count += guld_ratio * purchase_count['guldølkasse']
+        if 'sodavandkasse' in purchase_count:
+            vand_ratio = kind_price['sodavandkasse'] / kind_price['ølkasse']
+            kasse_count += vand_ratio * purchase_count['sodavandkasse']
 
         if profile.primary_title:
             title = profile.primary_title.display_title(self.period)
@@ -359,7 +394,38 @@ class Session(models.Model):
 
         context = {
             'TITEL ': title + ' ' if title else ''
+            'NAVN': profile.name,
+            'BETALT': payment_sum,
+            'POEL': '/'.join(kind_price.get('øl', ())),
+            'PVAND': '/'.join(kind_price.get('sodavand', ())),
+            'PGULD': '/'.join(kind_price.get('guldøl', ())),
+            'PKASSER': '/'.join(kind_price.get('ølkasse', ())),
+            'GAELD': profile.balance,
+            'MAXGAELD': 250,  # TODO make this configurable
+            'OEL': purchase_count.get('øl', 0),
+            'VAND': purchase_count.get('sodavand', 0),
+            'GULD': purchase_count.get('guldøl', 0),
+            'KASSER': kasse_count,
+            'INKA': get_inka().name,
         }
+
+        email_fields = ('subject', 'body', 'recipient_name', 'recipient_email')
+        email = Email(
+            session=self,
+            profile=profile,
+            subject=format(self.email_template.subject, context),
+            body=format(self.email_template.body, context),
+            recipient_name=profile.name,
+            recipient_email=profile.email,
+        )
+        if existing:
+            changed = any(getattr(email, k) != getattr(existing, k)
+                          for k in email_fields)
+            if changed:
+                email.pk = existing.pk
+            else:
+                return
+        email.save()
 
 
 class Email(models.Model):

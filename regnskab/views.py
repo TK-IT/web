@@ -21,7 +21,7 @@ from regnskab.models import (
     Sheet, SheetRow, SheetStatus, parse_bestfu_alias, Profile, Alias, Title,
     EmailTemplate, Session, Email,
     Purchase, Payment,
-    compute_balance,
+    compute_balance, get_inka,
     config,
 )
 
@@ -42,13 +42,8 @@ class Home(TemplateView):
             latest_session = Session.objects.latest()
         except Session.DoesNotExist:
             latest_session = None
-        try:
-            inka_profile = Profile.objects.get(title__root='INKA',
-                                               title__period=config.GFYEAR)
-        except Profile.DoesNotExist:
-            inka_profile = None
         context_data['latest_session'] = latest_session
-        context_data['inka'] = inka_profile
+        context_data['inka'] = get_inka()
         return context_data
 
 
