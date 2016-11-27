@@ -3,15 +3,17 @@ from decimal import Decimal
 import json
 
 from django.core.exceptions import ValidationError
+from django.http import Http404
 from django.db import models
-from django.db.models import F, Value
+from django.db.models import F, Value, Count
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+import django.core.mail
 from django.contrib.auth.decorators import permission_required
 from django.template.defaultfilters import floatformat
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
-    TemplateView, FormView, ListView, CreateView, UpdateView, DetailView,
+    View, TemplateView, FormView, ListView, CreateView, UpdateView, DetailView,
 )
 from regnskab.forms import (
     SheetCreateForm, EmailTemplateForm, SessionForm,
@@ -170,6 +172,8 @@ class SheetRowUpdate(TemplateView):
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
+        self.sheet = self.get_sheet()
+        self.regnskab_session = self.sheet.session
         return super().dispatch(request, *args, **kwargs)
 
     def get_sheet(self):
@@ -202,7 +206,7 @@ class SheetRowUpdate(TemplateView):
 
     def get_context_data(self, **kwargs):
         context_data = super(SheetRowUpdate, self).get_context_data(**kwargs)
-        sheet = context_data['sheet'] = self.get_sheet()
+        sheet = context_data['sheet'] = self.sheet
         profiles = self.get_profiles()
         context_data['profiles_json'] = json.dumps(profiles, indent=2)
         if 'rows_json' not in context_data:
@@ -220,6 +224,8 @@ class SheetRowUpdate(TemplateView):
                 ))
             context_data['rows_json'] = json.dumps(row_data, indent=2)
 
+        context_data['session'] = self.regnskab_session
+
         return context_data
 
     def post_invalid(self, request, message):
@@ -227,7 +233,7 @@ class SheetRowUpdate(TemplateView):
             self.get_context_data(error=message, rows_json=request.POST['data']))
 
     def clean(self, data_json):
-        sheet = self.get_sheet()
+        sheet = self.sheet
         kinds = list(sheet.purchasekind_set.all())
         try:
             row_data = json.loads(data_json)
@@ -274,7 +280,7 @@ class SheetRowUpdate(TemplateView):
             return (r['profile'].id, r['name'], r['position'],
                     [(p.kind_id, p.count) for p in r['kinds']])
 
-        sheet = self.get_sheet()
+        sheet = self.sheet
         existing = sheet.rows()
 
         delete = []
@@ -313,6 +319,8 @@ class SheetRowUpdate(TemplateView):
         except ValidationError as exn:
             return self.post_invalid(request, str(exn))
         self.save_rows(row_objects)
+        if self.regnskab_session:
+            self.regnskab_session.regenerate_emails()
         return self.render_to_response(
             self.get_context_data(saved=True))
 
@@ -367,11 +375,16 @@ class EmailTemplateCreate(CreateView):
 
 class SessionList(ListView):
     template_name = 'regnskab/session_list.html'
-    queryset = Session.objects.all()
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = Session.objects.all()
+        queryset = queryset.annotate(sheet_count=Count('sheet'),
+                                     payment_count=Count('payment'))
+        return queryset
 
 
 class SessionUpdate(UpdateView):
@@ -398,10 +411,18 @@ class EmailList(ListView):
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
+        self.regnskab_session = get_object_or_404(
+            Session.objects, pk=kwargs['pk'])
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         return Email.objects.filter(session_id=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['session'] = self.regnskab_session
+        context_data['editable'] = not self.regnskab_session.sent
+        return context_data
 
 
 class EmailDetail(DetailView):
@@ -413,9 +434,33 @@ class EmailDetail(DetailView):
 
     def get_object(self):
         return get_object_or_404(
-            Email,
-            batch_id=self.kwargs['pk'],
+            Email.objects,
+            session_id=self.kwargs['pk'],
             profile_id=self.kwargs['profile'])
+
+
+class EmailSend(View):
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, pk, profile=None):
+        regnskab_session = get_object_or_404(Session.objects, pk=pk)
+        if profile is None:
+            qs = Email.objects.filter(session=regnskab_session)
+        else:
+            p = get_object_or_404(Profile.objects, pk=profile)
+            qs = Email.objects.filter(session=regnskab_session, profile=p)
+
+        emails = list(qs)
+        if not emails:
+            raise Http404()
+        messages = [e.to_message() for e in emails]
+        email_backend = django.core.mail.get_connection()
+        email_backend.send_messages(messages)
+        regnskab_session.send_time = timezone.now()
+        regnskab_session.save()
+        return redirect('home')
 
 
 class ProfileList(TemplateView):
@@ -536,6 +581,8 @@ class PaymentBatchCreate(FormView):
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
+        self.regnskab_session = get_object_or_404(
+            Session.objects, pk=kwargs['pk'])
         return super().dispatch(request, *args, **kwargs)
 
     def get_initial_amounts(self):
@@ -557,6 +604,8 @@ class PaymentBatchCreate(FormView):
             if paid:
                 payments.append(Payment(
                     profile=profile, time=now, amount=amount,
-                    created_by=self.request.user))
+                    created_by=self.request.user,
+                    session=self.regnskab_session))
         Payment.objects.bulk_create(payments)
-        return redirect('payment_batch_create')
+        self.regnskab_session.regenerate_emails()
+        return redirect('payment_batch_create', pk=self.regnskab_session.pk)

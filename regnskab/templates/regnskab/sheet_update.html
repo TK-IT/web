@@ -17,6 +17,9 @@ href="{% static 'regnskab/sheet_update.css' %}" />
 
 {% if error %}<p>Der er sket en fejl. {{ error }}</p>{% endif %}
 
+{% if session %}<p><a href="{% url 'session_update' pk=session.pk %}">
+    Gå tilbage til opgørelsen</a></p>{% endif %}
+
 <form method="post">{% csrf_token %}
 <input type="hidden" name="data" id="tk_rows" value="{{ rows_json }}" />
 <div id="sheet-container"></div>

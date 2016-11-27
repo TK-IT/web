@@ -1,0 +1,26 @@
+{% extends "regnskab/base.html" %}
+{% block content %}
+<h1>Emails</h1>
+{% if object_list %}
+<table>
+    <thead>
+        <tr>
+            <th>Modtager</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in object_list %}
+        <tr>
+            <td><a href="{% url 'email_detail' pk=session.pk profile=o.profile_id %}">
+                    {{ o }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<form method="post" action="{% url 'email_send' pk=session.pk %}">{% csrf_token %}
+    <input type="submit" value="Send alle" />
+</form>
+{% else %}
+<p>Ingen emails</p>
+{% endif %}
+{% endblock %}

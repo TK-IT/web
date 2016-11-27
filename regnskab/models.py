@@ -1,3 +1,4 @@
+import re
 import heapq
 import itertools
 import collections
@@ -8,6 +9,7 @@ from django.db import models
 from django.db.models import F
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.core.mail import EmailMessage
 
 
 def _import_profile_title():
@@ -340,7 +342,7 @@ class Session(models.Model):
                       for n, g in kind_groups}
 
         purchases = Purchase.objects.filter(
-            sheetrow__sheet__session=self)
+            row__sheet__session=self)
         purchases = purchases.annotate(
             profile_id=F('row__profile_id'),
             amount=F('count')*F('kind__price'),
@@ -362,7 +364,7 @@ class Session(models.Model):
     def regenerate_email(self, kind_price, profile, data_iterable):
         payment_sum = 0
         other_sum = 0
-        purchase_count = collections.defaultdict(float)
+        purchase_count = collections.defaultdict(Decimal)
         existing_email = None
 
         for o in data_iterable:
@@ -381,10 +383,12 @@ class Session(models.Model):
 
         kasse_count = purchase_count['ølkasse']
         if 'guldølkasse' in purchase_count:
-            guld_ratio = kind_price['guldølkasse'] / kind_price['ølkasse']
+            guld_ratio = (next(iter(kind_price['guldølkasse'])) /
+                          next(iter(kind_price['ølkasse'])))
             kasse_count += guld_ratio * purchase_count['guldølkasse']
         if 'sodavandkasse' in purchase_count:
-            vand_ratio = kind_price['sodavandkasse'] / kind_price['ølkasse']
+            vand_ratio = (next(iter(kind_price['sodavandkasse'])) /
+                          next(iter(kind_price['ølkasse'])))
             kasse_count += vand_ratio * purchase_count['sodavandkasse']
 
         if profile.primary_title:
@@ -392,20 +396,29 @@ class Session(models.Model):
         else:
             title = None
 
+        def format_price(p):
+            return ('%.2f' % p).replace('.', ',')
+
+        def format_price_set(ps):
+            return '/'.join(map(format_price, sorted(ps)))
+
+        def format_count(c):
+            return ('%.2f' % c).rstrip('0').rstrip('.').replace('.', ',')
+
         context = {
             'TITEL ': title + ' ' if title else '',
             'NAVN': profile.name,
-            'BETALT': payment_sum,
-            'POEL': '/'.join(kind_price.get('øl', ())),
-            'PVAND': '/'.join(kind_price.get('sodavand', ())),
-            'PGULD': '/'.join(kind_price.get('guldøl', ())),
-            'PKASSER': '/'.join(kind_price.get('ølkasse', ())),
-            'GAELD': profile.balance,
-            'MAXGAELD': 250,  # TODO make this configurable
-            'OEL': purchase_count.get('øl', 0),
-            'VAND': purchase_count.get('sodavand', 0),
-            'GULD': purchase_count.get('guldøl', 0),
-            'KASSER': kasse_count,
+            'BETALT': format_price(payment_sum),
+            'POEL': format_price_set(kind_price.get('øl', ())),
+            'PVAND': format_price_set(kind_price.get('sodavand', ())),
+            'PGULD': format_price_set(kind_price.get('guldøl', ())),
+            'PKASSER': format_price_set(kind_price.get('ølkasse', ())),
+            'GAELD': format_price(profile.balance),
+            'MAXGAELD': format_price(250),  # TODO make this configurable
+            'OEL': format_count(purchase_count.get('øl', 0)),
+            'VAND': format_count(purchase_count.get('sodavand', 0)),
+            'GULD': format_count(purchase_count.get('guldøl', 0)),
+            'KASSER': format_count(kasse_count),
             'INKA': get_inka().name,
         }
 
@@ -418,11 +431,11 @@ class Session(models.Model):
             recipient_name=profile.name,
             recipient_email=profile.email,
         )
-        if existing:
-            changed = any(getattr(email, k) != getattr(existing, k)
+        if existing_email:
+            changed = any(getattr(email, k) != getattr(existing_email, k)
                           for k in email_fields)
             if changed:
-                email.pk = existing.pk
+                email.pk = existing_email.pk
             else:
                 return
         email.save()
@@ -439,3 +452,15 @@ class Email(models.Model):
 
     def __str__(self):
         return '%s <%s>' % (self.recipient_name, self.recipient_email)
+
+    def to_message(self):
+        headers = {
+            'From': 'INKA@TAAGEKAMMERET.dk',
+        }
+        return EmailMessage(
+            subject=self.subject,
+            body=self.body,
+            from_email='admin@TAAGEKAMMERET.dk',
+            reply_to=['INKA@TAAGEKAMMERET.dk'],
+            to=['%s <%s>' % (self.recipient_name, self.recipient_email)],
+            headers=headers)

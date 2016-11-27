@@ -2,11 +2,14 @@
 {% block content %}
 <h1>Opgørelse</h1>
 <p>Sendt:
-{% if object.send_time %}{{ object.send_time }}{% else %}
+{% if object.sent %}
+{{ object.send_time }}.
+<a href="{% url 'email_list' pk=object.pk %}">Vis sendte emails</a>
+{% else %}
 Ikke endnu. <a href="{% url 'email_list' pk=object.pk %}">Gå til udsendelse</a>
 {% endif %}</p>
 
-{% if not object.send_time %}
+{% if not object.sent %}
 <form method="post">{% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Gem" />
@@ -16,14 +19,17 @@ Ikke endnu. <a href="{% url 'email_list' pk=object.pk %}">Gå til udsendelse</a>
 <p>Krydslister:</p>
 <ul>
     {% for s in object.sheet_set.all %}
+    {% if object.sent %}
+    <li><a href="{% url 'sheet_detail' pk=s.pk %}">{{ s }}</a></li>
+    {% else %}
     <li><a href="{% url 'sheet_update' pk=s.pk %}">{{ s }}</a></li>
+    {% endif %}
     {% endfor %}
 </ul>
 
-{% if not object.send_time %}
-<form method="post" action="{% url 'sheet_create' session=object.pk %}">{% csrf_token %}
-    <input type="submit" value="Tilføj krydsliste til opgørelse" />
-</form>
+{% if not object.sent %}
+<p><a href="{% url 'sheet_create' session=object.pk %}">
+    Tilføj krydsliste til opgørelse</a></p>
 
 <p><a href="{% url 'payment_batch_create' pk=object.pk %}">Tilføj betalinger</a></p>
 {% endif %}

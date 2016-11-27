@@ -7,6 +7,9 @@
 <p>Seneste krydslisteopgørelse:
 {% if latest_session %}
 <a href="{% url 'session_update' pk=latest_session.pk %}">{{ latest_session.created_time }}</a>
+{% if latest_session.sent %}
+udsendt {{ latest_session.send_time }}
+{% endif %}
 {% else %}
 Ingen endnu
 {% endif %}
@@ -15,6 +18,8 @@ Ingen endnu
 <form method="post" action="{% url 'session_create' %}">{% csrf_token %}
     <input type="submit" value="Begynd ny opgørelse" />
 </form>
+
+<p><a href="{% url 'session_list' %}">Vis alle opgørelser</a></p>
 
 <p><a href="{% url 'profile_list' %}">Vis liste af personer</a></p>
 
