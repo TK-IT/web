@@ -4,4 +4,9 @@
 <p>Til: <tt>{{ object.recipient_email }}</tt></p>
 <p>Emne: <tt>{{ object.subject }}</tt></p>
 <pre>{{ object.body }}</pre>
+<h2>Send kopi</h2>
+<form method="post" action="{% url 'email_send' pk=session.pk profile=profile.pk %}">{% csrf_token %}
+    <p><label>Modtager: <input name="override_recipient"></label></p>
+    <p><input type="submit" value="Send kopi" /></p>
+</form>
 {% endblock %}
