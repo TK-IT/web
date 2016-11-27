@@ -478,6 +478,7 @@ class Email(models.Model):
     def to_message(self):
         headers = {
             'From': 'INKA@TAAGEKAMMERET.dk',
+            'Organization': 'TÅGEKAMMERET',
         }
         return EmailMessage(
             subject=self.subject,

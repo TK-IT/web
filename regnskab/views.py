@@ -508,13 +508,31 @@ class ProfileDetail(TemplateView):
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
+        self.profile = get_object_or_404(Profile.objects, pk=self.kwargs['pk'])
+        try:
+            self.sheetstatus = SheetStatus.objects.get(
+                profile=self.profile, end_time=None)
+        except SheetStatus.DoesNotExist:
+            self.sheetstatus = None
         return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if self.sheetstatus:
+            self.sheetstatus.end_time = timezone.now()
+            self.sheetstatus.save()
+            self.sheetstatus = None
+        else:
+            self.sheetstatus = SheetStatus.objects.create(
+                profile=self.profile,
+                start_time=timezone.now(),
+                created_by=self.request.user)
+        return self.render_to_response(self.get_context_data())
 
     def get_context_data(self, **kwargs):
         context_data = super(ProfileDetail, self).get_context_data(**kwargs)
 
-        profile = get_object_or_404(Profile.objects, pk=self.kwargs['pk'])
-        context_data['profile'] = profile
+        profile = context_data['profile'] = self.profile
+        context_data['sheetstatus'] = self.sheetstatus
 
         purchase_qs = Purchase.objects.all()
         purchase_qs = purchase_qs.filter(row__profile=profile)

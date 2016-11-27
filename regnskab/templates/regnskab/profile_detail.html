@@ -1,6 +1,13 @@
 {% extends "regnskab/base.html" %}
 {% block content %}
 <h1>{{ profile }}</h1>
+<form method="post">{% csrf_token %}
+    {% if sheetstatus %}
+    <input type="submit" value="Fjern fra krydslisten" />
+    {% else %}
+    <input type="submit" value="Tilføj til krydslisten" />
+    {% endif %}
+</form>
 <table>
     <thead>
         <tr>
