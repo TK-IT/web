@@ -1,0 +1,20 @@
+{% extends "regnskab/base.html" %}
+{% block content %}
+<h1>INKAs regnskab</h1>
+
+<p>Velkommen {{ inka.name }}</p>
+
+<p>Seneste krydslisteopgørelse:
+{% if latest_session %}
+<a href="{% url 'session_update' pk=latest_session.pk %}">{{ latest_session.created_time }}</a>
+{% else %}
+Ingen endnu
+{% endif %}
+</p>
+
+<form method="post" action="{% url 'session_create' %}">{% csrf_token %}
+    <input type="submit" value="Begynd ny opgørelse" />
+</form>
+
+<p><a href="{% url 'profile_list' %}">Vis liste af personer</a></p>
+{% endblock %}

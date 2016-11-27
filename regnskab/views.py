@@ -42,8 +42,23 @@ class Home(TemplateView):
             latest_session = Session.objects.latest()
         except Session.DoesNotExist:
             latest_session = None
+        try:
+            inka_profile = Profile.objects.get(title__root='INKA',
+                                               title__period=config.GFYEAR)
+        except Profile.DoesNotExist:
+            inka_profile = None
         context_data['latest_session'] = latest_session
+        context_data['inka'] = inka_profile
         return context_data
+
+
+class SessionCreate(TemplateView):
+    template_name = 'regnskab/session_create.html'
+
+    def post(self, request):
+        session = Session(created_by=self.request.user)
+        session.save()
+        return redirect('session_update', pk=session.pk)
 
 
 def get_profiles(only_current):
@@ -117,7 +132,8 @@ class SheetCreate(FormView):
         s = Sheet(name=data['name'],
                   start_date=data['start_date'],
                   end_date=data['end_date'],
-                  period=data['period'])
+                  period=data['period'],
+                  created_by=self.request.user)
         s.save()
         for i, kind in enumerate(data['kinds']):
             s.purchasekind_set.create(

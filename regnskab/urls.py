@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 
 from regnskab.views import (
-    Home,
+    Home, SessionCreate,
     SheetCreate, SheetDetail, SheetRowUpdate,
     EmailTemplateList, EmailTemplateUpdate, EmailTemplateCreate,
     SessionList, SessionUpdate, EmailList, EmailDetail,
@@ -38,6 +38,8 @@ urlpatterns = [
         name='email_template_create'),
     url(r'^session/$', SessionList.as_view(),
         name='session_list'),
+    url(r'^session/new/$', SessionCreate.as_view(),
+        name='session_create'),
     url(r'^session/(?P<pk>\d+)/$', SessionUpdate.as_view(),
         name='session_update'),
     url(r'^session/(?P<pk>\d+)/email/$', EmailList.as_view(),
