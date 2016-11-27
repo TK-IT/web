@@ -465,17 +465,20 @@ class EmailSend(View):
         if not emails:
             raise Http404()
 
-        override_recipient = self.request.POST.get('override_recipient')
-
         messages = [e.to_message() for e in emails]
+        override_recipient = (len(messages) == 1 and
+                              self.request.POST.get('override_recipient'))
         if override_recipient:
             for m in messages:
                 m.to = [override_recipient]
         email_backend = django.core.mail.get_connection()
         email_backend.send_messages(messages)
-        regnskab_session.send_time = timezone.now()
-        regnskab_session.save()
-        return redirect('home')
+        if override_recipient:
+            return redirect('email_list', pk=emails[0].session_id)
+        else:
+            regnskab_session.send_time = timezone.now()
+            regnskab_session.save()
+            return redirect('home')
 
 
 class ProfileList(TemplateView):
