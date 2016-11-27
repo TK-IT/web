@@ -25,6 +25,7 @@ class Migration(migrations.Migration):
                 ('payment_set', models.ManyToManyField(verbose_name='betalinger', to='regnskab.Payment', blank=True)),
                 ('sheet_set', models.ManyToManyField(verbose_name='krydslister', to='regnskab.Sheet', blank=True)),
             ],
+            options={'get_latest_by': 'created_time'},
         ),
         migrations.RemoveField(
             model_name='emailbatch',

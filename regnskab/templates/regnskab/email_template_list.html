@@ -18,7 +18,7 @@
             <td><a href="{% url 'email_template_update' pk=o.pk %}">
                     {{ o.name }}</a></td>
             <td>{{ o.created_time }}</td>
-            <td><!-- TODO --></td>
+            <td>{{ o.latest_session.send_time }}</td>
         </tr>
         {% endfor %}
     </tbody>

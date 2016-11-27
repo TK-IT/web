@@ -107,6 +107,8 @@ class SheetCreate(FormView):
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
+        self.regnskab_session = get_object_or_404(
+            Session.objects, pk=kwargs['session'])
         return super().dispatch(request, *args, **kwargs)
 
     def get_initial(self):
@@ -133,7 +135,8 @@ class SheetCreate(FormView):
                   start_date=data['start_date'],
                   end_date=data['end_date'],
                   period=data['period'],
-                  created_by=self.request.user)
+                  created_by=self.request.user,
+                  session=self.regnskab_session)
         s.save()
         for i, kind in enumerate(data['kinds']):
             s.purchasekind_set.create(
@@ -322,6 +325,17 @@ class SheetRowUpdate(TemplateView):
 class EmailTemplateList(ListView):
     template_name = 'regnskab/email_template_list.html'
     queryset = EmailTemplate.objects.all()
+
+    def get_queryset(self):
+        qs = list(super().get_queryset())
+        sessions = Session.objects.all()
+        sessions = sessions.exclude(send_time=None)
+        sessions = sessions.order_by('email_template_id', '-send_time')
+        groups = itertools.groupby(sessions, key=lambda s: s.email_template_id)
+        latest = {k: next(g) for k, g in groups}
+        for o in qs:
+            o.latest_session = latest.get(o.id)
+        return qs
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
