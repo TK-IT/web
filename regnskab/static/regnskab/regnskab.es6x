@@ -218,9 +218,8 @@ class Name extends React.Component {
         this.props.onChange(v, this.props.nameValue);
     }
     onNameChange(v) {
-        v = v.trim();
         let p;
-        if (v === '') {
+        if (v.trim() === '') {
             p = null;
         } else if (this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id) {
             let newChoices = this.getChoices(v);

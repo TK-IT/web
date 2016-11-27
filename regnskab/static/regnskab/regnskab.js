@@ -448,9 +448,8 @@ var Name = function (_React$Component3) {
     }, {
         key: 'onNameChange',
         value: function onNameChange(v) {
-            v = v.trim();
             var p = void 0;
-            if (v === '') {
+            if (v.trim() === '') {
                 p = null;
             } else if (this.props.personValue === null || this.props.personValue === this.getChoices()[0].person.id) {
                 var newChoices = this.getChoices(v);
