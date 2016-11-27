@@ -393,7 +393,7 @@ class Session(models.Model):
             title = None
 
         context = {
-            'TITEL ': title + ' ' if title else ''
+            'TITEL ': title + ' ' if title else '',
             'NAVN': profile.name,
             'BETALT': payment_sum,
             'POEL': '/'.join(kind_price.get('øl', ())),
