@@ -1,7 +1,7 @@
 import re
 import heapq
 import itertools
-import collections
+from collections import namedtuple, defaultdict
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
@@ -267,7 +267,7 @@ class Purchase(models.Model):
 
 
 def compute_balance(profile_ids=None):
-    balance = collections.defaultdict(Decimal)
+    balance = defaultdict(Decimal)
     purchase_qs = Purchase.objects.all()
     if profile_ids:
         purchase_qs = purchase_qs.filter(row__profile_id__in=profile_ids)
@@ -305,6 +305,9 @@ def format(template, context):
     return re.sub(r'#([^#]*)#', lambda mo: context[mo.group(1)], template)
 
 
+Balance = namedtuple('Balance', 'profile_id amount'.split())
+
+
 class Session(models.Model):
     email_template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL,
                                        null=True, blank=False)
@@ -325,12 +328,14 @@ class Session(models.Model):
         if self.email_template is None:
             raise ValidationError("template required to generate emails")
 
-        profiles = {p.id: p for p in Profile.objects.all()}
+        profiles = Profile.objects.all().annotate(profile_id=F('id'))
+        profiles = profiles.order_by('profile_id')
         balances = compute_balance()
+        balances = [Balance(profile_id=i, amount=a)
+                    for i, a in balances.items()]
+        balances.sort(key=lambda o: o.profile_id)
         titles = get_primary_titles(period=self.period)
-        for p in profiles.values():
-            p.balance = balances.get(p.id)
-            p.primary_title = titles.get(p.id)
+        titles = sorted(titles.values(), key=lambda o: o.profile_id)
 
         payments = self.payment_set.all()
         payments = payments.order_by('profile_id')
@@ -353,19 +358,22 @@ class Session(models.Model):
         emails = Email.objects.filter(session=self)
         emails = emails.order_by('profile_id')
 
-        data = heapq.merge(payments, purchases, emails,
-                           key=lambda o: o.profile_id)
+        data = heapq.merge(profiles, payments, purchases, emails, balances,
+                           titles, key=lambda o: o.profile_id)
         data_by_profile = itertools.groupby(data, key=lambda o: o.profile_id)
 
         for profile_id, profile_data in data_by_profile:
             self.regenerate_email(
-                kind_price, profiles[profile_id], profile_data)
+                kind_price, profile_data)
 
-    def regenerate_email(self, kind_price, profile, data_iterable):
+    def regenerate_email(self, kind_price, data_iterable):
         payment_sum = 0
         other_sum = 0
-        purchase_count = collections.defaultdict(Decimal)
+        purchase_count = defaultdict(Decimal)
         existing_email = None
+        primary_title = None
+        balance = 0
+        profile = None
 
         for o in data_iterable:
             if isinstance(o, Payment):
@@ -378,8 +386,22 @@ class Session(models.Model):
                 existing_email = o
             elif isinstance(o, Purchase):
                 purchase_count[o.name] += o.count
+            elif isinstance(o, Title):
+                assert primary_title is None
+                primary_title = o
+            elif isinstance(o, Balance):
+                balance = o.amount
+            elif isinstance(o, Profile):
+                profile = o
             else:
                 raise TypeError(type(o))
+
+        activity = (balance > 0 or any(purchase_count.values()) or
+                    payment_sum or other_sum)
+        if not activity or not profile.email:
+            if existing_email:
+                existing_email.delete()
+            return
 
         kasse_count = purchase_count['ølkasse']
         if 'guldølkasse' in purchase_count:
@@ -391,8 +413,8 @@ class Session(models.Model):
                           next(iter(kind_price['ølkasse'])))
             kasse_count += vand_ratio * purchase_count['sodavandkasse']
 
-        if profile.primary_title:
-            title = profile.primary_title.display_title(self.period)
+        if primary_title:
+            title = primary_title.display_title(self.period)
         else:
             title = None
 
@@ -413,7 +435,7 @@ class Session(models.Model):
             'PVAND': format_price_set(kind_price.get('sodavand', ())),
             'PGULD': format_price_set(kind_price.get('guldøl', ())),
             'PKASSER': format_price_set(kind_price.get('ølkasse', ())),
-            'GAELD': format_price(profile.balance),
+            'GAELD': format_price(balance),
             'MAXGAELD': format_price(250),  # TODO make this configurable
             'OEL': format_count(purchase_count.get('øl', 0)),
             'VAND': format_count(purchase_count.get('sodavand', 0)),

@@ -53,7 +53,7 @@ class SessionCreate(TemplateView):
     template_name = 'regnskab/session_create.html'
 
     def post(self, request):
-        session = Session(created_by=self.request.user)
+        session = Session(created_by=self.request.user, period=config.GFYEAR)
         session.save()
         return redirect('session_update', pk=session.pk)
 
@@ -140,7 +140,7 @@ class SheetCreate(FormView):
                 name=kind['name'],
                 position=i + 1,
                 price=kind['price'])
-        return redirect('sheet', pk=s.pk)
+        return redirect('sheet_update', pk=s.pk)
 
 
 class SheetDetail(TemplateView):
