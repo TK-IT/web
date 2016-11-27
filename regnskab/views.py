@@ -38,6 +38,11 @@ class Home(TemplateView):
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
+        try:
+            latest_session = Session.objects.latest()
+        except Session.DoesNotExist:
+            latest_session = None
+        context_data['latest_session'] = latest_session
         return context_data
 
 

@@ -287,6 +287,9 @@ class Session(models.Model):
                                    null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        get_latest_by = 'created_time'
+
     @property
     def sent(self):
         return bool(self.send_time)
