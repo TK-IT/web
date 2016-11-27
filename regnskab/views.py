@@ -364,6 +364,16 @@ class EmailTemplateCreate(CreateView):
     queryset = EmailTemplate.objects.all()
     form_class = EmailTemplateForm
 
+    def get_initial(self):
+        try:
+            email_template = EmailTemplate.objects.get(
+                name='Standard')
+        except EmailTemplate.DoesNotExist:
+            return dict(subject='[TK] Status på ølregningen')
+        else:
+            return dict(subject=email_template.subject,
+                        body=email_template.body)
+
     def form_valid(self, form):
         form.save()
         return redirect('email_template_list')
