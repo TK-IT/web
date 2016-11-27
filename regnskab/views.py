@@ -393,7 +393,11 @@ class SessionUpdate(UpdateView):
 
     def form_valid(self, form):
         self.object = form.save()
-        self.object.regenerate_emails()
+        try:
+            self.object.regenerate_emails()
+        except ValidationError as exn:
+            form.add_error(None, exn)
+            return self.form_invalid(form)
         context_data = self.get_context_data(
             form=form,
             success=True,

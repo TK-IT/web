@@ -302,7 +302,11 @@ class EmailTemplate(models.Model):
 
 
 def format(template, context):
-    return re.sub(r'#([^#]*)#', lambda mo: context[mo.group(1)], template)
+    try:
+        return re.sub(r'#([^#]*)#', lambda mo: context[mo.group(1)], template)
+    except KeyError as exn:
+        raise ValidationError("Emailskabelon har en ukendt variabel %r" %
+                              exn.args[0])
 
 
 Balance = namedtuple('Balance', 'profile_id amount'.split())
