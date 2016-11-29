@@ -58,8 +58,8 @@ class PaymentBatchForm(forms.Form):
                     '%s %s' % (t.display_title(GFYEAR), profile.name))
             else:
                 profile.display_name = profile.name
-            self.fields[p + 'paid'] = forms.BooleanField(
-                required=False, label='%s betalt' % profile.display_name)
+            self.fields[p + 'selected'] = forms.BooleanField(
+                required=False, label='%s markeret' % profile.display_name)
             amount_str = '%g' % amount
             try:
                 int(amount_str)
@@ -73,10 +73,14 @@ class PaymentBatchForm(forms.Form):
     def profile_fields(self):
         for profile in self._profiles:
             p = 'profile%d_' % profile.id
-            yield (profile, self[p + 'amount'], self[p + 'paid'])
+            yield (profile, self[p + 'amount'], self[p + 'selected'])
 
     def profile_data(self):
         data = self.cleaned_data
         for profile in self._profiles:
             p = 'profile%d_' % profile.id
-            yield (profile, data[p + 'amount'], data[p + 'paid'])
+            yield (profile, data[p + 'amount'], data[p + 'selected'])
+
+
+class OtherExpenseBatchForm(PaymentBatchForm):
+    note = forms.CharField(max_length=255)

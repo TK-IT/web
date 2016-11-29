@@ -20,7 +20,7 @@ from regnskab.views import (
     SheetCreate, SheetDetail, SheetRowUpdate,
     EmailTemplateList, EmailTemplateUpdate, EmailTemplateCreate,
     SessionList, SessionUpdate, EmailList, EmailDetail, EmailSend,
-    PaymentBatchCreate,
+    PaymentBatchCreate, OtherExpenseBatchCreate,
     ProfileList, ProfileDetail,
 )
 
@@ -52,6 +52,8 @@ urlpatterns = [
         EmailSend.as_view(), name='email_send'),
     url(r'^session/(?P<pk>\d+)/payment/$', PaymentBatchCreate.as_view(),
         name='payment_batch_create'),
+    url(r'^session/(?P<pk>\d+)/other/$', OtherExpenseBatchCreate.as_view(),
+        name='other_expense_batch_create'),
     url(r'^profile/$', ProfileList.as_view(),
         name='profile_list'),
     url(r'^profile/(?P<pk>\d+)/$', ProfileDetail.as_view(),

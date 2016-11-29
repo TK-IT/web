@@ -17,7 +17,7 @@ from django.views.generic import (
 )
 from regnskab.forms import (
     SheetCreateForm, EmailTemplateForm, SessionForm,
-    PaymentBatchForm,
+    PaymentBatchForm, OtherExpenseBatchForm,
 )
 from regnskab.models import (
     Sheet, SheetRow, SheetStatus, parse_bestfu_alias, Profile, Alias, Title,
@@ -655,3 +655,26 @@ class PaymentBatchCreate(FormView):
         Payment.objects.bulk_create(payments)
         self.regnskab_session.regenerate_emails()
         return redirect('payment_batch_create', pk=self.regnskab_session.pk)
+
+
+class OtherExpenseBatchCreate(PaymentBatchCreate):
+    form_class = OtherExpenseBatchForm
+    template_name = 'regnskab/payment_batch_form.html'
+
+    def get_initial_amounts(self):
+        profiles = get_profiles(only_current=True)
+        for p in profiles:
+            yield (p, 0)
+
+    def form_valid(self, form):
+        payments = []
+        now = timezone.now()
+        for profile, amount, chosen in form.profile_data():
+            if chosen:
+                payments.append(Payment(
+                    profile=profile, time=now, amount=-amount,
+                    note=form.cleaned_data['note'],
+                    created_by=self.request.user))
+        Payment.objects.bulk_create(payments)
+        return redirect('other_expense_batch_create',
+                        pk=self.regnskab_session.pk)
