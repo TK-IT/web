@@ -553,18 +553,18 @@ class ProfileList(TemplateView):
             # Override any older profiles
             titles[t.profile_id] = t
         qs = Profile.objects.all()
-        qs = qs.prefetch_related('sheetstatus_set')
+
+        status_qs = SheetStatus.objects.all().order_by('profile_id')
+        groups = itertools.groupby(status_qs, key=lambda s: s.profile_id)
+        now = timezone.now()
+        statuses = {pk: sorted(s, key=lambda s: (s.end_time or now))[-1]
+                    for pk, s in groups}
+
         profiles = list(qs)
         balances = compute_balance()
         for p in profiles:
             p.balance = balances.get(p.id)
-            now = timezone.now()
-            statuses = sorted(p.sheetstatus_set.all(),
-                              key=lambda s: (s.end_time or now))
-            if statuses:
-                p.status = statuses[-1]
-            else:
-                p.status = None
+            p.status = statuses.get(p.id)
             p.title = titles.get(p.id)
         profiles.sort(
             key=lambda p: (p.status is None,
