@@ -268,7 +268,7 @@ class Purchase(models.Model):
 
 def compute_balance(profile_ids=None):
     balance = defaultdict(Decimal)
-    purchase_qs = Purchase.objects.all()
+    purchase_qs = Purchase.objects.all().order_by()
     if profile_ids:
         purchase_qs = purchase_qs.filter(row__profile_id__in=profile_ids)
     purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'))
