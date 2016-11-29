@@ -4,8 +4,7 @@ import json
 
 from django.core.exceptions import ValidationError
 from django.http import Http404
-from django.db import models
-from django.db.models import F, Value, Count
+from django.db.models import F
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 import django.core.mail
@@ -20,7 +19,7 @@ from regnskab.forms import (
     PaymentBatchForm, OtherExpenseBatchForm,
 )
 from regnskab.models import (
-    Sheet, SheetRow, SheetStatus, parse_bestfu_alias, Profile, Alias, Title,
+    Sheet, SheetRow, SheetStatus, Profile, Alias, Title,
     EmailTemplate, Session, Email,
     Purchase, Payment,
     compute_balance, get_inka,
