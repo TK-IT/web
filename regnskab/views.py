@@ -346,10 +346,19 @@ class EmailTemplateList(ListView):
 
 class EmailTemplateUpdate(UpdateView):
     template_name = 'regnskab/email_template_form.html'
-    queryset = EmailTemplate.objects.all()
+    queryset = EmailTemplate.objects.exclude(name='')
     form_class = EmailTemplateForm
 
     def form_valid(self, form):
+        qs = Session.objects.filter(email_template_id=self.kwargs['pk'])
+        if qs.exists():
+            backup = EmailTemplate(
+                name='',
+                subject=self.object.subject,
+                body=self.object.body,
+                format=self.object.format)
+            backup.save()
+            qs.update(email_template=backup)
         form.save()
         return redirect('email_template_list')
 
@@ -360,7 +369,6 @@ class EmailTemplateUpdate(UpdateView):
 
 class EmailTemplateCreate(CreateView):
     template_name = 'regnskab/email_template_form.html'
-    queryset = EmailTemplate.objects.all()
     form_class = EmailTemplateForm
 
     def get_initial(self):
