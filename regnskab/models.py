@@ -367,6 +367,9 @@ class Session(models.Model):
                            titles, key=lambda o: o.profile_id)
         data_by_profile = itertools.groupby(data, key=lambda o: o.profile_id)
 
+        # Cache call to get_inka
+        self._inka = get_inka()
+
         for profile_id, profile_data in data_by_profile:
             self.regenerate_email(
                 kind_price, profile_data)
@@ -447,7 +450,7 @@ class Session(models.Model):
             'VAND': format_count(purchase_count.get('sodavand', 0)),
             'GULD': format_count(purchase_count.get('guldøl', 0)),
             'KASSER': format_count(kasse_count),
-            'INKA': get_inka().name,
+            'INKA': self._inka.name,
         }
 
         email_fields = ('subject', 'body', 'recipient_name', 'recipient_email')
