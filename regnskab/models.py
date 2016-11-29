@@ -261,7 +261,7 @@ class Purchase(models.Model):
         return '%g× %s' % (self.count, self.kind)
 
     class Meta:
-        ordering = ['row', 'kind']
+        ordering = ['row', 'kind__position']
         verbose_name = 'krydser'
         verbose_name_plural = verbose_name
 
