@@ -36,7 +36,9 @@ class EmailTemplateForm(forms.ModelForm):
     class Meta:
         model = EmailTemplate
         fields = ('name', 'subject', 'body', 'format')
+        widgets = {'subject': forms.TextInput(attrs={'size': 60})}
 
+    name = forms.CharField(required=True)
 
 class SessionForm(forms.ModelForm):
     class Meta:
