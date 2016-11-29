@@ -391,22 +391,62 @@ class SessionList(ListView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class SessionUpdate(UpdateView):
+class SessionUpdate(FormView):
     template_name = 'regnskab/session_form.html'
-    queryset = Session.objects.all()
     form_class = SessionForm
+
+    def get_object(self):
+        return get_object_or_404(Session.objects, pk=self.kwargs['pk'])
+
+    def get_initial(self):
+        email_template = self.object.email_template
+        if email_template:
+            name = email_template.name
+        else:
+            try:
+                email_template = EmailTemplate.objects.get(
+                    name='Standard')
+            except EmailTemplate.DoesNotExist:
+                email_template = EmailTemplate(
+                    name='', subject='', body='', format=EmailTemplate.POUND)
+            name = ''
+        return dict(name=name,
+                    subject=email_template.subject,
+                    body=email_template.body,
+                    format=email_template.format)
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['object'] = self.object
+        return context_data
+
     def form_valid(self, form):
-        self.object = form.save()
+        if not self.object.email_template:
+            self.object.email_template = EmailTemplate()
+        else:
+            if form.has_changed():
+                qs = Session.objects.exclude(pk=self.object.pk)
+                qs = qs.filter(email_template=self.object.email_template)
+                if qs.exists:
+                    self.object.email_template = EmailTemplate()
+
+        self.object.email_template.name = form.cleaned_data['name']
+        self.object.email_template.subject = form.cleaned_data['subject']
+        self.object.email_template.body = form.cleaned_data['body']
+        self.object.email_template.format = form.cleaned_data['format']
         try:
             self.object.regenerate_emails()
         except ValidationError as exn:
             form.add_error(None, exn)
             return self.form_invalid(form)
+        if form.has_changed():
+            self.object.email_template.save()
+            self.object.save()
         context_data = self.get_context_data(
             form=form,
             success=True,
