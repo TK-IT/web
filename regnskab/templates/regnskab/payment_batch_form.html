@@ -19,12 +19,12 @@ window.addEventListener('load', init, false);
 {% block content %}
 <form method="post">{% csrf_token %}
     <table id="payment_form">
-        <thead><tr><th></th><th>Navn</th><th>Betalt beløb</th></tr></thead>
+        <thead><tr><th></th><th>Navn</th><th>Beløb</th></tr></thead>
         <tbody>
-    {% for profile, amount, paid in form.profile_fields %}
+    {% for profile, amount, selected in form.profile_fields %}
     <tr>
-        <td>{{ paid }}{{ paid.errors }}</td>
-        <td><label for="{{ paid.id_for_label }}">{{ profile.display_name }}</label></td>
+        <td>{{ selected }}{{ selected.errors }}</td>
+        <td><label for="{{ selected.id_for_label }}">{{ profile.display_name }}</label></td>
         <td>{{ amount }}</td>
     </tr>
     {% endfor %}
