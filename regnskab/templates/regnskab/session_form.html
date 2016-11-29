@@ -24,6 +24,8 @@ Ikke endnu. <a href="{% url 'email_list' pk=object.pk %}">Gå til udsendelse</a>
     {% else %}
     <li><a href="{% url 'sheet_update' pk=s.pk %}">{{ s }}</a></li>
     {% endif %}
+    {% empty %}
+    <li>Ingen endnu</li>
     {% endfor %}
 </ul>
 
