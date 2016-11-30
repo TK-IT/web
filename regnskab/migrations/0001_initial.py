@@ -77,7 +77,7 @@ class Migration(migrations.Migration):
                 ('count', models.DecimalField(help_text='antal krydser eller brøkdel', max_digits=9, decimal_places=4)),
             ],
             options={
-                'ordering': ['row', 'kind'],
+                'ordering': ['row', 'kind__position'],
                 'verbose_name_plural': 'krydser',
                 'verbose_name': 'krydser',
             },
