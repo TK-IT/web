@@ -141,9 +141,13 @@ class Sheet(models.Model):
                                    null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
 
+    def columns(self):
+        qs = self.purchasekind_set.all()
+        return qs.order_by('position')
+
     def rows(self):
         result = []
-        kinds = list(self.purchasekind_set.all())
+        kinds = list(self.columns())
         kind_dict = {kind.id: kind for kind in kinds}
         sheetrow_qs = self.sheetrow_set.all()
         sheetrow_qs = sheetrow_qs.select_related('profile')

@@ -233,7 +233,7 @@ class SheetRowUpdate(TemplateView):
 
     def clean(self, data_json):
         sheet = self.sheet
-        kinds = list(sheet.purchasekind_set.all())
+        kinds = list(sheet.columns())
         try:
             row_data = json.loads(data_json)
         except Exception as exn:
