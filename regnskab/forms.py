@@ -58,10 +58,10 @@ class PaymentBatchForm(forms.Form):
         GFYEAR = config.GFYEAR
         for profile, amount in amounts:
             p = 'profile%d_' % profile.id
-            t = profile.title
-            if t:
-                profile.display_name = (
-                    '%s %s' % (t.display_title(GFYEAR), profile.name))
+            if profile.title:
+                profile.display_name = ('%s %s' %
+                                        (profile.title.display_title(GFYEAR),
+                                         profile.name))
             else:
                 profile.display_name = profile.name
             self.fields[p + 'selected'] = forms.BooleanField(
