@@ -50,13 +50,13 @@ class SessionForm(forms.Form):
                            label='Gem emailskabelon som')
 
 
-class PaymentBatchForm(forms.Form):
+class TransactionBatchForm(forms.Form):
     def __init__(self, **kwargs):
-        amounts = kwargs.pop('amounts')
+        profiles = kwargs.pop('profiles')
         super().__init__(**kwargs)
         self._profiles = []
         GFYEAR = config.GFYEAR
-        for profile, amount in amounts:
+        for profile, amount, selected in profiles:
             p = 'profile%d_' % profile.id
             if profile.title:
                 profile.display_name = ('%s %s' %
@@ -65,6 +65,7 @@ class PaymentBatchForm(forms.Form):
             else:
                 profile.display_name = profile.name
             self.fields[p + 'selected'] = forms.BooleanField(
+                initial=selected,
                 required=False, label='%s markeret' % profile.display_name)
             amount_str = '%g' % amount
             try:

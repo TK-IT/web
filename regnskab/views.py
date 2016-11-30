@@ -669,9 +669,9 @@ class ProfileDetail(TemplateView):
         return context_data
 
 
-class PaymentBatchCreate(FormView):
-    form_class = PaymentBatchForm
-    template_name = 'regnskab/payment_batch_form.html'
+class TransactionBatchCreateBase(FormView):
+    form_class = TransactionBatchForm
+    template_name = 'regnskab/transaction_batch_form.html'
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
@@ -679,50 +679,101 @@ class PaymentBatchCreate(FormView):
             Session.objects, pk=kwargs['pk'])
         return super().dispatch(request, *args, **kwargs)
 
-    def get_initial_amounts(self):
-        profiles = get_profiles(only_current=True)
-        balances = compute_balance(
-            profile_ids=set(p.id for p in profiles))
+    def get_transaction_kind(self):
+        try:
+            return self.transaction_kind
+        except AttributeError:
+            raise ImproperlyConfigured(
+                "TransactionBatchCreateBase subclass must define " +
+                "transaction_kind.")
+
+    def get_profiles(self):
+        return get_profiles(only_current=True)
+
+    def get_initial_amounts(self, profiles):
+        raise ImproperlyConfigured(
+            "TransactionBatchCreateBase subclass must define " +
+            "get_initial_amounts.")
+
+    def get_existing(self):
+        existing_qs = Transaction.objects.filter(
+            session=self.regnskab_session, kind=self.get_transaction_kind())
+        return {o.profile_id: o for o in existing_qs}
+
+    def get_success_view(self):
+        raise ImproperlyConfigured(
+            "TransactionBatchCreateBase subclass must define " +
+            "get_success_view.")
+
+    def get_profile_data(self):
+        profiles = self.get_profiles()
+        amounts = self.get_initial_amounts(profiles)
+        existing = self.get_existing()
         for p in profiles:
-            yield (p, balances[p.id])
+            amount = amounts[p.id]
+            try:
+                o = existing[p.id]
+            except KeyError:
+                selected = False
+            else:
+                amount = o.amount
+                selected = True
+            yield (p, amount, selected)
 
     def get_form_kwargs(self, **kwargs):
         r = super().get_form_kwargs(**kwargs)
-        r['amounts'] = self.get_initial_amounts()
+        r['profiles'] = self.get_profile_data()
         return r
 
     def form_valid(self, form):
-        payments = []
+        existing = self.get_existing()
+
+        save = []
+        new = []
+        delete = []
+
         now = timezone.now()
-        for profile, amount, paid in form.profile_data():
-            if paid:
-                payments.append(Payment(
+        for profile, amount, selected in form.profile_data():
+            if selected:
+                o = Transaction(
+                    kind=self.get_transaction_kind(),
                     profile=profile, time=now, amount=amount,
-                    created_by=self.request.user,
-                    session=self.regnskab_session))
-        Payment.objects.bulk_create(payments)
+                    created_by=self.request.user, created_time=now,
+                    session=self.regnskab_session)
+                if profile.id in existing:
+                    o.id = existing[profile.id].id
+                    save.append(o)
+                else:
+                    new.append(o)
+            elif profile.id in existing:
+                delete.append(existing[profile.id])
+
+        Transaction.objects.bulk_create(new)
+        for o in save:
+            o.save()
+        delete_ids = [o.id for o in delete]
+        Transaction.objects.filter(id__in=delete_ids).delete()
+
         self.regnskab_session.regenerate_emails()
+        return self.get_success_view()
+
+
+class PaymentBatchCreate(TransactionBatchCreateBase):
+    transaction_kind = Transaction.PAYMENT
+
+    def get_initial_amounts(self, profiles):
+        return compute_balance(profile_ids={p.id for p in profiles})
+
+    def get_success_view(self):
         return redirect('payment_batch_create', pk=self.regnskab_session.pk)
 
 
-class OtherExpenseBatchCreate(PaymentBatchCreate):
-    form_class = OtherExpenseBatchForm
-    template_name = 'regnskab/payment_batch_form.html'
+class PurchaseBatchCreate(TransactionBatchCreateBase):
+    transaction_kind = Transaction.PURCHASE
 
-    def get_initial_amounts(self):
-        profiles = get_profiles(only_current=True)
-        for p in profiles:
-            yield (p, 0)
+    def get_initial_amounts(self, profiles):
+        v = self.GET['amount']
+        return {p.id: v for p in profiles}
 
-    def form_valid(self, form):
-        payments = []
-        now = timezone.now()
-        for profile, amount, chosen in form.profile_data():
-            if chosen:
-                payments.append(Payment(
-                    profile=profile, time=now, amount=-amount,
-                    note=form.cleaned_data['note'],
-                    created_by=self.request.user))
-        Payment.objects.bulk_create(payments)
-        return redirect('other_expense_batch_create',
-                        pk=self.regnskab_session.pk)
+    def get_success_view(self):
+        return redirect('purchase_batch_create', pk=self.regnskab_session.pk)
