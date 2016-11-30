@@ -1,13 +1,13 @@
 from django.contrib import admin
-from regnskab.models import Alias, Payment, Sheet, EmailTemplate, Session
+from regnskab.models import Alias, Transaction, Sheet, EmailTemplate, Session
 
 
 class AliasAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'profile', 'period', 'start_time', 'end_time')
 
 
-class PaymentAdmin(admin.ModelAdmin):
-    list_display = ('profile', 'time', 'amount', 'note')
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = ('profile', 'kind', 'time', 'amount', 'note')
 
 
 class SheetAdmin(admin.ModelAdmin):
@@ -25,7 +25,7 @@ class SessionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Alias, AliasAdmin)
-admin.site.register(Payment, PaymentAdmin)
+admin.site.register(Transaction, TransactionAdmin)
 admin.site.register(Sheet, SheetAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(Session, SessionAdmin)
