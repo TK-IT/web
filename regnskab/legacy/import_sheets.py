@@ -121,30 +121,31 @@ def strptime(s):
         return datetime.datetime.strptime(s+'+0100', '%Y-%m-%dT%H:%M:%S%z')
 
 
-def get_payments(data, profiles):
-    from regnskab.models import Payment
-    payments = []
+def get_transactions(data, profiles):
+    from regnskab.models import Transaction
+    transactions = []
 
     for o in data:
         time = strptime(o['time'])
         for name, amount in o['payments'].items():
-            payments.append(
-                Payment(profile=profiles[name],
-                        time=time,
-                        amount=amount))
+            transactions.append(
+                Transaction(kind=Transaction.PAYMENT,
+                            profile=profiles[name],
+                            time=time,
+                            amount=amount))
         for name, amount in o['others'].items():
-            payments.append(
-                Payment(profile=profiles[name],
-                        time=time,
-                        amount=-amount,
-                        note='Andet'))
+            transactions.append(
+                Transaction(kind=Transaction.PURCHASE,
+                            profile=profiles[name],
+                            time=time,
+                            amount=-amount))
         for name, amount in o['corrections'].items():
-            payments.append(
-                Payment(profile=profiles[name],
-                        time=time,
-                        amount=-amount,
-                        note='Korrigering'))
-    return payments
+            transactions.append(
+                Transaction(kind=Transaction.CORRECTION,
+                            profile=profiles[name],
+                            time=time,
+                            amount=-amount))
+    return transactions
 
 
 purchase_kind_names = dict(oel='øl', xmas='guldøl', vand='sodavand',
@@ -203,10 +204,10 @@ def import_sheets(data, helper):
     filter_related = helper.filter_related
 
     profiles = get_existing_profiles(data, helper)
-    payments = get_payments(data, profiles)
+    transactions = get_transactions(data, profiles)
     sheets, purchase_kinds, rows, purchases = get_sheets(data, profiles)
 
-    save_all(payments, unique_attrs=('profile', 'time'), bulk=True)
+    save_all(transactions, unique_attrs=('profile', 'time', 'kind'), bulk=True)
 
     sheets = save_all(sheets, unique_attrs=('start_date', 'end_date'),
                       only_new=True)
