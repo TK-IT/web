@@ -169,7 +169,7 @@ def get_sheets(data, profiles):
                 sheet=sheet,
                 position=i+1,
                 name=name,
-                price=kind['price']))
+                unit_price=kind['price']))
             kind_map[kind['key']] = purchase_kinds[-1]
         for i, name in enumerate(sorted(o['purchases'])):
             row = SheetRow(sheet=sheet, profile=profiles[name], position=i + 1)

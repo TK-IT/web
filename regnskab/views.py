@@ -138,7 +138,7 @@ class SheetCreate(FormView):
             s.purchasekind_set.create(
                 name=kind['name'],
                 position=i + 1,
-                price=kind['price'])
+                unit_price=kind['unit_price'])
         return redirect('sheet_update', pk=s.pk)
 
 
@@ -611,7 +611,8 @@ class ProfileDetail(TemplateView):
 
         purchase_qs = Purchase.objects.all()
         purchase_qs = purchase_qs.filter(row__profile=profile)
-        purchase_qs = purchase_qs.annotate(amount=F('kind__price') * F('count'))
+        purchase_qs = purchase_qs.annotate(
+            amount=F('kind__unit_price') * F('count'))
         purchase_qs = purchase_qs.annotate(balance_change=F('amount'))
         purchase_qs = purchase_qs.annotate(date=F('row__sheet__end_date'))
         purchase_qs = purchase_qs.annotate(sheet=F('row__sheet__pk'))

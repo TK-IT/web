@@ -218,8 +218,8 @@ class PurchaseKind(models.Model):
     position = models.PositiveIntegerField()
     name = models.CharField(max_length=200,
                             help_text='f.eks. guldøl, guldølskasser')
-    price = models.DecimalField(max_digits=12, decimal_places=2,
-                                help_text='f.eks. 8, 10, 13, 200, 250')
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2,
+                                     help_text='f.eks. 8, 10, 13, 200, 250')
 
     @property
     def short_name(self):
@@ -272,7 +272,8 @@ def compute_balance(profile_ids=None):
     if profile_ids:
         purchase_qs = purchase_qs.filter(row__profile_id__in=profile_ids)
     purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'))
-    purchase_qs = purchase_qs.annotate(amount=F('count') * F('kind__price'))
+    purchase_qs = purchase_qs.annotate(
+        amount=F('count') * F('kind__unit_price'))
     purchase_qs = purchase_qs.values_list('profile_id', 'amount')
     for profile, amount in purchase_qs:
         balance[profile] += amount
@@ -346,18 +347,18 @@ class Session(models.Model):
         payments = payments.order_by('profile_id')
 
         kind_qs = PurchaseKind.objects.filter(sheet__session=self)
-        kind_qs = kind_qs.order_by('name', 'price')
+        kind_qs = kind_qs.order_by('name', 'unit_price')
         kind_groups = itertools.groupby(kind_qs, key=lambda k: k.name)
-        kind_price = {n: set(k.price for k in g)
+        kind_price = {n: set(k.unit_price for k in g)
                       for n, g in kind_groups}
 
         purchases = Purchase.objects.filter(
             row__sheet__session=self)
         purchases = purchases.annotate(
             profile_id=F('row__profile_id'),
-            amount=F('count')*F('kind__price'),
+            amount=F('count')*F('kind__unit_price'),
             name=F('kind__name'),
-            price=F('kind__price'))
+            unit_price=F('kind__unit_price'))
         purchases = purchases.order_by('profile_id', 'name')
 
         emails = Email.objects.filter(session=self)

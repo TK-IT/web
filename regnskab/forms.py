@@ -18,13 +18,13 @@ class SheetCreateForm(forms.Form):
             if not line:
                 continue
             try:
-                name, price = line.split()
+                name, unit_price = line.split()
             except ValueError:
                 raise ValidationError("Not two words: %r" % line)
             try:
-                kinds.append(dict(name=name, price=float(price)))
+                kinds.append(dict(name=name, unit_price=float(unit_price)))
             except ValueError:
-                raise ValidationError("Not a number: %r" % price)
+                raise ValidationError("Not a number: %r" % unit_price)
         names = collections.Counter(o['name'] for o in kinds)
         dups = {k: v for k, v in names.items() if v > 1}
         if dups:
