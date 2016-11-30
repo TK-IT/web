@@ -2,18 +2,17 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+from django.conf import settings
 import django.db.models.deletion
-from regnskab.models import Profile
 
 
-profile_app = Profile._meta.app_label
-profile_path = profile_app + '.' + Profile.__name__
+profile_model = settings.TKWEB_IDM_MODULE.split('.')[-1] + '.Profile'
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        (profile_app, '0001_initial'),
+        migrations.swappable_dependency(profile_model),
     ]
 
     operations = [
@@ -117,7 +116,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('position', models.PositiveIntegerField()),
                 ('name', models.CharField(max_length=200, null=True)),
-                ('profile', models.ForeignKey(null=True, to=profile_path)),
+                ('profile', models.ForeignKey(null=True, to=profile_model)),
                 ('sheet', models.ForeignKey(to='regnskab.Sheet')),
             ],
             options={
@@ -132,7 +131,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('start_time', models.DateTimeField(blank=True, null=True)),
                 ('end_time', models.DateTimeField(blank=True, null=True)),
-                ('profile', models.ForeignKey(to=profile_path)),
+                ('profile', models.ForeignKey(to=profile_model)),
             ],
         ),
         migrations.AddField(
@@ -153,7 +152,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='payment',
             name='profile',
-            field=models.ForeignKey(to=profile_path),
+            field=models.ForeignKey(to=profile_model),
         ),
         migrations.AddField(
             model_name='emailbatch',
@@ -178,11 +177,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='email',
             name='profile',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=profile_path, related_name='+'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=profile_model, related_name='+'),
         ),
         migrations.AddField(
             model_name='alias',
             name='profile',
-            field=models.ForeignKey(to=profile_path),
+            field=models.ForeignKey(to=profile_model),
         ),
     ]
