@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             name='Transaction',
             fields=[
                 ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('kind', models.CharField(max_length=10, choices=[('payment', 'Betaling'), ('purchase', 'Diverse køb')])),
+                ('kind', models.CharField(max_length=10, choices=[('payment', 'Betaling'), ('purchase', 'Diverse køb'), ('correction', 'Korrigering')])),
                 ('time', models.DateTimeField()),
                 ('amount', models.DecimalField(max_digits=9, decimal_places=2)),
                 ('note', models.CharField(blank=True, max_length=255)),

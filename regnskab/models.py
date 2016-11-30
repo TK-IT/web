@@ -115,10 +115,11 @@ class Payment(models.Model):
 
 
 class Transaction(models.Model):
-    PAYMENT, PURCHASE = 'payment', 'purchase'
+    PAYMENT, PURCHASE, CORRECTION = 'payment', 'purchase', 'correction'
     KIND = [
         (PAYMENT, 'Betaling'),
         (PURCHASE, 'Diverse køb'),
+        (CORRECTION, 'Korrigering'),
     ]
 
     session = models.ForeignKey('Session', on_delete=models.SET_NULL,
