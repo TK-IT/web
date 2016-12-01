@@ -295,6 +295,7 @@ class Purchase(models.Model):
 
 def compute_balance(profile_ids=None, created_before=None):
     balance = defaultdict(Decimal)
+    # TODO don't do the double join
     purchase_qs = Purchase.objects.all().order_by()
     if created_before:
         purchase_qs = purchase_qs.filter(
