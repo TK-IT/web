@@ -327,7 +327,7 @@ class SheetRowUpdate(TemplateView):
 
 class EmailTemplateList(ListView):
     template_name = 'regnskab/email_template_list.html'
-    queryset = EmailTemplate.objects.all()
+    queryset = EmailTemplate.objects.exclude(name='')
 
     def get_queryset(self):
         qs = list(super().get_queryset())
