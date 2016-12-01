@@ -795,7 +795,6 @@ class PurchaseNoteList(TemplateView):
         existing = self.regnskab_session.transaction_set.all()
         existing = existing.filter(kind=Transaction.PURCHASE)
         existing = existing.exclude(note='')
-        print(existing)
         existing = existing.values_list('note', 'amount')
         note_amounts = {}
         for note, amount in existing:
