@@ -521,9 +521,9 @@ class Session(models.Model):
             recipient_email=profile.email,
         )
         if existing_email:
-            changed = any(getattr(email, k) != getattr(existing_email, k)
-                          for k in email_fields)
-            if changed:
+            changed_keys = [k for k in email_fields
+                            if getattr(email, k) != getattr(existing_email, k)]
+            if changed_keys:
                 email.pk = existing_email.pk
             else:
                 return
