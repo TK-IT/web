@@ -1,0 +1,16 @@
+{% extends "regnskab/base.html" %}
+{% block content %}
+<form method="get" action="{% url 'purchase_batch_create' %}">
+    <p><label>Note: <input name="note" /></label>
+    <input type="submit" value="Indtast diverse køb" /></p>
+</form>
+{% if notes %}
+<p>... eller tilføj til allerede indtastede diverse køb:</p>
+<ul>
+    {% for n in notes %}
+    <li><a href="{% url 'purchase_batch_create' %}?note={{ n|urlencode }}">
+            {{ n }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

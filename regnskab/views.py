@@ -768,6 +768,25 @@ class PaymentBatchCreate(TransactionBatchCreateBase):
         return redirect('payment_batch_create', pk=self.regnskab_session.pk)
 
 
+class PurchaseNoteList(TemplateView):
+    template_name = 'regnskab/purchase_note_list.html'
+
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.regnskab_session = get_object_or_404(
+            Session.objects, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        existing = self.regnskab_session.purchase_set.all()
+        existing = existing.exclude(note='')
+        existing_notes = existing.values_list('note', flat=True)
+        existing_notes = sorted(set(existing_notes))
+        context_data['notes'] = existing_notes
+        return context_data
+
+
 class PurchaseBatchCreate(TransactionBatchCreateBase):
     transaction_kind = Transaction.PURCHASE
 
