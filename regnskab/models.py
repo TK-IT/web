@@ -278,9 +278,8 @@ class Purchase(models.Model):
         verbose_name_plural = verbose_name
 
 
-def compute_balance(profile_ids=None, created_before=None):
+def compute_balance_double_join(profile_ids=None, created_before=None):
     balance = defaultdict(Decimal)
-    # TODO don't do the double join
     purchase_qs = Purchase.objects.all().order_by()
     if created_before:
         purchase_qs = purchase_qs.filter(
@@ -301,6 +300,46 @@ def compute_balance(profile_ids=None, created_before=None):
         transaction_qs = transaction_qs.filter(created_time__lt=created_before)
     for profile, amount in transaction_qs:
         balance[profile] += amount
+    return balance
+
+
+def compute_balance(profile_ids=None, created_before=None):
+    if profile_ids is None:
+        balance = defaultdict(Decimal)
+    else:
+        # Ensure only profile_ids is in the result
+        balance = {p: Decimal() for p in profile_ids}
+
+    row_qs = SheetRow.objects.all()
+    kind_qs = PurchaseKind.objects.all()
+    if created_before:
+        sheet_qs = Sheet.objects.all()
+        sheet_qs = sheet_qs.filter(created_time__lt=created_before)
+        sheets = sheet_qs.values('id')
+        row_qs = row_qs.filter(sheet_id__in=sheets)
+        kind_qs = kind_qs.filter(sheet_id__in=sheets)
+    rows = {o.id: o for o in row_qs
+            if profile_ids is None or o.profile_id in profile_ids}
+    kinds = {o.id: o for o in kind_qs}
+
+    purchase_qs = Purchase.objects.all().order_by()
+    if created_before:
+        max_row = max(rows.keys())
+        purchase_qs = purchase_qs.filter(row_id__lte=max_row)
+
+    for o in purchase_qs:
+        if o.row_id in rows.keys():
+            amount = o.count * kinds[o.kind_id].unit_price
+            profile_id = rows[o.row_id].profile_id
+            balance[profile_id] += amount
+
+    transaction_qs = Transaction.objects.all()
+    if created_before:
+        transaction_qs = transaction_qs.filter(created_time__lt=created_before)
+    for o in transaction_qs:
+        if profile_ids is None or o.profile_id in profile_ids:
+            balance[o.profile_id] += o.amount
+
     return balance
 
 
