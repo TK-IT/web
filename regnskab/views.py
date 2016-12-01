@@ -184,20 +184,17 @@ class SheetRowUpdate(TemplateView):
 
     def get_profiles(self):
         profiles = get_profiles(only_current=False)
-        alias_qs = Alias.objects.filter(end_time=None)
         aliases = {}
-        for a in alias_qs:
-            aliases.setdefault(a.profile_id, []).append(a)
+        for o in Alias.objects.filter(end_time=None):
+            aliases.setdefault(o.profile_id, []).append(o)
+        for o in Title.objects.all():
+            aliases.setdefault(o.profile_id, []).append(o)
 
         GFYEAR = config.GFYEAR
 
         result = []
         for i, profile in enumerate(profiles):
-            titles = []
-            for title in profile.title_set.all():
-                titles.append(title)
-            for title in aliases.get(profile.id, ()):
-                titles.append(title)
+            titles = aliases.get(profile.id, ())
             titles_input = [t.input_title(GFYEAR) for t in titles]
             title_input = profile.title and profile.title.input_title(GFYEAR)
             title_name = ' '.join((title_input or '', profile.name)).strip()
