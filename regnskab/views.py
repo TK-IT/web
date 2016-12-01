@@ -22,7 +22,7 @@ from regnskab.forms import (
 from regnskab.models import (
     Sheet, SheetRow, SheetStatus, Profile, Alias, Title,
     EmailTemplate, Session, Email,
-    Transaction, Purchase, Payment,
+    Transaction, Purchase,
     compute_balance, get_inka,
     config,
 )
