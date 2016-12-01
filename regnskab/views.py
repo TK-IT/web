@@ -437,12 +437,16 @@ class SessionUpdate(FormView):
     def form_valid(self, form):
         if not self.object.email_template:
             self.object.email_template = EmailTemplate()
+            save_it = True
         else:
             if form.has_changed():
                 qs = Session.objects.exclude(pk=self.object.pk)
                 qs = qs.filter(email_template=self.object.email_template)
                 if qs.exists:
                     self.object.email_template = EmailTemplate()
+                save_it = True
+            else:
+                save_it = False
 
         self.object.email_template.name = form.cleaned_data['name']
         self.object.email_template.subject = form.cleaned_data['subject']
@@ -453,8 +457,10 @@ class SessionUpdate(FormView):
         except ValidationError as exn:
             form.add_error(None, exn)
             return self.form_invalid(form)
-        if form.has_changed():
+        if save_it:
             self.object.email_template.save()
+            # Update self.object.email_template_id
+            self.object.email_template = self.object.email_template
             self.object.save()
         context_data = self.get_context_data(
             form=form,
