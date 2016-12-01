@@ -22,7 +22,7 @@
 <p>
 <a href="{% url 'payment_batch_create' pk=object.pk %}">Tilføj betalinger</a>
 &bullet;
-<a href="{% url 'other_expense_batch_create' pk=object.pk %}">Tilføj "Andet"</a>
+<a href="{% url 'purchase_note_list' pk=object.pk %}">Tilføj "Andet"</a>
 </p>
 {% endif %}
 

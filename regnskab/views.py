@@ -1,5 +1,6 @@
 import itertools
 from decimal import Decimal
+from collections import Counter
 import json
 
 from django.core.exceptions import ValidationError
@@ -16,12 +17,12 @@ from django.views.generic import (
 )
 from regnskab.forms import (
     SheetCreateForm, EmailTemplateForm, SessionForm,
-    PaymentBatchForm, OtherExpenseBatchForm,
+    TransactionBatchForm,
 )
 from regnskab.models import (
     Sheet, SheetRow, SheetStatus, Profile, Alias, Title,
     EmailTemplate, Session, Email,
-    Purchase, Payment,
+    Transaction, Purchase, Payment,
     compute_balance, get_inka,
     config,
 )
@@ -318,7 +319,7 @@ class SheetRowUpdate(TemplateView):
         except ValidationError as exn:
             return self.post_invalid(request, str(exn))
         self.save_rows(row_objects)
-        if self.regnskab_session:
+        if self.regnskab_session.email_template:
             self.regnskab_session.regenerate_emails()
         return self.render_to_response(
             self.get_context_data(saved=True))
@@ -622,10 +623,10 @@ class ProfileDetail(TemplateView):
         for o in purchases:
             o['name'] = '%s× %s' % (floatformat(o['count']), o['kind__name'])
 
-        payment_qs = Payment.objects.all()
+        payment_qs = Transaction.objects.all()
         payment_qs = payment_qs.filter(profile=profile)
         payment_qs = payment_qs.annotate(name=F('note'))
-        payment_qs = payment_qs.annotate(balance_change=-1 * F('amount'))
+        payment_qs = payment_qs.annotate(balance_change=F('amount'))
         payment_qs = payment_qs.values('time', 'name', 'amount', 'balance_change')
         payments = list(payment_qs)
         for o in payments:
@@ -671,13 +672,16 @@ class ProfileDetail(TemplateView):
 
 class TransactionBatchCreateBase(FormView):
     form_class = TransactionBatchForm
-    template_name = 'regnskab/transaction_batch_form.html'
+    template_name = 'regnskab/transaction_batch_create.html'
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
-        self.regnskab_session = get_object_or_404(
-            Session.objects, pk=kwargs['pk'])
+        self.regnskab_session = self.get_regnskab_session()
         return super().dispatch(request, *args, **kwargs)
+
+    def get_regnskab_session(self):
+        return get_object_or_404(
+            Session.objects, pk=self.kwargs['pk'])
 
     def get_transaction_kind(self):
         try:
@@ -698,7 +702,7 @@ class TransactionBatchCreateBase(FormView):
     def get_existing(self):
         existing_qs = Transaction.objects.filter(
             session=self.regnskab_session, kind=self.get_transaction_kind())
-        return {o.profile_id: o for o in existing_qs}
+        return existing_qs
 
     def get_success_view(self):
         raise ImproperlyConfigured(
@@ -708,7 +712,8 @@ class TransactionBatchCreateBase(FormView):
     def get_profile_data(self):
         profiles = self.get_profiles()
         amounts = self.get_initial_amounts(profiles)
-        existing = self.get_existing()
+        existing_qs = self.get_existing()
+        existing = {o.profile_id: o for o in existing_qs}
         for p in profiles:
             amount = amounts[p.id]
             try:
@@ -725,8 +730,12 @@ class TransactionBatchCreateBase(FormView):
         r['profiles'] = self.get_profile_data()
         return r
 
+    def get_note(self):
+        return ''
+
     def form_valid(self, form):
-        existing = self.get_existing()
+        existing_qs = self.get_existing()
+        existing = {o.profile_id: o for o in existing_qs}
 
         save = []
         new = []
@@ -739,6 +748,7 @@ class TransactionBatchCreateBase(FormView):
                     kind=self.get_transaction_kind(),
                     profile=profile, time=now, amount=amount,
                     created_by=self.request.user, created_time=now,
+                    note=self.get_note(),
                     session=self.regnskab_session)
                 if profile.id in existing:
                     o.id = existing[profile.id].id
@@ -754,7 +764,8 @@ class TransactionBatchCreateBase(FormView):
         delete_ids = [o.id for o in delete]
         Transaction.objects.filter(id__in=delete_ids).delete()
 
-        self.regnskab_session.regenerate_emails()
+        if self.regnskab_session.email_template:
+            self.regnskab_session.regenerate_emails()
         return self.get_success_view()
 
 
@@ -762,7 +773,9 @@ class PaymentBatchCreate(TransactionBatchCreateBase):
     transaction_kind = Transaction.PAYMENT
 
     def get_initial_amounts(self, profiles):
-        return compute_balance(profile_ids={p.id for p in profiles})
+        return compute_balance(
+            profile_ids={p.id for p in profiles},
+            created_before=self.regnskab_session.created_time)
 
     def get_success_view(self):
         return redirect('payment_batch_create', pk=self.regnskab_session.pk)
@@ -779,20 +792,50 @@ class PurchaseNoteList(TemplateView):
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        existing = self.regnskab_session.purchase_set.all()
+        existing = self.regnskab_session.transaction_set.all()
+        existing = existing.filter(kind=Transaction.PURCHASE)
         existing = existing.exclude(note='')
-        existing_notes = existing.values_list('note', flat=True)
-        existing_notes = sorted(set(existing_notes))
-        context_data['notes'] = existing_notes
+        print(existing)
+        existing = existing.values_list('note', 'amount')
+        note_amounts = {}
+        for note, amount in existing:
+            note_amounts.setdefault(note, []).append(amount)
+        notes = []
+        for note in sorted(note_amounts.keys()):
+            counter = Counter(note_amounts[note])
+            max_count = max(counter.values())
+            amount = next(a for a, c in counter.items()
+                          if c == max_count)
+            notes.append((note, amount))
+        context_data['notes'] = notes
+        context_data['session'] = self.regnskab_session
         return context_data
 
 
 class PurchaseBatchCreate(TransactionBatchCreateBase):
     transaction_kind = Transaction.PURCHASE
 
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            self.note = request.GET['note']
+        except KeyError:
+            return redirect(
+                'purchase_note_list', pk=self.get_regnskab_session().pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_note(self):
+        return self.note
+
+    def get_existing(self):
+        return super().get_existing().filter(note=self.note)
+
     def get_initial_amounts(self, profiles):
-        v = self.GET['amount']
-        return {p.id: v for p in profiles}
+        try:
+            a = float(self.request.GET['amount'])
+        except (ValueError, KeyError):
+            a = 0
+        return {p.id: a for p in profiles}
 
     def get_success_view(self):
         return redirect('purchase_batch_create', pk=self.regnskab_session.pk)

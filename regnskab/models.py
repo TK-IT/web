@@ -293,9 +293,12 @@ class Purchase(models.Model):
         verbose_name_plural = verbose_name
 
 
-def compute_balance(profile_ids=None):
+def compute_balance(profile_ids=None, created_before=None):
     balance = defaultdict(Decimal)
     purchase_qs = Purchase.objects.all().order_by()
+    if created_before:
+        purchase_qs = purchase_qs.filter(
+            row__sheet__created_time__lt=created_before)
     if profile_ids:
         purchase_qs = purchase_qs.filter(row__profile_id__in=profile_ids)
     purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'))
@@ -304,12 +307,14 @@ def compute_balance(profile_ids=None):
     purchase_qs = purchase_qs.values_list('profile_id', 'amount')
     for profile, amount in purchase_qs:
         balance[profile] += amount
-    payment_qs = Payment.objects.all()
+    transaction_qs = Transaction.objects.all()
     if profile_ids:
-        payment_qs = payment_qs.filter(profile_id__in=profile_ids)
-    payment_qs = payment_qs.values_list('profile_id', 'amount')
-    for profile, amount in payment_qs:
-        balance[profile] -= amount
+        transaction_qs = transaction_qs.filter(profile_id__in=profile_ids)
+    transaction_qs = transaction_qs.values_list('profile_id', 'amount')
+    if created_before:
+        transaction_qs = transaction_qs.filter(created_time__lt=created_before)
+    for profile, amount in transaction_qs:
+        balance[profile] += amount
     return balance
 
 
@@ -370,8 +375,8 @@ class Session(models.Model):
         titles = get_primary_titles(period=self.period)
         titles = sorted(titles.values(), key=lambda o: o.profile_id)
 
-        payments = self.payment_set.all()
-        payments = payments.order_by('profile_id')
+        transactions = self.transaction_set.all()
+        transactions = transactions.order_by('profile_id')
 
         kind_qs = PurchaseKind.objects.filter(sheet__session=self)
         kind_qs = kind_qs.order_by('name', 'unit_price')
@@ -391,7 +396,7 @@ class Session(models.Model):
         emails = Email.objects.filter(session=self)
         emails = emails.order_by('profile_id')
 
-        data = heapq.merge(profiles, payments, purchases, emails, balances,
+        data = heapq.merge(profiles, transactions, purchases, emails, balances,
                            titles, key=lambda o: o.profile_id)
         data_by_profile = itertools.groupby(data, key=lambda o: o.profile_id)
 
@@ -412,11 +417,11 @@ class Session(models.Model):
         profile = None
 
         for o in data_iterable:
-            if isinstance(o, Payment):
-                if o.amount > 0:
-                    payment_sum += o.amount
+            if isinstance(o, Transaction):
+                if o.kind == Transaction.PAYMENT:
+                    payment_sum -= o.amount
                 else:
-                    other_sum -= o.amount
+                    other_sum += o.amount
             elif isinstance(o, Email):
                 assert existing_email is None
                 existing_email = o
