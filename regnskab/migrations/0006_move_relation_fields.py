@@ -23,11 +23,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='payment',
             name='session',
-            field=models.ForeignKey(to='regnskab.Session', null=True, on_delete=django.db.models.deletion.SET_NULL),
+            field=models.ForeignKey(to='regnskab.Session', null=True),
         ),
         migrations.AddField(
             model_name='sheet',
             name='session',
-            field=models.ForeignKey(to='regnskab.Session', null=True, on_delete=django.db.models.deletion.SET_NULL),
+            field=models.ForeignKey(to='regnskab.Session', null=True),
         ),
     ]

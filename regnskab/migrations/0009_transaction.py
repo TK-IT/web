@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 ('created_time', models.DateTimeField(auto_now_add=True)),
                 ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
                 ('profile', models.ForeignKey(to=profile_model)),
-                ('session', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='regnskab.Session')),
+                ('session', models.ForeignKey(null=True, to='regnskab.Session')),
             ],
         ),
     ]

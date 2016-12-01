@@ -107,7 +107,7 @@ class Transaction(models.Model):
         (CORRECTION, 'Korrigering'),
     ]
 
-    session = models.ForeignKey('Session', on_delete=models.SET_NULL,
+    session = models.ForeignKey('Session', on_delete=models.CASCADE,
                                 null=True, blank=False)
     kind = models.CharField(max_length=10, choices=KIND)
     profile = models.ForeignKey(Profile)
@@ -138,7 +138,7 @@ def get_primary_titles(title_qs=None, period=None):
 
 
 class Sheet(models.Model):
-    session = models.ForeignKey('Session', on_delete=models.SET_NULL,
+    session = models.ForeignKey('Session', on_delete=models.CASCADE,
                                 null=True, blank=False)
     name = models.CharField(max_length=200, blank=True,
                             help_text='f.eks. HSTR, revy, matlabotanisk have')
