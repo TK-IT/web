@@ -87,7 +87,3 @@ class TransactionBatchForm(forms.Form):
         for profile in self._profiles:
             p = 'profile%d_' % profile.id
             yield (profile, data[p + 'amount'], data[p + 'selected'])
-
-
-class OtherExpenseBatchForm(PaymentBatchForm):
-    note = forms.CharField(max_length=255)
