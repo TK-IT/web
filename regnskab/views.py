@@ -62,10 +62,13 @@ def get_profiles(only_current):
     current_qs = SheetStatus.objects.filter(end_time=None)
     current = set(current_qs.values_list('profile_id', flat=True))
 
-    qs = Profile.objects.all()
+    profile_qs = Profile.objects.all()
     if only_current:
-        qs = qs.filter(id__in=current)
-    qs = qs.prefetch_related('title_set')
+        profile_qs = profile_qs.filter(id__in=current)
+    title_qs = Title.objects.all()
+    titles = {}
+    for t in title_qs:
+        titles.setdefault(t.profile_id, []).append(t)
     TITLE_ORDER = dict(BEST=0, FU=1, EFU=2)
 
     def title_key(t):
@@ -84,10 +87,10 @@ def get_profiles(only_current):
             return (1, profile.name)
 
     profiles = []
-    for profile in qs:
-        titles = list(profile.title_set.all())
-        if titles:
-            profile.title = max(titles, key=lambda t: t.period)
+    for profile in profile_qs:
+        t = titles.get(profile.id)
+        if t:
+            profile.title = max(t, key=lambda t: t.period)
         else:
             profile.title = None
         profile.in_current = profile.id in current
