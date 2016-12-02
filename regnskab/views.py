@@ -631,14 +631,16 @@ class ProfileDetail(TemplateView):
 
         payment_qs = Transaction.objects.all()
         payment_qs = payment_qs.filter(profile=profile)
-        payment_qs = payment_qs.annotate(name=F('note'))
         payment_qs = payment_qs.annotate(balance_change=F('amount'))
-        payment_qs = payment_qs.values('time', 'name', 'amount', 'balance_change')
+        payment_qs = payment_qs.values('kind', 'time', 'note', 'amount', 'balance_change')
         payments = list(payment_qs)
         for o in payments:
+            kind = o.pop('kind')
+            note = o.pop('note')
             o['date'] = o['time'].date()
-            if not o['name']:
-                o['name'] = 'Betaling'
+
+            t = Transaction(kind=kind, note=note)
+            o['name'] = t.get_kind_display()
 
         row_data = payments + purchases
 
