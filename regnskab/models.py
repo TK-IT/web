@@ -315,6 +315,8 @@ def compute_balance(profile_ids=None, created_before=None):
     else:
         # Ensure only profile_ids is in the result
         balance = {p: Decimal() for p in profile_ids}
+        if not balance:
+            return balance
 
     row_qs = SheetRow.objects.all().order_by()
     kind_qs = PurchaseKind.objects.all().order_by()
