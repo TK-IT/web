@@ -1,4 +1,5 @@
 {% extends "regnskab/base.html" %}
+{% block title %}Email til {{ object.recipient_name }}{% endblock %}
 {% block content %}
 <h1>{{ object.recipient_name }}</h1>
 <p>Til: <tt>{{ object.recipient_email }}</tt></p>

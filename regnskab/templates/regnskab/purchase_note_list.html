@@ -1,4 +1,5 @@
 {% extends "regnskab/base.html" %}
+{% block title %}Tilføj diverse køb{% endblock %}
 {% block content %}
 <form method="get" action="{% url 'purchase_batch_create' pk=session.pk %}">
     <p><label>Note: <input name="note" required /></label>
