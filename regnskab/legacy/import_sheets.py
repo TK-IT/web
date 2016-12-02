@@ -132,19 +132,19 @@ def get_transactions(data, profiles):
                 Transaction(kind=Transaction.PAYMENT,
                             profile=profiles[name],
                             time=time,
-                            amount=amount))
+                            amount=-amount))
         for name, amount in o['others'].items():
             transactions.append(
                 Transaction(kind=Transaction.PURCHASE,
                             profile=profiles[name],
                             time=time,
-                            amount=-amount))
+                            amount=amount))
         for name, amount in o['corrections'].items():
             transactions.append(
                 Transaction(kind=Transaction.CORRECTION,
                             profile=profiles[name],
                             time=time,
-                            amount=-amount))
+                            amount=amount))
     return transactions
 
 
