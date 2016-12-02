@@ -61,6 +61,8 @@ class SessionCreate(TemplateView):
         session = Session(created_by=self.request.user, period=config.GFYEAR,
                           email_template=email_template)
         session.save()
+        if session.email_template:
+            session.regenerate_emails()
         return redirect('session_update', pk=session.pk)
 
 
