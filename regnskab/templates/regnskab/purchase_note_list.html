@@ -1,8 +1,8 @@
 {% extends "regnskab/base.html" %}
 {% block content %}
 <form method="get" action="{% url 'purchase_batch_create' pk=session.pk %}">
-    <p><label>Note: <input name="note" /></label>
-    <label>Beløb: <input name="amount" /></label>
+    <p><label>Note: <input name="note" required /></label>
+    <label>Beløb: <input name="amount" required /></label>
     <input type="submit" value="Indtast diverse køb" /></p>
 </form>
 {% if notes %}
