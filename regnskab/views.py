@@ -53,7 +53,13 @@ class SessionCreate(TemplateView):
     template_name = 'regnskab/session_create.html'
 
     def post(self, request):
-        session = Session(created_by=self.request.user, period=config.GFYEAR)
+        try:
+            email_template = EmailTemplate.objects.get(
+                name='Standard')
+        except EmailTemplate.DoesNotExist:
+            email_template = None
+        session = Session(created_by=self.request.user, period=config.GFYEAR,
+                          email_template=email_template)
         session.save()
         return redirect('session_update', pk=session.pk)
 
@@ -410,19 +416,13 @@ class SessionUpdate(FormView):
     def get_initial(self):
         email_template = self.object.email_template
         if email_template:
-            name = email_template.name
+            return dict(subject=email_template.subject,
+                        body=email_template.body,
+                        format=email_template.format)
         else:
-            try:
-                email_template = EmailTemplate.objects.get(
-                    name='Standard')
-            except EmailTemplate.DoesNotExist:
-                email_template = EmailTemplate(
-                    name='', subject='', body='', format=EmailTemplate.POUND)
-            name = ''
-        return dict(name=name,
-                    subject=email_template.subject,
-                    body=email_template.body,
-                    format=email_template.format)
+            return dict(subject='',
+                        body='',
+                        format=EmailTemplate.POUND)
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
@@ -442,13 +442,13 @@ class SessionUpdate(FormView):
             if form.has_changed():
                 qs = Session.objects.exclude(pk=self.object.pk)
                 qs = qs.filter(email_template=self.object.email_template)
-                if qs.exists():
+                if self.object.email_template.name or qs.exists():
                     self.object.email_template = EmailTemplate()
                 save_it = True
             else:
                 save_it = False
 
-        self.object.email_template.name = form.cleaned_data['name']
+        self.object.email_template.name = ''
         self.object.email_template.subject = form.cleaned_data['subject']
         self.object.email_template.body = form.cleaned_data['body']
         self.object.email_template.format = form.cleaned_data['format']

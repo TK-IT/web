@@ -46,8 +46,6 @@ class SessionForm(forms.Form):
                               widget=forms.TextInput(attrs={'size': 60}))
     body = forms.CharField(widget=forms.Textarea(attrs={'cols': 70, 'rows': 20}))
     format = forms.ChoiceField(choices=EmailTemplate.FORMAT)
-    name = forms.CharField(max_length=200, required=False,
-                           label='Gem emailskabelon som')
 
 
 class TransactionBatchForm(forms.Form):
