@@ -3,7 +3,7 @@ from decimal import Decimal
 from collections import Counter
 import json
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.http import Http404
 from django.db.models import F
 from django.utils import timezone
