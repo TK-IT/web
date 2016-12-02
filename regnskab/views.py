@@ -545,6 +545,35 @@ class EmailSend(View):
             return redirect('home')
 
 
+def get_profiles_title_status():
+    title_qs = Title.objects.all().order_by('period')
+    titles = {}
+    for t in title_qs:
+        # Override any older profiles
+        titles[t.profile_id] = t
+
+    qs = Profile.objects.all()
+
+    status_qs = SheetStatus.objects.all().order_by('profile_id')
+    groups = itertools.groupby(status_qs, key=lambda s: s.profile_id)
+    now = timezone.now()
+    statuses = {pk: sorted(s, key=lambda s: (s.end_time or now))[-1]
+                for pk, s in groups}
+
+    profiles = list(qs)
+    for p in profiles:
+        p.status = statuses.get(p.id)
+        p.title = titles.get(p.id)
+    profiles.sort(
+        key=lambda p: (p.status is None,
+                       p.status and p.status.end_time is not None,
+                       p.name if not p.status or p.status.end_time else
+                       (p.title is None,
+                        (-p.title.period, p.title.kind, p.title.root)
+                        if p.title else p.name)))
+    return profiles
+
+
 class ProfileList(TemplateView):
     template_name = 'regnskab/profile_list.html'
 
@@ -554,33 +583,10 @@ class ProfileList(TemplateView):
 
     def get_context_data(self, **kwargs):
         context_data = super(ProfileList, self).get_context_data(**kwargs)
-        title_qs = Title.objects.all().order_by('period')
-        titles = {}
-        for t in title_qs:
-            # Override any older profiles
-            titles[t.profile_id] = t
-        qs = Profile.objects.all()
-
-        status_qs = SheetStatus.objects.all().order_by('profile_id')
-        groups = itertools.groupby(status_qs, key=lambda s: s.profile_id)
-        now = timezone.now()
-        statuses = {pk: sorted(s, key=lambda s: (s.end_time or now))[-1]
-                    for pk, s in groups}
-
-        profiles = list(qs)
+        profiles = get_profiles_title_status()
         balances = compute_balance()
         for p in profiles:
             p.balance = balances.get(p.id)
-            p.status = statuses.get(p.id)
-            p.title = titles.get(p.id)
-        profiles.sort(
-            key=lambda p: (p.status is None,
-                           p.status and p.status.end_time is not None,
-                           p.name if not p.status or p.status.end_time else
-                           (p.title is None,
-                            (-p.title.period, p.title.kind, p.title.root)
-                            if p.title else p.name)))
-
         context_data['object_list'] = profiles
         return context_data
 
