@@ -1,11 +1,11 @@
 import itertools
 from decimal import Decimal
-from collections import Counter
+from collections import Counter, defaultdict
 import json
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
-from django.http import Http404
-from django.db.models import F
+from django.http import Http404, HttpResponse
+from django.db.models import F, Min
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 import django.core.mail
@@ -21,11 +21,12 @@ from regnskab.forms import (
 )
 from regnskab.models import (
     Sheet, SheetRow, SheetStatus, Profile, Alias, Title,
-    EmailTemplate, Session, Email,
+    EmailTemplate, Session, Email, PurchaseKind,
     Transaction, Purchase,
     compute_balance, get_inka,
-    config,
+    config, tk_prefix,
 )
+from regnskab.texrender import tex_to_pdf
 
 
 regnskab_permission_required = permission_required('regnskab.add_sheetrow')
@@ -566,12 +567,16 @@ def get_profiles_title_status():
     for p in profiles:
         p.status = statuses.get(p.id)
         p.title = titles.get(p.id)
+    order = dict(zip('FORM INKA KASS NF CERM SEKR PR VC'.split(),
+                     range(8)))
     profiles.sort(
         key=lambda p: (p.status is None,
                        p.status and p.status.end_time is not None,
                        p.name if not p.status or p.status.end_time else
                        (p.title is None,
-                        (-p.title.period, p.title.kind, p.title.root)
+                        (-p.title.period, p.title.kind,
+                         order.get(p.title.root, 10),
+                         p.title.root)
                         if p.title else p.name)))
     return profiles
 
@@ -929,3 +934,168 @@ class PaymentPurchaseList(TemplateView):
 
         context_data['object_list'] = rows
         return context_data
+
+
+BALANCE_PRINT_TEX = r"""\documentclass[danish,a4paper,12pt]{article}
+\usepackage{a4}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage{multirow}
+\usepackage{longtable}
+\setlength{\hoffset}{-2.2cm}
+\setlength{\voffset}{-2.7cm}
+\setlength{\textwidth}{19.5cm}
+\setlength{\textheight}{26.4cm}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+\begin{document}
+\strut \hfill \today\\
+
+\begin{longtable}{|p{6.3cm}|p{1.2cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.7cm}p{1.9cm}|p{1.7cm}|}
+\hline
+Siden sidste regning & Kasser & Guldøl & Øl & Vand & Diverse & Betalt & Gæld\\
+År til dato & %(price_ølkasse).2f & %(price_guldøl).2f & %(price_øl).2f & %(price_sodavand).2f & & &\\
+%(personer)s\hline
+\end{longtable}
+\newpage\phantom{A}\newpage
+\begin{longtable}{|p{6.3cm}|p{1.2cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.7cm}p{1.9cm}|p{1.7cm}|}
+\hline
+Siden sidste regning & Kasser & Guldøl & Øl & Vand & Diverse & Betalt & Gæld\\
+År til dato & %(price_ølkasse).2f & %(price_guldøl).2f & %(price_øl).2f & %(price_sodavand).2f & & &\\
+\hline
+Månedstotal & \hfill %(last_ølkasse).2f & \hfill %(last_guldøl)d & \hfill %(last_øl)d & \hfill %(last_sodavand)d & \hfill %(last_andet).2f & \hfill %(last_betalt).2f &\\
+Årstotal & \hfill %(total_ølkasse).2f & \hfill %(total_guldøl)d & \hfill %(total_øl)d & \hfill %(total_sodavand)d & \hfill %(total_andet).2f & \hfill %(total_betalt).2f & \hfill %(total_balance).2f\\
+\hline
+\end{longtable}
+\end{document}
+"""
+
+BALANCE_ROW = '\n'.join([
+    r'\hline',
+    r'\multirow{2}{6cm}{%(name)-30s} & %(last)s &\\',
+    r'& %(total)s & \hfill %(balance)7.2f\\'])
+
+
+class BalancePrint(View):
+    content_type = 'text/plain; charset=utf8'
+
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, pk, ext):
+        self.regnskab_session = get_object_or_404(
+            Session.objects, pk=pk)
+
+        period = self.regnskab_session.period
+
+        purchase_qs = Purchase.objects.all().order_by().filter(
+            row__sheet__period=period)
+        purchase_qs = purchase_qs.annotate(
+            name=F('kind__name'),
+            sheet_id=F('row__sheet_id'),
+            profile_id=F('row__profile_id'),
+            session_id=F('row__sheet__session_id'))
+        purchase_qs = purchase_qs.values_list(
+            'sheet_id', 'name', 'profile_id', 'session_id', 'count')
+
+        kinds = {
+            (o.sheet_id, o.name): o.unit_price
+            for o in PurchaseKind.objects.all()}
+
+        kind_last_sheet = {}
+        for sheet_id, name in kinds.keys():
+            ex = kind_last_sheet.setdefault(name, sheet_id)
+            if ex < sheet_id:
+                kind_last_sheet[name] = sheet_id
+        prices = {name: kinds[sheet_id, name]
+                  for name, sheet_id in kind_last_sheet.items()}
+
+        counts = defaultdict(Decimal)
+        cur_counts = defaultdict(Decimal)
+
+        for sheet_id, name, profile_id, session_id, count in purchase_qs:
+            if name in ('guldølkasse', 'sodavandkasse'):
+                real_name = 'ølkasse'
+                real_count = count * (kinds[sheet_id, name] /
+                                      kinds[sheet_id, 'ølkasse'])
+            elif name in ('ølkasse', 'ølkasser'):
+                real_name = 'ølkasse'
+                real_count = count
+            else:
+                real_name, real_count = name, count
+            counts[profile_id, real_name] += real_count
+            if session_id == self.regnskab_session.id:
+                cur_counts[profile_id, real_name] += real_count
+
+        transaction_qs = Transaction.objects.all()
+        period_start_time, = (
+            Sheet.objects.filter(period=period).aggregate(Min('start_date')).values())
+        transaction_qs = transaction_qs.filter(time__gte=period_start_time)
+        for o in transaction_qs:
+            if o.kind == Transaction.PAYMENT:
+                real_name = 'betalt'
+                amount = -o.amount
+            else:
+                real_name = 'andet'
+                amount = o.amount
+            counts[o.profile_id, real_name] += amount
+            if o.session_id == self.regnskab_session.id:
+                cur_counts[o.profile_id, real_name] += amount
+
+        context = {}
+        for name, unit_price in prices.items():
+            context['price_%s' % name] = unit_price
+
+        keys = 'ølkasse guldøl øl sodavand andet betalt'.split()
+        for k in keys:
+            context['total_%s' % k] = context['last_%s' % k] = Decimal()
+        context['total_balance'] = Decimal()
+
+        profiles = get_profiles_title_status()
+        balances = compute_balance()
+
+        rows = []
+        for p in profiles:
+            context['total_balance'] += balances.get(p.id, 0)
+            for k in keys:
+                context['total_%s' % k] += counts[p.id, k]
+                context['last_%s' % k] += cur_counts[p.id, k]
+            p_context = {}
+            if p.title:
+                age = p.title.age(period)
+                if age > 4:
+                    tex_prefix = 'T$^%s$O' % (age - 3)
+                else:
+                    tex_prefix = tk_prefix(age)
+                if p.title.root == 'KASS':
+                    root = 'KA\\$\\$'
+                else:
+                    root = p.title.root
+                p_context['name'] = '%s%s %s' % (tex_prefix, root, p.name)
+            else:
+                p_context['name'] = p.name
+            FMT = dict(betalt='\\hfill %.2f', andet='\\hfill %.2f',
+                       ølkasse='\\hfill %.1f')
+            p_context['last'] = ' & '.join(
+                FMT.get(k, '\\hfill %g') % cur_counts.get((p.id, k), 0)
+                for k in keys)
+            p_context['total'] = ' & '.join(
+                FMT.get(k, '\\hfill %g') % counts.get((p.id, k), 0)
+                for k in keys)
+            p_context['balance'] = balances[p.id]
+            if not p.status or p.status.end_time is not None:
+                continue
+            rows.append(BALANCE_ROW % p_context)
+
+        context['personer'] = '\n'.join(rows)
+
+        tex_source = BALANCE_PRINT_TEX % context
+
+        if ext == 'pdf':
+            pdf = tex_to_pdf(tex_source)
+            return HttpResponse(pdf,
+                                content_type='application/pdf')
+        else:
+            return HttpResponse(tex_source,
+                                content_type=self.content_type)

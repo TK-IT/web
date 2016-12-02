@@ -30,6 +30,11 @@
 <p><a href="{% url 'payment_purchase_list' pk=object.pk %}">
 Hvem har krydset uden at have betalt?</a></p>
 
+<p><a href="{% url 'balance_print_pdf' pk=object.pk %}">
+Hent opgørelse som PDF</a> (eller
+<a href="{% url 'balance_print_tex' pk=object.pk %}">
+LaTeX</a>)</p>
+
 <p>Sendt:
 {% if object.sent %}
 {{ object.send_time }}.
