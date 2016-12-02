@@ -118,6 +118,12 @@ class Transaction(models.Model):
                                    null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
 
+    def get_kind_display(self):
+        if self.note:
+            return self.note
+        return next((l for k, l in Transaction.KIND if l == self.kind),
+                    '')
+
     def __str__(self):
         return '%.2f kr.' % self.amount
 
