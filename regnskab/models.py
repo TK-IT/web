@@ -316,8 +316,8 @@ def compute_balance(profile_ids=None, created_before=None):
         # Ensure only profile_ids is in the result
         balance = {p: Decimal() for p in profile_ids}
 
-    row_qs = SheetRow.objects.all()
-    kind_qs = PurchaseKind.objects.all()
+    row_qs = SheetRow.objects.all().order_by()
+    kind_qs = PurchaseKind.objects.all().order_by()
     if created_before:
         sheet_qs = Sheet.objects.all()
         sheet_qs = sheet_qs.filter(created_time__lt=created_before)
