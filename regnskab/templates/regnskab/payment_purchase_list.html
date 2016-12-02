@@ -1,0 +1,37 @@
+{% extends "regnskab/base.html" %}
+{% block head %}
+<style>
+.warn { background-color: rgba(255, 0, 0, 0.4); }
+</style>
+{% endblock %}
+{% block content %}
+<h1>Personer der har krydset</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Navn</th>
+            <th>På krydslisten</th>
+            <th>Balance sidste gang</th>
+            <th>Balance efter betaling</th>
+            <th>Krydser</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for person in object_list %}
+        <tr class="{{ person.warn|yesno:"warn," }}">
+            <td><a class="profile-link"
+                   href="{% url 'profile_detail' pk=person.pk %}">
+                    {{ person.title.display_title }} {{ person.name }}</a></td>
+            <td>{{ person.status.since }}</td>
+            <td align=right>{{ person.b0|floatformat:2 }}</td>
+            <td align=right>{{ person.b1|floatformat:2 }}</td>
+            <td>{% for sheet, purchases in person.sheets %}
+                <a href="{% url 'sheet_detail' pk=sheet.id %}"
+                   title="{{ sheet }}">
+                {{ purchases }}</a>{% if forloop.first %}{% else %},{% endif %}
+            {% endfor %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

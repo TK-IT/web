@@ -21,7 +21,7 @@ from regnskab.views import (
     EmailTemplateList, EmailTemplateUpdate, EmailTemplateCreate,
     SessionList, SessionUpdate, EmailList, EmailDetail, EmailSend,
     PaymentBatchCreate, PurchaseNoteList, PurchaseBatchCreate,
-    ProfileList, ProfileDetail,
+    ProfileList, ProfileDetail, PaymentPurchaseList,
 )
 
 urlpatterns = [
@@ -56,6 +56,8 @@ urlpatterns = [
         name='purchase_note_list'),
     url(r'^session/(?P<pk>\d+)/other/add/$', PurchaseBatchCreate.as_view(),
         name='purchase_batch_create'),
+    url(r'^session/(?P<pk>\d+)/purchases/$', PaymentPurchaseList.as_view(),
+        name='payment_purchase_list'),
     url(r'^profile/$', ProfileList.as_view(),
         name='profile_list'),
     url(r'^profile/(?P<pk>\d+)/$', ProfileDetail.as_view(),

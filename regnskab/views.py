@@ -874,3 +874,64 @@ class PurchaseBatchCreate(TransactionBatchCreateBase):
 
     def get_success_view(self):
         return redirect('purchase_batch_create', pk=self.regnskab_session.pk)
+
+
+class PaymentPurchaseList(TemplateView):
+    template_name = 'regnskab/payment_purchase_list.html'
+
+    @method_decorator(regnskab_permission_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.regnskab_session = get_object_or_404(
+            Session.objects, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+
+        payments = {}
+        payment_qs = Transaction.objects.filter(
+            session=self.regnskab_session,
+            kind=Transaction.PAYMENT).order_by()
+        for p_id, amount in payment_qs.values_list('profile_id', 'amount'):
+            payments[p_id] = payments.get(p_id, Decimal()) + amount
+
+        profile_sheets = {}
+        purchase_qs = Purchase.objects.filter(
+            row__sheet__session=self.regnskab_session)
+        purchase_qs = purchase_qs.annotate(
+            amount=F('kind__unit_price') * F('count'))
+        purchase_qs = purchase_qs.annotate(
+            profile_id=F('row__profile_id'))
+        purchase_qs = purchase_qs.annotate(
+            sheet_id=F('row__sheet_id'))
+
+        for o in purchase_qs:
+            p_id = o.profile_id
+            x = profile_sheets.setdefault(p_id, {})
+            x.setdefault(o.sheet_id, []).append(o)
+
+        profile_ids = set(payments.keys()) | set(profile_sheets.keys())
+        initial_balances = compute_balance(
+            profile_ids=profile_ids,
+            created_before=self.regnskab_session.created_time)
+
+        sheet_ids = set(s_id for p_id, sheets in profile_sheets.items()
+                        for s_id in sheets.keys())
+        sheets = {o.id: o for o in Sheet.objects.filter(id__in=sheet_ids)}
+
+        profiles = get_profiles_title_status()
+        rows = []
+        for p in profiles:
+            p.b0 = initial_balances.get(p.id, Decimal())
+            p.b1 = p.b0 - payments.get(p.id, Decimal())
+            p.sheets = [
+                (sheets[s_id], ', '.join(map(str, purchases)))
+                for s_id, purchases in profile_sheets.get(p.id, {}).items()]
+            if not p.sheets:
+                continue
+            # TODO make 250 configurable
+            p.warn = 250 < p.b0 and 0 < p.b1 and p.sheets
+            rows.append(p)
+
+        context_data['object_list'] = rows
+        return context_data

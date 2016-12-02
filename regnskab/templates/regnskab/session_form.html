@@ -26,6 +26,9 @@
 </p>
 {% endif %}
 
+<p><a href="{% url 'payment_purchase_list' pk=object.pk %}">
+Hvem har krydset uden at have betalt?</a></p>
+
 <p>Sendt:
 {% if object.sent %}
 {{ object.send_time }}.
