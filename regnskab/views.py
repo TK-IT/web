@@ -730,9 +730,7 @@ class TransactionBatchCreateBase(FormView):
         return existing_qs
 
     def get_success_view(self):
-        raise ImproperlyConfigured(
-            "TransactionBatchCreateBase subclass must define " +
-            "get_success_view.")
+        return redirect('session_update', pk=self.regnskab_session.pk)
 
     def get_profile_data(self):
         profiles = self.get_profiles()
@@ -811,9 +809,6 @@ class PaymentBatchCreate(TransactionBatchCreateBase):
             profile_ids={p.id for p in profiles},
             created_before=self.regnskab_session.created_time)
 
-    def get_success_view(self):
-        return redirect('payment_batch_create', pk=self.regnskab_session.pk)
-
 
 class PurchaseNoteList(TemplateView):
     template_name = 'regnskab/purchase_note_list.html'
@@ -873,9 +868,6 @@ class PurchaseBatchCreate(TransactionBatchCreateBase):
         except (ValueError, KeyError):
             a = 0
         return {p.id: a for p in profiles}
-
-    def get_success_view(self):
-        return redirect('purchase_batch_create', pk=self.regnskab_session.pk)
 
 
 class PaymentPurchaseList(TemplateView):
