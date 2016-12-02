@@ -680,10 +680,19 @@ class TransactionBatchCreateBase(FormView):
     form_class = TransactionBatchForm
     template_name = 'regnskab/transaction_batch_create.html'
 
+    save_label = 'Gem'
+    header = None
+
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
         self.regnskab_session = self.get_regnskab_session()
         return super().dispatch(request, *args, **kwargs)
+
+    def get_save_label(self):
+        return self.save_label
+
+    def get_header(self):
+        return self.header
 
     def get_regnskab_session(self):
         return get_object_or_404(
@@ -774,9 +783,18 @@ class TransactionBatchCreateBase(FormView):
             self.regnskab_session.regenerate_emails()
         return self.get_success_view()
 
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['session'] = self.regnskab_session
+        context_data['header'] = self.get_header()
+        context_data['save_label'] = self.get_save_label()
+        return context_data
+
 
 class PaymentBatchCreate(TransactionBatchCreateBase):
     transaction_kind = Transaction.PAYMENT
+    save_label = 'Gem betalinger'
+    header = 'Indtast betalinger'
 
     def get_initial_amounts(self, profiles):
         return compute_balance(
@@ -789,6 +807,7 @@ class PaymentBatchCreate(TransactionBatchCreateBase):
 
 class PurchaseNoteList(TemplateView):
     template_name = 'regnskab/purchase_note_list.html'
+    save_label = 'Gem diverse køb'
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
@@ -831,6 +850,9 @@ class PurchaseBatchCreate(TransactionBatchCreateBase):
 
     def get_note(self):
         return self.note
+
+    def get_header(self):
+        return 'Indtast "%s"' % self.note
 
     def get_existing(self):
         return super().get_existing().filter(note=self.note)
