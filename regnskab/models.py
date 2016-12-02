@@ -334,10 +334,13 @@ def compute_balance(profile_ids=None, created_before=None):
         purchase_qs = purchase_qs.filter(row_id__lte=max_row)
 
     for o in purchase_qs:
-        if o.row_id in rows.keys():
-            amount = o.count * kinds[o.kind_id].unit_price
-            profile_id = rows[o.row_id].profile_id
-            balance[profile_id] += amount
+        try:
+            row = rows[o.row_id]
+        except KeyError:
+            continue
+        amount = o.count * kinds[o.kind_id].unit_price
+        profile_id = row.profile_id
+        balance[profile_id] += amount
 
     transaction_qs = Transaction.objects.all()
     if created_before:
