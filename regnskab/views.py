@@ -1096,7 +1096,7 @@ class BalancePrint(View):
 
     def get(self, request, **kwargs):
         tex_source = self.get_tex_source()
-        if ext == 'pdf':
+        if kwargs['ext'] == 'pdf':
             try:
                 pdf = tex_to_pdf(tex_source)
             except RenderError as exn:

@@ -34,7 +34,7 @@ def pdfnup(pdf, jobname='django'):
         base = os.path.join(d, jobname)
         out = base + '-nup'
         with open(base + '.pdf', 'w', encoding='utf8') as fp:
-            fp.write(source)
+            fp.write(pdf)
         cmd = ('pdfnup', base + '.pdf', '-o', out + '.pdf')
         p = subprocess.Popen(
             cmd,
@@ -61,7 +61,7 @@ def run_lp(pdf, duplex=True, hostname=None, destination=None):
         cmd = ('lp', '-h', hostname, '-d', destination, fp.name)
         p = subprocess.Popen(
             cmd,
-            cwd=d,
+            cwd=os.path.dirname(fp.name),
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
