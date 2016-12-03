@@ -31,11 +31,11 @@
 Hvem har krydset uden at have betalt?</a></p>
 
 <form method="post" action="{% url 'balance_print_pdf' pk=object.pk %}">{% csrf_token %}
-<p><a href="{% url 'balance_print_pdf' pk=object.pk %}">
-Hent opgørelse som PDF</a> (eller
-<a href="{% url 'balance_print_tex' pk=object.pk %}">
-LaTeX</a>)</p>
-<p><input type="submit" value="Print opgørelse på A2" /></p>
+    <p>
+    {{ print_form.mode }} <label>Highlight over 250: {{ print_form.highlight }}</label>
+    <input type="submit" value="Udskriv opgørelse" />
+    {% if print %}Opgørelsen er udskrevet på A2.{% endif %}
+    </p>
 </form>
 
 <p>Sendt:

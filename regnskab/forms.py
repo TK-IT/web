@@ -85,3 +85,15 @@ class TransactionBatchForm(forms.Form):
         for profile in self._profiles:
             p = 'profile%d_' % profile.id
             yield (profile, data[p + 'amount'], data[p + 'selected'])
+
+
+class BalancePrintForm(forms.Form):
+    PDF, SOURCE, PRINT = 'pdf', 'source', 'print'
+    print_choices = [
+        (PDF, 'Hent som PDF'),
+        (SOURCE, 'Hent TeX-kildekode'),
+        (PRINT, 'Print på A2'),
+    ]
+
+    highlight = forms.BooleanField(required=False, initial=True)
+    mode = forms.ChoiceField(choices=print_choices, initial='pdf')

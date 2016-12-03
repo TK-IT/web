@@ -4,7 +4,8 @@ from collections import Counter, defaultdict
 import json
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.core.urlresolvers import reverse
 from django.db.models import F, Min
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -17,7 +18,7 @@ from django.views.generic import (
 )
 from regnskab.forms import (
     SheetCreateForm, EmailTemplateForm, SessionForm,
-    TransactionBatchForm,
+    TransactionBatchForm, BalancePrintForm,
 )
 from regnskab.models import (
     Sheet, SheetRow, SheetStatus, Profile, Alias, Title,
@@ -435,6 +436,8 @@ class SessionUpdate(FormView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         context_data['object'] = self.object
+        context_data['print'] = self.request.GET.get('print')
+        context_data['print_form'] = BalancePrintForm()
         return context_data
 
     def form_valid(self, form):
@@ -982,11 +985,12 @@ Månedstotal & \hfill %(last_ølkasse).2f & \hfill %(last_guldøl)d & \hfill %(l
 BALANCE_ROW = '\n'.join([
     r'\hline',
     r'\multirow{2}{6cm}{%(name)-30s} & %(last)s &\\',
-    r'& %(total)s & \hfill %(hl)s{%(balance)7.2f}\\'])
+    r'& %(total)s & \hfill %(hl)s{%(balance).2f}\\'])
 
 
-class BalancePrint(View):
-    content_type = 'text/plain; charset=utf8'
+class BalancePrint(FormView):
+    form_class = BalancePrintForm
+    template_name = 'regnskab/balance_print_form.html'
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
@@ -994,7 +998,7 @@ class BalancePrint(View):
             Session.objects, pk=kwargs['pk'])
         return super().dispatch(request, *args, **kwargs)
 
-    def get_tex_source(self):
+    def get_tex_source(self, threshold):
         period = self.regnskab_session.period
 
         purchase_qs = Purchase.objects.all().order_by().filter(
@@ -1092,8 +1096,7 @@ class BalancePrint(View):
                 FMT.get(k, '\\hfill %g') % counts.get((p.id, k), 0)
                 for k in keys)
             p_context['balance'] = balances[p.id]
-            # TODO make 250 configurable
-            p_context['hl'] = '\\hl' if balances[p.id] > 250 else ''
+            p_context['hl'] = '\\hl' if balances[p.id] > threshold else ''
             if not p.status or p.status.end_time is not None:
                 continue
             rows.append(BALANCE_ROW % p_context)
@@ -1104,37 +1107,39 @@ class BalancePrint(View):
 
         return tex_source
 
-    def get(self, request, **kwargs):
-        tex_source = self.get_tex_source()
-        if kwargs['ext'] == 'pdf':
-            try:
-                pdf = tex_to_pdf(tex_source)
-            except RenderError as exn:
-                return HttpResponse(str(exn), content_type='text/plain')
-            try:
-                pdf = pdfnup(pdf)
-            except RenderError as exn:
-                return HttpResponse(str(exn), content_type='text/plain')
-            return HttpResponse(pdf,
-                                content_type='application/pdf')
-        else:
-            return HttpResponse(tex_source,
-                                content_type=self.content_type)
+    def form_valid(self, form):
+        mode = form.cleaned_data['mode']
+        should_highlight = form.cleaned_data['highlight']
+        threshold = 250 if should_highlight else float('inf')
 
-    def post(self, request, **kwargs):
-        tex_source = self.get_tex_source()
+        tex_source = self.get_tex_source(threshold=threshold)
+        if mode == BalancePrintForm.SOURCE:
+            return HttpResponse(tex_source, content_type='text/plain')
+
         try:
             pdf = tex_to_pdf(tex_source)
         except RenderError as exn:
-            return HttpResponse(str(exn), content_type='text/plain')
+            form.add_error(None, str(exn))
+            return self.form_invalid(form)
+
         try:
             pdf = pdfnup(pdf)
         except RenderError as exn:
-            return HttpResponse(str(exn), content_type='text/plain')
+            form.add_error(None, str(exn))
+            return self.form_invalid(form)
+
+        if mode == BalancePrintForm.PDF:
+            return HttpResponse(pdf, content_type='application/pdf')
+
+        if mode != BalancePrintForm.PRINT:
+            raise ValueError(mode)
+
         try:
             output = run_lp(pdf, duplex=False)
         except RenderError as exn:
-            return HttpResponse(str(exn), content_type='text/plain')
-        output = ('Listen er sendt til printeren.\n\n' +
-                  'Output fra lp-kommandoen:\n' + output)
-        return HttpResponse(output, content_type='text/plain')
+            form.add_error(None, str(exn))
+            return self.form_invalid(form)
+
+        url = reverse('session_update',
+                      kwargs=dict(pk=self.regnskab_session.id))
+        return HttpResponseRedirect(url + '?print=success')
