@@ -32,6 +32,7 @@ from regnskab.texrender import tex_to_pdf, RenderError, pdfnup, run_lp
 
 regnskab_permission_required = permission_required('regnskab.add_sheetrow')
 
+TITLE_ORDER = dict(BEST=0, EFU=1, FU=2)
 BEST_ORDER = dict(zip('FORM INKA KASS NF CERM SEKR PR VC'.split(), range(8)))
 
 
@@ -81,7 +82,6 @@ def get_profiles(only_current):
     titles = {}
     for t in title_qs:
         titles.setdefault(t.profile_id, []).append(t)
-    TITLE_ORDER = dict(BEST=0, FU=1, EFU=2)
 
     def title_key(t):
         return (-t.period, TITLE_ORDER[t.kind],
