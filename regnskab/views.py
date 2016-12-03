@@ -1107,13 +1107,13 @@ class BalancePrint(FormView):
                 p_context['name'] = '%s%s %s' % (tex_prefix, root, p.name)
             else:
                 p_context['name'] = p.name
-            FMT = dict(betalt='\\hfill $%.2f$', andet='\\hfill $%.2f$',
-                       ølkasse='\\hfill $%.1f$')
+            FMT = dict(betalt='\\hfill \\num{%.2f}', andet='\\hfill \\num{%.2f}',
+                       ølkasse='\\hfill \\num{%.1f}')
             p_context['last'] = ' & '.join(
-                FMT.get(k, '\\hfill $%g$') % cur_counts.get((p.id, k), 0)
+                FMT.get(k, '\\hfill \\num{%g}') % cur_counts.get((p.id, k), 0)
                 for k in keys)
             p_context['total'] = ' & '.join(
-                FMT.get(k, '\\hfill $%g$') % counts.get((p.id, k), 0)
+                FMT.get(k, '\\hfill \\num{%g}') % counts.get((p.id, k), 0)
                 for k in keys)
             p_context['balance'] = balances[p.id]
             p_context['hl'] = '\\hl' if balances[p.id] > threshold else ''
