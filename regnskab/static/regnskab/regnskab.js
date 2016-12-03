@@ -77,7 +77,7 @@ function get_query_filters(query) {
     // Regex matching optional TK prefix followed by a prefix of a BEST title.
     var re_best = new RegExp('^(' + tk_prefix + '|)(' + best_prefix + ')$');
     // Regex matching optional TK prefix followed by FU title.
-    var re_fu = new RegExp('^(?:(' + tk_prefix + '|)FU)?(' + fu_two_letters + ')$');
+    var re_fu = new RegExp('^(' + tk_prefix + '|)(?:FU)?(' + fu_two_letters + ')$');
     // Regex matching optional TK prefix followed by FUAN.
     var re_fuan = new RegExp('^(' + tk_prefix + '|)AN$');
 
