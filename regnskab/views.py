@@ -1064,7 +1064,7 @@ class BalancePrint(View):
             if p.title:
                 age = p.title.age(period)
                 if age > 4:
-                    tex_prefix = 'T$^%s$O' % (age - 3)
+                    tex_prefix = 'T$^{%s}$O' % (age - 3)
                 else:
                     tex_prefix = tk_prefix(age)
                 if p.title.root == 'KASS':
