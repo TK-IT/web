@@ -1114,7 +1114,8 @@ class BalancePrint(FormView):
 
         tex_source = self.get_tex_source(threshold=threshold)
         if mode == BalancePrintForm.SOURCE:
-            return HttpResponse(tex_source, content_type='text/plain')
+            return HttpResponse(tex_source,
+                                content_type='text/plain; charset=utf8')
 
         try:
             pdf = tex_to_pdf(tex_source)
