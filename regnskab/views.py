@@ -936,16 +936,18 @@ class PaymentPurchaseList(TemplateView):
         return context_data
 
 
-BALANCE_PRINT_TEX = r"""\documentclass[a4paper,12pt]{article}
-\usepackage{a4}
+BALANCE_PRINT_TEX = r"""
+\documentclass[a4paper,12pt]{memoir}
 \usepackage[utf8]{inputenc}
+\usepackage{a4}
 \usepackage{multirow}
 \usepackage{longtable}
-\setlength{\hoffset}{-2.2cm}
-\setlength{\voffset}{-2.7cm}
-\setlength{\textwidth}{19.5cm}
-\setlength{\textheight}{26.4cm}
-\setlength{\parindent}{0pt}
+\setulmarginsandblock{.8cm}{*}{1}
+\setlrmarginsandblock{.7cm}{*}{1}
+\setlength{\headheight}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\footskip}{0pt}
+\checkandfixthelayout
 \pagestyle{empty}
 \begin{document}
 \strut \hfill \today\\
