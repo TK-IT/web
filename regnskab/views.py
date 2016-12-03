@@ -958,7 +958,7 @@ Siden sidste regning & Kasser & Guldøl & Øl & Vand & Diverse & Betalt & Gæld\
 År til dato & %(price_ølkasse).2f & %(price_guldøl).2f & %(price_øl).2f & %(price_sodavand).2f & & &\\
 %(personer)s\hline
 \end{longtable}
-\newpage
+\newpage\phantom{A}\newpage
 \begin{longtable}{|p{6.3cm}|p{1.2cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.7cm}p{1.9cm}|p{1.7cm}|}
 \hline
 Siden sidste regning & Kasser & Guldøl & Øl & Vand & Diverse & Betalt & Gæld\\
