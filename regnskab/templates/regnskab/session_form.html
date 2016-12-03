@@ -30,10 +30,13 @@
 <p><a href="{% url 'payment_purchase_list' pk=object.pk %}">
 Hvem har krydset uden at have betalt?</a></p>
 
+<form method="post" action="{% url 'balance_print_pdf' pk=object.pk %}">{% csrf_token %}
 <p><a href="{% url 'balance_print_pdf' pk=object.pk %}">
 Hent opgørelse som PDF</a> (eller
 <a href="{% url 'balance_print_tex' pk=object.pk %}">
 LaTeX</a>)</p>
+<p><input type="submit" value="Print opgørelse på A2" /></p>
+</form>
 
 <p>Sendt:
 {% if object.sent %}
