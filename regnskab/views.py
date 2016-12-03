@@ -936,10 +936,9 @@ class PaymentPurchaseList(TemplateView):
         return context_data
 
 
-BALANCE_PRINT_TEX = r"""\documentclass[danish,a4paper,12pt]{article}
+BALANCE_PRINT_TEX = r"""\documentclass[a4paper,12pt]{article}
 \usepackage{a4}
 \usepackage[utf8]{inputenc}
-\usepackage{babel}
 \usepackage{multirow}
 \usepackage{longtable}
 \setlength{\hoffset}{-2.2cm}
