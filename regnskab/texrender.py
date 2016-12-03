@@ -7,9 +7,8 @@ class RenderError(subprocess.CalledProcessError):
     pass
 
 
-def tex_to_pdf(source):
+def tex_to_pdf(source, jobname='django'):
     with tempfile.TemporaryDirectory() as d:
-        jobname = 'plans'
         base = os.path.join(d, jobname)
         with open(base + '.tex', 'w', encoding='utf8') as fp:
             fp.write(source)
