@@ -894,7 +894,9 @@ class PaymentPurchaseList(TemplateView):
             session=self.regnskab_session,
             kind=Transaction.PAYMENT).order_by()
         for p_id, amount in payment_qs.values_list('profile_id', 'amount'):
-            payments[p_id] = payments.get(p_id, Decimal()) + amount
+            # Note: Payments in the database have negative sign.
+            payments[p_id] = payments.get(p_id, Decimal()) - amount
+        # payments[p_id] is the sum of payment amounts
 
         profile_sheets = {}
         purchase_qs = Purchase.objects.filter(
