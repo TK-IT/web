@@ -26,7 +26,7 @@ from regnskab.models import (
     compute_balance, get_inka,
     config, tk_prefix,
 )
-from regnskab.texrender import tex_to_pdf, RenderError, pdfnup
+from regnskab.texrender import tex_to_pdf, RenderError, pdfnup, run_lp
 
 
 regnskab_permission_required = permission_required('regnskab.add_sheetrow')
@@ -1110,3 +1110,21 @@ class BalancePrint(View):
         else:
             return HttpResponse(tex_source,
                                 content_type=self.content_type)
+
+    def post(self, request, **kwargs):
+        tex_source = self.get_tex_source()
+        try:
+            pdf = tex_to_pdf(tex_source)
+        except RenderError as exn:
+            return HttpResponse(str(exn), content_type='text/plain')
+        try:
+            pdf = pdfnup(pdf)
+        except RenderError as exn:
+            return HttpResponse(str(exn), content_type='text/plain')
+        try:
+            output = run_lp(pdf, duplex=False)
+        except RenderError as exn:
+            return HttpResponse(str(exn), content_type='text/plain')
+        output = ('Listen er sendt til printeren.\n\n' +
+                  'Output fra lp-kommandoen:\n' + output)
+        return HttpResponse(output, content_type='text/plain')
