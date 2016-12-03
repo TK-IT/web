@@ -33,7 +33,7 @@ def pdfnup(pdf, jobname='django'):
     with tempfile.TemporaryDirectory() as d:
         base = os.path.join(d, jobname)
         out = base + '-nup'
-        with open(base + '.pdf', 'w', encoding='utf8') as fp:
+        with open(base + '.pdf', 'wb') as fp:
             fp.write(pdf)
         cmd = ('pdfnup', base + '.pdf', '-o', out + '.pdf')
         p = subprocess.Popen(
