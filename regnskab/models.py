@@ -131,7 +131,7 @@ class Transaction(models.Model):
 def get_primary_titles(title_qs=None, period=None):
     if title_qs is None:
         title_qs = Title.objects.all()
-    if period is not None:
+    if period is None:
         period = config.GFYEAR
     title_qs = title_qs.filter(period__lte=period)
     title_qs = title_qs.exclude(root='EFUIT', period__lt=period)
