@@ -56,7 +56,7 @@ def run_lp(pdf, duplex=True, hostname=None, destination=None):
         hostname = getattr(settings, 'CUPS_HOSTNAME', 'localhost')
     if destination is None:
         destination = settings.PRINT_DESTINATION
-    with tempfile.NamedTemporaryFile(mode='wb') as fp:
+    with tempfile.NamedTemporaryFile(mode='wb', suffix='.pdf') as fp:
         fp.write(pdf)
         cmd = ('lp', '-h', hostname, '-d', destination, fp.name)
         p = subprocess.Popen(
