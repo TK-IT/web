@@ -986,7 +986,7 @@ Månedstotal & \hfill $%(last_ølkasse).2f$ & \hfill $%(last_guldøl)d$ & \hfill
 BALANCE_ROW = '\n'.join([
     r'\hline',
     r'\multirow{2}{6cm}{%(name)-30s} & %(last)s &\\',
-    r'& %(total)s & \hfill %(hl)s{%(balance).2f}\\'])
+    r'& %(total)s & \hfill %(hl)s{$%(balance).2f$}\\'])
 
 
 class BalancePrint(FormView):
