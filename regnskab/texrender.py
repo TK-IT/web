@@ -58,7 +58,12 @@ def run_lp(pdf, duplex=True, hostname=None, destination=None):
         destination = settings.PRINT_DESTINATION
     with tempfile.NamedTemporaryFile(mode='wb', suffix='.pdf') as fp:
         fp.write(pdf)
-        cmd = ('lp', '-h', hostname, '-d', destination, fp.name)
+        if duplex:
+            opt = ('-o', 'Duplex=DuplexNoTumble')
+        else:
+            opt = ('-o', 'Duplex=None')
+
+        cmd = ('lp', '-h', hostname, '-d', destination,) + opt + (fp.name,)
         p = subprocess.Popen(
             cmd,
             cwd=os.path.dirname(fp.name),
