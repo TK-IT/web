@@ -30,7 +30,7 @@
 <p><a href="{% url 'payment_purchase_list' pk=object.pk %}">
 Hvem har krydset uden at have betalt?</a></p>
 
-<form method="post" action="{% url 'balance_print_pdf' pk=object.pk %}">{% csrf_token %}
+<form method="post" action="{% url 'balance_print' pk=object.pk %}">{% csrf_token %}
     <p>
     {{ print_form.mode }} <label>Highlight over 250: {{ print_form.highlight }}</label>
     <input type="submit" value="Udskriv opgørelse" />
