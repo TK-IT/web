@@ -943,6 +943,7 @@ BALANCE_PRINT_TEX = r"""
 \usepackage{a4}
 \usepackage{multirow}
 \usepackage{longtable}
+\usepackage{color,soul}
 \setulmarginsandblock{.8cm}{*}{1}
 \setlrmarginsandblock{.7cm}{*}{1}
 \setlength{\headheight}{0pt}
@@ -952,6 +953,8 @@ BALANCE_PRINT_TEX = r"""
 \pagestyle{empty}
 \begin{document}
 \strut \hfill \today\\
+\definecolor{pink}{rgb}{1,0.57,0.74}
+\sethlcolor{pink}
 
 \begin{longtable}{|p{6.3cm}|p{1.2cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.7cm}p{1.9cm}|p{1.7cm}|}
 \hline
@@ -975,7 +978,7 @@ Månedstotal & \hfill %(last_ølkasse).2f & \hfill %(last_guldøl)d & \hfill %(l
 BALANCE_ROW = '\n'.join([
     r'\hline',
     r'\multirow{2}{6cm}{%(name)-30s} & %(last)s &\\',
-    r'& %(total)s & \hfill %(balance)7.2f\\'])
+    r'& %(total)s & \hfill %(hl)s{%(balance)7.2f}\\'])
 
 
 class BalancePrint(View):
@@ -1085,6 +1088,8 @@ class BalancePrint(View):
                 FMT.get(k, '\\hfill %g') % counts.get((p.id, k), 0)
                 for k in keys)
             p_context['balance'] = balances[p.id]
+            # TODO make 250 configurable
+            p_context['hl'] = '\\hl' if balances[p.id] > 250 else ''
             if not p.status or p.status.end_time is not None:
                 continue
             rows.append(BALANCE_ROW % p_context)
