@@ -26,7 +26,7 @@ from regnskab.models import (
     compute_balance, get_inka,
     config, tk_prefix,
 )
-from regnskab.texrender import tex_to_pdf, RenderError
+from regnskab.texrender import tex_to_pdf, RenderError, pdfnup
 
 
 regnskab_permission_required = permission_required('regnskab.add_sheetrow')
@@ -1099,6 +1099,10 @@ class BalancePrint(View):
         if ext == 'pdf':
             try:
                 pdf = tex_to_pdf(tex_source)
+            except RenderError as exn:
+                return HttpResponse(str(exn), content_type='text/plain')
+            try:
+                pdf = pdfnup(pdf)
             except RenderError as exn:
                 return HttpResponse(str(exn), content_type='text/plain')
             return HttpResponse(pdf,
