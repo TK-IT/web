@@ -32,6 +32,9 @@ from regnskab.texrender import tex_to_pdf, RenderError, pdfnup, run_lp
 
 regnskab_permission_required = permission_required('regnskab.add_sheetrow')
 
+BEST_ORDER = dict(
+    zip('FORM INKA KASS NF CERM SEKR PR VC'.split(), range(8)))
+
 
 class Home(TemplateView):
     template_name = 'regnskab/home.html'
@@ -82,7 +85,8 @@ def get_profiles(only_current):
     TITLE_ORDER = dict(BEST=0, FU=1, EFU=2)
 
     def title_key(t):
-        return (-t.period, TITLE_ORDER[t.kind], t.root)
+        return (-t.period, TITLE_ORDER[t.kind],
+                BEST_ORDER.get(t.root, 0), t.root)
 
     def current_key(title, profile):
         if profile.title is None:
@@ -570,15 +574,13 @@ def get_profiles_title_status():
     for p in profiles:
         p.status = statuses.get(p.id)
         p.title = titles.get(p.id)
-    order = dict(zip('FORM INKA KASS NF CERM SEKR PR VC'.split(),
-                     range(8)))
     profiles.sort(
         key=lambda p: (p.status is None,
                        p.status and p.status.end_time is not None,
                        p.name if not p.status or p.status.end_time else
                        (p.title is None,
                         (-p.title.period, p.title.kind,
-                         order.get(p.title.root, 10),
+                         BEST_ORDER.get(p.title.root, 10),
                          p.title.root)
                         if p.title else p.name)))
     return profiles
