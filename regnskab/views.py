@@ -2,6 +2,7 @@ import itertools
 from decimal import Decimal
 from collections import Counter, defaultdict
 import json
+import random
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -1070,6 +1071,8 @@ class BalancePrint(FormView):
 
         profiles = get_profiles_title_status()
         if period == 2016 and timezone.now().year == 2016:
+            hængere = [i for i in range(len(profiles))
+                       if not profiles[i].title]
             best = {profiles[i].title.root: i
                     for i in range(len(profiles))
                     if profiles[i].title and
@@ -1079,7 +1082,7 @@ class BalancePrint(FormView):
             del profiles[best['NF']]
             nf.name = 'Taberen'
             nf.title = None
-            profiles.append(nf)
+            profiles.insert(random.choice(hængere), nf)
             FORM = profiles[best['FORM']]
             del profiles[best['FORM']]
             profiles.insert(0, FORM)
