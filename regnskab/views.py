@@ -953,7 +953,7 @@ BALANCE_PRINT_TEX = r"""
 \pagestyle{empty}
 \begin{document}
 \strut \hfill \today\\
-\definecolor{pink}{rgb}{1,0.57,0.74}
+\definecolor{pink}{rgb}{1,0.80,0.88}
 \sethlcolor{pink}
 
 \begin{longtable}{|p{6.3cm}|p{1.2cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.7cm}p{1.9cm}|p{1.7cm}|}
