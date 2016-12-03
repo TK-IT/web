@@ -697,6 +697,7 @@ class TransactionBatchCreateBase(FormView):
 
     save_label = 'Gem'
     header = None
+    sign = +1
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
@@ -749,7 +750,7 @@ class TransactionBatchCreateBase(FormView):
             except KeyError:
                 selected = False
             else:
-                amount = o.amount
+                amount = self.sign * o.amount
                 selected = True
             yield (p, amount, selected)
 
@@ -774,7 +775,7 @@ class TransactionBatchCreateBase(FormView):
             if selected:
                 o = Transaction(
                     kind=self.get_transaction_kind(),
-                    profile=profile, time=now, amount=amount,
+                    profile=profile, time=now, amount=self.sign * amount,
                     created_by=self.request.user, created_time=now,
                     note=self.get_note(),
                     session=self.regnskab_session)
@@ -808,6 +809,7 @@ class PaymentBatchCreate(TransactionBatchCreateBase):
     transaction_kind = Transaction.PAYMENT
     save_label = 'Gem betalinger'
     header = 'Indtast betalinger'
+    sign = -1
 
     def get_initial_amounts(self, profiles):
         return compute_balance(
