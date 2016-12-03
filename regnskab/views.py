@@ -32,8 +32,7 @@ from regnskab.texrender import tex_to_pdf, RenderError, pdfnup, run_lp
 
 regnskab_permission_required = permission_required('regnskab.add_sheetrow')
 
-BEST_ORDER = dict(
-    zip('FORM INKA KASS NF CERM SEKR PR VC'.split(), range(8)))
+BEST_ORDER = dict(zip('FORM INKA KASS NF CERM SEKR PR VC'.split(), range(8)))
 
 
 class Home(TemplateView):
