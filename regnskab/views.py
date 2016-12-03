@@ -982,12 +982,11 @@ class BalancePrint(View):
 
     @method_decorator(regnskab_permission_required)
     def dispatch(self, request, *args, **kwargs):
+        self.regnskab_session = get_object_or_404(
+            Session.objects, pk=kwargs['pk'])
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request, pk, ext):
-        self.regnskab_session = get_object_or_404(
-            Session.objects, pk=pk)
-
+    def get_tex_source(self):
         period = self.regnskab_session.period
 
         purchase_qs = Purchase.objects.all().order_by().filter(
@@ -1093,6 +1092,10 @@ class BalancePrint(View):
 
         tex_source = BALANCE_PRINT_TEX % context
 
+        return tex_source
+
+    def get(self, request, **kwargs):
+        tex_source = self.get_tex_source()
         if ext == 'pdf':
             try:
                 pdf = tex_to_pdf(tex_source)
