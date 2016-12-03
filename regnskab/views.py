@@ -967,17 +967,17 @@ BALANCE_PRINT_TEX = r"""
 \begin{longtable}{|p{6.3cm}|p{1.2cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.7cm}p{1.9cm}|p{1.7cm}|}
 \hline
 Siden sidste regning & Kasser & Guldøl & Øl & Vand & Diverse & Betalt & Gæld\\
-År til dato & %(price_ølkasse).2f & %(price_guldøl).2f & %(price_øl).2f & %(price_sodavand).2f & & &\\
+År til dato & $%(price_ølkasse).2f$ & $%(price_guldøl).2f$ & $%(price_øl).2f$ & $%(price_sodavand).2f$ & & &\\
 %(personer)s\hline
 \end{longtable}
 \newpage\phantom{A}\newpage
 \begin{longtable}{|p{6.3cm}|p{1.2cm}p{1.1cm}p{1.1cm}p{1.1cm}p{1.7cm}p{1.9cm}|p{1.7cm}|}
 \hline
 Siden sidste regning & Kasser & Guldøl & Øl & Vand & Diverse & Betalt & Gæld\\
-År til dato & %(price_ølkasse).2f & %(price_guldøl).2f & %(price_øl).2f & %(price_sodavand).2f & & &\\
+År til dato & $%(price_ølkasse).2f$ & $%(price_guldøl).2f$ & $%(price_øl).2f$ & $%(price_sodavand).2f$ & & &\\
 \hline
-Månedstotal & \hfill %(last_ølkasse).2f & \hfill %(last_guldøl)d & \hfill %(last_øl)d & \hfill %(last_sodavand)d & \hfill %(last_andet).2f & \hfill %(last_betalt).2f &\\
-Årstotal & \hfill %(total_ølkasse).2f & \hfill %(total_guldøl)d & \hfill %(total_øl)d & \hfill %(total_sodavand)d & \hfill %(total_andet).2f & \hfill %(total_betalt).2f & \hfill %(total_balance).2f\\
+Månedstotal & \hfill $%(last_ølkasse).2f$ & \hfill $%(last_guldøl)d$ & \hfill $%(last_øl)d$ & \hfill $%(last_sodavand)d$ & \hfill $%(last_andet).2f$ & \hfill $%(last_betalt).2f$ &\\
+Årstotal & \hfill $%(total_ølkasse).2f$ & \hfill $%(total_guldøl)d$ & \hfill $%(total_øl)d$ & \hfill $%(total_sodavand)d$ & \hfill $%(total_andet).2f$ & \hfill $%(total_betalt).2f$ & \hfill $%(total_balance).2f$\\
 \hline
 \end{longtable}
 \end{document}
@@ -1104,13 +1104,13 @@ class BalancePrint(FormView):
                 p_context['name'] = '%s%s %s' % (tex_prefix, root, p.name)
             else:
                 p_context['name'] = p.name
-            FMT = dict(betalt='\\hfill %.2f', andet='\\hfill %.2f',
-                       ølkasse='\\hfill %.1f')
+            FMT = dict(betalt='\\hfill $%.2f$', andet='\\hfill $%.2f$',
+                       ølkasse='\\hfill $%.1f$')
             p_context['last'] = ' & '.join(
-                FMT.get(k, '\\hfill %g') % cur_counts.get((p.id, k), 0)
+                FMT.get(k, '\\hfill $%g$') % cur_counts.get((p.id, k), 0)
                 for k in keys)
             p_context['total'] = ' & '.join(
-                FMT.get(k, '\\hfill %g') % counts.get((p.id, k), 0)
+                FMT.get(k, '\\hfill $%g$') % counts.get((p.id, k), 0)
                 for k in keys)
             p_context['balance'] = balances[p.id]
             p_context['hl'] = '\\hl' if balances[p.id] > threshold else ''
