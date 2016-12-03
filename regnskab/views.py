@@ -937,8 +937,9 @@ class PaymentPurchaseList(TemplateView):
 
 
 BALANCE_PRINT_TEX = r"""
-\documentclass[a4paper,12pt]{memoir}
+\documentclass[danish,a4paper,12pt]{memoir}
 \usepackage[utf8]{inputenc}
+\usepackage[danish]{babel}
 \usepackage{a4}
 \usepackage{multirow}
 \usepackage{longtable}
