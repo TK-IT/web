@@ -548,30 +548,30 @@ def get_profiles_title_status():
         return (t.kind == Title.EFU, -t.period, t.kind,
                 BEST_ORDER.get(t.root, 10), t.root)
 
-    qs = Title.objects.all().order_by('profile_id')
-    titles = {}
-    for p_id, g in itertools.groupby(qs, key=lambda t: t.profile_id):
-        titles[p_id] = min(g, key=title_key)
+    def profile_key(p):
+        if p.status is None:
+            return (3, p.name)
+        elif p.status.end_time is not None:
+            return (2, p.name)
+        elif p.title is None:
+            return (1, p.name)
+        else:
+            return (0, title_key(p.title))
 
-    qs = Profile.objects.all()
+    title_qs = Title.objects.all().order_by('profile_id')
+    groups = itertools.groupby(title_qs, key=lambda t: t.profile_id)
+    titles = {pk: min(g, key=title_key) for pk, g in groups}
 
     status_qs = SheetStatus.objects.all().order_by('profile_id')
     groups = itertools.groupby(status_qs, key=lambda s: s.profile_id)
-    now = timezone.now()
-    statuses = {pk: sorted(s, key=lambda s: (s.end_time or now))[-1]
+    statuses = {pk: max(s, key=lambda s: (s.end_time is None, s.end_time))
                 for pk, s in groups}
 
-    profiles = list(qs)
+    profiles = list(Profile.objects.all())
     for p in profiles:
         p.status = statuses.get(p.id)
         p.title = titles.get(p.id)
-    profiles.sort(
-        key=lambda p: (p.status is None,
-                       p.status and p.status.end_time is not None,
-                       p.name if not p.status or p.status.end_time else
-                       (p.title is None,
-                        title_key(p.title)
-                        if p.title else p.name)))
+    profiles.sort(key=profile_key)
     return profiles
 
 
