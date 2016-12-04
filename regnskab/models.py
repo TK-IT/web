@@ -350,19 +350,20 @@ def compute_balance(profile_ids=None, created_before=None):
             if profile_ids is None or o.profile_id in profile_ids}
     kinds = {o.id: o for o in kind_qs}
 
-    purchase_qs = Purchase.objects.all().order_by()
-    if created_before:
-        max_row = max(rows.keys())
-        purchase_qs = purchase_qs.filter(row_id__lte=max_row)
+    if rows:
+        purchase_qs = Purchase.objects.all().order_by()
+        if created_before:
+            max_row = max(rows.keys())
+            purchase_qs = purchase_qs.filter(row_id__lte=max_row)
 
-    for o in purchase_qs:
-        try:
-            row = rows[o.row_id]
-        except KeyError:
-            continue
-        amount = o.count * kinds[o.kind_id].unit_price
-        profile_id = row.profile_id
-        balance[profile_id] += amount
+        for o in purchase_qs:
+            try:
+                row = rows[o.row_id]
+            except KeyError:
+                continue
+            amount = o.count * kinds[o.kind_id].unit_price
+            profile_id = row.profile_id
+            balance[profile_id] += amount
 
     transaction_qs = Transaction.objects.all()
     if created_before:
