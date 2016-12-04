@@ -4,5 +4,6 @@ from .base import (
     SessionUpdate, EmailList, EmailDetail, EmailSend,
     get_profiles_title_status, ProfileList, ProfileDetail,
     TransactionBatchCreateBase, PaymentBatchCreate, PurchaseNoteList,
-    PurchaseBatchCreate, PaymentPurchaseList, BalancePrint,
+    PurchaseBatchCreate, PaymentPurchaseList,
 )
+from .printing import BalancePrint
