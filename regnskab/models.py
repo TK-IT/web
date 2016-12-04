@@ -46,6 +46,23 @@ def get_inka():
         return Profile()
 
 
+def get_default_prices():
+    vand_price = Decimal('8.00')
+    øl_price = Decimal('10.00')
+    guld_price = Decimal('13.00')
+    vandkasse_price = 25*vand_price
+    ølkasse_price = 25*øl_price
+    guldkasse_price = ølkasse_price + 30*(guld_price - øl_price)
+    return [
+        ('øl', øl_price),
+        ('ølkasse', ølkasse_price),
+        ('guldøl', guld_price),
+        ('guldølkasse', guldkasse_price),
+        ('sodavand', vand_price),
+        ('sodavandkasse', vandkasse_price),
+    ]
+
+
 class SheetStatus(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     start_time = models.DateTimeField(blank=True, null=True)

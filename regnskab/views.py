@@ -25,7 +25,7 @@ from regnskab.models import (
     Sheet, SheetRow, SheetStatus, Profile, Alias, Title,
     EmailTemplate, Session, Email, PurchaseKind,
     Transaction, Purchase,
-    compute_balance, get_inka,
+    compute_balance, get_inka, get_default_prices,
     config, tk_prefix,
 )
 from regnskab.texrender import tex_to_pdf, RenderError, pdfnup, run_lp
@@ -126,20 +126,7 @@ class SheetCreate(FormView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_initial(self):
-        vand_price = 8
-        øl_price = 10
-        guld_price = 13
-        vandkasse_price = 25*vand_price
-        ølkasse_price = 25*øl_price
-        guldkasse_price = ølkasse_price + 30*(guld_price - øl_price)
-        kinds = [
-            ('øl', øl_price),
-            ('ølkasse', ølkasse_price),
-            ('guldøl', guld_price),
-            ('guldølkasse', guldkasse_price),
-            ('sodavand', vand_price),
-            ('sodavandkasse', vandkasse_price),
-        ]
+        kinds = get_default_prices()
         return dict(kinds='\n'.join('%s %s' % x for x in kinds),
                     period=config.GFYEAR)
 
