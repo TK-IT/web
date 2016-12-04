@@ -560,7 +560,7 @@ def get_profiles_title_status():
 
     title_qs = Title.objects.all().order_by('profile_id')
     groups = itertools.groupby(title_qs, key=lambda t: t.profile_id)
-    titles = {pk: min(g, key=title_key) for pk, g in groups}
+    titles = {pk: sorted(g, key=title_key) for pk, g in groups}
 
     status_qs = SheetStatus.objects.all().order_by('profile_id')
     groups = itertools.groupby(status_qs, key=lambda s: s.profile_id)
@@ -570,7 +570,9 @@ def get_profiles_title_status():
     profiles = list(Profile.objects.all())
     for p in profiles:
         p.status = statuses.get(p.id)
-        p.title = titles.get(p.id)
+        p.titles = titles.get(p.id, [])
+        p.title = p.titles[0] if p.titles else None
+        p.in_current = p.status and p.status.end_time is None
     profiles.sort(key=profile_key)
     return profiles
 
