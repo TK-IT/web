@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.contrib import admin
 from regnskab.models import Alias, Transaction, Sheet, EmailTemplate, Session
 
