@@ -7,6 +7,11 @@
 {% block title %}Personer der har krydset{% endblock %}
 {% block content %}
 <h1>Personer der har krydset</h1>
+
+<p>Personer der har krydset uden at betale sin regning
+eller som har taget mere end én indgang på en krydsliste
+<span class="warn">markeres med rødt</span>.</p>
+
 <table>
     <thead>
         <tr>
@@ -26,9 +31,9 @@
             <td>{{ person.status.since }}</td>
             <td align=right>{{ person.b0|floatformat:2 }}</td>
             <td align=right>{{ person.b1|floatformat:2 }}</td>
-            <td>{% for sheet, purchases in person.sheets %}
+            <td>{% for sheet, purchases, n_rows in person.sheets %}
                 <a href="{% url 'sheet_detail' pk=sheet.id %}"
-                   title="{{ sheet }}">
+                   title="{{ sheet }}" data-rows="{{ n_rows }}">
                 {{ purchases }}</a>{% if forloop.first %}{% else %},{% endif %}
             {% endfor %}</td>
         </tr>

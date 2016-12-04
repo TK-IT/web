@@ -881,13 +881,16 @@ class PaymentPurchaseList(TemplateView):
         for p in profiles:
             p.b0 = initial_balances.get(p.id, Decimal())
             p.b1 = p.b0 - payments.get(p.id, Decimal())
-            p.sheets = [
-                (sheets[s_id], ', '.join(map(str, purchases)))
-                for s_id, purchases in profile_sheets.get(p.id, {}).items()]
+            p.sheets = []
+            for s_id, purchases in profile_sheets.get(p.id, {}).items():
+                purchases_str = ', '.join(map(str, purchases))
+                n_rows = len(set(p.row_id for p in purchases))
+                p.sheets.append((sheets[s_id], purchases_str, n_rows))
             if not p.sheets:
                 continue
             # TODO make 250 configurable
-            p.warn = 250 < p.b0 and 0 < p.b1 and p.sheets
+            p.warn = ((250 < p.b0 and 0 < p.b1 and p.sheets) or
+                      any(n_rows > 1 for s, p, n_rows in p.sheets))
             rows.append(p)
 
         context_data['object_list'] = rows
