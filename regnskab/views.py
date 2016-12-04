@@ -72,13 +72,6 @@ class SessionCreate(TemplateView):
         return redirect('session_update', pk=session.pk)
 
 
-def get_profiles(only_current):
-    profiles = get_profiles_title_status()
-    if only_current:
-        profiles = [p for p in profiles if p.in_current]
-    return profiles
-
-
 class SheetCreate(FormView):
     form_class = SheetCreateForm
     template_name = 'regnskab/sheet_create.html'
@@ -148,7 +141,7 @@ class SheetRowUpdate(TemplateView):
         return get_object_or_404(Sheet.objects, pk=self.kwargs['pk'])
 
     def get_profiles(self):
-        profiles = get_profiles(only_current=False)
+        profiles = get_profiles_title_status()
         aliases = {}
         for o in Alias.objects.filter(end_time=None):
             aliases.setdefault(o.profile_id, []).append(o)
@@ -683,7 +676,8 @@ class TransactionBatchCreateBase(FormView):
                 "transaction_kind.")
 
     def get_profiles(self):
-        return get_profiles(only_current=True)
+        profiles = get_profiles_title_status()
+        return [p for p in profiles if p.in_current]
 
     def get_initial_amounts(self, profiles):
         raise ImproperlyConfigured(
