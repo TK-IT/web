@@ -44,6 +44,7 @@
 	right: 0;
 	background-color: rgba(0, 0, 0, 0.5);
 }
+.highlight { background-color: rgba(255, 0, 0, 0.4); }
 </style>
 {% endblock %}
 {% block title %}Krydslisten {{ sheet }}{% endblock %}
@@ -67,7 +68,7 @@ har krydset på alle krydslisterne siden sidst regningen blev gjort op.</p>
 </thead>
 <tbody>
 {% for row in sheet.rows %}
-<tr>
+<tr class="{% if row.profile.id == highlight_profile %}highlight{% endif %}">
 <!--
 <td>
 {% for kind in row.kinds %}{{ kind.count|floatformat }}

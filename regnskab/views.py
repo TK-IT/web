@@ -125,6 +125,11 @@ class SheetDetail(TemplateView):
     def get_context_data(self, **kwargs):
         context_data = super(SheetDetail, self).get_context_data(**kwargs)
         context_data['sheet'] = self.get_sheet()
+        try:
+            context_data['highlight_profile'] = int(
+                self.request.GET['highlight_profile'])
+        except (KeyError, ValueError):
+            pass
         return context_data
 
 
