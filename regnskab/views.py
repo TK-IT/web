@@ -543,11 +543,15 @@ class EmailSend(View):
 
 
 def get_profiles_title_status():
-    title_qs = Title.objects.all().order_by('period')
+    def title_key(t):
+        # EFU after others. Latest period first.
+        return (t.kind == Title.EFU, -t.period, t.kind,
+                BEST_ORDER.get(t.root, 10), t.root)
+
+    qs = Title.objects.all().order_by('profile_id')
     titles = {}
-    for t in title_qs:
-        # Override any older profiles
-        titles[t.profile_id] = t
+    for p_id, g in itertools.groupby(qs, key=lambda t: t.profile_id):
+        titles[p_id] = min(g, key=title_key)
 
     qs = Profile.objects.all()
 
@@ -566,9 +570,7 @@ def get_profiles_title_status():
                        p.status and p.status.end_time is not None,
                        p.name if not p.status or p.status.end_time else
                        (p.title is None,
-                        (-p.title.period, p.title.kind,
-                         BEST_ORDER.get(p.title.root, 10),
-                         p.title.root)
+                        title_key(p.title)
                         if p.title else p.name)))
     return profiles
 
