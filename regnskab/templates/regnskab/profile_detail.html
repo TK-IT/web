@@ -23,7 +23,7 @@
         <tr>
             <td>
                 {% if row.sheet %}
-                <a class="sheet-link" href="{% url 'sheet_detail' pk=row.sheet %}">{{ row.date }}</a>
+                <a class="sheet-link" href="{% url 'sheet_detail' pk=row.sheet %}?highlight_profile={{ profile.pk }}">{{ row.date }}</a>
                 {% else %}
                 {{ row.date }}
                 {% endif %}
