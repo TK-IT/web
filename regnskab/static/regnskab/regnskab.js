@@ -41,7 +41,8 @@ function get_query_filters(query) {
     }
 
     var tk_prefix = '[KGBOT][KGBOT0-9]*|[0-9]*O';
-    var best_list = 'CERM FORM INKA KASS NF PR SEKR VC'.split(' ');
+    // Include EFUIT with BEST for the purpose of searching
+    var best_list = 'CERM FORM INKA KASS NF PR SEKR VC EFUIT'.split(' ');
     // best_prefix is a regex that matches any prefix of a BEST title
     var best_prefix = best_list.map(all_prefixes).join('|');
     // Map first letter to BEST title, e.g. best_map['F'] === 'FORM'
