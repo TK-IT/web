@@ -1014,6 +1014,8 @@ class BalancePrint(FormView):
                 kind_last_sheet[name] = sheet_id
         prices = {name: kinds[sheet_id, name]
                   for name, sheet_id in kind_last_sheet.items()}
+        if not prices:
+            prices = get_default_prices()
 
         counts = defaultdict(Decimal)
         cur_counts = defaultdict(Decimal)

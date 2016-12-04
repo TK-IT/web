@@ -436,6 +436,8 @@ class Session(models.Model):
         kind_groups = itertools.groupby(kind_qs, key=lambda k: k.name)
         kind_price = {n: set(k.unit_price for k in g)
                       for n, g in kind_groups}
+        if not kind_price:
+            kind_price = {n: {p} for n, p in get_default_prices()}
 
         purchases = Purchase.objects.filter(
             row__sheet__session=self)
