@@ -73,45 +73,9 @@ class SessionCreate(TemplateView):
 
 
 def get_profiles(only_current):
-    current_qs = SheetStatus.objects.filter(end_time=None)
-    current = set(current_qs.values_list('profile_id', flat=True))
-
-    profile_qs = Profile.objects.all()
+    profiles = get_profiles_title_status()
     if only_current:
-        profile_qs = profile_qs.filter(id__in=current)
-    title_qs = Title.objects.all()
-    titles = {}
-    for t in title_qs:
-        titles.setdefault(t.profile_id, []).append(t)
-
-    def title_key(t):
-        return (-t.period, TITLE_ORDER[t.kind],
-                BEST_ORDER.get(t.root, 0), t.root)
-
-    def current_key(title, profile):
-        if profile.title is None:
-            return (1, profile.name)
-        else:
-            return (0, title_key(profile.title), profile.name)
-
-    def key(profile):
-        if profile.in_current:
-            return (0, current_key(profile.title, profile))
-        else:
-            return (1, profile.name)
-
-    profiles = []
-    for profile in profile_qs:
-        t = titles.get(profile.id)
-        if t:
-            profile.title = max(t, key=lambda t: t.period)
-        else:
-            profile.title = None
-        profile.in_current = profile.id in current
-        if only_current:
-            assert profile.in_current
-        profiles.append(profile)
-    profiles.sort(key=key)
+        profiles = [p for p in profiles if p.in_current]
     return profiles
 
 
