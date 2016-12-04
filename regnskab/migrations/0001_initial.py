@@ -20,8 +20,8 @@ class Migration(migrations.Migration):
             name='Alias',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('period', models.IntegerField(blank=True, null=True, verbose_name='Årgang')),
-                ('root', models.CharField(max_length=10, verbose_name='Titel')),
+                ('period', models.IntegerField(help_text='Bruges kun hvis aliaset skal opdateres automatisk efter hver GF', blank=True, null=True, verbose_name='Årgang')),
+                ('root', models.CharField(max_length=10, verbose_name='Alias')),
                 ('start_time', models.DateTimeField(blank=True, null=True)),
                 ('end_time', models.DateTimeField(blank=True, null=True)),
             ],

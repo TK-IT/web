@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='alias',
             name='root',
-            field=models.CharField(verbose_name='Titel', max_length=200),
+            field=models.CharField(verbose_name='Alias', max_length=200),
         ),
     ]

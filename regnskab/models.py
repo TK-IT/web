@@ -80,8 +80,11 @@ class SheetStatus(models.Model):
 
 class Alias(models.Model):
     profile = models.ForeignKey(Profile)
-    period = models.IntegerField(blank=True, null=True, verbose_name='Årgang')
-    root = models.CharField(max_length=200, verbose_name='Titel')
+    period = models.IntegerField(
+        blank=True, null=True, verbose_name='Årgang',
+        help_text='Bruges kun hvis aliaset skal opdateres automatisk ' +
+                  'efter hver GF')
+    root = models.CharField(max_length=200, verbose_name='Alias')
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
