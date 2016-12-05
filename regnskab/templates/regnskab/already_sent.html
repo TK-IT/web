@@ -1,0 +1,13 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Allerede udsendt{% endblock %}
+{% block content %}
+<h1>Fejl: Allerede udsendt</h1>
+{% if session %}
+<p>Du har prøvet at ændre opgørelsen
+<a href="{% url 'session_detail' pk=session.pk %}">{{ session }}</a>
+der blev sendt ud {{ session.send_time }}.</p>
+{% else %}
+<p>Du har prøvet at ændre en krydsliste
+fra det gamle INKA-program før 2017.</p>
+{% endif %}
+{% endblock %}

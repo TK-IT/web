@@ -11,6 +11,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
     TemplateView, FormView, ListView,
 )
+from django.template.response import TemplateResponse
 from regnskab.forms import (
     SheetCreateForm, SessionForm,
     TransactionBatchForm, BalancePrintForm,
@@ -41,6 +42,12 @@ class Home(TemplateView):
         context_data['latest_session'] = latest_session
         context_data['inka'] = get_inka()
         return context_data
+
+
+def already_sent_view(request, regnskab_session):
+    context = dict(session=regnskab_session)
+    return TemplateResponse(
+        request, 'regnskab/already_sent.html', context=context)
 
 
 class SessionCreate(TemplateView):
