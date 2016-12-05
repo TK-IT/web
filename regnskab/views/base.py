@@ -833,6 +833,32 @@ class PurchaseBatchCreate(TransactionBatchCreateBase):
         return {p.id: a for p in profiles}
 
 
+def describe_purchases(purchases):
+    # PaymentPurchaseList helper
+    sheet_rows = set(p.row_id for p in purchases)
+    result = []
+    for i in sorted(sheet_rows):
+        single = {}
+        kasse = {}
+        for p in purchases:
+            if p.row_id != i:
+                continue
+            if p.kind.name.endswith('kasse'):
+                kind = p.kind.name[:-5]
+                kasse[kind] = kasse.get(kind, Decimal()) + p.count
+            else:
+                kind = p.kind.name
+                single[kind] = single.get(kind, Decimal()) + p.count
+        order = ['øl', 'guldøl', 'sodavand']
+        x = []
+        for k in order:
+            s = single.pop(k, 0)
+            k = kasse.pop(k, None)
+            x.append('%g' % s if k is None else '%g+%gks' % (s, k))
+        result.append('(%s)' % ', '.join(x))
+    return ' '.join(result)
+
+
 class PaymentPurchaseList(TemplateView):
     template_name = 'regnskab/payment_purchase_list.html'
 
@@ -885,7 +911,7 @@ class PaymentPurchaseList(TemplateView):
             p.b1 = p.b0 - payments.get(p.id, Decimal())
             p.sheets = []
             for s_id, purchases in profile_sheets.get(p.id, {}).items():
-                purchases_str = ', '.join(map(str, purchases))
+                purchases_str = describe_purchases(purchases)
                 n_rows = len(set(p.row_id for p in purchases))
                 p.sheets.append((sheets[s_id], purchases_str, n_rows, n_rows > 1))
             if not p.sheets:
