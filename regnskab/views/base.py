@@ -76,6 +76,8 @@ class SheetCreate(FormView):
     def dispatch(self, request, *args, **kwargs):
         self.regnskab_session = get_object_or_404(
             Session.objects, pk=kwargs['session'])
+        if not self.regnskab_session or self.regnskab_session.sent:
+            return already_sent_view(request, self.regnskab_session)
         return super().dispatch(request, *args, **kwargs)
 
     def get_initial(self):
@@ -136,6 +138,8 @@ class SheetRowUpdate(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         self.sheet = self.get_sheet()
         self.regnskab_session = self.sheet.session
+        if not self.regnskab_session or self.regnskab_session.sent:
+            return already_sent_view(request, self.regnskab_session)
         return super().dispatch(request, *args, **kwargs)
 
     def get_sheet(self):
@@ -479,6 +483,8 @@ class TransactionBatchCreateBase(FormView):
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         self.regnskab_session = self.get_regnskab_session()
+        if not self.regnskab_session or self.regnskab_session.sent:
+            return already_sent_view(request, self.regnskab_session)
         return super().dispatch(request, *args, **kwargs)
 
     def get_save_label(self):
@@ -603,6 +609,8 @@ class PurchaseNoteList(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         self.regnskab_session = get_object_or_404(
             Session.objects, pk=kwargs['pk'])
+        if not self.regnskab_session or self.regnskab_session.sent:
+            return already_sent_view(request, self.regnskab_session)
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
