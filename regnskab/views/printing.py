@@ -5,7 +5,6 @@ from collections import defaultdict
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import F, Min
-from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.views.generic import FormView
@@ -13,12 +12,11 @@ from django.views.generic import FormView
 from regnskab.models import (
     Session, Purchase, Transaction, Sheet, PurchaseKind,
     tk_prefix, compute_balance, get_default_prices,
+    get_profiles_title_status,
 )
 from regnskab.forms import BalancePrintForm
 from regnskab.texrender import tex_to_pdf, RenderError, pdfnup, run_lp
-from regnskab.views.base import (
-    regnskab_permission_required, get_profiles_title_status,
-)
+from .auth import regnskab_permission_required_method
 
 
 BALANCE_PRINT_TEX = r"""
@@ -73,7 +71,7 @@ class BalancePrint(FormView):
     form_class = BalancePrintForm
     template_name = 'regnskab/balance_print_form.html'
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         self.regnskab_session = get_object_or_404(
             Session.objects, pk=kwargs['pk'])

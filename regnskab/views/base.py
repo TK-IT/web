@@ -6,8 +6,6 @@ import json
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.db.models import F
 from django.utils import timezone
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import permission_required
 from django.template.defaultfilters import floatformat
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
@@ -22,20 +20,18 @@ from regnskab.models import (
     EmailTemplate, Session,
     Transaction, Purchase,
     compute_balance, get_inka, get_default_prices,
-    config,
+    config, get_profiles_title_status,
 )
+from .auth import regnskab_permission_required_method
 
-
-regnskab_permission_required = permission_required('regnskab.add_sheetrow')
 
 TITLE_ORDER = dict(BEST=0, EFU=1, FU=2)
-BEST_ORDER = dict(zip('FORM INKA KASS NF CERM SEKR PR VC'.split(), range(8)))
 
 
 class Home(TemplateView):
     template_name = 'regnskab/home.html'
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
@@ -71,7 +67,7 @@ class SheetCreate(FormView):
     form_class = SheetCreateForm
     template_name = 'regnskab/sheet_create.html'
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         self.regnskab_session = get_object_or_404(
             Session.objects, pk=kwargs['session'])
@@ -102,7 +98,7 @@ class SheetCreate(FormView):
 class SheetDetail(TemplateView):
     template_name = 'regnskab/sheet_detail.html'
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
@@ -131,7 +127,7 @@ class SheetDetail(TemplateView):
 class SheetRowUpdate(TemplateView):
     template_name = 'regnskab/sheet_update.html'
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         self.sheet = self.get_sheet()
         self.regnskab_session = self.sheet.session
@@ -287,7 +283,7 @@ class SessionList(ListView):
     template_name = 'regnskab/session_list.html'
     queryset = Session.objects.all()
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
@@ -310,7 +306,7 @@ class SessionUpdate(FormView):
                         body='',
                         format=EmailTemplate.POUND)
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
@@ -357,45 +353,10 @@ class SessionUpdate(FormView):
         return self.render_to_response(context_data)
 
 
-def get_profiles_title_status():
-    def title_key(t):
-        # EFU after others. Latest period first.
-        return (t.kind == Title.EFU, -t.period, t.kind,
-                BEST_ORDER.get(t.root, 10), t.root)
-
-    def profile_key(p):
-        if p.status is None:
-            return (3, p.name)
-        elif p.status.end_time is not None:
-            return (2, p.name)
-        elif p.title is None:
-            return (1, p.name)
-        else:
-            return (0, title_key(p.title))
-
-    title_qs = Title.objects.all().order_by('profile_id')
-    groups = itertools.groupby(title_qs, key=lambda t: t.profile_id)
-    titles = {pk: sorted(g, key=title_key) for pk, g in groups}
-
-    status_qs = SheetStatus.objects.all().order_by('profile_id')
-    groups = itertools.groupby(status_qs, key=lambda s: s.profile_id)
-    statuses = {pk: max(s, key=lambda s: (s.end_time is None, s.end_time))
-                for pk, s in groups}
-
-    profiles = list(Profile.objects.all())
-    for p in profiles:
-        p.status = statuses.get(p.id)
-        p.titles = titles.get(p.id, [])
-        p.title = p.titles[0] if p.titles else None
-        p.in_current = p.status and p.status.end_time is None
-    profiles.sort(key=profile_key)
-    return profiles
-
-
 class ProfileList(TemplateView):
     template_name = 'regnskab/profile_list.html'
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
@@ -412,7 +373,7 @@ class ProfileList(TemplateView):
 class ProfileDetail(TemplateView):
     template_name = 'regnskab/profile_detail.html'
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         self.profile = get_object_or_404(Profile.objects, pk=self.kwargs['pk'])
         try:
@@ -510,7 +471,7 @@ class TransactionBatchCreateBase(FormView):
     header = None
     sign = +1
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         self.regnskab_session = self.get_regnskab_session()
         return super().dispatch(request, *args, **kwargs)
@@ -633,7 +594,7 @@ class PurchaseNoteList(TemplateView):
     template_name = 'regnskab/purchase_note_list.html'
     save_label = 'Gem diverse køb'
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         self.regnskab_session = get_object_or_404(
             Session.objects, pk=kwargs['pk'])
@@ -663,7 +624,7 @@ class PurchaseNoteList(TemplateView):
 class PurchaseBatchCreate(TransactionBatchCreateBase):
     transaction_kind = Transaction.PURCHASE
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         try:
             self.note = request.GET['note']
@@ -718,7 +679,7 @@ def describe_purchases(purchases):
 class PaymentPurchaseList(TemplateView):
     template_name = 'regnskab/payment_purchase_list.html'
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         self.regnskab_session = get_object_or_404(
             Session.objects, pk=kwargs['pk'])

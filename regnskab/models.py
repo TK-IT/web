@@ -37,6 +37,8 @@ def _import_profile_title():
 
 Profile, Title, tk_prefix, config, parse_bestfu_alias = _import_profile_title()
 
+BEST_ORDER = dict(zip('FORM INKA KASS NF CERM SEKR PR VC'.split(), range(8)))
+
 
 def get_inka():
     try:
@@ -588,3 +590,38 @@ class Email(models.Model):
             reply_to=['INKA@TAAGEKAMMERET.dk'],
             to=['%s <%s>' % (self.recipient_name, self.recipient_email)],
             headers=headers)
+
+
+def get_profiles_title_status():
+    def title_key(t):
+        # EFU after others. Latest period first.
+        return (t.kind == Title.EFU, -t.period, t.kind,
+                BEST_ORDER.get(t.root, 10), t.root)
+
+    def profile_key(p):
+        if p.status is None:
+            return (3, p.name)
+        elif p.status.end_time is not None:
+            return (2, p.name)
+        elif p.title is None:
+            return (1, p.name)
+        else:
+            return (0, title_key(p.title))
+
+    title_qs = Title.objects.all().order_by('profile_id')
+    groups = itertools.groupby(title_qs, key=lambda t: t.profile_id)
+    titles = {pk: sorted(g, key=title_key) for pk, g in groups}
+
+    status_qs = SheetStatus.objects.all().order_by('profile_id')
+    groups = itertools.groupby(status_qs, key=lambda s: s.profile_id)
+    statuses = {pk: max(s, key=lambda s: (s.end_time is None, s.end_time))
+                for pk, s in groups}
+
+    profiles = list(Profile.objects.all())
+    for p in profiles:
+        p.status = statuses.get(p.id)
+        p.titles = titles.get(p.id, [])
+        p.title = p.titles[0] if p.titles else None
+        p.in_current = p.status and p.status.end_time is None
+    profiles.sort(key=profile_key)
+    return profiles

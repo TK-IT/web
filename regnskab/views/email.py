@@ -2,7 +2,6 @@ import itertools
 
 import django.core.mail
 from django.http import Http404
-from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
@@ -15,7 +14,7 @@ from regnskab.models import (
     Profile, Session,
 )
 
-from .base import regnskab_permission_required
+from .auth import regnskab_permission_required_method
 
 
 class EmailTemplateList(ListView):
@@ -33,7 +32,7 @@ class EmailTemplateList(ListView):
             o.latest_session = latest.get(o.id)
         return qs
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
@@ -56,7 +55,7 @@ class EmailTemplateUpdate(UpdateView):
         form.save()
         return redirect('email_template_list')
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
@@ -79,7 +78,7 @@ class EmailTemplateCreate(CreateView):
         form.save()
         return redirect('email_template_list')
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
@@ -87,7 +86,7 @@ class EmailTemplateCreate(CreateView):
 class EmailList(ListView):
     template_name = 'regnskab/email_list.html'
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         self.regnskab_session = get_object_or_404(
             Session.objects, pk=kwargs['pk'])
@@ -106,7 +105,7 @@ class EmailList(ListView):
 class EmailDetail(DetailView):
     template_name = 'regnskab/email_detail.html'
 
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         self.regnskab_session = get_object_or_404(
             Session.objects, pk=self.kwargs['pk'])
@@ -128,7 +127,7 @@ class EmailDetail(DetailView):
 
 
 class EmailSend(View):
-    @method_decorator(regnskab_permission_required)
+    @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
