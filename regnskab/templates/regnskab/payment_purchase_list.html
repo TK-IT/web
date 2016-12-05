@@ -2,6 +2,8 @@
 {% block head %}
 <style>
 .warn { background-color: rgba(255, 0, 0, 0.4); }
+.name, .status, .prev-balance, .paid-balance { white-space: nowrap; }
+.prev-balance, .paid-balance { text-align: right; }
 </style>
 {% endblock %}
 {% block title %}Personer der har krydset{% endblock %}
@@ -25,13 +27,13 @@ eller som har taget mere end én indgang på en krydsliste
     <tbody>
         {% for person in object_list %}
         <tr class="{{ person.warn|yesno:"warn," }}">
-            <td><a class="profile-link"
+            <td class="name"><a class="profile-link"
                    href="{% url 'profile_detail' pk=person.pk %}">
                     {{ person.title.display_title }} {{ person.name }}</a></td>
-            <td>{{ person.status.since }}</td>
-            <td align=right>{{ person.b0|floatformat:2 }}</td>
-            <td align=right>{{ person.b1|floatformat:2 }}</td>
-            <td>{% for sheet, purchases, n_rows, w in person.sheets %}
+            <td class="status">{{ person.status.since }}</td>
+            <td class="prev-balance">{{ person.b0|floatformat:2 }}</td>
+            <td class="paid-balance">{{ person.b1|floatformat:2 }}</td>
+            <td class="purchases">{% for sheet, purchases, n_rows, w in person.sheets %}
                 <a class="{{ w|yesno:"warn," }}" href="{% url 'sheet_detail' pk=sheet.id %}?highlight_profile={{ person.pk }}"
                    title="{{ sheet }}" data-rows="{{ n_rows }}">
                 {{ purchases }}</a>{% if forloop.last %}{% else %},{% endif %}
