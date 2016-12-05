@@ -2,6 +2,11 @@
 {% block title %}Opgørelser{% endblock %}
 {% block content %}
 <h1>Opgørelser</h1>
+
+<form method="post" action="{% url 'session_create' %}">{% csrf_token %}
+    <input type="submit" value="Begynd ny opgørelse" />
+</form>
+
 <table>
     <thead>
         <tr>
