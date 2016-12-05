@@ -25,9 +25,6 @@ from regnskab.models import (
 from .auth import regnskab_permission_required_method
 
 
-TITLE_ORDER = dict(BEST=0, EFU=1, FU=2)
-
-
 class Home(TemplateView):
     template_name = 'regnskab/home.html'
 
