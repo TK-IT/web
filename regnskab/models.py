@@ -425,6 +425,10 @@ class Session(models.Model):
         if self.email_template is None:
             raise ValidationError("template required to generate emails")
 
+        if self.sent:
+            raise ValidationError(
+                "Tried to regenerate emails for session already sent")
+
         profiles = Profile.objects.all().annotate(profile_id=F('id'))
         profiles = profiles.order_by('profile_id')
         balances = compute_balance()
