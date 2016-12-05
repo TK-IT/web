@@ -25,10 +25,24 @@ class AliasAdmin(admin.ModelAdmin):
 class TransactionAdmin(admin.ModelAdmin):
     list_display = ('profile', 'kind', 'time', 'amount', 'note')
 
+    def has_change_permission(self, request, obj=None):
+        if obj and (not obj.session_id or obj.session.sent):
+            return False
+        return True
+
+    has_delete_permission = has_change_permission
+
 
 class SheetAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
+
+    def has_change_permission(self, request, obj=None):
+        if obj and (not obj.session_id or obj.session.sent):
+            return False
+        return True
+
+    has_delete_permission = has_change_permission
 
 
 class EmailTemplateAdmin(admin.ModelAdmin):
@@ -38,6 +52,13 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 class SessionAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
+
+    def has_change_permission(self, request, obj=None):
+        if obj and obj.sent:
+            return False
+        return True
+
+    has_delete_permission = has_change_permission
 
 
 admin.site.register(Alias, AliasAdmin)
