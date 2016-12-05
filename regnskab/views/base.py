@@ -506,8 +506,7 @@ class TransactionBatchCreateBase(FormView):
                 "transaction_kind.")
 
     def get_profiles(self):
-        profiles = get_profiles_title_status()
-        return [p for p in profiles if p.in_current]
+        return get_profiles_title_status()
 
     def get_initial_amounts(self, profiles):
         raise ImproperlyConfigured(
