@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(profile_model),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
@@ -21,9 +22,12 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('period', models.IntegerField(help_text='Bruges kun hvis aliaset skal opdateres automatisk efter hver GF', blank=True, null=True, verbose_name='Årgang')),
-                ('root', models.CharField(max_length=10, verbose_name='Alias')),
+                ('root', models.CharField(max_length=200, verbose_name='Alias')),
                 ('start_time', models.DateTimeField(blank=True, null=True)),
                 ('end_time', models.DateTimeField(blank=True, null=True)),
+                ('created_time', models.DateTimeField(auto_now_add=True)),
+                ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
+                ('profile', models.ForeignKey(to=profile_model)),
             ],
             options={
                 'ordering': ['period', 'root'],
@@ -39,15 +43,22 @@ class Migration(migrations.Migration):
                 ('body', models.TextField()),
                 ('recipient_name', models.CharField(max_length=255)),
                 ('recipient_email', models.CharField(max_length=255)),
+                ('profile', models.ForeignKey(to=profile_model, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+')),
             ],
         ),
         migrations.CreateModel(
-            name='EmailBatch',
+            name='Session',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('period', models.IntegerField(verbose_name='Årgang')),
+                ('send_time', models.DateTimeField(null=True, blank=True)),
                 ('created_time', models.DateTimeField(auto_now_add=True)),
-                ('send_time', models.DateTimeField(blank=True, null=True)),
+                ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
+                ('email_template', models.ForeignKey(verbose_name='Emailskabelon', to='regnskab.EmailTemplate', null=True, on_delete=django.db.models.deletion.SET_NULL)),
             ],
+            options={
+                'get_latest_by': 'created_time',
+            },
         ),
         migrations.CreateModel(
             name='EmailTemplate',
@@ -56,17 +67,9 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=255, blank=True)),
                 ('subject', models.TextField()),
                 ('body', models.TextField()),
-                ('created_time', models.DateTimeField(auto_now_add=True)),
                 ('format', models.CharField(max_length=10, choices=[('pound', 'pound')])),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Payment',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('time', models.DateTimeField()),
-                ('amount', models.DecimalField(max_digits=9, decimal_places=2)),
-                ('note', models.CharField(max_length=255, blank=True)),
+                ('created_time', models.DateTimeField(auto_now_add=True)),
+                ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
             ],
         ),
         migrations.CreateModel(
@@ -87,7 +90,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('position', models.PositiveIntegerField()),
                 ('name', models.CharField(help_text='f.eks. guldøl, guldølskasser', max_length=200)),
-                ('price', models.DecimalField(help_text='f.eks. 8, 10, 13, 200, 250', max_digits=12, decimal_places=2)),
+                ('unit_price', models.DecimalField(help_text='f.eks. 8, 10, 13, 200, 250', max_digits=12, decimal_places=2)),
             ],
             options={
                 'ordering': ['sheet', 'position'],
@@ -103,6 +106,9 @@ class Migration(migrations.Migration):
                 ('start_date', models.DateField()),
                 ('end_date', models.DateField()),
                 ('period', models.IntegerField(verbose_name='Årgang')),
+                ('created_time', models.DateTimeField(auto_now_add=True)),
+                ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
+                ('session', models.ForeignKey(null=True, to='regnskab.Session')),
             ],
             options={
                 'ordering': ['start_date'],
@@ -131,7 +137,23 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('start_time', models.DateTimeField(blank=True, null=True)),
                 ('end_time', models.DateTimeField(blank=True, null=True)),
+                ('created_time', models.DateTimeField(auto_now_add=True)),
+                ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
                 ('profile', models.ForeignKey(to=profile_model)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Transaction',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
+                ('kind', models.CharField(choices=[('payment', 'Betaling'), ('purchase', 'Diverse køb'), ('correction', 'Korrigering')], max_length=10)),
+                ('time', models.DateTimeField()),
+                ('amount', models.DecimalField(max_digits=9, decimal_places=2)),
+                ('note', models.CharField(blank=True, max_length=255)),
+                ('created_time', models.DateTimeField(auto_now_add=True)),
+                ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
+                ('profile', models.ForeignKey(to=profile_model)),
+                ('session', models.ForeignKey(null=True, to='regnskab.Session')),
             ],
         ),
         migrations.AddField(
@@ -150,38 +172,8 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(to='regnskab.SheetRow'),
         ),
         migrations.AddField(
-            model_name='payment',
-            name='profile',
-            field=models.ForeignKey(to=profile_model),
-        ),
-        migrations.AddField(
-            model_name='emailbatch',
-            name='payment_set',
-            field=models.ManyToManyField(blank=True, to='regnskab.Payment', verbose_name='betalinger'),
-        ),
-        migrations.AddField(
-            model_name='emailbatch',
-            name='sheet_set',
-            field=models.ManyToManyField(blank=True, to='regnskab.Sheet', verbose_name='krydslister'),
-        ),
-        migrations.AddField(
-            model_name='emailbatch',
-            name='template',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='regnskab.EmailTemplate'),
-        ),
-        migrations.AddField(
             model_name='email',
-            name='batch',
-            field=models.ForeignKey(to='regnskab.EmailBatch'),
-        ),
-        migrations.AddField(
-            model_name='email',
-            name='profile',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=profile_model, related_name='+'),
-        ),
-        migrations.AddField(
-            model_name='alias',
-            name='profile',
-            field=models.ForeignKey(to=profile_model),
+            name='session',
+            field=models.ForeignKey(to='regnskab.Session'),
         ),
     ]
