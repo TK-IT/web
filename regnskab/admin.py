@@ -1,5 +1,7 @@
 from django.utils import timezone
 from django.contrib import admin
+from django.core.urlresolvers import reverse
+from django.utils.html import format_html
 from regnskab.models import Alias, Transaction, Sheet, EmailTemplate, Session
 
 
@@ -50,6 +52,10 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 
 
 class SessionAdmin(admin.ModelAdmin):
+    list_display = ('item_link', 'send_time', 'period', 'created_by',
+                    'email_template')
+    list_display_links = []
+
     def has_add_permission(self, request):
         return False
 
@@ -59,6 +65,15 @@ class SessionAdmin(admin.ModelAdmin):
         return True
 
     has_delete_permission = has_change_permission
+
+    def item_link(self, obj):
+        if obj.sent:
+            return 'Udsendt %s' % (obj.send_time,)
+        text = 'Oprettet %s' % (obj.created_time,)
+        url = reverse('admin:regnskab_session_change', args=(obj.pk,))
+        return format_html('<a href="{}">{}</a>', url, text)
+
+    item_link.verbose_name = 'Opgørelse'
 
 
 admin.site.register(Alias, AliasAdmin)
