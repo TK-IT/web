@@ -34,7 +34,7 @@ eller som har taget mere end én indgang på en krydsliste
             <td>{% for sheet, purchases, n_rows, w in person.sheets %}
                 <a class="{{ w|yesno:"warn," }}" href="{% url 'sheet_detail' pk=sheet.id %}?highlight_profile={{ person.pk }}"
                    title="{{ sheet }}" data-rows="{{ n_rows }}">
-                {{ purchases }}</a>{% if forloop.first %}{% else %},{% endif %}
+                {{ purchases }}</a>{% if forloop.last %}{% else %},{% endif %}
             {% endfor %}</td>
         </tr>
         {% endfor %}
