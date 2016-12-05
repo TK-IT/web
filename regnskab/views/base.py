@@ -566,24 +566,22 @@ class PaymentBatchCreate(TransactionBatchCreateBase):
     sign = -1
 
     def get_profile_data(self):
-        profiles = get_profiles_title_status()
         amounts = compute_balance(
-            profile_ids={p.id for p in profiles},
             created_before=self.regnskab_session.created_time)
         existing_qs = Transaction.objects.filter(
             session=self.regnskab_session, kind=self.get_transaction_kind())
         existing = {o.profile_id: o for o in existing_qs}
-        sign = -1
-        for p in profiles:
-            amount = amounts[p.id]
+        for p in get_profiles_title_status():
             try:
                 o = existing[p.id]
             except KeyError:
+                amount = amounts[p.id]
                 selected = False
             else:
-                amount = sign * o.amount
+                amount = self.sign * o.amount
                 selected = True
-            yield (p, amount, selected)
+            if selected or p.in_current or amount != 0:
+                yield (p, amount, selected)
 
 
 class PurchaseNoteList(TemplateView):
