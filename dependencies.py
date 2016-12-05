@@ -93,7 +93,7 @@ class Visitor:
     def as_graph(self):
         from graphviz import Digraph
 
-        dot = Digraph()
+        dot = Digraph(graph_attr=dict(rankdir='LR'))
         for name in sorted(self.items.keys()):
             dot.node(name)
         for name, edges in sorted(self.edge_lists.items()):
