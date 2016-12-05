@@ -505,37 +505,8 @@ class TransactionBatchCreateBase(FormView):
                 "TransactionBatchCreateBase subclass must define " +
                 "transaction_kind.")
 
-    def get_profiles(self):
-        return get_profiles_title_status()
-
-    def get_initial_amounts(self, profiles):
-        raise ImproperlyConfigured(
-            "TransactionBatchCreateBase subclass must define " +
-            "get_initial_amounts.")
-
-    def get_existing(self):
-        existing_qs = Transaction.objects.filter(
-            session=self.regnskab_session, kind=self.get_transaction_kind())
-        return existing_qs
-
     def get_success_view(self):
         return redirect('session_update', pk=self.regnskab_session.pk)
-
-    def get_profile_data(self):
-        profiles = self.get_profiles()
-        amounts = self.get_initial_amounts(profiles)
-        existing_qs = self.get_existing()
-        existing = {o.profile_id: o for o in existing_qs}
-        for p in profiles:
-            amount = amounts[p.id]
-            try:
-                o = existing[p.id]
-            except KeyError:
-                selected = False
-            else:
-                amount = self.sign * o.amount
-                selected = True
-            yield (p, amount, selected)
 
     def get_form_kwargs(self, **kwargs):
         r = super().get_form_kwargs(**kwargs)
@@ -594,10 +565,25 @@ class PaymentBatchCreate(TransactionBatchCreateBase):
     header = 'Indtast betalinger'
     sign = -1
 
-    def get_initial_amounts(self, profiles):
-        return compute_balance(
+    def get_profile_data(self):
+        profiles = get_profiles_title_status()
+        amounts = compute_balance(
             profile_ids={p.id for p in profiles},
             created_before=self.regnskab_session.created_time)
+        existing_qs = Transaction.objects.filter(
+            session=self.regnskab_session, kind=self.get_transaction_kind())
+        existing = {o.profile_id: o for o in existing_qs}
+        sign = -1
+        for p in profiles:
+            amount = amounts[p.id]
+            try:
+                o = existing[p.id]
+            except KeyError:
+                selected = False
+            else:
+                amount = sign * o.amount
+                selected = True
+            yield (p, amount, selected)
 
 
 class PurchaseNoteList(TemplateView):
@@ -651,15 +637,27 @@ class PurchaseBatchCreate(TransactionBatchCreateBase):
     def get_header(self):
         return 'Indtast "%s"' % self.note
 
-    def get_existing(self):
-        return super().get_existing().filter(note=self.note)
-
-    def get_initial_amounts(self, profiles):
+    def get_profile_data(self):
         try:
-            a = float(self.request.GET['amount'])
+            initial_amount = float(self.request.GET['amount'])
         except (ValueError, KeyError):
-            a = 0
-        return {p.id: a for p in profiles}
+            initial_amount = 0
+
+        profiles = get_profiles_title_status()
+        existing_qs = Transaction.objects.filter(
+            session=self.regnskab_session, kind=self.get_transaction_kind())
+        existing_qs = existing_qs.filter(note=self.note)
+        existing = {o.profile_id: o for o in existing_qs}
+        for p in profiles:
+            try:
+                o = existing[p.id]
+            except KeyError:
+                amount = initial_amount
+                selected = False
+            else:
+                amount = self.sign * o.amount
+                selected = True
+            yield (p, amount, selected)
 
 
 def describe_purchases(purchases):
