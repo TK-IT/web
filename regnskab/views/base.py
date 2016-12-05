@@ -46,6 +46,7 @@ class Home(TemplateView):
 class SessionCreate(TemplateView):
     template_name = 'regnskab/session_create.html'
 
+    @regnskab_permission_required_method
     def post(self, request):
         try:
             email_template = EmailTemplate.objects.get(
