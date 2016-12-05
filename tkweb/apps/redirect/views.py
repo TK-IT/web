@@ -51,8 +51,14 @@ class GalleryShowPictureRedirectView(RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
 
-        folder = self.request.GET.get('folder','')
-        pic_count = int(self.request.GET.get('pic_count',''))
+        folder = self.request.GET.get('folder', '')
+        pic_count = self.request.GET.get('pic_count', '')
+
+        try:
+            pic_count = int(pic_count)
+        except ValueError:
+            raise Http404("Billedet kan ikke findes")
+
         if not folder:
             return None # The old page prints a load of garbage. This will
                         # return a 410 GONE instead.
