@@ -145,7 +145,8 @@ class BalancePrint(FormView):
             context['total_%s' % k] = context['last_%s' % k] = Decimal()
         context['total_balance'] = Decimal()
 
-        profiles = get_profiles_title_status()
+        time = self.regnskab_session.send_time
+        profiles = get_profiles_title_status(period=period, time=time)
         if period == 2016 and timezone.now().year == 2016:
             hængere = [i for i in range(len(profiles))
                        if not profiles[i].title]
