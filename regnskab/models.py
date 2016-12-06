@@ -605,7 +605,7 @@ def get_profiles_title_status():
     def profile_key(p):
         if p.status is None:
             return (3, p.name)
-        elif p.status.end_time is not None:
+        elif not p.in_current:
             return (2, p.name)
         elif p.title is None:
             return (1, p.name)
