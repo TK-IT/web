@@ -5,13 +5,14 @@ from django.http import Http404
 from django.utils import timezone
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
-    View, ListView, CreateView, UpdateView, DetailView,
+    View, TemplateView, ListView, CreateView, UpdateView, DetailView,
 )
 
 from regnskab.forms import EmailTemplateForm
 from regnskab.models import (
     EmailTemplate, Email,
     Profile, Session,
+    get_profiles_title_status,
 )
 
 from .auth import regnskab_permission_required_method
@@ -83,7 +84,7 @@ class EmailTemplateCreate(CreateView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class EmailList(ListView):
+class EmailList(TemplateView):
     template_name = 'regnskab/email_list.html'
 
     @regnskab_permission_required_method
@@ -92,11 +93,21 @@ class EmailList(ListView):
             Session.objects, pk=kwargs['pk'])
         return super().dispatch(request, *args, **kwargs)
 
-    def get_queryset(self):
-        return Email.objects.filter(session_id=self.kwargs['pk'])
+    def get_emails(self):
+        period = self.regnskab_session.period
+        time = self.regnskab_session.send_time
+        profile_list = get_profiles_title_status(period=period, time=time)
+        order = {p.id: i for i, p in enumerate(profile_list)}
+        profiles = {p.id: p for p in profile_list}
+        emails = list(Email.objects.filter(session_id=self.kwargs['pk']))
+        emails.sort(key=lambda o: order.get(o.profile_id, 0))
+        for o in emails:
+            o.profile = profiles.get(o.profile_id, o.profile)
+        return emails
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
+        context_data['object_list'] = self.get_emails()
         context_data['session'] = self.regnskab_session
         context_data['editable'] = not self.regnskab_session.sent
         return context_data
