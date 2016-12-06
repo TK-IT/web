@@ -565,11 +565,15 @@ class PaymentBatchCreate(TransactionBatchCreateBase):
     header = 'Indtast betalinger'
     sign = -1
 
+    def get_existing(self):
+        existing_qs = Transaction.objects.filter(
+            session=self.regnskab_session, kind=self.get_transaction_kind())
+        return existing_qs
+
     def get_profile_data(self):
         amounts = compute_balance(
             created_before=self.regnskab_session.created_time)
-        existing_qs = Transaction.objects.filter(
-            session=self.regnskab_session, kind=self.get_transaction_kind())
+        existing_qs = self.get_existing()
         existing = {o.profile_id: o for o in existing_qs}
         for p in get_profiles_title_status():
             try:
@@ -635,6 +639,12 @@ class PurchaseBatchCreate(TransactionBatchCreateBase):
     def get_header(self):
         return 'Indtast "%s"' % self.note
 
+    def get_existing(self):
+        existing_qs = Transaction.objects.filter(
+            session=self.regnskab_session, kind=self.get_transaction_kind())
+        existing_qs = existing_qs.filter(note=self.note)
+        return existing_qs
+
     def get_profile_data(self):
         try:
             initial_amount = float(self.request.GET['amount'])
@@ -642,9 +652,7 @@ class PurchaseBatchCreate(TransactionBatchCreateBase):
             initial_amount = 0
 
         profiles = get_profiles_title_status()
-        existing_qs = Transaction.objects.filter(
-            session=self.regnskab_session, kind=self.get_transaction_kind())
-        existing_qs = existing_qs.filter(note=self.note)
+        existing_qs = self.get_existing()
         existing = {o.profile_id: o for o in existing_qs}
         for p in profiles:
             try:
