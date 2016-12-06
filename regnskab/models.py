@@ -596,7 +596,7 @@ class Email(models.Model):
             headers=headers)
 
 
-def get_profiles_title_status():
+def get_profiles_title_status(period=None, time=None):
     def title_key(t):
         # EFU after others. Latest period first.
         return (t.kind == Title.EFU, -t.period, t.kind,
@@ -613,10 +613,14 @@ def get_profiles_title_status():
             return (0, title_key(p.title))
 
     title_qs = Title.objects.all().order_by('profile_id')
+    if period is not None:
+        title_qs = title_qs.filter(period__lte=period)
     groups = itertools.groupby(title_qs, key=lambda t: t.profile_id)
     titles = {pk: sorted(g, key=title_key) for pk, g in groups}
 
     status_qs = SheetStatus.objects.all().order_by('profile_id')
+    if time is not None:
+        status_qs = status_qs.exclude(start_time__gt=time)
     groups = itertools.groupby(status_qs, key=lambda s: s.profile_id)
     statuses = {pk: max(s, key=lambda s: (s.end_time is None, s.end_time))
                 for pk, s in groups}
@@ -626,6 +630,8 @@ def get_profiles_title_status():
         p.status = statuses.get(p.id)
         p.titles = titles.get(p.id, [])
         p.title = p.titles[0] if p.titles else None
-        p.in_current = p.status and p.status.end_time is None
+        p.in_current = (p.status and
+                        (p.status.end_time is None or
+                         (time is not None and p.status.end_time > time)))
     profiles.sort(key=profile_key)
     return profiles
