@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.views.generic.base import RedirectView
 from django.shortcuts import render
+from django.utils.encoding import uri_to_iri
 import logging
 
 from tkweb.apps.gallery.models import Album
@@ -37,11 +38,14 @@ class GalleryShowFolderRedirectView(RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
 
-        folder = self.request.GET.get('folder','')
+        folder = self.request.GET.get('folder', '')
+        # Some of the old string are double encoded.
+        folder = uri_to_iri(folder)
+
         if not folder:
             logger.warning('GalleryShowFolderRedirectView: The \'folder\' '
                            'request parameter cold not be parsed. Returning '
-                           '410. \'folder\' was %s' % (folder))
+                           '410. \'folder\' doubledecoded was %s' % (folder))
             # The old page prints a load of garbage. This will
             # return a 410 GONE instead.
             return None
@@ -51,7 +55,8 @@ class GalleryShowFolderRedirectView(RedirectView):
             logger.warning('GalleryShowFolderRedirectView: The album could '
                            'not be found when comparing the \'folder\' '
                            'request parameter with \'oldFolder\' on albums. '
-                           'Returning 404. \'folder\' was %s' % (folder))
+                           'Returning 404. \'folder\' doubledecoded was %s'
+                           % (folder))
             raise Http404("Albummet kan ikke findes")
 
         gfyear = albums[0].gfyear
@@ -66,7 +71,10 @@ class GalleryShowPictureRedirectView(RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
 
-        folder = self.request.GET.get('folder','')
+        folder = self.request.GET.get('folder', '')
+        # Some of the old string are double encoded.
+        folder = uri_to_iri(folder)
+
         pic_countStr = self.request.GET.get('pic_count', '')
         try:
             pic_count = int(pic_countStr)
@@ -79,7 +87,7 @@ class GalleryShowPictureRedirectView(RedirectView):
         if not folder:
             logger.warning('GalleryShowPictureRedirectView: The \'folder\' '
                            'request parameter cold not be parsed. Returning '
-                           '410. \'folder\' was %s' % (folder))
+                           '410. \'folder\' doubledecoded was %s' % (folder))
             # The old page prints a load of garbage. This will
             # return a 410 GONE instead.
             return None
@@ -89,7 +97,8 @@ class GalleryShowPictureRedirectView(RedirectView):
             logger.warning('GalleryShowPictureRedirectView: The album could '
                            'not be found when comparing the \'folder\' '
                            'request parameter with \'oldFolder\' on albums. '
-                           'Returning 404. \'folder\' was %s' % (folder))
+                           'Returning 404. \'folder\' doubledecoded was %s'
+                           % (folder))
             raise Http404("Albummet kan ikke findes")
 
         gfyear = albums[0].gfyear
