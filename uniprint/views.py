@@ -4,11 +4,36 @@ from django.core.urlresolvers import reverse
 from django.views.generic import (
     TemplateView, FormView, CreateView,
 )
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import permission_required
+
+
+printout_permission_required = permission_required('uniprint.add_printout')
+printout_permission_required_method = method_decorator(
+    printout_permission_required)
+
+
+class DocumentCreate(CreateView):
+    model = Document
+    fields = ('file',)
+
+    @printout_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        document = form.save(commit=False)
+
+        document.save()
 
 
 class PrintoutCreate(CreateView):
     model = Printout
     fields = ('document', 'printer', 'duplex')
+
+    @printout_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     def get_initial(self):
         try:

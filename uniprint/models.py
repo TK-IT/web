@@ -1,4 +1,10 @@
+import os
+import tempfile
+import subprocess
+
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Document(models.Model):
@@ -6,7 +12,13 @@ class Document(models.Model):
     pages = models.IntegerField()
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                    null=True, blank=False)
-    created_time = models.DateTimeField()
+    created_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.file.name
+
+    class Meta:
+        ordering = ['created_time']
 
 
 class Printer(models.Model):
@@ -21,6 +33,12 @@ class Printer(models.Model):
     def port(self):
         return 6631
 
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+
 
 class Printout(models.Model):
     document = models.ForeignKey(Document, on_delete=models.SET_NULL,
@@ -29,9 +47,12 @@ class Printout(models.Model):
                                 null=True, blank=False)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                    null=True, blank=False)
-    created_time = models.DateTimeField()
+    created_time = models.DateTimeField(auto_now_add=True)
 
     duplex = models.BooleanField(blank=True)
+
+    def __str__(self):
+        return '<Printout %s on %s>' % (self.document, self.printer)
 
     def send_to_printer(self):
         with self.document.file.open('rb') as fp:
@@ -56,5 +77,6 @@ class Printout(models.Model):
             with p:
                 output, _ = p.communicate()
             if p.returncode != 0:
-                raise RenderError(p.returncode, cmd, output, stderr=None)
+                raise ValidationError(
+                    p.returncode, cmd, output, stderr=None)
         return output
