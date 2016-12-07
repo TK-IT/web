@@ -1,3 +1,9 @@
 from django.contrib import admin
+from .models import (
+    Document, Printer, Printout,
+)
 
-# Register your models here.
+
+admin.site.register(Document)
+admin.site.register(Printer)
+admin.site.register(Printout)
