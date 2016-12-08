@@ -1,4 +1,5 @@
 from django.core.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.views.generic import (
@@ -7,13 +8,24 @@ from django.views.generic import (
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
+from uniprint.models import Document, Printer, Printout
+
 
 printout_permission_required = permission_required('uniprint.add_printout')
 printout_permission_required_method = method_decorator(
     printout_permission_required)
 
 
+class Home(TemplateView):
+    template_name = 'uniprint/home.html'
+
+    @printout_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+
 class DocumentCreate(CreateView):
+    template_name = 'uniprint/document_create.html'
     model = Document
     fields = ('file',)
 
@@ -23,11 +35,14 @@ class DocumentCreate(CreateView):
 
     def form_valid(self, form):
         document = form.save(commit=False)
-
+        document.created_by = self.request.user
         document.save()
+        url = reverse('printout_create')
+        return HttpResponseRedirect(url + '?d=%s' % document.pk)
 
 
 class PrintoutCreate(CreateView):
+    template_name = 'uniprint/printout_create.html'
     model = Printout
     fields = ('document', 'printer', 'duplex')
 
@@ -46,10 +61,7 @@ class PrintoutCreate(CreateView):
         try:
             printer_id = self.request.GET['p']
         except KeyError:
-            try:
-                printer = Printer.objects.get()
-            except Exception:  # No printers or multiple printers
-                printer = None
+            printer = None
         else:
             printer = get_object_or_404(
                 Printer.objects, pk=printer_id)
@@ -57,6 +69,7 @@ class PrintoutCreate(CreateView):
 
     def form_valid(self, form):
         printout = form.save(commit=False)
+        printout.created_by = self.request.user
         try:
             printout.send_to_printer()
         except ValidationError as exn:

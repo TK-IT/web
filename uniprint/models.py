@@ -1,10 +1,15 @@
 import os
+import shlex
+import logging
 import tempfile
 import subprocess
 
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
+
+
+logger = logging.getLogger('uniprint')
 
 
 class Document(models.Model):
@@ -49,34 +54,38 @@ class Printout(models.Model):
                                    null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
 
-    duplex = models.BooleanField(blank=True)
+    copies = models.PositiveIntegerField(default=1)
+    duplex = models.BooleanField(blank=True, default=True)
 
     def __str__(self):
         return '<Printout %s on %s>' % (self.document, self.printer)
 
     def send_to_printer(self):
-        with self.document.file.open('rb') as fp:
-            pdf = fp.read()
         host = '%s:%s' % (self.printer.hostname, self.printer.port)
         destination = self.printer.destination
-        with tempfile.NamedTemporaryFile(mode='wb', suffix='.pdf') as fp:
-            fp.write(pdf)
-            if self.duplex:
-                opt = ('-o', 'Duplex=DuplexNoTumble')
-            else:
-                opt = ('-o', 'Duplex=None')
+        if self.duplex:
+            opt = ('-o', 'Duplex=DuplexNoTumble')
+        else:
+            opt = ('-o', 'Duplex=None')
 
-            cmd = ('lp', '-h', host, '-d', destination) + opt + (fp.name,)
-            p = subprocess.Popen(
-                cmd,
-                cwd=os.path.dirname(fp.name),
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                universal_newlines=True)
-            with p:
-                output, _ = p.communicate()
-            if p.returncode != 0:
-                raise ValidationError(
-                    p.returncode, cmd, output, stderr=None)
+        filename = self.document.file.name
+        cmd = ('lp', '-h', host, '-d', destination) + opt + (filename,)
+        logger.info('Running %s', ' '.join(map(shlex.quote, cmd)))
+        p = subprocess.Popen(
+            cmd,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True)
+        with p:
+            output, _ = p.communicate()
+        output_brief = output.splitlines()[0][:100]
+        if p.returncode != 0:
+            logger.error(
+                'lp return code was %s, output: %r',
+                (p.returncode, output_brief))
+            raise ValidationError(
+                'lp return code was %s, output: %r' %
+                (p.returncode, output_brief))
+        logger.info('lp output: %r', output_brief)
         return output

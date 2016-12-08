@@ -1,0 +1,10 @@
+{% extends "uniprint/base.html" %}
+{% block fulltitle %}Uniprint{% endblock %}
+{% block content %}
+<h1>Uniprint</h1>
+
+<p>Velkommen {{ user.name }}</p>
+
+<p><a href="{% url 'document_create' %}">Upload nyt dokument til print</a></p>
+
+{% endblock %}
