@@ -7,7 +7,7 @@
 <p>Dokumentet er sendt til printeren!</p>
 {% endif %}
 
-<form method="post" action="{% url 'logout' %}">{% csrf_token %}
+<form method="post" action="/admin/logout/">{% csrf_token %}
     <p>Velkommen {{ user.name }}. <input type="submit" value="Log ud" /></p>
 </form>
 
