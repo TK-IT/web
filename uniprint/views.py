@@ -67,7 +67,7 @@ class DocumentCreate(CreateView):
 class PrintoutCreate(CreateView):
     template_name = 'uniprint/printout_create.html'
     model = Printout
-    fields = ('document', 'printer', 'duplex')
+    fields = ('document', 'printer', 'copies', 'duplex')
 
     @printout_permission_required_method
     def dispatch(self, request, *args, **kwargs):

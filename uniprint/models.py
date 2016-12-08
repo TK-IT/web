@@ -73,7 +73,10 @@ class Printout(models.Model):
             opt = ('-o', 'Duplex=None')
 
         filename = self.document.file.path
-        cmd = ('lp', '-h', host, '-d', destination) + opt + (filename,)
+        cmd = (('lp', '-h', host,
+                '-d', destination,
+                '-n', str(self.copies)) +
+               opt + (filename,))
         cmdline = ' '.join(map(shlex.quote, cmd))
         logger.info('Running %s', cmdline)
         p = subprocess.Popen(
