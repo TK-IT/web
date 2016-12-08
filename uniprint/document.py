@@ -3,6 +3,10 @@ import subprocess
 from django.core.exceptions import ValidationError
 
 
+class FileTypeError(Exception):
+    pass
+
+
 def file_for_subprocess(file):
     file.open('rb')
     try:
@@ -16,10 +20,13 @@ def file_for_subprocess(file):
     return file, stdin, comm_args
 
 
-def extract_plain_text(file):
+def run_poppler(file, *args):
+    '''
+    Run a command from the poppler utility distribution.
+    '''
     file, stdin, comm_args = file_for_subprocess(file)
     proc = subprocess.Popen(
-        ('pdftotext', '-', '-'),
+        args,
         stdin=stdin,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -27,31 +34,23 @@ def extract_plain_text(file):
     stdoutbytes, stderrbytes = proc.communicate(*comm_args)
     stdout = stdoutbytes.decode()
     stderr = stderrbytes.decode()
+    # Poppler util returns 0 on success and 1 on invalid input
     if proc.returncode == 1:
-        raise ValidationError("Du skal uploade en PDF-fil")
+        raise FileTypeError()
     elif proc.returncode != 0:
+        # Internal/other error
         stderr_brief = stderr[:100]
-        raise ValidationError("pdftotext fejlede: %s" % stderr_brief)
+        raise subprocess.CalledProcessError(
+            proc.returncode, proc.args, stdout, stderr)
     return stdout
+
+
+def extract_plain_text(file):
+    return run_poppler(file, 'pdftotext', '-', '-')
 
 
 def get_pdfinfo(file):
-    file, stdin, comm_args = file_for_subprocess(file)
-    proc = subprocess.Popen(
-        ('pdfinfo', '-'),
-        stdin=stdin,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    stdoutbytes, stderrbytes = proc.communicate(*comm_args)
-    stdout = stdoutbytes.decode()
-    stderr = stderrbytes.decode()
-    if proc.returncode == 1:
-        raise ValidationError("Du skal uploade en PDF-fil")
-    elif proc.returncode != 0:
-        stderr_brief = stderr[:100]
-        raise ValidationError("pdfinfo fejlede: %s" % stderr_brief)
-    return stdout
+    return run_poppler(file, 'pdfinfo', '-')
 
 
 def pages_from_pdfinfo(text):

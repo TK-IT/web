@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
@@ -5,12 +6,14 @@ from django.core.urlresolvers import reverse
 from django.views.generic import (
     TemplateView, FormView, CreateView,
 )
+from django import forms
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
 from uniprint.models import Document, Printer, Printout
 from uniprint.document import (
     extract_plain_text, get_pdfinfo, pages_from_pdfinfo,
+    FileTypeError,
 )
 
 
@@ -26,6 +29,11 @@ class Home(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['print'] = self.request.GET.get('print')
+        return context_data
+
 
 class DocumentCreate(CreateView):
     template_name = 'uniprint/document_create.html'
@@ -38,20 +46,17 @@ class DocumentCreate(CreateView):
 
     def form_valid(self, form):
         document = form.save(commit=False)
+        document.original_filename = form.cleaned_data['file'].name
         try:
             document.pdfinfo = get_pdfinfo(document.file)
-        except ValidationError as exn:
-            form.add_error(None, exn)
-            return self.form_invalid(form)
-        try:
             document.text = extract_plain_text(document.file)
-        except ValidationError as exn:
-            form.add_error(None, exn)
-            return self.form_invalid(form)
-        try:
             document.pages = pages_from_pdfinfo(document.pdfinfo)
-        except ValidationError as exn:
-            form.add_error(None, exn)
+        except FileTypeError as exn:
+            form.add_error('file', 'Du skal angive en PDF')
+            return self.form_invalid(form)
+        except Exception as exn:
+            logger.exception('Could not parse uploaded PDF')
+            form.add_error(None, 'Ukendt fejl: %s' % (exn,))
             return self.form_invalid(form)
         document.created_by = self.request.user
         document.save()
@@ -67,6 +72,13 @@ class PrintoutCreate(CreateView):
     @printout_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        if settings.DEBUG:
+            form.fields['fake'] = forms.BooleanField(
+                required=False, initial=True, label='Kun en prøve')
+        return form
 
     def get_initial(self):
         try:
@@ -88,11 +100,12 @@ class PrintoutCreate(CreateView):
     def form_valid(self, form):
         printout = form.save(commit=False)
         printout.created_by = self.request.user
-        try:
-            printout.send_to_printer()
-        except ValidationError as exn:
-            form.add_error(None, exn)
-            return self.form_invalid(form)
+        if not form.cleaned_data.get('fake'):
+            try:
+                printout.send_to_printer()
+            except ValidationError as exn:
+                form.add_error(None, exn)
+                return self.form_invalid(form)
         printout.save()
         url = reverse('home')
         return HttpResponseRedirect(url + '?print=success')

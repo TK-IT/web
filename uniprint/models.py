@@ -14,6 +14,7 @@ logger = logging.getLogger('uniprint')
 
 class Document(models.Model):
     file = models.FileField()
+    original_filename = models.CharField(max_length=255)
     text = models.TextField(blank=True, null=True)
     pages = models.IntegerField()
     pdfinfo = models.TextField(blank=True, null=True)
@@ -22,7 +23,8 @@ class Document(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.file.name
+        s = 'side' if self.pages == 1 else 'sider'
+        return '%s (%s %s)' % (self.original_filename, self.pages, s)
 
     class Meta:
         ordering = ['created_time']
@@ -70,9 +72,10 @@ class Printout(models.Model):
         else:
             opt = ('-o', 'Duplex=None')
 
-        filename = self.document.file.name
+        filename = self.document.file.path
         cmd = ('lp', '-h', host, '-d', destination) + opt + (filename,)
-        logger.info('Running %s', ' '.join(map(shlex.quote, cmd)))
+        cmdline = ' '.join(map(shlex.quote, cmd))
+        logger.info('Running %s', cmdline)
         p = subprocess.Popen(
             cmd,
             stdin=subprocess.DEVNULL,
@@ -83,11 +86,9 @@ class Printout(models.Model):
             output, _ = p.communicate()
         output_brief = output.splitlines()[0][:100]
         if p.returncode != 0:
-            logger.error(
-                'lp return code was %s, output: %r',
-                (p.returncode, output_brief))
-            raise ValidationError(
-                'lp return code was %s, output: %r' %
-                (p.returncode, output_brief))
+            msg = ('%s return code was %s, ' % (cmdline, p.returncode) +
+                   'output: %r' % output_brief)
+            logger.error(msg)
+            raise ValidationError(msg)
         logger.info('lp output: %r', output_brief)
         return output

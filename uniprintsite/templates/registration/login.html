@@ -1,0 +1,9 @@
+{% extends "uniprint/base.html" %}
+{% block title %}Log ind{% endblock %}
+{% block content %}
+<h1>Uniprint</h1>
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Log ind" />
+</form>
+{% endblock %}
