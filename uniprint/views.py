@@ -9,7 +9,9 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
 from uniprint.models import Document, Printer, Printout
-from uniprint.document import extract_plain_text
+from uniprint.document import (
+    extract_plain_text, get_pdfinfo, pages_from_pdfinfo,
+)
 
 
 printout_permission_required = permission_required('uniprint.add_printout')
@@ -37,7 +39,17 @@ class DocumentCreate(CreateView):
     def form_valid(self, form):
         document = form.save(commit=False)
         try:
+            document.pdfinfo = get_pdfinfo(document.file)
+        except ValidationError as exn:
+            form.add_error(None, exn)
+            return self.form_invalid(form)
+        try:
             document.text = extract_plain_text(document.file)
+        except ValidationError as exn:
+            form.add_error(None, exn)
+            return self.form_invalid(form)
+        try:
+            document.pages = pages_from_pdfinfo(document.pdfinfo)
         except ValidationError as exn:
             form.add_error(None, exn)
             return self.form_invalid(form)

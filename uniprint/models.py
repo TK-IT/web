@@ -16,6 +16,7 @@ class Document(models.Model):
     file = models.FileField()
     text = models.TextField(blank=True, null=True)
     pages = models.IntegerField()
+    pdfinfo = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                    null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
