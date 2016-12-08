@@ -14,6 +14,7 @@ logger = logging.getLogger('uniprint')
 
 class Document(models.Model):
     file = models.FileField()
+    text = models.TextField(blank=True, null=True)
     pages = models.IntegerField()
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                    null=True, blank=False)

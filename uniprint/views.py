@@ -1,4 +1,4 @@
-from django.core.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -9,6 +9,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 
 from uniprint.models import Document, Printer, Printout
+from uniprint.document import extract_plain_text
 
 
 printout_permission_required = permission_required('uniprint.add_printout')
@@ -35,6 +36,11 @@ class DocumentCreate(CreateView):
 
     def form_valid(self, form):
         document = form.save(commit=False)
+        try:
+            document.text = extract_plain_text(document.file)
+        except ValidationError as exn:
+            form.add_error(None, exn)
+            return self.form_invalid(form)
         document.created_by = self.request.user
         document.save()
         url = reverse('printout_create')

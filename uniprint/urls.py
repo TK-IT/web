@@ -5,7 +5,7 @@ from uniprint.views import (
 )
 
 urlpatterns = [
-    url(r'^$', Home.as_view()),
-    url(r'^upload/$', DocumentCreate.as_view()),
-    url(r'^print/$', PrintoutCreate.as_view()),
+    url(r'^$', Home.as_view(), name='home'),
+    url(r'^upload/$', DocumentCreate.as_view(), name='document_create'),
+    url(r'^print/$', PrintoutCreate.as_view(), name='printout_create'),
 ]
