@@ -8,7 +8,7 @@
 {% endif %}
 
 <form method="post" action="/admin/logout/">{% csrf_token %}
-    <p>Velkommen {{ user.name }}. <input type="submit" value="Log ud" /></p>
+    <p>Velkommen {{ user.get_full_name }}. <input type="submit" value="Log ud" /></p>
 </form>
 
 <p><a href="{% url 'document_create' %}">Upload nyt dokument til print</a></p>
