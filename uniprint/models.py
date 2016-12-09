@@ -107,7 +107,12 @@ class Printout(models.Model):
             stderr=subprocess.STDOUT,
             universal_newlines=True)
         with p:
-            output, _ = p.communicate()
+            try:
+                output, _ = p.communicate(timeout=2)
+            except subprocess.TimeoutExpired:
+                msg = '%s timed out' % cmdline
+                logger.error(msg)
+                raise ValidationError(msg)
         output_lines = output.splitlines() or ('',)
         output_brief = output_lines[0][:100]
         if p.returncode != 0:
