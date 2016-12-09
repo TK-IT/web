@@ -110,6 +110,12 @@ class Printout(models.Model):
             try:
                 output, _ = p.communicate(timeout=2)
             except subprocess.TimeoutExpired:
+                p.terminate()
+                try:
+                    p.wait(timeout=0.1)
+                except subprocess.TimeoutExpired:
+                    p.kill()
+                    p.wait(timeout=0.1)
                 msg = '%s timed out' % cmdline
                 logger.error(msg)
                 raise ValidationError(msg)
