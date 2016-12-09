@@ -108,7 +108,8 @@ class Printout(models.Model):
             universal_newlines=True)
         with p:
             output, _ = p.communicate()
-        output_brief = output.splitlines()[0][:100]
+        output_lines = output.splitlines() or ('',)
+        output_brief = output_lines[0][:100]
         if p.returncode != 0:
             msg = ('%s return code was %s, ' % (cmdline, p.returncode) +
                    'output: %r' % output_brief)
