@@ -77,6 +77,8 @@ class Printout(models.Model):
             cmd += ('-o', 'Duplex=DuplexNoTumble')
         else:
             cmd += ('-o', 'Duplex=None')
+        if self.page_range:
+            cmd += ('-P', self.page_range)
         cmd += (filename,)
         cmdline = ' '.join(map(shlex.quote, cmd))
         logger.info('Running %s', cmdline)
