@@ -67,16 +67,16 @@ class Printout(models.Model):
     def send_to_printer(self):
         host = '%s:%s' % (self.printer.hostname, self.printer.port)
         destination = self.printer.destination
-        if self.duplex:
-            opt = ('-o', 'Duplex=DuplexNoTumble')
-        else:
-            opt = ('-o', 'Duplex=None')
 
         filename = self.document.file.path
-        cmd = (('lp', '-h', host,
-                '-d', destination,
-                '-n', str(self.copies)) +
-               opt + (filename,))
+        cmd = ('lp', '-h', host, '-d', destination)
+        if self.copies != 1:
+            cmd += ('-n', str(self.copies))
+        if self.duplex:
+            cmd += ('-o', 'Duplex=DuplexNoTumble')
+        else:
+            cmd += ('-o', 'Duplex=None')
+        cmd += (filename,)
         cmdline = ' '.join(map(shlex.quote, cmd))
         logger.info('Running %s', cmdline)
         p = subprocess.Popen(
