@@ -97,6 +97,8 @@ class Printout(models.Model):
             cmd += ('-o', 'Duplex=None')
         if self.page_range:
             cmd += ('-P', self.page_range)
+        if self.created_by:
+            cmd += ('-U', self.created_by.username)
         cmd += (filename,)
         cmdline = ' '.join(map(shlex.quote, cmd))
         logger.info('Running %s', cmdline)
