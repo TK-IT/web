@@ -49,6 +49,20 @@ class Printer(models.Model):
         ordering = ['name']
 
 
+def validate_page_range(s):
+    parts = s.split(',')
+    for p in parts:
+        try:
+            s, e = p.split('-')
+        except ValueError:
+            s, e = p, p
+        for v in (s, e):
+            try:
+                int(v)
+            except ValueError:
+                raise ValidationError('%r er ikke et heltal' % (v,))
+
+
 class Printout(models.Model):
     document = models.ForeignKey(Document, on_delete=models.SET_NULL,
                                  null=True, blank=False)
@@ -64,6 +78,10 @@ class Printout(models.Model):
 
     def __str__(self):
         return '<Printout %s on %s>' % (self.document, self.printer)
+
+    def clean(self):
+        if self.page_range:
+            validate_page_range(self.page_range)
 
     def send_to_printer(self):
         host = '%s:%s' % (self.printer.hostname, self.printer.port)
