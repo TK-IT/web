@@ -60,6 +60,7 @@ class Printout(models.Model):
 
     copies = models.PositiveIntegerField(default=1)
     duplex = models.BooleanField(blank=True, default=True)
+    page_range = models.CharField(max_length=255, blank=True, default='')
 
     def __str__(self):
         return '<Printout %s on %s>' % (self.document, self.printer)
