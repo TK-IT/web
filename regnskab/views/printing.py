@@ -249,6 +249,7 @@ class BalancePrint(FormView):
             output = print_new_document(io.BytesIO(pdf),
                                         filename=filename,
                                         username=username,
+                                        printer='A2',
                                         duplex=False, fake=fake)
         except Exception as exn:
             form.add_error(None, str(exn))
