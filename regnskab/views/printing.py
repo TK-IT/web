@@ -15,8 +15,13 @@ from regnskab.models import (
     get_profiles_title_status,
 )
 from regnskab.forms import BalancePrintForm
-from regnskab.texrender import tex_to_pdf, RenderError, pdfnup, print_new_document
+from regnskab.texrender import tex_to_pdf, RenderError, pdfnup
 from .auth import regnskab_permission_required_method
+
+try:
+    from uniprint.api import print_new_document
+except ImportError:
+    from regnskab.texrender import print_new_document
 
 
 BALANCE_PRINT_TEX = r"""
