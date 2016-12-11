@@ -5,6 +5,7 @@ from collections import defaultdict
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
+from django.conf import settings
 from django.db.models import F, Min
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
@@ -243,11 +244,12 @@ class BalancePrint(FormView):
 
         filename = 'regnskab_%s.pdf' % self.regnskab_session.pk
         username = self.request.user.username
+        fake = settings.DEBUG
         try:
             output = print_new_document(io.BytesIO(pdf),
                                         filename=filename,
                                         username=username,
-                                        duplex=False)
+                                        duplex=False, fake=fake)
         except Exception as exn:
             form.add_error(None, str(exn))
             return self.form_invalid(form)
