@@ -39,7 +39,7 @@ def print_document(document, printer, username,
     try:
         printout.created_by = User.objects.get(username=username)
     except User.DoesNotExist:
-        raise ValueError('user')
+        raise ValueError(username)
     printout.clean()
     if not fake:
         printout.send_to_printer()
