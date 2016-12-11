@@ -1,5 +1,6 @@
 import re
 import heapq
+import functools
 import itertools
 from collections import namedtuple, defaultdict
 from decimal import Decimal
@@ -596,6 +597,17 @@ class Email(models.Model):
             headers=headers)
 
 
+def set_default(fn, *default_args, **default_kwargs):
+    @functools.wraps(fn)
+    def f(*args, **kwargs):
+        if args or kwargs:
+            return fn(*args, **kwargs)
+        else:
+            return fn(*default_args, **default_kwargs)
+
+    return f
+
+
 def get_profiles_title_status(period=None, time=None):
     def title_key(t):
         # EFU after others. Latest period first.
@@ -629,6 +641,9 @@ def get_profiles_title_status(period=None, time=None):
     for p in profiles:
         p.status = statuses.get(p.id)
         p.titles = titles.get(p.id, [])
+        if period:
+            for t in p.titles:
+                t.age = set_default(t.age, period)
         p.title = p.titles[0] if p.titles else None
         p.in_current = (p.status and
                         (p.status.end_time is None or
