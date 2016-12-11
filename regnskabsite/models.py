@@ -170,18 +170,9 @@ class Title(models.Model):
     root = models.CharField(max_length=10, verbose_name='Titel')
     kind = models.CharField(max_length=10, choices=KIND, verbose_name='Slags')
 
-    def set_context_gfyear(self, gfyear):
-        self._context_gfyear = gfyear
-
-    def get_context_gfyear(self):
-        try:
-            return self._context_gfyear
-        except AttributeError:
-            return config.GFYEAR
-
     def age(self, gfyear=None):
         if gfyear is None:
-            gfyear = self.get_context_gfyear()
+            gfyear = config.GFYEAR
         return gfyear - self.period
 
     def display_root(self):
