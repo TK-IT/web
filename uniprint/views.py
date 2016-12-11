@@ -77,7 +77,7 @@ class PrintoutCreate(CreateView):
         form = super().get_form(form_class)
         if settings.DEBUG:
             form.fields['fake'] = forms.BooleanField(
-                required=False, initial=True, label='Kun en prøve')
+                required=False, initial=True, label='DEBUG: Kun en prøve')
         return form
 
     def get_initial(self):
