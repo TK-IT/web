@@ -69,6 +69,10 @@ class DocumentList(ListView):
     template_name = 'uniprint/document_list.html'
     paginate_by = 100
 
+    @printout_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         qs = Document.objects.all()
         username = self.kwargs.get('username')
@@ -83,6 +87,10 @@ class DocumentList(ListView):
 class PrintoutList(ListView):
     template_name = 'uniprint/printout_list.html'
     paginate_by = 100
+
+    @printout_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         qs = Printout.objects.all()
