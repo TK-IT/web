@@ -7,13 +7,28 @@ import subprocess
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.text import slugify as dslugify
+from unidecode import unidecode
+
+
+def slugify(string):
+    return dslugify(unidecode(string))
+
+
+def document_path(instance, input_filename):
+    filename = os.path.basename(input_filename)
+    base, ext = os.path.splitext(filename)
+    slug_base = slugify(base)
+    slug_name = slug_base + ext
+    username = instance.created_by.username
+    return '/'.join(('uniprint', username, slug_name))
 
 
 logger = logging.getLogger('uniprint')
 
 
 class Document(models.Model):
-    file = models.FileField()
+    file = models.FileField(upload_to=document_path)
     original_filename = models.CharField(max_length=255)
     text = models.TextField(blank=True, null=True)
     pages = models.IntegerField()
