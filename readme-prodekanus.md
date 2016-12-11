@@ -2,7 +2,7 @@
 
 På prodekanus ligger Django projektet under `/home/tkammer/tkweb/`. Det er ejet
 af brugeren `tkammer`, men bliver håndteret igennem WSGI af apache2 og brugeren
-`www-data`. WSGI bruger et python3.4 virualenv der ligger i
+`www-data`. WSGI bruger et Python3 virtual environment (venv) der ligger i
 `/home/tkammer/tkweb/venv/`.
 
 Apache2 håndterer også de statiske filer. Mediefiler ligger på et stor drev
