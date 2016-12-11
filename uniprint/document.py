@@ -17,14 +17,14 @@ def file_for_subprocess(file):
     else:
         stdin = file
         comm_args = ()
-    return file, stdin, comm_args
+    return stdin, comm_args
 
 
 def run_poppler(file, *args):
     '''
     Run a command from the poppler utility distribution.
     '''
-    file, stdin, comm_args = file_for_subprocess(file)
+    stdin, comm_args = file_for_subprocess(file)
     proc = subprocess.Popen(
         args,
         stdin=stdin,
