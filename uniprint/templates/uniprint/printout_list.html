@@ -7,6 +7,7 @@
 <thead>
     <tr>
         <th>Tidspunkt</th>
+        <th>Dokument</th>
         <th>Printer</th>
         <th>Udskrevet af</th>
         <th>Duplex</th>
@@ -19,6 +20,8 @@
     {% for o in object_list %}
     <tr>
         <td>{{ o.created_time }}</td>
+        <td><a href="{{ o.document.file.url }}">
+                {{ o.document.original_filename }}</a></td>
         <td>{{ o.printer }}</td>
         <td>{{ o.created_by.get_full_name|default:o.created_by.username }}</td>
         <td>{{ o.duplex|yesno:"Tosidet,Enkeltsidet" }}</td>
