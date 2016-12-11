@@ -81,6 +81,10 @@ def page_range_ranges(s):
         yield r
 
 
+def page_range_page_count(s):
+    return sum(len(r) for r in page_range_ranges(s))
+
+
 def validate_page_range(s, pages):
     for r in page_range_ranges(s):
         if not (1 <= r.start <= r.stop - 1 <= pages):
@@ -107,6 +111,21 @@ class Printout(models.Model):
     def clean(self):
         if self.page_range:
             validate_page_range(self.page_range, self.document.pages)
+
+    @property
+    def page_range_page_count(self):
+        return page_range_page_count(self.page_range)
+
+    @property
+    def page_count(self):
+        return self.copies * self.page_range_page_count
+
+    @property
+    def sheet_count(self):
+        if self.duplex:
+            return self.copies * ((1 + self.page_range_page_count) // 2)
+        else:
+            return self.page_count
 
     def send_to_printer(self):
         host = '%s:%s' % (self.printer.hostname, self.printer.port)
