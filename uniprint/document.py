@@ -8,8 +8,8 @@ class FileTypeError(Exception):
 
 
 def file_for_subprocess(file):
-    file.open('rb')
     try:
+        file.open('rb')
         file.fileno()
     except Exception:
         stdin = subprocess.PIPE
