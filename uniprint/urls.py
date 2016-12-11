@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from uniprint.views import (
     Home, DocumentCreate, PrintoutCreate,
-    DocumentList,
+    DocumentList, PrintoutList,
 )
 
 urlpatterns = [
@@ -12,4 +12,7 @@ urlpatterns = [
     url(r'^document/$', DocumentList.as_view(), name='document_list'),
     url(r'^document/(?P<username>\w+)/$',
         DocumentList.as_view(), name='document_list'),
+    url(r'^printout/$', PrintoutList.as_view(), name='printout_list'),
+    url(r'^printout/(?P<username>\w+)/$',
+        PrintoutList.as_view(), name='printout_list'),
 ]

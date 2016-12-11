@@ -80,6 +80,19 @@ class DocumentList(ListView):
         return qs
 
 
+class PrintoutList(ListView):
+    template_name = 'uniprint/printout_list.html'
+    paginate_by = 100
+
+    def get_queryset(self):
+        qs = Printout.objects.all()
+        username = self.kwargs.get('username')
+        if username is not None:
+            qs = qs.filter(created_by__username=username)
+        qs = qs.order_by('created_time')
+        return qs
+
+
 class PrintoutCreate(CreateView):
     template_name = 'uniprint/printout_create.html'
     model = Printout
