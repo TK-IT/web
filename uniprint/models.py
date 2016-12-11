@@ -64,18 +64,28 @@ class Printer(models.Model):
         ordering = ['name']
 
 
-def validate_page_range(s):
+def page_range_ranges(s):
     parts = s.split(',')
     for p in parts:
         try:
             s, e = p.split('-')
         except ValueError:
             s, e = p, p
-        for v in (s, e):
-            try:
-                int(v)
-            except ValueError:
-                raise ValidationError('%r er ikke et heltal' % (v,))
+        try:
+            r = range(int(s), int(e)+1)
+        except ValueError:
+            raise ValidationError('%r er ikke et heltal' % (v,))
+        if len(r) == 0:
+            raise ValidationError('%s-%s er et ugyldigt interval' %
+                                  (s, e))
+        yield r
+
+
+def validate_page_range(s, pages):
+    for r in page_range_ranges(s):
+        if not (1 <= r.start <= r.stop - 1 <= pages):
+            raise ValidationError('Dokumentet har kun %s sider' %
+                                  pages)
 
 
 class Printout(models.Model):
@@ -96,7 +106,7 @@ class Printout(models.Model):
 
     def clean(self):
         if self.page_range:
-            validate_page_range(self.page_range)
+            validate_page_range(self.page_range, self.document.pages)
 
     def send_to_printer(self):
         host = '%s:%s' % (self.printer.hostname, self.printer.port)
