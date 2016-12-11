@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-from uniprint.models import Document, Printout
+from uniprint.models import Document, Printout, Printer
 from uniprint.document import (
     extract_plain_text, get_pdfinfo, pages_from_pdfinfo,
     FileTypeError,
@@ -28,7 +28,12 @@ def create_document(fp, filename, username):
 def print_document(document, printer, username,
                    copies=1, duplex=True, page_range=None,
                    fake=False):
-    printout = Printout(document=document,
+    if isinstance(printer, str):
+        try:
+            printer = Printer.objects.get(name=printer)
+        except Printer.DoesNotExist:
+            raise ValueError(printer)
+    printout = Printout(document=document, printer=printer,
                         copies=copies, duplex=duplex,
                         page_range=page_range)
     try:
