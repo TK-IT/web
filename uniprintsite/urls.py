@@ -12,3 +12,7 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(
         settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if 'regnskab' in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        url(r'^regnskab/', include('regnskab.urls')))

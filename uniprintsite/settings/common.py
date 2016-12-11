@@ -37,6 +37,14 @@ INSTALLED_APPS = (
     'uniprint',
 )
 
+try:
+    import regnskab
+except ImportError:
+    pass
+else:
+    INSTALLED_APPS += ('uniprintsite', 'regnskab',)
+    TKWEB_IDM_MODULE = 'uniprintsite'
+
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
