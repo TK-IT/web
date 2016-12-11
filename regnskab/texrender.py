@@ -76,3 +76,11 @@ def run_lp(pdf, duplex=True, hostname=None, destination=None):
         if p.returncode != 0:
             raise RenderError(p.returncode, cmd, output, stderr=None)
     return output
+
+
+def print_new_document(fp, filename, username, **kwargs):
+    '''Drop-in replacement for uniprint.api.print_new_document'''
+    duplex = kwargs.pop('duplex', True)
+    if kwargs:
+        raise TypeError('unsupported kwargs: %s' % kwargs)
+    run_lp(fp.read(), duplex=duplex)

@@ -15,7 +15,7 @@ from regnskab.models import (
     get_profiles_title_status,
 )
 from regnskab.forms import BalancePrintForm
-from regnskab.texrender import tex_to_pdf, RenderError, pdfnup, run_lp
+from regnskab.texrender import tex_to_pdf, RenderError, pdfnup, print_new_document
 from .auth import regnskab_permission_required_method
 
 
@@ -235,9 +235,14 @@ class BalancePrint(FormView):
         if mode != BalancePrintForm.PRINT:
             raise ValueError(mode)
 
+        filename = 'regnskab_%s.pdf' % self.regnskab_session.pk
+        username = self.request.user.username
         try:
-            output = run_lp(pdf, duplex=False)
-        except RenderError as exn:
+            output = print_new_document(io.BytesIO(pdf),
+                                        filename=filename,
+                                        username=username,
+                                        duplex=False)
+        except Exception as exn:
             form.add_error(None, str(exn))
             return self.form_invalid(form)
 
