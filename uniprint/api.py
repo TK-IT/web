@@ -43,6 +43,7 @@ def print_document(document, printer, username,
     printout.clean()
     if not fake:
         printout.send_to_printer()
+    printout.save()
     return printout
 
 
