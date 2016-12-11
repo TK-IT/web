@@ -47,6 +47,18 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='EmailTemplate',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=255, blank=True)),
+                ('subject', models.TextField()),
+                ('body', models.TextField()),
+                ('format', models.CharField(max_length=10, choices=[('pound', 'pound')])),
+                ('created_time', models.DateTimeField(auto_now_add=True)),
+                ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
+            ],
+        ),
+        migrations.CreateModel(
             name='Session',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -59,18 +71,6 @@ class Migration(migrations.Migration):
             options={
                 'get_latest_by': 'created_time',
             },
-        ),
-        migrations.CreateModel(
-            name='EmailTemplate',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, blank=True)),
-                ('subject', models.TextField()),
-                ('body', models.TextField()),
-                ('format', models.CharField(max_length=10, choices=[('pound', 'pound')])),
-                ('created_time', models.DateTimeField(auto_now_add=True)),
-                ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
-            ],
         ),
         migrations.CreateModel(
             name='Purchase',
