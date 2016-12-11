@@ -4,11 +4,12 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.views.generic import (
-    TemplateView, FormView, CreateView,
+    TemplateView, FormView, CreateView, ListView,
 )
 from django import forms
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
+from django.db.models import Max
 
 from uniprint.models import Document, Printer, Printout
 from uniprint.document import (
@@ -62,6 +63,21 @@ class DocumentCreate(CreateView):
         document.save()
         url = reverse('printout_create')
         return HttpResponseRedirect(url + '?d=%s' % document.pk)
+
+
+class DocumentList(ListView):
+    template_name = 'uniprint/document_list.html'
+    paginate_by = 100
+
+    def get_queryset(self):
+        qs = Document.objects.all()
+        username = self.kwargs.get('username')
+        if username is not None:
+            qs = qs.filter(created_by__username=username)
+        qs = qs.order_by('created_time')
+        qs = qs.annotate(
+            latest_printout=Max('printout__created_time'))
+        return qs
 
 
 class PrintoutCreate(CreateView):
