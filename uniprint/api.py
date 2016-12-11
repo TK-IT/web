@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
 from uniprint.models import Document, Printout
 from uniprint.document import (
     extract_plain_text, get_pdfinfo, pages_from_pdfinfo,
@@ -7,6 +8,10 @@ from uniprint.document import (
 
 
 def create_document(fp, filename, username):
+    if not hasattr(fp, 'open') and not isinstance(fp, bytes):
+        fp = fp.read()
+    if isinstance(fp, bytes):
+        fp = ContentFile(fp, filename)
     document = Document(file=fp)
     try:
         document.created_by = User.objects.get(username=username)
