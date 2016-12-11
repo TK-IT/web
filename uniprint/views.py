@@ -16,6 +16,7 @@ from uniprint.document import (
     extract_plain_text, get_pdfinfo, pages_from_pdfinfo,
     FileTypeError,
 )
+from uniprint.api import create_document, print_document
 
 
 printout_permission_required = permission_required('uniprint.add_printout')
@@ -46,12 +47,13 @@ class DocumentCreate(CreateView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        document = form.save(commit=False)
-        document.original_filename = form.cleaned_data['file'].name
+        doc_dummy = form.save(commit=False)
+        file = doc_dummy.file
         try:
-            document.pdfinfo = get_pdfinfo(document.file)
-            document.text = extract_plain_text(document.file)
-            document.pages = pages_from_pdfinfo(document.pdfinfo)
+            document = create_document(
+                fp=file, filename=form.cleaned_data['file'].name,
+                username=self.request.user.username,
+            )
         except FileTypeError as exn:
             form.add_error('file', 'Du skal angive en PDF')
             return self.form_invalid(form)
@@ -59,8 +61,6 @@ class DocumentCreate(CreateView):
             logger.exception('Could not parse uploaded PDF')
             form.add_error(None, 'Ukendt fejl: %s' % (exn,))
             return self.form_invalid(form)
-        document.created_by = self.request.user
-        document.save()
         url = reverse('printout_create')
         return HttpResponseRedirect(url + '?d=%s' % document.pk)
 
@@ -135,14 +135,16 @@ class PrintoutCreate(CreateView):
         return dict(document=document, printer=printer)
 
     def form_valid(self, form):
-        printout = form.save(commit=False)
-        printout.created_by = self.request.user
-        if not form.cleaned_data.get('fake'):
-            try:
-                printout.send_to_printer()
-            except ValidationError as exn:
-                form.add_error(None, exn)
-                return self.form_invalid(form)
-        printout.save()
+        dummy = form.save(commit=False)
+        fake = bool(form.cleaned_data.get('fake'))
+        try:
+            printout = print_document(
+                dummy.document, printer=dummy.printer,
+                username=self.request.user.username,
+                copies=dummy.copies, duplex=dummy.duplex,
+                page_range=dummy.page_range, fake=fake)
+        except ValidationError as exn:
+            form.add_error(None, exn)
+            return self.form_invalid(form)
         url = reverse('home')
         return HttpResponseRedirect(url + '?print=success')
