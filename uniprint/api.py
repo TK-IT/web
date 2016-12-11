@@ -35,7 +35,7 @@ def print_document(document, printer, username,
             raise ValueError(printer)
     printout = Printout(document=document, printer=printer,
                         copies=copies, duplex=duplex,
-                        page_range=page_range)
+                        page_range=page_range or '')
     try:
         printout.created_by = User.objects.get(username=username)
     except User.DoesNotExist:
