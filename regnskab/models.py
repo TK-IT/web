@@ -629,9 +629,6 @@ def get_profiles_title_status(period=None, time=None):
     for p in profiles:
         p.status = statuses.get(p.id)
         p.titles = titles.get(p.id, [])
-        if period:
-            for t in p.titles:
-                t.set_context_gfyear(period)
         p.title = p.titles[0] if p.titles else None
         p.in_current = (p.status and
                         (p.status.end_time is None or
