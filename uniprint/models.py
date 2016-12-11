@@ -81,8 +81,11 @@ def page_range_ranges(s):
         yield r
 
 
-def page_range_page_count(s):
-    return sum(len(r) for r in page_range_ranges(s))
+def page_range_page_count(s, d):
+    if s:
+        return sum(len(r) for r in page_range_ranges(s))
+    else:
+        return d
 
 
 def validate_page_range(s, pages):
@@ -114,7 +117,7 @@ class Printout(models.Model):
 
     @property
     def page_range_page_count(self):
-        return page_range_page_count(self.page_range)
+        return page_range_page_count(self.page_range, self.document.pages)
 
     @property
     def page_count(self):
