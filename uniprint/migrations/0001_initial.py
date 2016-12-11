@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 import django.db.models.deletion
 from django.conf import settings
+from uniprint.models import document_path
 
 
 class Migration(migrations.Migration):
@@ -17,7 +18,7 @@ class Migration(migrations.Migration):
             name='Document',
             fields=[
                 ('id', models.AutoField(auto_created=True, verbose_name='ID', serialize=False, primary_key=True)),
-                ('file', models.FileField(upload_to='')),
+                ('file', models.FileField(upload_to=document_path)),
                 ('original_filename', models.CharField(max_length=255)),
                 ('text', models.TextField(null=True, blank=True)),
                 ('pages', models.IntegerField()),
