@@ -48,6 +48,9 @@ def print_document(document, printer, username,
 
 
 def print_new_document(fp, filename, username, **kwargs):
+    # TODO: Switch this function to using Django transactions.
+    # Currently we use poor man's transactions since nothing else
+    # in our codebase uses real transactions.
     document = create_document(fp, filename=filename, username=username)
     try:
         return print_document(document, username=username, **kwargs)
