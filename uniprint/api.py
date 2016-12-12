@@ -25,6 +25,10 @@ def create_document(fp, filename, username):
     return document
 
 
+def print_url(document):
+    return reverse('printout_create') + '?d=%s' % document.pk
+
+
 def print_document(document, printer, username,
                    copies=1, duplex=True, page_range=None,
                    fake=False):
