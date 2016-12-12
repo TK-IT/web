@@ -31,6 +31,7 @@ class Document(models.Model):
     file = models.FileField(upload_to=document_path)
     original_filename = models.CharField(max_length=255)
     text = models.TextField(blank=True, null=True)
+    size = models.BigIntegerField()
     pages = models.IntegerField()
     pdfinfo = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,

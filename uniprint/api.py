@@ -12,7 +12,8 @@ def create_document(fp, filename, username):
         fp = fp.read()
     if isinstance(fp, bytes):
         fp = ContentFile(fp, filename)
-    document = Document(file=fp)
+    size = len(fp)
+    document = Document(file=fp, size=size)
     try:
         document.created_by = User.objects.get(username=username)
     except User.DoesNotExist:
