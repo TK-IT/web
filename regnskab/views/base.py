@@ -382,6 +382,7 @@ class ProfileList(TemplateView):
 
 class ProfileDetail(TemplateView):
     template_name = 'regnskab/profile_detail.html'
+    REMOVE_ALIAS = 'remove_'
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
@@ -394,15 +395,34 @@ class ProfileDetail(TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        if self.sheetstatus:
+        if self.sheetstatus and 'remove_status' in self.request.POST:
             self.sheetstatus.end_time = timezone.now()
             self.sheetstatus.save()
             self.sheetstatus = None
-        else:
+        elif not self.sheetstatus and 'add_status' in self.request.POST:
             self.sheetstatus = SheetStatus.objects.create(
                 profile=self.profile,
                 start_time=timezone.now(),
                 created_by=self.request.user)
+        elif 'add_alias' in self.request.POST:
+            s = self.request.POST.get('alias')
+            if s:
+                Alias.objects.create(profile=self.profile,
+                                     root=s,
+                                     start_time=timezone.now(),
+                                     created_by=request.user)
+        else:
+            for k in self.request.POST:
+                if k.startswith(self.REMOVE_ALIAS):
+                    pk = k[len(self.REMOVE_ALIAS):]
+                    try:
+                        o = Alias.objects.get(profile=self.profile,
+                                              pk=pk)
+                    except Alias.DoesNotExist:
+                        pass
+                    else:
+                        o.end_time = timezone.now()
+                        o.save()
         return self.render_to_response(self.get_context_data())
 
     def get_purchases(self):
@@ -455,6 +475,31 @@ class ProfileDetail(TemplateView):
                 for x in xs:
                     yield date, sheet, x['balance_change'], x['name']
 
+    def get_names(self):
+        names = []
+        for o in self.profile.title_set.all():
+            names.append(dict(
+                name=o.display_title(),
+                since='Titel siden %s/%02d' % (o.period, (o.period+1) % 100),
+                remove=None,
+            ))
+        for o in self.profile.alias_set.all():
+            start = o.start_time.date() if o.start_time else 'altid'
+            end = o.end_time.date() if o.end_time else 'altid'
+            if o.end_time is None:
+                names.append(dict(
+                    name=o.display_title(),
+                    since='Siden %s' % start,
+                    remove=self.REMOVE_ALIAS + str(o.pk),
+                ))
+            else:
+                names.append(dict(
+                    name=o.display_title(),
+                    since='Fra %s til %s' % (start, end),
+                    remove=None,
+                ))
+        return names
+
     def get_context_data(self, **kwargs):
         context_data = super(ProfileDetail, self).get_context_data(**kwargs)
 
@@ -474,6 +519,7 @@ class ProfileDetail(TemplateView):
             ))
 
         context_data['rows'] = rows
+        context_data['names'] = self.get_names()
         return context_data
 
 

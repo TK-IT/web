@@ -1,14 +1,48 @@
 {% extends "regnskab/base.html" %}
 {% block title %}{{ profile }}{% endblock %}
+{% block head %}
+<style>
+.names td { height: 30px; }
+</style>
+{% endblock %}
 {% block content %}
 <h1>{{ profile }}</h1>
 <form method="post">{% csrf_token %}
     {% if sheetstatus %}
-    <input type="submit" value="Fjern fra krydslisten" />
+    <input type="submit" name="remove_status" value="Fjern fra krydslisten" />
     {% else %}
-    <input type="submit" value="Tilføj til krydslisten" />
+    <input type="submit" name="add_status" value="Tilføj til krydslisten" />
     {% endif %}
 </form>
+
+{% if names %}
+<form method="post">{% csrf_token %}
+<table class="names">
+    <thead>
+        <tr>
+            <th>Kaldenavn</th>
+            <th>Gyldig?</th>
+            <th>Fjern</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in names %}
+        <tr>
+            <td>{{ o.name }}</td>
+            <td>{{ o.since }}</td>
+            <td>{% if o.remove %}<input type="submit" name="{{ o.remove }}" value="X" />{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</form>
+{% endif %}
+
+<form method="post">{% csrf_token %}
+    <p>Alias: <input name="alias" /></p>
+    <p><input name="add_alias" type="submit" value="Tilføj alias" /></p>
+</form>
+
 <table>
     <thead>
         <tr>
