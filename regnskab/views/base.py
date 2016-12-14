@@ -404,70 +404,74 @@ class ProfileDetail(TemplateView):
                 created_by=self.request.user)
         return self.render_to_response(self.get_context_data())
 
-    def get_context_data(self, **kwargs):
-        context_data = super(ProfileDetail, self).get_context_data(**kwargs)
-
-        profile = context_data['profile'] = self.profile
-        context_data['sheetstatus'] = self.sheetstatus
-
-        purchase_qs = Purchase.objects.all()
-        purchase_qs = purchase_qs.filter(row__profile=profile)
-        purchase_qs = purchase_qs.annotate(
+    def get_purchases(self):
+        qs = Purchase.objects.all()
+        qs = qs.filter(row__profile=self.profile)
+        qs = qs.annotate(
             amount=F('kind__unit_price') * F('count'))
-        purchase_qs = purchase_qs.annotate(balance_change=F('amount'))
-        purchase_qs = purchase_qs.annotate(date=F('row__sheet__end_date'))
-        purchase_qs = purchase_qs.annotate(sheet=F('row__sheet__pk'))
-        purchase_qs = purchase_qs.values(
+        qs = qs.annotate(balance_change=F('amount'))
+        qs = qs.annotate(date=F('row__sheet__end_date'))
+        qs = qs.annotate(sheet=F('row__sheet__pk'))
+        qs = qs.values(
             'sheet', 'date', 'count', 'kind__name', 'amount', 'balance_change')
-        purchases = list(purchase_qs)
+        purchases = list(qs)
         for o in purchases:
             o['name'] = '%s× %s' % (floatformat(o['count']), o['kind__name'])
+        return purchases
 
-        payment_qs = Transaction.objects.all()
-        payment_qs = payment_qs.filter(profile=profile)
-        payment_qs = payment_qs.annotate(balance_change=F('amount'))
-        payment_qs = payment_qs.values('kind', 'time', 'note', 'amount', 'balance_change')
-        payments = list(payment_qs)
-        for o in payments:
+    def get_transactions(self):
+        qs = Transaction.objects.all()
+        qs = qs.filter(profile=self.profile)
+        qs = qs.annotate(balance_change=F('amount'))
+        qs = qs.values('kind', 'time', 'note', 'amount', 'balance_change')
+        transactions = list(qs)
+        for o in transactions:
             kind = o.pop('kind')
             note = o.pop('note')
             o['date'] = o['time'].date()
 
             t = Transaction(kind=kind, note=note)
             o['name'] = t.get_kind_display()
+        return transactions
 
-        row_data = payments + purchases
+    def get_rows(self):
+        purchases = self.get_purchases()
+        transactions = self.get_transactions()
+        data = transactions + purchases
 
         def key(x):
             return (x['date'], 'sheet' in x, x.get('sheet'))
 
-        row_data.sort(key=key)
-        row_iter = itertools.groupby(row_data, key=key)
-        rows = []
-        balance = Decimal()
-        for (date, b, sheet), xs in row_iter:
-            if sheet:
+        data.sort(key=key)
+        groups = itertools.groupby(data, key=key)
+        for (date, has_sheet, sheet), xs in groups:
+            if has_sheet:
                 xs = list(xs)
                 amount = sum(x['balance_change'] for x in xs)
-                balance += sum(x['balance_change'] for x in xs)
-                rows.append(dict(
-                    date=date,
-                    sheet=sheet,
-                    name=', '.join(x['name'] for x in xs),
-                    amount=floatformat(amount, 2),
-                    balance=floatformat(balance, 2),
-                ))
+                name = ', '.join(x['name'] for x in xs)
+                yield date, sheet, amount, name
             else:
                 for x in xs:
-                    amount = x['balance_change']
-                    balance += amount
-                    rows.append(dict(
-                        date=date,
-                        sheet=sheet,
-                        name=x['name'],
-                        amount=floatformat(amount, 2),
-                        balance=floatformat(balance, 2),
-                    ))
+                    yield date, sheet, x['balance_change'], x['name']
+
+    def get_context_data(self, **kwargs):
+        context_data = super(ProfileDetail, self).get_context_data(**kwargs)
+
+        profile = context_data['profile'] = self.profile
+        context_data['sheetstatus'] = self.sheetstatus
+
+        rows = []
+        balance = Decimal()
+        for date, sheet, amount, name in self.get_rows():
+            balance += amount
+            rows.append(dict(
+                date=date,
+                sheet=sheet,
+                name=name,
+                amount=floatformat(amount, 2),
+                balance=floatformat(balance, 2),
+            ))
+
         context_data['rows'] = rows
         return context_data
 
