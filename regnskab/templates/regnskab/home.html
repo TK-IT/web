@@ -25,7 +25,9 @@ Ingen endnu
 
 <p><a href="{% url 'session_list' %}">Vis alle opgørelser</a></p>
 
-<p><a href="{% url 'profile_list' %}">Vis liste af personer</a></p>
+<p><a href="{% url 'profile_list' %}">Vis liste af personer</a>
+&bull; <a href="{% url 'profile_search' %}">Søg efter person</a>
+</p>
 
 <p><a href="{% url 'email_template_list' %}">Vis og opret emailskabeloner</a></p>
 {% endblock %}

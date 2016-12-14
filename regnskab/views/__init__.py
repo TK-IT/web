@@ -1,7 +1,7 @@
 from .base import (
     Home, SessionCreate, SheetCreate, SheetDetail, SheetRowUpdate,
     SessionList, SessionUpdate,
-    get_profiles_title_status, ProfileList, ProfileDetail,
+    get_profiles_title_status, ProfileList, ProfileDetail, ProfileSearch,
     TransactionBatchCreateBase, PaymentBatchCreate, PurchaseNoteList,
     PurchaseBatchCreate, PaymentPurchaseList,
 )

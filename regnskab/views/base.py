@@ -1,3 +1,4 @@
+import difflib
 import itertools
 from decimal import Decimal
 from collections import Counter
@@ -473,6 +474,76 @@ class ProfileDetail(TemplateView):
             ))
 
         context_data['rows'] = rows
+        return context_data
+
+
+class ProfileSearch(TemplateView):
+    template_name = 'regnskab/profile_search.html'
+
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_results(self, q, only_current):
+        if not q:
+            return
+
+        results = []
+
+        matcher = difflib.SequenceMatcher()
+        matcher.set_seq2(q.lower())
+        alias_qs = Alias.objects.all()
+        if only_current:
+            alias_qs = alias_qs.filter(end_time=None)
+            alias_qs = alias_qs.filter(profile__sheetstatus__end_time=None)
+        for o in alias_qs:
+            if o.input_title().lower() == q.lower():
+                sort_key = (4, o.profile_id)
+            else:
+                matcher.set_seq1(o.input_title().lower())
+                sort_key = (0, matcher.ratio(), o.input_title(), o.pk)
+            value = (o.input_title(), o.profile)
+            results.append((sort_key, value))
+
+        title_qs = Title.objects.all()
+        if only_current:
+            alias_qs = alias_qs.filter(profile__sheetstatus__end_time=None)
+        for o in title_qs:
+            if q.upper() == o.input_title():
+                sort_key = (4, o.profile_id)
+                value = (o.input_title(), o.profile)
+                results.append((sort_key, value))
+            elif o.kind == Title.FU and q.upper() == o.root != 'FUAN':
+                sort_key = (3, o.profile_id)
+                value = (o.input_title(), o.profile)
+                results.append((sort_key, value))
+
+        profile_qs = Profile.objects.all()
+        if only_current:
+            profile_qs = profile_qs.filter(sheetstatus__end_time=None)
+        for o in profile_qs:
+            if q.lower() in o.name.lower().split():
+                sort_key = (3, o.name, o.pk)
+            elif q.lower() in o.name.lower():
+                sort_key = (2, o.name, o.pk)
+            else:
+                matcher.set_seq1(o.name.lower())
+                sort_key = (0, matcher.ratio(), o.name, o.pk)
+            value = (o.name, o)
+            results.append((sort_key, value))
+
+        results.sort(reverse=True)
+        results = results[:50]
+        results = [value for sort_key, value in results]
+        return results
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        query = self.request.GET.get('q')
+        current = query is None or bool(self.request.GET.get('c'))
+        context_data['q'] = query or ''
+        context_data['c'] = current
+        context_data['results'] = self.get_results(query, current)
         return context_data
 
 
