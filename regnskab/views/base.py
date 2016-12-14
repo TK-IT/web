@@ -541,6 +541,7 @@ class ProfileSearch(TemplateView):
         alias_qs = Alias.objects.all()
         if only_current:
             alias_qs = alias_qs.filter(end_time=None)
+            alias_qs = alias_qs.exclude(profile__sheetstatus=None)
             alias_qs = alias_qs.filter(profile__sheetstatus__end_time=None)
         for o in alias_qs:
             if o.input_title().lower() == q.lower():
@@ -553,7 +554,8 @@ class ProfileSearch(TemplateView):
 
         title_qs = Title.objects.all()
         if only_current:
-            alias_qs = alias_qs.filter(profile__sheetstatus__end_time=None)
+            title_qs = title_qs.exclude(profile__sheetstatus=None)
+            title_qs = title_qs.filter(profile__sheetstatus__end_time=None)
         for o in title_qs:
             if q.upper() == o.input_title():
                 sort_key = (4, o.profile_id)
@@ -566,6 +568,7 @@ class ProfileSearch(TemplateView):
 
         profile_qs = Profile.objects.all()
         if only_current:
+            profile_qs = profile_qs.exclude(sheetstatus=None)
             profile_qs = profile_qs.filter(sheetstatus__end_time=None)
         for o in profile_qs:
             if q.lower() in o.name.lower().split():
