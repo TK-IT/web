@@ -1,7 +1,8 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Emailskabeloner{% endblock %}
 {% block content %}
-<h1>Email-skabeloner</h1>
+<h1><a href="{% url 'home' %}">INKAs regnskab</a></h1>
+<h2>Email-skabeloner</h2>
 <p>
 <a href="{% url 'email_template_create' %}">Opret ny</a>
 </p>

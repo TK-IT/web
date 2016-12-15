@@ -1,7 +1,8 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Emails{% endblock %}
 {% block content %}
-<h1>Emails</h1>
+<h1><a href="{% url 'home' %}">INKAs regnskab</a></h1>
+<h2>Emails</h2>
 {% if object_list %}
 <table>
     <thead>

@@ -12,7 +12,8 @@ href="{% static 'regnskab/sheet_update.css' %}" />
 {% endblock %}
 {% block title %}Opgør krydsliste{% endblock %}
 {% block content %}
-<h1>{{ sheet }}</h1>
+<h1><a href="{% url 'home' %}">INKAs regnskab</a></h1>
+<h2>{{ sheet }}</h2>
 
 {% if saved %}<p class="success-message">Krydslisten er gemt!</p>{% endif %}
 
