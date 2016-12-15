@@ -256,5 +256,6 @@ class BalancePrint(FormView):
             return self.form_invalid(form)
 
         url = reverse('session_update',
-                      kwargs=dict(pk=self.regnskab_session.id))
+                      kwargs=dict(pk=self.regnskab_session.id),
+                      current_app=self.request.resolver_match.namespace)
         return HttpResponseRedirect(url + '?print=success')
