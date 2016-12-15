@@ -1,7 +1,7 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Søg{% endblock %}
 {% block content %}
-<h1><a href="{% url 'home' %}">INKAs regnskab</a></h1>
+<h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <h2>Søg person</h2>
 <p>
 På denne side kan du finde en person ved at søge efter vedkommendes
@@ -29,7 +29,7 @@ Søgeresultaterne er sorteret efter relevans.
         {% for match, profile in results %}
         <tr>
             <td>{{ match }}</td>
-            <td><a href="{% url 'profile_detail' pk=profile.pk %}">{{ profile }}</a></td>
+            <td><a href="{% url 'regnskab:profile_detail' pk=profile.pk %}">{{ profile }}</a></td>
         </tr>
         {% endfor %}
     </tbody>

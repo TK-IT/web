@@ -1,13 +1,13 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Email til {{ object.recipient_name }}{% endblock %}
 {% block content %}
-<h1><a href="{% url 'home' %}">INKAs regnskab</a></h1>
+<h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <h2>{{ object.recipient_name }}</h2>
 <p>Til: <tt>{{ object.recipient_email }}</tt></p>
 <p>Emne: <tt>{{ object.subject }}</tt></p>
 <pre>{{ object.body }}</pre>
 <h2>Send kopi</h2>
-<form method="post" action="{% url 'email_send' pk=session.pk profile=profile.pk %}">{% csrf_token %}
+<form method="post" action="{% url 'regnskab:email_send' pk=session.pk profile=profile.pk %}">{% csrf_token %}
     <p><label>Modtager: <input name="override_recipient" value="{{ user.email }}"></label></p>
     <p><input type="submit" value="Send kopi" /></p>
 </form>

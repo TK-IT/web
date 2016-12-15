@@ -12,14 +12,14 @@ href="{% static 'regnskab/sheet_update.css' %}" />
 {% endblock %}
 {% block title %}Opgør krydsliste{% endblock %}
 {% block content %}
-<h1><a href="{% url 'home' %}">INKAs regnskab</a></h1>
+<h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <h2>{{ sheet }}</h2>
 
 {% if saved %}<p class="success-message">Krydslisten er gemt!</p>{% endif %}
 
 {% if error %}<p>Der er sket en fejl. {{ error }}</p>{% endif %}
 
-{% if session %}<p><a href="{% url 'session_update' pk=session.pk %}">
+{% if session %}<p><a href="{% url 'regnskab:session_update' pk=session.pk %}">
     Gå tilbage til opgørelsen</a></p>{% endif %}
 
 <form method="post">{% csrf_token %}

@@ -8,7 +8,7 @@
 {% endblock %}
 {% block title %}Personer der har krydset{% endblock %}
 {% block content %}
-<h1><a href="{% url 'home' %}">INKAs regnskab</a></h1>
+<h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <h2>Personer der har krydset</h2>
 
 <p>Personer der har krydset uden at betale sin regning
@@ -29,13 +29,13 @@ eller som har taget mere end én indgang på en krydsliste
         {% for person in object_list %}
         <tr class="{{ person.warn|yesno:"warn," }}">
             <td class="name"><a class="profile-link"
-                   href="{% url 'profile_detail' pk=person.pk %}">
+                   href="{% url 'regnskab:profile_detail' pk=person.pk %}">
                     {{ person.title.display_title }} {{ person.name }}</a></td>
             <td class="status">{{ person.status.since }}</td>
             <td class="prev-balance">{{ person.b0|floatformat:2 }}</td>
             <td class="paid-balance">{{ person.b1|floatformat:2 }}</td>
             <td class="purchases">{% for sheet, purchases, n_rows, w in person.sheets %}
-                <a class="{{ w|yesno:"warn," }}" href="{% url 'sheet_detail' pk=sheet.id %}?highlight_profile={{ person.pk }}"
+                <a class="{{ w|yesno:"warn," }}" href="{% url 'regnskab:sheet_detail' pk=sheet.id %}?highlight_profile={{ person.pk }}"
                    title="{{ sheet }}" data-rows="{{ n_rows }}">
                 {{ purchases }}</a>{% if forloop.last %}{% else %},{% endif %}
             {% endfor %}</td>

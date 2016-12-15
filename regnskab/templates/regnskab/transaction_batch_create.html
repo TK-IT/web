@@ -56,10 +56,10 @@ window.addEventListener('load', init, false);
 {% endblock %}
 {% block title %}{{ header }}{% endblock %}
 {% block content %}
-<h1><a href="{% url 'home' %}">INKAs regnskab</a></h1>
+<h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <h2>{{ header }}</h2>
 
-{% if session %}<p><a href="{% url 'session_update' pk=session.pk %}">
+{% if session %}<p><a href="{% url 'regnskab:session_update' pk=session.pk %}">
     Gå tilbage til opgørelsen</a></p>{% endif %}
 
 <form method="post">{% csrf_token %}

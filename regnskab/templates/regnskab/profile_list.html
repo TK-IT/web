@@ -1,7 +1,7 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Personer{% endblock %}
 {% block content %}
-<h1><a href="{% url 'home' %}">INKAs regnskab</a></h1>
+<h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <h2>Personer</h2>
 <table>
     <thead>
@@ -15,7 +15,7 @@
         {% for person in object_list %}
         <tr>
             <td><a class="profile-link"
-                   href="{% url 'profile_detail' pk=person.pk %}">
+                   href="{% url 'regnskab:profile_detail' pk=person.pk %}">
                     {{ person.title.display_title }} {{ person.name }}</a></td>
             <td>{{ person.status.since }}</td>
             <td align=right>{{ person.balance|floatformat:2 }}</td>

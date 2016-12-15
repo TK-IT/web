@@ -1,16 +1,16 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Opgørelse{% endblock %}
 {% block content %}
-<h1><a href="{% url 'home' %}">INKAs regnskab</a></h1>
+<h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <h2>Opgørelse</h2>
 
 <p>Krydslister:</p>
 <ul>
     {% for s in object.sheet_set.all %}
     {% if object.sent %}
-    <li><a href="{% url 'sheet_detail' pk=s.pk %}">{{ s }}</a></li>
+    <li><a href="{% url 'regnskab:sheet_detail' pk=s.pk %}">{{ s }}</a></li>
     {% else %}
-    <li><a href="{% url 'sheet_update' pk=s.pk %}">{{ s }}</a></li>
+    <li><a href="{% url 'regnskab:sheet_update' pk=s.pk %}">{{ s }}</a></li>
     {% endif %}
     {% empty %}
     <li>Ingen endnu</li>
@@ -18,20 +18,20 @@
 </ul>
 
 {% if not object.sent %}
-<p><a href="{% url 'sheet_create' session=object.pk %}">
+<p><a href="{% url 'regnskab:sheet_create' session=object.pk %}">
     Tilføj krydsliste til opgørelse</a></p>
 
 <p>
-<a href="{% url 'payment_batch_create' pk=object.pk %}">Tilføj betalinger</a>
+<a href="{% url 'regnskab:payment_batch_create' pk=object.pk %}">Tilføj betalinger</a>
 &bullet;
-<a href="{% url 'purchase_note_list' pk=object.pk %}">Tilføj "Andet"</a>
+<a href="{% url 'regnskab:purchase_note_list' pk=object.pk %}">Tilføj "Andet"</a>
 </p>
 {% endif %}
 
-<p><a href="{% url 'payment_purchase_list' pk=object.pk %}">
+<p><a href="{% url 'regnskab:payment_purchase_list' pk=object.pk %}">
 Hvem har krydset uden at have betalt?</a></p>
 
-<form method="post" action="{% url 'balance_print' pk=object.pk %}">{% csrf_token %}
+<form method="post" action="{% url 'regnskab:balance_print' pk=object.pk %}">{% csrf_token %}
     <p>
     {{ print_form.mode }} <label>Highlight over 250: {{ print_form.highlight }}</label>
     <input type="submit" value="Udskriv opgørelse" />
@@ -42,9 +42,9 @@ Hvem har krydset uden at have betalt?</a></p>
 <p>Sendt:
 {% if object.sent %}
 {{ object.send_time }}.
-<a href="{% url 'email_list' pk=object.pk %}">Vis sendte emails</a>
+<a href="{% url 'regnskab:email_list' pk=object.pk %}">Vis sendte emails</a>
 {% else %}
-Ikke endnu. <a href="{% url 'email_list' pk=object.pk %}">Gå til udsendelse</a>
+Ikke endnu. <a href="{% url 'regnskab:email_list' pk=object.pk %}">Gå til udsendelse</a>
 {% endif %}</p>
 
 {% if not object.sent %}

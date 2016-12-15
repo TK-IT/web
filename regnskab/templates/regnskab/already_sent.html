@@ -5,7 +5,7 @@
 <h2>Fejl: Allerede udsendt</h2>
 {% if session %}
 <p>Du har prøvet at ændre opgørelsen
-<a href="{% url 'session_update' pk=session.pk %}">{{ session }}</a>
+<a href="{% url 'regnskab:session_update' pk=session.pk %}">{{ session }}</a>
 der blev sendt ud {{ session.send_time }}.</p>
 {% else %}
 <p>Du har prøvet at ændre en krydsliste

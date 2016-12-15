@@ -1,7 +1,7 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Emails{% endblock %}
 {% block content %}
-<h1><a href="{% url 'home' %}">INKAs regnskab</a></h1>
+<h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <h2>Emails</h2>
 {% if object_list %}
 <table>
@@ -15,14 +15,14 @@
         {% for o in object_list %}
         <tr>
             <td><a class="profile-link"
-                   href="{% url 'email_detail' pk=session.pk profile=o.profile_id %}">
+                   href="{% url 'regnskab:email_detail' pk=session.pk profile=o.profile_id %}">
                     {{ o.profile.title.display_title }} {{ o.recipient_name }}</a></td>
             <td><a href="mailto:{{ o.recipient_email }}">{{ o.recipient_email }}</a></td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-<form method="post" action="{% url 'email_send' pk=session.pk %}">{% csrf_token %}
+<form method="post" action="{% url 'regnskab:email_send' pk=session.pk %}">{% csrf_token %}
     <input type="submit" value="Send alle" />
 </form>
 {% else %}

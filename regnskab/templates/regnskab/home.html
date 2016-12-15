@@ -7,7 +7,7 @@
 
 <p>Seneste krydslisteopgørelse:
 {% if latest_session %}
-<a href="{% url 'session_update' pk=latest_session.pk %}">{{ latest_session.created_time }}</a>
+<a href="{% url 'regnskab:session_update' pk=latest_session.pk %}">{{ latest_session.created_time }}</a>
 {% if latest_session.sent %}
 udsendt {{ latest_session.send_time }}
 {% endif %}
@@ -18,16 +18,16 @@ Ingen endnu
 
 {# Display form if there is no latest_session or latest_session.sent is true #}
 {% if not latest_session.sent %}{% else %}
-<form method="post" action="{% url 'session_create' %}">{% csrf_token %}
+<form method="post" action="{% url 'regnskab:session_create' %}">{% csrf_token %}
     <input type="submit" value="Begynd ny opgørelse" />
 </form>
 {% endif %}
 
-<p><a href="{% url 'session_list' %}">Vis alle opgørelser</a></p>
+<p><a href="{% url 'regnskab:session_list' %}">Vis alle opgørelser</a></p>
 
-<p><a href="{% url 'profile_list' %}">Vis liste af personer</a>
-&bull; <a href="{% url 'profile_search' %}">Søg efter person</a>
+<p><a href="{% url 'regnskab:profile_list' %}">Vis liste af personer</a>
+&bull; <a href="{% url 'regnskab:profile_search' %}">Søg efter person</a>
 </p>
 
-<p><a href="{% url 'email_template_list' %}">Vis og opret emailskabeloner</a></p>
+<p><a href="{% url 'regnskab:email_template_list' %}">Vis og opret emailskabeloner</a></p>
 {% endblock %}
