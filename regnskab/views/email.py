@@ -54,7 +54,7 @@ class EmailTemplateUpdate(UpdateView):
             backup.save()
             qs.update(email_template=backup)
         form.save()
-        return redirect('email_template_list')
+        return redirect('regnskab:email_template_list')
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
@@ -77,7 +77,7 @@ class EmailTemplateCreate(CreateView):
 
     def form_valid(self, form):
         form.save()
-        return redirect('email_template_list')
+        return redirect('regnskab:email_template_list')
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
@@ -163,8 +163,8 @@ class EmailSend(View):
         email_backend = django.core.mail.get_connection()
         email_backend.send_messages(messages)
         if override_recipient:
-            return redirect('email_list', pk=emails[0].session_id)
+            return redirect('regnskab:email_list', pk=emails[0].session_id)
         else:
             regnskab_session.send_time = timezone.now()
             regnskab_session.save()
-            return redirect('home')
+            return redirect('regnskab:home')
