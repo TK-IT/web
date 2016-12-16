@@ -71,7 +71,7 @@ class SessionCreate(TemplateView):
                     self.request.user, session.pk)
         if session.email_template:
             session.regenerate_emails()
-        return redirect('session_update', pk=session.pk)
+        return redirect('regnskab:session_update', pk=session.pk)
 
 
 class SheetCreate(FormView):
@@ -110,7 +110,7 @@ class SheetCreate(FormView):
                     self.request.user, s.pk, self.regnskab_session.pk,
                     ' '.join('%s=%s' % (k['name'], k['unit_price'])
                              for k in data['kinds']))
-        return redirect('sheet_update', pk=s.pk)
+        return redirect('regnskab:sheet_update', pk=s.pk)
 
 
 class SheetDetail(TemplateView):
@@ -124,7 +124,7 @@ class SheetDetail(TemplateView):
         s = self.get_sheet()
         qs = SheetRow.objects.filter(sheet=s)
         if not qs.exists():
-            return redirect('sheet_update', pk=s.pk)
+            return redirect('regnskab:sheet_update', pk=s.pk)
         else:
             return super().get(request, *args, **kwargs)
 
@@ -663,7 +663,7 @@ class TransactionBatchCreateBase(FormView):
                 "transaction_kind.")
 
     def get_success_view(self):
-        return redirect('session_update', pk=self.regnskab_session.pk)
+        return redirect('regnskab:session_update', pk=self.regnskab_session.pk)
 
     def get_form_kwargs(self, **kwargs):
         r = super().get_form_kwargs(**kwargs)
@@ -794,8 +794,8 @@ class PurchaseBatchCreate(TransactionBatchCreateBase):
         try:
             self.note = request.GET['note']
         except KeyError:
-            return redirect(
-                'purchase_note_list', pk=self.get_regnskab_session().pk)
+            return redirect('regnskab:purchase_note_list',
+                            pk=self.get_regnskab_session().pk)
         return super().dispatch(request, *args, **kwargs)
 
     def get_note(self):
