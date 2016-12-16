@@ -144,7 +144,7 @@ class Transaction(models.Model):
     def get_kind_display(self):
         if self.note:
             return self.note
-        return next((l for k, l in Transaction.KIND if l == self.kind),
+        return next((l for k, l in Transaction.KIND if k == self.kind),
                     '')
 
     def __str__(self):
