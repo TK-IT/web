@@ -57,6 +57,8 @@ class EmailTemplateUpdate(UpdateView):
             backup.save()
             qs.update(email_template=backup)
         form.save()
+        logger.info("%s: Ret emailskabelon %s",
+                    self.request.user, self.kwargs['pk'])
         return redirect('regnskab:email_template_list')
 
     @regnskab_permission_required_method
@@ -79,7 +81,9 @@ class EmailTemplateCreate(CreateView):
                         body=email_template.body)
 
     def form_valid(self, form):
-        form.save()
+        o = form.save()
+        logger.info("%s: Opret emailskabelon %s",
+                    self.request.user, o.pk)
         return redirect('regnskab:email_template_list')
 
     @regnskab_permission_required_method
@@ -164,6 +168,13 @@ class EmailSend(View):
             for m in messages:
                 m.to = [override_recipient]
         email_backend = django.core.mail.get_connection()
+        if profile:
+            logger.info("%s: Send email for %s i opgørelse %s til %s",
+                        self.request.user, p, regnskab_session.pk,
+                        override_recipient)
+        else:
+            logger.info("%s: Send emails i opgørelse %s",
+                        self.request.user, regnskab_session.pk)
         email_backend.send_messages(messages)
         if override_recipient:
             return redirect('regnskab:email_list', pk=emails[0].session_id)

@@ -258,6 +258,9 @@ class BalancePrint(FormView):
             form.add_error(None, str(exn))
             return self.form_invalid(form)
 
+        logger.info("%s: Udskriv opgørelse id=%s på A2",
+                    self.request.user, self.regnskab_session.pk)
+
         url = reverse('regnskab:session_update',
                       kwargs=dict(pk=self.regnskab_session.id),
                       current_app=self.request.resolver_match.namespace)
