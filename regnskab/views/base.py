@@ -56,7 +56,7 @@ class Log(View):
 
     def get(self, request):
         filename = logger.handlers[0].stream.name
-        with open(filename) as fp:
+        with open(filename, encoding='utf8') as fp:
             s = fp.read()
         return HttpResponse(s, content_type='text/plain; charset=utf8')
 
