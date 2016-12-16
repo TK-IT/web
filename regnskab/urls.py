@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 
 from regnskab.views import (
-    Home, SessionCreate,
+    Home, Log, SessionCreate,
     SheetCreate, SheetDetail, SheetRowUpdate,
     EmailTemplateList, EmailTemplateUpdate, EmailTemplateCreate,
     SessionList, SessionUpdate, EmailList, EmailDetail, EmailSend,
@@ -27,6 +27,7 @@ from regnskab.views import (
 
 urlpatterns = [
     url(r'^$', Home.as_view(), name='home'),
+    url(r'^log/$', Log.as_view(), name='log'),
     url(r'^session/(?P<session>\d+)/sheet/new/$', SheetCreate.as_view(),
         name='sheet_create'),
     url(r'^sheet/(?P<pk>\d+)/$', SheetDetail.as_view(), name='sheet_detail'),

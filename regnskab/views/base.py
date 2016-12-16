@@ -6,12 +6,13 @@ from collections import Counter
 import json
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
+from django.http import HttpResponse
 from django.db.models import F
 from django.utils import timezone
 from django.template.defaultfilters import floatformat
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
-    TemplateView, FormView, ListView,
+    TemplateView, FormView, ListView, View,
 )
 from django.template.response import TemplateResponse
 from regnskab.forms import (
@@ -46,6 +47,18 @@ class Home(TemplateView):
         context_data['latest_session'] = latest_session
         context_data['inka'] = get_inka()
         return context_data
+
+
+class Log(View):
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        filename = logger.handlers[0].stream.name
+        with open(filename) as fp:
+            s = fp.read()
+        return HttpResponse(s, content_type='text/plain; charset=utf8')
 
 
 def already_sent_view(request, regnskab_session):
