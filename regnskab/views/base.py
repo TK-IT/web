@@ -455,7 +455,7 @@ class ProfileDetail(TemplateView):
                         o.end_time = timezone.now()
                         o.save()
                         logger.info("%s: Fjern alias %r fra %s",
-                                    self.request.user, s, self.profile)
+                                    self.request.user, o.root, self.profile)
         return self.render_to_response(self.get_context_data())
 
     def get_purchases(self):
