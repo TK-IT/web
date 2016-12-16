@@ -5,6 +5,7 @@ from decimal import Decimal
 from collections import defaultdict
 
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
 from django.db.models import F, Min
@@ -255,6 +256,8 @@ class BalancePrint(FormView):
                                         printer='A2',
                                         duplex=False, fake=fake)
         except Exception as exn:
+            if settings.DEBUG and not isinstance(exn, ValidationError):
+                raise
             form.add_error(None, str(exn))
             return self.form_invalid(form)
 
