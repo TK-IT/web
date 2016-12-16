@@ -112,4 +112,30 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': ('[%(asctime)s %(name)s %(levelname)s] ' +
+                       '%(message)s'),
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django.log'),
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'regnskab': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
 TKWEB_IDM_MODULE = 'regnskabsite'
