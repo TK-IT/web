@@ -1,3 +1,4 @@
+import logging
 import itertools
 
 import django.core.mail
@@ -16,6 +17,8 @@ from regnskab.models import (
 )
 
 from .auth import regnskab_permission_required_method
+
+logger = logging.getLogger('regnskab')
 
 
 class EmailTemplateList(ListView):

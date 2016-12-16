@@ -1,5 +1,6 @@
 import io
 import random
+import logging
 from decimal import Decimal
 from collections import defaultdict
 
@@ -24,6 +25,8 @@ try:
     from uniprint.api import print_new_document
 except ImportError:
     from regnskab.texrender import print_new_document
+
+logger = logging.getLogger('regnskab')
 
 
 BALANCE_PRINT_TEX = r"""
