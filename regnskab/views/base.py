@@ -1,4 +1,5 @@
 import difflib
+import logging
 import itertools
 from decimal import Decimal
 from collections import Counter
@@ -25,6 +26,8 @@ from regnskab.models import (
     config, get_profiles_title_status,
 )
 from .auth import regnskab_permission_required_method
+
+logger = logging.getLogger('regnskab')
 
 
 class Home(TemplateView):
@@ -64,6 +67,8 @@ class SessionCreate(TemplateView):
         session = Session(created_by=self.request.user, period=config.GFYEAR,
                           email_template=email_template)
         session.save()
+        logger.info("Opret ny opgørelse id=%s", session.pk,
+                    extra=self.request.log_data)
         if session.email_template:
             session.regenerate_emails()
         return redirect('session_update', pk=session.pk)
@@ -100,6 +105,11 @@ class SheetCreate(FormView):
                 name=kind['name'],
                 position=i + 1,
                 unit_price=kind['unit_price'])
+        logger.info("Opret ny krydsliste id=%s i opgørelse=%s med priser %s",
+                    s.pk, self.regnskab_session.pk,
+                    ' '.join('%s=%s' % (k['name'], k['unit_price'])
+                             for k in data['kinds']),
+                    extra=self.request.log_data)
         return redirect('sheet_update', pk=s.pk)
 
 
@@ -257,6 +267,14 @@ class SheetRowUpdate(TemplateView):
         delete.extend(existing[len(rows):])
         save.extend(rows[len(existing):])
 
+        for row in delete:
+            logger.info("Slet række %s i krydsliste %s: %r %r %s",
+                        row['position'], sheet.pk,
+                        row['name'], str(row['profile']),
+                        ' '.join('%s=%s' % (c.kind.name, c.count)
+                                 for c in row['kinds']),
+                        extra=self.request.log_data)
+
         save_rows = []
         save_purchases = []
         for o in save:
@@ -267,6 +285,12 @@ class SheetRowUpdate(TemplateView):
                 if c.count:
                     c.row = save_rows[-1]
                     save_purchases.append(c)
+            logger.info("Gem række %s i krydsliste %s: %r %r %s",
+                        o['position'], sheet.pk,
+                        o['name'], str(o['profile']),
+                        ' '.join('%s=%s' % (c.kind.name, c.count)
+                                 for c in o['kinds']),
+                        extra=self.request.log_data)
 
         # print("Create %s, delete %s" % (len(save_rows), len(delete)))
         delete_ids = set(d['id'] for d in delete if d['id'])
@@ -356,6 +380,9 @@ class SessionUpdate(FormView):
             # Update self.object.email_template_id
             self.object.email_template = self.object.email_template
             self.object.save()
+            logger.info("Ret emailskabelon %s for opgørelse %s",
+                        self.object.email_template_id, self.object.pk,
+                        extra=self.request.log_data)
         context_data = self.get_context_data(
             form=form,
             success=True,
@@ -396,10 +423,16 @@ class ProfileDetail(TemplateView):
 
     def post(self, request, *args, **kwargs):
         if self.sheetstatus and 'remove_status' in self.request.POST:
+            logger.info("Fjern %s fra krydslisten",
+                        self.profile,
+                        extra=self.request.log_data)
             self.sheetstatus.end_time = timezone.now()
             self.sheetstatus.save()
             self.sheetstatus = None
         elif not self.sheetstatus and 'add_status' in self.request.POST:
+            logger.info("Tilføj %s til krydslisten",
+                        self.profile,
+                        extra=self.request.log_data)
             self.sheetstatus = SheetStatus.objects.create(
                 profile=self.profile,
                 start_time=timezone.now(),
@@ -407,6 +440,9 @@ class ProfileDetail(TemplateView):
         elif 'add_alias' in self.request.POST:
             s = self.request.POST.get('alias')
             if s:
+                logger.info("Tilføj alias %r til %s",
+                            s, self.profile,
+                            extra=self.request.log_data)
                 Alias.objects.create(profile=self.profile,
                                      root=s,
                                      start_time=timezone.now(),
@@ -423,6 +459,9 @@ class ProfileDetail(TemplateView):
                     else:
                         o.end_time = timezone.now()
                         o.save()
+                        logger.info("Fjern alias %r fra %s",
+                                    s, self.profile,
+                                    extra=self.request.log_data)
         return self.render_to_response(self.get_context_data())
 
     def get_purchases(self):
@@ -657,13 +696,23 @@ class TransactionBatchCreateBase(FormView):
                     created_by=self.request.user, created_time=now,
                     note=self.get_note(),
                     session=self.regnskab_session)
+                logger.info("Sæt %r for %s i opgørelse %s til %s",
+                            o.get_kind_display(),
+                            profile, self.regnskab_session.pk,
+                            o.amount,
+                            extra=self.request.log_data)
                 if profile.id in existing:
                     o.id = existing[profile.id].id
                     save.append(o)
                 else:
                     new.append(o)
             elif profile.id in existing:
-                delete.append(existing[profile.id])
+                e = existing[profile.id]
+                logger.info("Fjern %r for %s i opgørelse %s",
+                            e.get_kind_display(),
+                            profile, self.regnskab_session.pk,
+                            extra=self.request.log_data)
+                delete.append(e)
 
         Transaction.objects.bulk_create(new)
         for o in save:
