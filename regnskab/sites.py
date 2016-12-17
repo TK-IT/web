@@ -1,11 +1,9 @@
-from regnskab import views
-
-
 class RegnskabSite(object):
     name = 'regnskab'
 
     def get_urls(self):
         from django.conf.urls import url
+        from regnskab import views
 
         return [
             url(r'^$', views.Home.as_view(), name='home'),
