@@ -61,7 +61,7 @@ class DocumentCreate(CreateView):
             logger.exception('Could not parse uploaded PDF')
             form.add_error(None, 'Ukendt fejl: %s' % (exn,))
             return self.form_invalid(form)
-        url = reverse('printout_create')
+        url = reverse('uniprint:printout_create')
         return HttpResponseRedirect(url + '?d=%s' % document.pk)
 
 
@@ -146,5 +146,5 @@ class PrintoutCreate(CreateView):
         except ValidationError as exn:
             form.add_error(None, exn)
             return self.form_invalid(form)
-        url = reverse('home')
+        url = reverse('uniprint:home')
         return HttpResponseRedirect(url + '?print=success')
