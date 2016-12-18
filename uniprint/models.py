@@ -140,10 +140,7 @@ class Printout(models.Model):
         cmd = ('lp', '-h', host, '-d', destination)
         if self.copies != 1:
             cmd += ('-n', str(self.copies))
-        if self.duplex:
-            cmd += ('-o', 'Duplex=DuplexNoTumble')
-        else:
-            cmd += ('-o', 'Duplex=None')
+        cmd += tuple(shlex.split(self.lp_option_string))
         if self.page_range:
             cmd += ('-P', self.page_range)
         if self.created_by:
