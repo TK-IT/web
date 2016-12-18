@@ -17,6 +17,7 @@ from uniprint.document import (
     FileTypeError,
 )
 from uniprint.api import create_document, print_document
+from uniprint.forms import PrintoutForm
 
 
 printout_permission_required = permission_required('uniprint.add_printout')
@@ -101,10 +102,10 @@ class PrintoutList(ListView):
         return qs
 
 
-class PrintoutCreate(CreateView):
+class PrintoutCreate(FormView):
     template_name = 'uniprint/printout_create.html'
     model = Printout
-    fields = ('document', 'printer', 'copies', 'duplex', 'page_range')
+    form = PrintoutForm
 
     @printout_permission_required_method
     def dispatch(self, request, *args, **kwargs):
@@ -135,14 +136,15 @@ class PrintoutCreate(CreateView):
         return dict(document=document, printer=printer)
 
     def form_valid(self, form):
-        dummy = form.save(commit=False)
-        fake = bool(form.cleaned_data.get('fake'))
+        data = form.cleaned_data
+        fake = bool(data.get('fake'))
+        option = data['option']
         try:
             printout = print_document(
-                dummy.document, printer=dummy.printer,
+                data['document'], printer=data['printer'],
                 username=self.request.user.username,
-                copies=dummy.copies, duplex=dummy.duplex,
-                page_range=dummy.page_range, fake=fake)
+                copies=data['copies'], option=option,
+                page_range=data['page_range'], fake=fake)
         except ValidationError as exn:
             form.add_error(None, exn)
             return self.form_invalid(form)
