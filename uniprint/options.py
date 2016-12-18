@@ -11,8 +11,8 @@ class Option:
             raise TypeError(kwargs.keys())
 
     def lp_options(self):
-        return [o for arg in args
-                for o in ((arg,) if isinstance(arg, str) else arg.options())]
+        return [o for arg in self.args for o in
+                ((arg,) if isinstance(arg, str) else arg.lp_options())]
 
     def lp_string(self):
         return ' '.join('-o %s' % shlex.quote(s) for s in self.lp_options())
@@ -39,6 +39,33 @@ class Options:
 
     twosided = Option('Duplex=DuplexNoTumble', name='Tosidet')
     onesided = Option('Duplex=None', name='Enkeltsidet')
+
+    @classmethod
+    def get_options(cls):
+        values = [getattr(cls, k) for k in dir(cls)]
+        options = [v for v in values if isinstance(v, Option)]
+        options.sort(key=lambda o: len(o.lp_options()))
+        return options
+
+    @classmethod
+    def parse(cls, string):
+        args = shlex.split(string)
+        assert len(args) % 2 == 0
+        assert all(o == '-o' for o in args[::2])
+        options = args[1::2]
+
+        remaining = collections.Counter(options)
+        result = []
+        for o in reversed(cls.get_options()):
+            o_c = collections.Counter(o.lp_options())
+            if (remaining - o_c) + o_c == remaining:
+                # o_c contained in remaining
+                remaining -= o_c
+                result.append(o)
+        if remaining:
+            raise ValueError("Unrecognized: %s" %
+                             ' '.join(remaining.elements()))
+        return result
 
 
 choices = [getattr(Options, name)
