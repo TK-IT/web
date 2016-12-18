@@ -107,7 +107,6 @@ class Printout(models.Model):
 
     copies = models.PositiveIntegerField(default=1)
     lp_option_string = models.TextField(blank=True)
-    duplex = models.BooleanField(blank=True, default=True)
     page_range = models.CharField(max_length=255, blank=True, default='')
 
     def __str__(self):
@@ -116,6 +115,13 @@ class Printout(models.Model):
     def clean(self):
         if self.page_range:
             validate_page_range(self.page_range, self.document.pages)
+
+    @property
+    def duplex(self):
+        if 'Duplex=DuplexNoTumble' in self.lp_option_string.split():
+            return True
+        elif 'Duplex=None' in self.lp_option_string.split():
+            return False
 
     @property
     def page_range_page_count(self):
