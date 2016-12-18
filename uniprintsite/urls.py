@@ -14,5 +14,6 @@ if settings.DEBUG:
         settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if 'regnskab' in settings.INSTALLED_APPS:
+    import regnskab
     urlpatterns.append(
-        url(r'^regnskab/', include('regnskab.urls')))
+        url(r'^regnskab/', regnskab.site.urls))
