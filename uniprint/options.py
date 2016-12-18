@@ -23,6 +23,7 @@ def set_option_keys(cls):
         v = getattr(cls, k)
         if isinstance(v, Option):
             v.key = k
+    return cls
 
 
 @set_option_keys
