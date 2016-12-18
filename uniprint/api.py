@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
+from django.core.urlresolvers import reverse
 from uniprint.models import Document, Printout, Printer
 from uniprint.document import (
     extract_plain_text, get_pdfinfo, pages_from_pdfinfo,
