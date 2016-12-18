@@ -106,6 +106,7 @@ class Printout(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
 
     copies = models.PositiveIntegerField(default=1)
+    lp_option_string = models.TextField(blank=True)
     duplex = models.BooleanField(blank=True, default=True)
     page_range = models.CharField(max_length=255, blank=True, default='')
 
