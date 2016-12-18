@@ -138,7 +138,7 @@ class Printout(models.Model):
         else:
             return self.page_count
 
-    def send_to_printer(self):
+    def get_command_line(self):
         host = '%s:%s' % (self.printer.hostname, self.printer.port)
         destination = self.printer.destination
 
@@ -152,6 +152,10 @@ class Printout(models.Model):
         if self.created_by:
             cmd += ('-U', self.created_by.username)
         cmd += (filename,)
+        return cmd
+
+    def send_to_printer(self):
+        cmd = self.get_command_line()
         cmdline = ' '.join(map(shlex.quote, cmd))
         logger.info('Running %s', cmdline)
         p = subprocess.Popen(
