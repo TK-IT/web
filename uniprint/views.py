@@ -105,7 +105,7 @@ class PrintoutList(ListView):
 class PrintoutCreate(FormView):
     template_name = 'uniprint/printout_create.html'
     model = Printout
-    form = PrintoutForm
+    form_class = PrintoutForm
 
     @printout_permission_required_method
     def dispatch(self, request, *args, **kwargs):
