@@ -28,7 +28,6 @@ def set_option_keys(cls):
 @set_option_keys
 class Options:
     booklet = Option('Booklet=Left')
-    book_staple = Option()
     a5paper = Option('PageSize=A5')
     fit_to_page = Option('fit-to-page')
 
