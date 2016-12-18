@@ -15,7 +15,8 @@ class PrintoutForm(forms.Form):
         key = self.cleaned_data['option']
         return next(o for o in choice_objects if o.key == key)
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         choice_objects = uniprint.options.choices
         choices = [(c.key, c.name) for c in choice_objects]
         self.fields['option'] = forms.ChoiceField(
