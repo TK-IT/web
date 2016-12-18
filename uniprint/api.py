@@ -31,15 +31,26 @@ def print_url(document):
 
 
 def print_document(document, printer, username,
-                   copies=1, duplex=True, page_range=None,
-                   fake=False):
+                   copies=1, duplex=None, page_range=None,
+                   fake=False, option=None):
+
+    if duplex is not None:
+        raise TypeError("'duplex' is deprecated in favor of 'option'")
+
+    if isinstance(option, str):
+        option_string = option
+    elif isinstance(option, list):
+        option_string = ' '.join(o.lp_string() for o in option)
+    else:
+        option_string = option.lp_string()
+
     if isinstance(printer, str):
         try:
             printer = Printer.objects.get(name=printer)
         except Printer.DoesNotExist:
             raise ValueError(printer)
     printout = Printout(document=document, printer=printer,
-                        copies=copies, duplex=duplex,
+                        copies=copies, lp_option_string=option_string,
                         page_range=page_range or '')
     try:
         printout.created_by = User.objects.get(username=username)
