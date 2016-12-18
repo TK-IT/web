@@ -3,7 +3,7 @@ import collections
 
 
 class Option:
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.args = args
         self.key = None
         self.name = kwargs.pop('name', None)
