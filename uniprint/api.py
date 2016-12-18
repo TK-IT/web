@@ -1,3 +1,6 @@
+import shlex
+import logging
+
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
@@ -5,6 +8,9 @@ from uniprint.models import Document, Printout, Printer
 from uniprint.document import (
     extract_plain_text, get_pdfinfo, pages_from_pdfinfo,
 )
+
+
+logger = logging.getLogger('uniprint')
 
 
 def create_document(fp, filename, username):
@@ -57,7 +63,10 @@ def print_document(document, printer, username,
     except User.DoesNotExist:
         raise ValueError(username)
     printout.clean()
-    if not fake:
+    if fake:
+        cmdline = ' '.join(map(shlex.quote, printout.get_command_line()))
+        logger.info('Fake: Not running %s', cmdline)
+    else:
         printout.send_to_printer()
     printout.save()
     return printout
