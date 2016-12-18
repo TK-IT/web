@@ -3,7 +3,6 @@ from django.core.files.base import ContentFile
 from uniprint.models import Document, Printout, Printer
 from uniprint.document import (
     extract_plain_text, get_pdfinfo, pages_from_pdfinfo,
-    FileTypeError,
 )
 
 
