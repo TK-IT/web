@@ -43,6 +43,8 @@ class Options:
     [<Option booklet>]
     >>> Options.parse(Options.stapled_a5_book.lp_string())
     [<Option stapled_a5_book>]
+    >>> all([o] == Options.parse(o.lp_string()) for o in Options.get_options())
+    True
     '''
 
     # Note, 'booklet' means book-nup AND fold.
@@ -69,9 +71,8 @@ class Options:
 
     @classmethod
     def get_options(cls):
-        values = [getattr(cls, k) for k in dir(cls)]
+        values = [getattr(cls, k) for k in sorted(dir(cls))]
         options = [v for v in values if isinstance(v, Option)]
-        options.sort(key=lambda o: len(o.lp_options()))
         return options
 
     @classmethod
@@ -93,7 +94,18 @@ class Options:
 
         remaining = Counter(input_options)
         result = []
-        for o in reversed(cls.get_options()):
+
+        all_options = cls.get_options()
+        # Start with 'largest' options to avoid problems with one option being
+        # a subset of another option. That is, if we have (in class Options)
+        #     foo = Option('x')
+        #     bar = Option('y')
+        #     baz = Option(foo, bar)
+        # and the input is baz.lp_string() (which is '-o x -o y'),
+        # we must consider baz before foo or bar to ensure that
+        # parse('-o x -o y') == [Options.baz].
+        all_options.sort(key=lambda o: (len(o.lp_options()), o.lp_options()))
+        for o in reversed(all_options):
             # Invariant: result + remaining == input_options
             result_lp_options = (Counter(r.lp_options()) for r in result)
             assert sum(result_lp_options, remaining) == Counter(input_options)
@@ -103,10 +115,15 @@ class Options:
                 # o_c contained in remaining
                 remaining -= o_c
                 result.append(o)
+
+        # In the future we might want to put the unparsed options into a
+        # CustomOption type (or similar).
         if remaining:
             raise ValueError("Unrecognized: %s" %
                              ' '.join(remaining.elements()))
         return result
 
 
+# These are the choices from which the user must select exactly one.
+# The first choice is the default choice.
 choices = [Options.twosided, Options.onesided, Options.stapled_a5_book]
