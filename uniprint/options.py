@@ -65,8 +65,12 @@ class Options:
     @classmethod
     def parse(cls, string):
         args = shlex.split(string)
-        assert len(args) % 2 == 0
-        assert all(o == '-o' for o in args[::2])
+        invalid = [o for o in args[::2] if o != '-o']
+        if invalid:
+            raise ValueError('Every other argument should be "-o": %s' %
+                             (invalid,))
+        if len(args) % 2 != 0:
+            raise ValueError('Last option not supplied')
         options = args[1::2]
 
         remaining = collections.Counter(options)
