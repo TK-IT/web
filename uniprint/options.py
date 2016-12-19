@@ -8,9 +8,15 @@ class Option:
         self.args = args
         self.key = None
         self.name = kwargs.pop('name', None)
-        self.get_sheets = kwargs.pop('sheets', lambda n: n)
+        self._sheet_count = kwargs.pop('sheets', None)
         if kwargs:
             raise TypeError(kwargs.keys())
+
+    def sheet_count(self, n):
+        if self._sheet_count is None:
+            return n
+        else:
+            return self._sheet_count(n)
 
     def lp_options(self):
         return [o for arg in self.args for o in
