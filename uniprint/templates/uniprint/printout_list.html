@@ -24,7 +24,7 @@
                 {{ o.document.original_filename }}</a></td>
         <td>{{ o.printer }}</td>
         <td>{{ o.created_by.get_full_name|default:o.created_by.username }}</td>
-        <td>{{ o.duplex|yesno:"Tosidet,Enkeltsidet" }}</td>
+        <td>{% for x in o.lp_options %}{{ x }} {% endfor %}</td>
         <td>{{ o.page_range_page_count }}</td>
         <td>{{ o.copies }}</td>
         <td>{{ o.sheet_count }}</td>
