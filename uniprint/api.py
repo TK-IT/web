@@ -1,3 +1,20 @@
+'''
+The functions in this module allow applications to print PDFs via uniprint.
+There are two modes of operation: interactive and non-interactive.
+If the user should be able to pick printing options (destination, # copies, ...),
+then the interactive mode should be used:
+
+    document = create_document(pdf_fp, 'filename.pdf', request.user.username)
+    url = print_url(document)
+    # Redirect the user to 'url' which lets the user create the printout.
+
+If all options are given along with the PDF, the noninteractive mode can be used:
+    printout = print_new_document(
+        pdf_fp, 'filename.pdf', request.user.username,
+        printer='A2', option='twosided',
+        # plus any other arguments of print_document you may want
+    )
+'''
 import shlex
 import logging
 
