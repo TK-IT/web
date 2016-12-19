@@ -18,7 +18,7 @@ class Option:
         return ' '.join('-o %s' % shlex.quote(s) for s in self.lp_options())
 
     def __str__(self):
-        return self.key or '<Option>'
+        return self.name or self.key or self.lp_string()
 
     def __repr__(self):
         return '<Option %s>' % self.key if self.key else '<Option>'
