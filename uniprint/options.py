@@ -17,6 +17,12 @@ class Option:
     def lp_string(self):
         return ' '.join('-o %s' % shlex.quote(s) for s in self.lp_options())
 
+    def __str__(self):
+        return self.key or '<Option>'
+
+    def __repr__(self):
+        return '<Option %s>' % self.key if self.key else '<Option>'
+
 
 def set_option_keys(cls):
     for k in dir(cls):
