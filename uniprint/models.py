@@ -117,11 +117,14 @@ class Printout(models.Model):
     def clean(self):
         if self.page_range:
             validate_page_range(self.page_range, self.document.pages)
-        if self.lp_option_string:
-            try:
-                Options.parse(self.lp_option_string)
-            except ValueError as exn:
-                raise ValidationError(exn.args[0])
+        try:
+            Options.parse(self.lp_option_string)
+        except ValueError as exn:
+            raise ValidationError(exn.args[0])
+
+    @property
+    def lp_options(self):
+        return Options.parse(self.lp_option_string)
 
     @property
     def duplex(self):
