@@ -52,6 +52,15 @@ def print_document(document, printer, username,
             raise ValueError(duplex)
 
     if isinstance(option, str):
+        try:
+            options_entry = getattr(Options, option)
+        except AttributeError:
+            pass
+        else:
+            if isinstance(options_entry, Option):
+                option = options_entry
+
+    if isinstance(option, str):
         option_string = option
     elif isinstance(option, list):
         option_string = ' '.join(o.lp_string() for o in option)
