@@ -143,10 +143,13 @@ class Printout(models.Model):
 
     @property
     def sheet_count(self):
-        if self.duplex:
-            return self.copies * ((1 + self.page_range_page_count) // 2)
+        try:
+            o, = self.lp_options
+        except ValueError:
+            # Either Options.parse failed, or it didn't return exactly 1.
+            pass
         else:
-            return self.page_count
+            return self.copies * o.sheet_count(self.page_range_page_count)
 
     def get_command_line(self):
         host = '%s:%s' % (self.printer.hostname, self.printer.port)

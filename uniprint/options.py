@@ -1,3 +1,4 @@
+import math
 import shlex
 from collections import Counter
 
@@ -7,6 +8,7 @@ class Option:
         self.args = args
         self.key = None
         self.name = kwargs.pop('name', None)
+        self.get_sheets = kwargs.pop('sheets', lambda n: n)
         if kwargs:
             raise TypeError(kwargs.keys())
 
@@ -50,9 +52,11 @@ class Options:
     fit_a5 = Option(a5paper, fit_to_page)
     stapled_book = Option(booklet, 'SaddleStitch=On')
     stapled_a5_book = Option(stapled_book, fit_a5,
-                             name='Klipset A5-hæfte')
+                             name='Klipset A5-hæfte',
+                             sheets=lambda n: math.ceil(n / 4))
 
-    twosided = Option('Duplex=DuplexNoTumble', name='Tosidet')
+    twosided = Option('Duplex=DuplexNoTumble', name='Tosidet',
+                      sheets=lambda n: math.ceil(n / 2))
     onesided = Option('Duplex=None', name='Enkeltsidet')
 
     @classmethod
