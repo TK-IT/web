@@ -68,5 +68,4 @@ class Options:
         return result
 
 
-choices = [getattr(Options, name)
-           for name in 'twosided onesided stapled_a5_book'.split()]
+choices = [Options.twosided, Options.onesided, Options.stapled_a5_book]
