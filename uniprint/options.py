@@ -34,6 +34,15 @@ def set_option_keys(cls):
 
 @set_option_keys
 class Options:
+    '''
+    >>> Options.booklet.lp_string()
+    '-o Booklet=Left'
+    >>> Options.parse(Options.booklet.lp_string())
+    [<Option booklet>]
+    >>> Options.parse(Options.stapled_a5_book.lp_string())
+    [<Option stapled_a5_book>]
+    '''
+
     booklet = Option('Booklet=Left')
     a5paper = Option('PageSize=A5')
     fit_to_page = Option('fit-to-page')
