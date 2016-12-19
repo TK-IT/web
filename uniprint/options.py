@@ -89,11 +89,15 @@ class Options:
             raise ValueError('Last option not supplied')
 
         # Throw away all the -o's
-        options = args[1::2]
+        input_options = args[1::2]
 
-        remaining = Counter(options)
+        remaining = Counter(input_options)
         result = []
         for o in reversed(cls.get_options()):
+            # Invariant: result + remaining == input_options
+            result_lp_options = (Counter(r.lp_options()) for r in result)
+            assert sum(result_lp_options, remaining) == Counter(input_options)
+
             o_c = Counter(o.lp_options())
             if (remaining - o_c) + o_c == remaining:
                 # o_c contained in remaining
