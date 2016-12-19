@@ -8,6 +8,7 @@ from uniprint.models import Document, Printout, Printer
 from uniprint.document import (
     extract_plain_text, get_pdfinfo, pages_from_pdfinfo,
 )
+from uniprint.options import Options, Option
 
 
 logger = logging.getLogger('uniprint')
@@ -40,8 +41,15 @@ def print_document(document, printer, username,
                    copies=1, duplex=None, page_range=None,
                    fake=False, option=None):
 
-    if duplex is not None:
-        raise TypeError("'duplex' is deprecated in favor of 'option'")
+    if duplex is not None and option is not None:
+        raise TypeError("Cannot mix 'duplex' and 'option'")
+    elif duplex is not None:
+        if duplex is True:
+            option = Options.twosided
+        elif duplex is False:
+            option = Options.onesided
+        else:
+            raise ValueError(duplex)
 
     if isinstance(option, str):
         option_string = option
