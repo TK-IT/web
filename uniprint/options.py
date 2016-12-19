@@ -45,12 +45,20 @@ class Options:
     [<Option stapled_a5_book>]
     '''
 
+    # Note, 'booklet' means book-nup AND fold.
+    # Printing an A4 document with just Booklet=Left
+    # will result in a folded booklet made from A3 paper.
     booklet = Option('Booklet=Left')
+
+    # SaddleStitch probably only makes sense with Booklet.
+    stapled_book = Option(booklet, 'SaddleStitch=On')
+
+    # The following options force the source material to A5 size
+    # so that the booklet option will use A4 paper.
     a5paper = Option('PageSize=A5')
     fit_to_page = Option('fit-to-page')
-
     fit_a5 = Option(a5paper, fit_to_page)
-    stapled_book = Option(booklet, 'SaddleStitch=On')
+
     stapled_a5_book = Option(stapled_book, fit_a5,
                              name='Klipset A5-hæfte',
                              sheets=lambda n: math.ceil(n / 4))
@@ -68,13 +76,19 @@ class Options:
 
     @classmethod
     def parse(cls, string):
+        # shlex.split might raise ValueError
         args = shlex.split(string)
+
+        # 'string' was a valid command line option string,
+        # now let's check if it is on the form (-o <OPTION>)*
         invalid = [o for o in args[::2] if o != '-o']
         if invalid:
             raise ValueError('Every other argument should be "-o": %s' %
                              (invalid,))
         if len(args) % 2 != 0:
             raise ValueError('Last option not supplied')
+
+        # Throw away all the -o's
         options = args[1::2]
 
         remaining = Counter(options)
