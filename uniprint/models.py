@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify as dslugify
 from unidecode import unidecode
 
+from uniprint.options import Options
+
 
 def slugify(string):
     return dslugify(unidecode(string))
@@ -115,6 +117,11 @@ class Printout(models.Model):
     def clean(self):
         if self.page_range:
             validate_page_range(self.page_range, self.document.pages)
+        if self.lp_option_string:
+            try:
+                Options.parse(self.lp_option_string)
+            except ValueError as exn:
+                raise ValidationError(exn.args[0])
 
     @property
     def duplex(self):
