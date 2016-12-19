@@ -1,5 +1,5 @@
 import shlex
-import collections
+from collections import Counter
 
 
 class Option:
@@ -73,10 +73,10 @@ class Options:
             raise ValueError('Last option not supplied')
         options = args[1::2]
 
-        remaining = collections.Counter(options)
+        remaining = Counter(options)
         result = []
         for o in reversed(cls.get_options()):
-            o_c = collections.Counter(o.lp_options())
+            o_c = Counter(o.lp_options())
             if (remaining - o_c) + o_c == remaining:
                 # o_c contained in remaining
                 remaining -= o_c
