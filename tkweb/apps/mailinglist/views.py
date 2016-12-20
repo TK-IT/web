@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from django.core.urlresolvers import reverse
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
@@ -74,11 +75,12 @@ class EmailFormView(FormView):
 
         messages = []
         for recipient in recipients:
-            headers = {
-                'From': from_field,
-                'X-TK-Recipient': recipient,
-                'X-TK-Sender': self.request.user.get_full_name(),
-            }
+            headers = OrderedDict([
+                ('From', from_field),
+                ('X-TK-Recipient', recipient),
+                ('X-TK-Sender', self.request.user.get_full_name()),
+            ])
+
             msg = EmailMessage(
                 subject=subject,
                 body=text,
