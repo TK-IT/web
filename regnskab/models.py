@@ -584,6 +584,8 @@ class Email(models.Model):
         return '%s <%s>' % (self.recipient_name, self.recipient_email)
 
     def to_message(self):
+        sender = 'admin@TAAGEKAMMERET.dk'
+
         headers = OrderedDict([
             ('From', 'INKA@TAAGEKAMMERET.dk'),
             ('Organization', 'TÅGEKAMMERET'),
@@ -592,7 +594,7 @@ class Email(models.Model):
         return EmailMessage(
             subject=self.subject,
             body=self.body,
-            from_email='admin@TAAGEKAMMERET.dk',
+            from_email=sender,
             reply_to=['INKA@TAAGEKAMMERET.dk'],
             to=['%s <%s>' % (self.recipient_name, self.recipient_email)],
             headers=headers)
