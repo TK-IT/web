@@ -2,7 +2,7 @@ import re
 import heapq
 import functools
 import itertools
-from collections import namedtuple, defaultdict
+from collections import namedtuple, defaultdict, OrderedDict
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
@@ -584,10 +584,11 @@ class Email(models.Model):
         return '%s <%s>' % (self.recipient_name, self.recipient_email)
 
     def to_message(self):
-        headers = {
-            'From': 'INKA@TAAGEKAMMERET.dk',
-            'Organization': 'TÅGEKAMMERET',
-        }
+        headers = OrderedDict([
+            ('From', 'INKA@TAAGEKAMMERET.dk'),
+            ('Organization', 'TÅGEKAMMERET'),
+        ])
+
         return EmailMessage(
             subject=self.subject,
             body=self.body,
