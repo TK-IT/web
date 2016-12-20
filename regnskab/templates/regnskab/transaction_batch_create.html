@@ -1,5 +1,8 @@
 {% extends "regnskab/base.html" %}
 {% block head %}
+<style>
+.amount input { text-align: right; width: 4em; }
+</style>
 <script>
 function above(checkbox) {
     var row = checkbox;
@@ -64,13 +67,13 @@ window.addEventListener('load', init, false);
 
 <form method="post">{% csrf_token %}
     <table id="transaction_form">
-        <thead><tr><th></th><th>Navn</th><th>Beløb</th></tr></thead>
+        <thead><tr><th>Navn</th><th>Beløb</th><th></th></tr></thead>
         <tbody>
     {% for profile, amount, selected in form.profile_fields %}
     <tr>
-        <td>{{ selected }}{{ selected.errors }}</td>
         <td><label for="{{ selected.id_for_label }}">{{ profile.display_name }}</label></td>
-        <td>{{ amount }}</td>
+        <td class="amount">{{ amount }}</td>
+        <td>{{ selected }}{{ selected.errors }}</td>
     </tr>
     {% endfor %}
         </tbody>
