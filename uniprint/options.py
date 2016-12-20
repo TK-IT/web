@@ -67,6 +67,10 @@ class Options:
     fit_to_page = Option('fit-to-page')
     fit_a5 = Option(a5paper, fit_to_page)
 
+    a5_book = Option(booklet, fit_a5,
+                     name='A5-hæfte',
+                     sheets=lambda n: math.ceil(n / 4))
+
     stapled_a5_book = Option(stapled_book, fit_a5,
                              name='A5-hæfte, klipset+foldet',
                              sheets=lambda n: math.ceil(n / 4))
@@ -133,5 +137,6 @@ class Options:
 # These are the choices from which the user must select exactly one.
 # The first choice is the default choice.
 choices = [getattr(Options, k) for k in '''
-    twosided onesided stapled_a5_book
+    twosided onesided
+    a5_book stapled_a5_book
 '''.split()]
