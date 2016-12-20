@@ -53,13 +53,13 @@ class Options:
     True
     '''
 
-    # Note, 'booklet' means book-nup AND fold.
-    # Printing an A4 document with just Booklet=Left
-    # will result in a folded booklet made from A3 paper.
+    # Printing an A4 document with just Booklet=Left and no
+    # PageSize/fit-to-page will result in a folded booklet made from A3 paper.
     booklet = Option('Booklet=Left')
 
     # SaddleStitch probably only makes sense with Booklet.
-    stapled_book = Option(booklet, 'SaddleStitch=On')
+    # SaddleStitch means fold and staple.
+    stapled_folded_book = Option(booklet, 'SaddleStitch=On')
 
     # The following options force the source material to A5 size
     # so that the booklet option will use A4 paper.
@@ -71,7 +71,7 @@ class Options:
                      name='A5-hæfte',
                      sheets=lambda n: math.ceil(n / 4))
 
-    stapled_a5_book = Option(stapled_book, fit_a5,
+    stapled_a5_book = Option(stapled_folded_book, fit_a5,
                              name='A5-hæfte, klipset+foldet',
                              sheets=lambda n: math.ceil(n / 4))
 
