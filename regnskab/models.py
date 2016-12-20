@@ -585,9 +585,24 @@ class Email(models.Model):
 
     def to_message(self):
         sender = 'admin@TAAGEKAMMERET.dk'
+        list_name = 'krydsliste'
+        list_id = '%s.TAAGEKAMMERET.dk' % list_name
+        unsub = '<mailto:%s?subject=unsubscribe%%20%s>' % (sender, list_name)
+        help = '<mailto:%s?subject=list-help>' % (sender,)
+        sub = '<mailto:%s?subject=subscribe%%20%s>' % (sender, list_name)
 
         headers = OrderedDict([
             ('From', 'INKA@TAAGEKAMMERET.dk'),
+            ('X-TK-Sender', 'INKAs regnskab'),
+            ('X-TK-Recipient', self.recipient_email),
+            ('Sender', sender),
+            ('List-Name', list_name),
+            ('List-Id', list_id),
+            ('List-Unsubscribe', unsub),
+            ('List-Help', help),
+            ('List-Subscribe', sub),
+            ('Precedence', 'bulk'),
+            ('X-Auto-Response-Suppress', 'OOF'),
             ('Organization', 'TÅGEKAMMERET'),
         ])
 
