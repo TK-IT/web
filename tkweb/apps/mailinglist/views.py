@@ -73,12 +73,28 @@ class EmailFormView(FormView):
         if self.request.POST.get('only_me'):
             recipients = [self.request.user.email]
 
+        sender = 'admin@TAAGEKAMMERET.dk'
+        list_name = 'mailinglist'
+        list_id = '%s.TAAGEKAMMERET.dk' % list_name
+        unsub = '<mailto:%s?subject=unsubscribe%%20%s>' % (sender, list_name)
+        help = '<mailto:%s?subject=list-help>' % (sender,)
+        sub = '<mailto:%s?subject=subscribe%%20%s>' % (sender, list_name)
+
         messages = []
         for recipient in recipients:
             headers = OrderedDict([
                 ('From', from_field),
                 ('X-TK-Recipient', recipient),
                 ('X-TK-Sender', self.request.user.get_full_name()),
+                ('Sender', sender),
+                ('List-Name', list_name),
+                ('List-Id', list_id),
+                ('List-Unsubscribe', unsub),
+                ('List-Help', help),
+                ('List-Subscribe', sub),
+                ('Precedence', 'bulk'),
+                ('X-Auto-Response-Suppress', 'OOF'),
+                ('Organization', 'TÅGEKAMMERET'),
             ])
 
             msg = EmailMessage(
