@@ -68,7 +68,7 @@ class Options:
     fit_a5 = Option(a5paper, fit_to_page)
 
     stapled_a5_book = Option(stapled_book, fit_a5,
-                             name='Klipset A5-hæfte',
+                             name='A5-hæfte, klipset+foldet',
                              sheets=lambda n: math.ceil(n / 4))
 
     twosided = Option('Duplex=DuplexNoTumble', name='Tosidet',
