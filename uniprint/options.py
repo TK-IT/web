@@ -132,4 +132,6 @@ class Options:
 
 # These are the choices from which the user must select exactly one.
 # The first choice is the default choice.
-choices = [Options.twosided, Options.onesided, Options.stapled_a5_book]
+choices = [getattr(Options, k) for k in '''
+    twosided onesided stapled_a5_book
+'''.split()]
