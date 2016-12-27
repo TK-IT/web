@@ -205,8 +205,8 @@ class SheetRowUpdate(TemplateView):
                     counts.append(float(k.count) if k.id else None)
 
                 row_data.append(dict(
-                    profile_id=r['profile'].id,
-                    name=r['name'],
+                    profile_id=r['profile'] and r['profile'].id,
+                    name=r['name'] or '',
                     counts=counts,
                 ))
             context_data['rows_json'] = json.dumps(row_data, indent=2)
