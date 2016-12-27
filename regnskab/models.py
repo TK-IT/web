@@ -341,7 +341,7 @@ def compute_balance(profile_ids=None, created_before=None):
         if not balance:
             return balance
 
-    row_qs = SheetRow.objects.all().order_by()
+    row_qs = SheetRow.objects.exclude(profile=None).order_by()
     kind_qs = PurchaseKind.objects.all().order_by()
     if created_before:
         sheet_qs = Sheet.objects.all()
@@ -452,6 +452,7 @@ class Session(models.Model):
 
         purchases = Purchase.objects.filter(
             row__sheet__session=self)
+        purchases = purchases.exclude(row__profile=None)
         purchases = purchases.annotate(
             profile_id=F('row__profile_id'),
             amount=F('count')*F('kind__unit_price'),
