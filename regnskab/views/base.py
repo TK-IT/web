@@ -27,7 +27,6 @@ from regnskab.models import (
     compute_balance, get_inka, get_default_prices,
     config, get_profiles_title_status,
 )
-from regnskab.images.extract import extract_images
 from .auth import regnskab_permission_required_method
 
 logger = logging.getLogger('regnskab')
@@ -107,6 +106,8 @@ class SheetCreate(FormView):
                     period=config.GFYEAR)
 
     def form_valid(self, form):
+        from regnskab.images.extract import extract_images
+
         data = form.cleaned_data
         sheet = Sheet(name=data['name'],
                       start_date=data['start_date'],
