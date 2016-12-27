@@ -1,0 +1,52 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Markér krydser{% endblock %}
+{% block head %}
+<script>
+function init() {
+    var inputcontainer = document.getElementById('form-checkboxes');
+    inputcontainer.style.display = 'none';
+    var container = document.getElementById('sheet-image');
+    var chks = [].slice.call(inputcontainer.querySelectorAll('input'));
+    for (var i = 0; i < chks.length; ++i) {
+        var o = chks[i];
+        o.className = 'overlay-checkbox';
+        var l = document.createElement('label');
+        l.setAttribute('for', o.getAttribute('id'));
+        l.style.left = o.getAttribute('data-x') + 'px';
+        l.style.top = o.getAttribute('data-y') + 'px';
+        // Ensure l comes right after o
+        container.appendChild(o);
+        container.appendChild(l);
+    }
+}
+
+window.addEventListener('load', init, false);
+</script>
+<style>
+.overlay-checkbox {
+    display: none;
+}
+.overlay-checkbox + label {
+    width: 20px;
+    height: 20px;
+    margin-left: -10px;
+    margin-top: -10px;
+    opacity: 0.5;
+    position: absolute;
+}
+.overlay-checkbox:checked + label {
+    background: rgba(255, 0, 0, 0.5);
+}
+</style>
+{% endblock %}
+{% block content %}
+<form method="post">{% csrf_token %}
+<div id="sheet-image" style="position: relative">
+<img src="{% url 'regnskab:sheet_image_file' pk=object.pk %}" />
+</div>
+    <div id="form-checkboxes">
+    {{ form.as_p }}
+    </div>
+    <input type="submit" value="Gem" />
+</form>
+{% endblock %}

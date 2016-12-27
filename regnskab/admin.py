@@ -2,7 +2,10 @@ from django.utils import timezone
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.utils.html import format_html
-from regnskab.models import Alias, Transaction, Sheet, EmailTemplate, Session
+from regnskab.models import (
+    Alias, Transaction, Sheet, EmailTemplate, Session,
+    SheetImage,
+)
 
 
 class AliasAdmin(admin.ModelAdmin):
@@ -76,8 +79,13 @@ class SessionAdmin(admin.ModelAdmin):
     item_link.verbose_name = 'Opgørelse'
 
 
+class SheetImageAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(Alias, AliasAdmin)
 admin.site.register(Transaction, TransactionAdmin)
 admin.site.register(Sheet, SheetAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(Session, SessionAdmin)
+admin.site.register(SheetImage, SheetImageAdmin)

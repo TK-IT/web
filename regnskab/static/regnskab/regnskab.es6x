@@ -303,6 +303,7 @@ class Sheet extends React.Component {
 
     empty_row() {
         return {name: '', profile_id: null,
+                image: null,
                 counts: [null, null, null, null, null, null]};
     }
 
@@ -337,16 +338,27 @@ class Sheet extends React.Component {
                 personValue={data.profile_id}
                 onChange={this.onChangeCell.bind(this, i)}
                 onChangeName={this.onChangeName.bind(this, i)} />);
+            if (data.image !== null) {
+                rows.push(<div style={{
+                    'width': data.image.width+'px',
+                    'height': (data.image.stop - data.image.start)+'px',
+                    'position': 'relative',
+                    'overflow': 'hidden'}}>
+                    <img src={data.image.url} style={{
+                        'top': -data.image.start + 'px',
+                        'position': 'absolute'}} />
+                </div>);
+            }
         }
         return <div className='sheet'>
             <div className="sheetrow sheetrow-header">
                 <div className="name"></div>
-                <div className="column column-1">øl ({counts[0]})</div>
-                <div className="column column-1ks">ks ({counts[1]})</div>
-                <div className="column column-2">guldøl ({counts[2]})</div>
-                <div className="column column-2ks">ks ({counts[3]})</div>
-                <div className="column column-3">sodavand ({counts[4]})</div>
-                <div className="column column-3ks">ks ({counts[5]})</div>
+                <div className="column column-1">øl<br/>({counts[0]})</div>
+                <div className="column column-1ks">ks<br/>({counts[1]})</div>
+                <div className="column column-2">guldøl<br/>({counts[2]})</div>
+                <div className="column column-2ks">ks<br/>({counts[3]})</div>
+                <div className="column column-3">sodavand<br/>({counts[4]})</div>
+                <div className="column column-3ks">ks<br/>({counts[5]})</div>
             </div>
             {rows}
         </div>;

@@ -38,10 +38,10 @@
     border-bottom: 1px solid #666;
 }
 .sheetrow.sheetrow-header {
-    height: 18px;
+    /*height: 18px;*/
 }
 .sheetrow > .summary { width: 30px; }
-.sheetrow > .name { width: 200px; }
+.sheetrow > .name { width: 189px; }
 .sheetrow > .column {
     position: relative;
     border-left: 3px solid #333;
@@ -71,9 +71,9 @@
     width: 100%;
     box-sizing: border-box;
 }
-.sheetrow > .column-1 { width: 225px; }
-.sheetrow > .column-2 { width: 90px; }
-.sheetrow > .column-3 { width: 225px; }
+.sheetrow > .column-1 { width: 242px; }
+.sheetrow > .column-2 { width: 63px; }
+.sheetrow > .column-3 { width: 242px; }
 .sheetrow > .column-1ks { width: 60px; }
 .sheetrow > .column-2ks { width: 60px; }
 .sheetrow > .column-3ks { width: 60px; }

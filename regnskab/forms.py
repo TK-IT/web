@@ -10,6 +10,7 @@ class SheetCreateForm(forms.Form):
     start_date = forms.DateField()
     end_date = forms.DateField()
     kinds = forms.CharField(widget=forms.Textarea)
+    image_file = forms.FileField(required=False)
 
     def clean_kinds(self):
         s = self.cleaned_data['kinds']

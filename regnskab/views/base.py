@@ -6,6 +6,7 @@ from collections import Counter
 import json
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
+from django.conf import settings
 from django.http import HttpResponse
 from django.db.models import F
 from django.utils import timezone
@@ -21,11 +22,12 @@ from regnskab.forms import (
 )
 from regnskab.models import (
     Sheet, SheetRow, SheetStatus, Profile, Alias, Title,
-    EmailTemplate, Session,
+    EmailTemplate, Session, SheetImage, PurchaseKind,
     Transaction, Purchase,
     compute_balance, get_inka, get_default_prices,
     config, get_profiles_title_status,
 )
+from regnskab.images.extract import extract_images
 from .auth import regnskab_permission_required_method
 
 logger = logging.getLogger('regnskab')
@@ -111,13 +113,34 @@ class SheetCreate(FormView):
                       end_date=data['end_date'],
                       period=data['period'],
                       created_by=self.request.user,
-                      session=self.regnskab_session)
-        sheet.save()
-        for i, kind in enumerate(data['kinds']):
-            sheet.purchasekind_set.create(
+                      session=self.regnskab_session,
+                      image_file=data['image_file'])
+        kinds = [
+            PurchaseKind(
+                sheet=sheet,
                 name=kind['name'],
                 position=i + 1,
                 unit_price=kind['unit_price'])
+            for i, kind in enumerate(data['kinds'])]
+        if data['image_file']:
+            # extract_images sets sheet.row_image
+            try:
+                images, rows, purchases = extract_images(sheet, kinds)
+            except Exception as exn:
+                if settings.DEBUG and not isinstance(exn, ValidationError):
+                    raise
+                form.add_error(None, exn)
+                return self.form_invalid(form)
+        sheet.save()
+        if data['image_file']:
+            for o in images + rows + kinds:
+                o.sheet = o.sheet  # Update sheet_id
+            for o in images + rows + kinds:
+                o.save()
+            for o in purchases:
+                o.row = o.row  # Update row_id
+                o.kind = o.kind  # Update kind_id
+            Purchase.objects.bulk_create(purchases)
         logger.info("%s: Opret ny krydsliste id=%s i opgørelse=%s " +
                     "med priser %s",
                     self.request.user, sheet.pk, self.regnskab_session.pk,
@@ -208,6 +231,7 @@ class SheetRowUpdate(TemplateView):
                     profile_id=r['profile'] and r['profile'].id,
                     name=r['name'] or '',
                     counts=counts,
+                    image=r['image'],
                 ))
             context_data['rows_json'] = json.dumps(row_data, indent=2)
 
@@ -227,7 +251,7 @@ class SheetRowUpdate(TemplateView):
         except Exception as exn:
             raise ValidationError(str(exn))
 
-        KEYS = {'profile_id', 'name', 'counts'}
+        KEYS = {'profile_id', 'name', 'counts', 'image'}
         for row in row_data:
             if set(row.keys()) != KEYS:
                 raise ValidationError("Invalid keys %s" % (set(row.keys()),))
@@ -253,10 +277,12 @@ class SheetRowUpdate(TemplateView):
             dict(profile=row['profile_id'] and profiles[row['profile_id']],
                  name=row['name'],
                  position=i + 1,
+                 image_start=row['image'] and row['image']['start'],
+                 image_stop=row['image'] and row['image']['stop'],
                  kinds=[Purchase(kind=kind, count=c or 0)
                         for kind, c in zip(kinds, row['counts'])])
             for i, row in enumerate(row_data)
-            if any(c is not None for c in row['counts'])
+            if any(c is not None for c in row['counts']) or row['image']
         ]
 
     def save_rows(self, rows):
@@ -289,7 +315,9 @@ class SheetRowUpdate(TemplateView):
         for o in save:
             save_rows.append(SheetRow(
                 sheet=sheet, profile=o['profile'],
-                name=o['name'], position=o['position']))
+                name=o['name'], position=o['position'],
+                image_start=o['image_start'], image_stop=o['image_stop'],
+            ))
             for c in o['kinds']:
                 if c.count:
                     c.row = save_rows[-1]

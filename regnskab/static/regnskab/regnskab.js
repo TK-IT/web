@@ -582,6 +582,7 @@ var Sheet = function (_React$Component5) {
         key: 'empty_row',
         value: function empty_row() {
             return { name: '', profile_id: null,
+                image: null,
                 counts: [null, null, null, null, null, null] };
         }
     }, {
@@ -618,6 +619,19 @@ var Sheet = function (_React$Component5) {
                     personValue: data.profile_id,
                     onChange: this.onChangeCell.bind(this, i),
                     onChangeName: this.onChangeName.bind(this, i) }));
+                if (data.image !== null) {
+                    rows.push(React.createElement(
+                        'div',
+                        { style: {
+                                'width': data.image.width + 'px',
+                                'height': data.image.stop - data.image.start + 'px',
+                                'position': 'relative',
+                                'overflow': 'hidden' } },
+                        React.createElement('img', { src: data.image.url, style: {
+                                'top': -data.image.start + 'px',
+                                'position': 'absolute' } })
+                    ));
+                }
             }
             return React.createElement(
                 'div',
@@ -629,42 +643,54 @@ var Sheet = function (_React$Component5) {
                     React.createElement(
                         'div',
                         { className: 'column column-1' },
-                        'øl (',
+                        'øl',
+                        React.createElement('br', null),
+                        '(',
                         counts[0],
                         ')'
                     ),
                     React.createElement(
                         'div',
                         { className: 'column column-1ks' },
-                        'ks (',
+                        'ks',
+                        React.createElement('br', null),
+                        '(',
                         counts[1],
                         ')'
                     ),
                     React.createElement(
                         'div',
                         { className: 'column column-2' },
-                        'guldøl (',
+                        'guldøl',
+                        React.createElement('br', null),
+                        '(',
                         counts[2],
                         ')'
                     ),
                     React.createElement(
                         'div',
                         { className: 'column column-2ks' },
-                        'ks (',
+                        'ks',
+                        React.createElement('br', null),
+                        '(',
                         counts[3],
                         ')'
                     ),
                     React.createElement(
                         'div',
                         { className: 'column column-3' },
-                        'sodavand (',
+                        'sodavand',
+                        React.createElement('br', null),
+                        '(',
                         counts[4],
                         ')'
                     ),
                     React.createElement(
                         'div',
                         { className: 'column column-3ks' },
-                        'ks (',
+                        'ks',
+                        React.createElement('br', null),
+                        '(',
                         counts[5],
                         ')'
                     )

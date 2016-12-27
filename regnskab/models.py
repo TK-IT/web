@@ -1,7 +1,10 @@
+import os
 import re
 import heapq
+import tempfile
 import functools
 import itertools
+import contextlib
 from collections import namedtuple, defaultdict, OrderedDict
 from decimal import Decimal
 
@@ -11,6 +14,11 @@ from django.db.models import F
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.mail import EmailMessage
+from django.utils.text import slugify as dslugify
+from django.utils.html import format_html
+
+from unidecode import unidecode
+from jsonfield import JSONField
 
 
 def _import_profile_title():
@@ -166,6 +174,15 @@ def get_primary_titles(title_qs=None, period=None):
     return titles
 
 
+def slugify(string):
+    return dslugify(unidecode(string))
+
+
+def sheet_upload_to(instance, original_filename):
+    base, ext = os.path.splitext(os.path.basename(original_filename))
+    return 'sheet/%s%s' % (slugify(base), ext)
+
+
 class Sheet(models.Model):
     session = models.ForeignKey('Session', on_delete=models.CASCADE,
                                 null=True, blank=False)
@@ -177,6 +194,12 @@ class Sheet(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                    null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
+
+    image_file = models.FileField(upload_to=sheet_upload_to,
+                                  blank=True, null=True)
+    row_image_width = models.PositiveIntegerField(blank=True, null=True)
+    row_image = models.FileField(upload_to=sheet_upload_to,
+                                 blank=True, null=True)
 
     def columns(self):
         qs = self.purchasekind_set.all()
@@ -206,12 +229,19 @@ class Sheet(models.Model):
                     p.counter = range(int(p.count))
                 else:
                     p.counter = None
+            im_url, im_width, im_start, im_stop = row.image_data()
+            if im_url:
+                image = dict(url=im_url, width=im_width,
+                             start=im_start, stop=im_stop)
+            else:
+                image = None
             result.append(dict(
                 id=row.id,
                 profile=row.profile,
                 position=row.position,  # needed?
                 name=row.name,
                 kinds=purchase_list,
+                image=image,
             ))
         profile_ids = set(row['profile'] for row in result)
         titles = get_primary_titles(
@@ -243,6 +273,25 @@ class Sheet(models.Model):
         except AttributeError:
             self._legacy_style = (len(self.purchasekind_set.all()) == 4)
             return self._legacy_style
+
+    @contextlib.contextmanager
+    def image_file_name(self):
+        try:
+            yield self._image_file_name
+        except AttributeError:
+            pass
+        else:
+            return
+        if self.image_file and os.path.exists(self.image_file.path):
+            yield self.image_file.path
+        else:
+            with tempfile.NamedTemporaryFile(mode='w+b') as fp:
+                self.image_file.file.open('rb')
+                fp.write(self.image_file.file.read())
+                fp.flush()
+                self._image_file_name = fp.name
+                yield fp.name
+                del self._image_file_name
 
     class Meta:
         ordering = ['start_date']
@@ -282,11 +331,30 @@ class SheetRow(models.Model):
     position = models.PositiveIntegerField()
     name = models.CharField(max_length=200, blank=False, null=True)
     profile = models.ForeignKey(Profile, blank=False, null=True)
+    image_start = models.PositiveIntegerField(blank=True, null=True)
+    image_stop = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         ordering = ['sheet', 'position']
         verbose_name = 'krydslisteindgang'
         verbose_name_plural = verbose_name + 'e'
+
+    def image_data(self):
+        if not self.sheet.row_image:
+            return None, None, None, None
+        return (self.sheet.row_image.url,
+                self.sheet.row_image_width,
+                self.image_start, self.image_stop)
+
+    def image_html(self):
+        url, width, start, stop = self.image_data()
+        if not url:
+            return ''
+        return format_html(
+            '<div style="display:inline-block;overflow:hidden;' +
+            'position:relative;width:{}px;height:{}px">' +
+            '<img src="{}" style="position:absolute;top:-{}px" /></div>',
+            width, stop - start, url, start)
 
     def __str__(self):
         return self.name or str(self.profile)
@@ -669,3 +737,54 @@ def get_profiles_title_status(period=None, time=None):
                          (time is not None and p.status.end_time > time)))
     profiles.sort(key=profile_key)
     return profiles
+
+
+class SheetImage(models.Model):
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE)
+    page = models.PositiveIntegerField()
+
+    quad = JSONField(default=[])
+    cols = JSONField(default=[])
+    rows = JSONField(default=[])
+    person_rows = JSONField(default=[])
+    crosses = JSONField(default=[])
+    person_counts = JSONField(default=[])
+
+    def get_image(self):
+        try:
+            return self._image
+        except AttributeError:
+            pass
+
+        from regnskab.images.utils import load_pdf_page
+
+        with self.sheet.image_file_name() as filename:
+            self._image = load_pdf_page(filename, self.page - 1)
+
+        return self._image
+
+    def compute_person_counts(self):
+        col_bounds = [0, 15, 21, 36]
+
+        i = 0
+        res = []
+        for person_row_count in self.person_rows:
+            j = i + person_row_count
+            person_rows = self.crosses[i:j]
+            groups = []
+            for i, j in zip(col_bounds[:-1], col_bounds[1:]):
+                group_rows = [r[i:j] for r in person_rows]
+                crosses = box_crosses = 0
+                for r in group_rows:
+                    try:
+                        x = next(i for i in range(len(r))
+                                 if not r[len(r)-1-i])
+                    except StopIteration:
+                        x = 0
+                    r_crosses = sum(r) - x
+                    crosses += r_crosses
+                    box_crosses += x
+                groups.append([crosses, box_crosses/2])
+            res.append(groups)
+            i = j
+        self.person_counts = res
