@@ -106,24 +106,24 @@ class SheetCreate(FormView):
 
     def form_valid(self, form):
         data = form.cleaned_data
-        s = Sheet(name=data['name'],
-                  start_date=data['start_date'],
-                  end_date=data['end_date'],
-                  period=data['period'],
-                  created_by=self.request.user,
-                  session=self.regnskab_session)
-        s.save()
+        sheet = Sheet(name=data['name'],
+                      start_date=data['start_date'],
+                      end_date=data['end_date'],
+                      period=data['period'],
+                      created_by=self.request.user,
+                      session=self.regnskab_session)
+        sheet.save()
         for i, kind in enumerate(data['kinds']):
-            s.purchasekind_set.create(
+            sheet.purchasekind_set.create(
                 name=kind['name'],
                 position=i + 1,
                 unit_price=kind['unit_price'])
         logger.info("%s: Opret ny krydsliste id=%s i opgørelse=%s " +
                     "med priser %s",
-                    self.request.user, s.pk, self.regnskab_session.pk,
+                    self.request.user, sheet.pk, self.regnskab_session.pk,
                     ' '.join('%s=%s' % (k['name'], k['unit_price'])
                              for k in data['kinds']))
-        return redirect('regnskab:sheet_update', pk=s.pk)
+        return redirect('regnskab:sheet_update', pk=sheet.pk)
 
 
 class SheetDetail(TemplateView):
