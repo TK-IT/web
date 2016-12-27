@@ -221,10 +221,10 @@ class Sheet(models.Model):
         for row in result:
             try:
                 title = row['title'] = titles[row['profile'].id]
-            except KeyError:
-                title = row['title'] = None
-                continue
-            row['display_title'] = title.display_title(self.period)
+            except (KeyError, AttributeError):
+                title = row['title'] = row['display_title'] = None
+            else:
+                row['display_title'] = title.display_title(self.period)
 
         if self.legacy_style():
             # Sort rows by title, period
