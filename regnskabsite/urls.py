@@ -14,6 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from django.conf import settings
+import django.views.static
 from django.contrib import admin
 import regnskab
 
@@ -30,3 +32,11 @@ else:
     urlpatterns += [
         url(r'^__debug__/', include(debug_toolbar.urls)),
     ]
+
+if settings.DEBUG:
+    # Temporary media (user uploaded static files)
+    # serving from dev server
+    urlpatterns.append(
+        url(r'^media/(?P<path>.*)$',
+            django.views.static.serve,
+            {'document_root': settings.MEDIA_ROOT}))
