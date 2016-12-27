@@ -236,16 +236,13 @@ class SheetRowUpdate(TemplateView):
                 raise ValidationError("Wrong type of counts %s" % (counts,))
             if len(counts) != len(kinds):
                 raise ValidationError("Wrong number of counts %s" % (counts,))
-            if any(c is not None for c in counts):
-                if not row['name']:
-                    raise ValidationError("Name must not be empty")
-                if not row['profile_id']:
-                    raise ValidationError("Unknown name/profile")
-                if not isinstance(row['profile_id'], int):
-                    raise ValidationError("profile_id must be an int")
+            p_id = row['profile_id']
+            if p_id is not None and not isinstance(p_id, int):
+                raise ValidationError("profile_id must be an int")
 
         profile_ids = set(row['profile_id'] for row in row_data
-                          if any(c is not None for c in row['counts']))
+                          if any(c is not None for c in row['counts'])
+                          and row['profile_id'])
         profiles = {
             p.id: p for p in Profile.objects.filter(id__in=sorted(profile_ids))
         }
@@ -253,7 +250,7 @@ class SheetRowUpdate(TemplateView):
         if missing:
             raise ValidationError("Unknown profile IDs %s" % (missing,))
         return [
-            dict(profile=profiles[row['profile_id']],
+            dict(profile=row['profile_id'] and profiles[row['profile_id']],
                  name=row['name'],
                  position=i + 1,
                  kinds=[Purchase(kind=kind, count=c or 0)
@@ -264,7 +261,7 @@ class SheetRowUpdate(TemplateView):
 
     def save_rows(self, rows):
         def data(r):
-            return (r['profile'].id, r['name'], r['position'],
+            return (r['profile'] and r['profile'].id, r['name'], r['position'],
                     [(p.kind_id, p.count) for p in r['kinds']])
 
         sheet = self.sheet
