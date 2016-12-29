@@ -240,10 +240,22 @@ class Name extends React.Component {
         if (typeof query === 'undefined') query = this.props.nameValue;
         return filter_persons_cached(this.props.persons, query);
     }
+    handleKeyDown(ev) {
+        console.log('handleKeyDown(', ev.key, ')');
+        if (ev.key === 'ArrowDown') this.props.onArrowDown();
+        else if (ev.key === 'ArrowUp') this.props.onArrowUp();
+    }
+
+    setNameEntry(o) {
+        this.nameInputDOMNode = o;
+    }
+
     render() {
         return <div className='name'>
             <input className='name-entry'
                 value={this.props.nameValue}
+                ref={this.setNameEntry.bind(this)}
+                onKeyDown={this.handleKeyDown.bind(this)}
                 onChange={e => this.onNameChange(e.target.value)} />
             <PersonChoice choices={this.getChoices()}
                 value={this.props.personValue}
@@ -270,7 +282,10 @@ class SheetRow extends React.Component {
                 onChange={v => this.props.onChange(i, v)} />);
         return <div className='sheetrow'>
             <Name persons={this.props.persons} nameValue={this.props.nameValue}
+                ref={(o) => this.nameInputDOMNode = o && o.nameInputDOMNode}
                 personValue={this.props.personValue}
+                onArrowDown={this.props.onArrowDown}
+                onArrowUp={this.props.onArrowUp}
                 onChange={this.props.onChangeName} />
             {columns}
         </div>;
@@ -324,14 +339,33 @@ class Sheet extends React.Component {
         this.setState({});
     }
 
+    setRowElement(i, o) {
+        this.rowElements[i] = o;
+    }
+
+    focusRow(i) {
+        console.log('focusRow(',i,')');
+        if (0 <= i && i < this.rowElements.length && this.rowElements[i]) {
+            console.log(this.rowElements[i]);
+            this.rowElements[i].nameInputDOMNode.focus();
+        }
+    }
+
     render() {
         let rows = [];
+        if (typeof this.rowElements === 'undefined')
+            this.rowElements = [];
         let counts = [0, 0, 0, 0, 0, 0];
         for (let i = 0; i < this.state.rows.length; ++i) {
             let data = this.state.rows[i];
             for (let j = 0; j < counts.length; ++j)
                 counts[j] += (data.counts[j] || 0);
+            if (this.rowElements.length < i)
+                this.rowElements.push(null);
             rows.push(<SheetRow key={i}
+                ref={this.setRowElement.bind(this, i)}
+                onArrowDown={this.focusRow.bind(this, i+1)}
+                onArrowUp={this.focusRow.bind(this, i-1)}
                 persons={this.props.persons}
                 columns={data.counts}
                 nameValue={data.name}

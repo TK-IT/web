@@ -472,6 +472,17 @@ var Name = function (_React$Component3) {
             return filter_persons_cached(this.props.persons, query);
         }
     }, {
+        key: 'handleKeyDown',
+        value: function handleKeyDown(ev) {
+            console.log('handleKeyDown(', ev.key, ')');
+            if (ev.key === 'ArrowDown') this.props.onArrowDown();else if (ev.key === 'ArrowUp') this.props.onArrowUp();
+        }
+    }, {
+        key: 'setNameEntry',
+        value: function setNameEntry(o) {
+            this.nameInputDOMNode = o;
+        }
+    }, {
         key: 'render',
         value: function render() {
             var _this8 = this;
@@ -481,6 +492,8 @@ var Name = function (_React$Component3) {
                 { className: 'name' },
                 React.createElement('input', { className: 'name-entry',
                     value: this.props.nameValue,
+                    ref: this.setNameEntry.bind(this),
+                    onKeyDown: this.handleKeyDown.bind(this),
                     onChange: function onChange(e) {
                         return _this8.onNameChange(e.target.value);
                     } }),
@@ -530,7 +543,12 @@ var SheetRow = function (_React$Component4) {
                 'div',
                 { className: 'sheetrow' },
                 React.createElement(Name, { persons: this.props.persons, nameValue: this.props.nameValue,
+                    ref: function ref(o) {
+                        return _this10.nameInputDOMNode = o && o.nameInputDOMNode;
+                    },
                     personValue: this.props.personValue,
+                    onArrowDown: this.props.onArrowDown,
+                    onArrowUp: this.props.onArrowUp,
                     onChange: this.props.onChangeName }),
                 columns
             );
@@ -604,15 +622,34 @@ var Sheet = function (_React$Component5) {
             this.setState({});
         }
     }, {
+        key: 'setRowElement',
+        value: function setRowElement(i, o) {
+            this.rowElements[i] = o;
+        }
+    }, {
+        key: 'focusRow',
+        value: function focusRow(i) {
+            console.log('focusRow(', i, ')');
+            if (0 <= i && i < this.rowElements.length && this.rowElements[i]) {
+                console.log(this.rowElements[i]);
+                this.rowElements[i].nameInputDOMNode.focus();
+            }
+        }
+    }, {
         key: 'render',
         value: function render() {
             var rows = [];
+            if (typeof this.rowElements === 'undefined') this.rowElements = [];
             var counts = [0, 0, 0, 0, 0, 0];
             for (var i = 0; i < this.state.rows.length; ++i) {
                 var data = this.state.rows[i];
                 for (var j = 0; j < counts.length; ++j) {
                     counts[j] += data.counts[j] || 0;
-                }rows.push(React.createElement(SheetRow, { key: i,
+                }if (this.rowElements.length < i) this.rowElements.push(null);
+                rows.push(React.createElement(SheetRow, { key: i,
+                    ref: this.setRowElement.bind(this, i),
+                    onArrowDown: this.focusRow.bind(this, i + 1),
+                    onArrowUp: this.focusRow.bind(this, i - 1),
                     persons: this.props.persons,
                     columns: data.counts,
                     nameValue: data.name,
