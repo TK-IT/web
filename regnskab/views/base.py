@@ -194,20 +194,20 @@ class SheetRowUpdate(TemplateView):
         return get_object_or_404(Sheet.objects, pk=self.kwargs['pk'])
 
     def get_profiles(self):
-        profiles = get_profiles_title_status()
+        period = self.get_sheet().period
+
+        profiles = get_profiles_title_status(period=period)
         aliases = {}
         for o in Alias.objects.filter(end_time=None):
             aliases.setdefault(o.profile_id, []).append(o)
         for o in Title.objects.all():
             aliases.setdefault(o.profile_id, []).append(o)
 
-        GFYEAR = config.GFYEAR
-
         result = []
         for i, profile in enumerate(profiles):
             titles = aliases.get(profile.id, ())
-            titles_input = [t.input_title(GFYEAR) for t in titles]
-            title_input = profile.title and profile.title.input_title(GFYEAR)
+            titles_input = [t.input_title(period) for t in titles]
+            title_input = profile.title and profile.title.input_title(period)
             title_name = ' '.join((title_input or '', profile.name)).strip()
             result.append(dict(
                 titles=titles_input, title=title_input, sort_key=i,
