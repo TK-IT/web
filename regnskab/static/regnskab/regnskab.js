@@ -345,6 +345,12 @@ var ColumnEntry = function (_React$Component) {
             }
         }
     }, {
+        key: 'handleKeyDown',
+        value: function handleKeyDown(ev) {
+            console.log('handleKeyDown(', ev.key, ')');
+            if (ev.key === 'ArrowDown') this.props.onArrowDown();else if (ev.key === 'ArrowUp') this.props.onArrowUp();
+        }
+    }, {
         key: 'onChange',
         value: function onChange(s) {
             if (s === '') {
@@ -369,7 +375,8 @@ var ColumnEntry = function (_React$Component) {
                 React.createElement('input', { className: 'column-entry', value: this.getInputValue(),
                     onChange: function onChange(e) {
                         return _this4.onChange(e.target.value);
-                    } })
+                    },
+                    onKeyDown: this.handleKeyDown.bind(this) })
             );
         }
     }]);
@@ -535,6 +542,8 @@ var SheetRow = function (_React$Component4) {
             var columns = this.props.columns.map(function (v, i) {
                 return React.createElement(ColumnEntry, { columnKind: columnKind[i],
                     value: v, key: columnKind[i],
+                    onArrowDown: _this10.props.onArrowDown,
+                    onArrowUp: _this10.props.onArrowUp,
                     onChange: function onChange(v) {
                         return _this10.props.onChange(i, v);
                     } });

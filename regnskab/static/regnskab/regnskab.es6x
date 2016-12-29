@@ -170,6 +170,11 @@ class ColumnEntry extends React.Component {
         if (parseFloat(st) === v) { return this.state.inputValue; }
         else { return ''+v; }
     }
+    handleKeyDown(ev) {
+        console.log('handleKeyDown(', ev.key, ')');
+        if (ev.key === 'ArrowDown') this.props.onArrowDown();
+        else if (ev.key === 'ArrowUp') this.props.onArrowUp();
+    }
     onChange(s) {
         if (s === '') {
             this.setState({inputValue: ''});
@@ -185,7 +190,8 @@ class ColumnEntry extends React.Component {
         return <div className={'column column-'+this.props.columnKind}>
             <Crosses count={this.props.value} maxCount={30} />
             <input className='column-entry' value={this.getInputValue()}
-                   onChange={e => this.onChange(e.target.value)} />
+                   onChange={e => this.onChange(e.target.value)}
+                   onKeyDown={this.handleKeyDown.bind(this)} />
         </div>;
     }
 }
@@ -279,6 +285,8 @@ class SheetRow extends React.Component {
         let columns = this.props.columns.map((v, i) =>
             <ColumnEntry columnKind={columnKind[i]}
                 value={v} key={columnKind[i]}
+                onArrowDown={this.props.onArrowDown}
+                onArrowUp={this.props.onArrowUp}
                 onChange={v => this.props.onChange(i, v)} />);
         return <div className='sheetrow'>
             <Name persons={this.props.persons} nameValue={this.props.nameValue}
