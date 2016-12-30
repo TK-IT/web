@@ -142,3 +142,5 @@ TKWEB_IDM_MODULE = 'regnskabsite'
 
 MEDIA_ROOT = BASE_DIR
 MEDIA_URL = '/media/'
+
+LOGIN_URL = '/admin/login/'
