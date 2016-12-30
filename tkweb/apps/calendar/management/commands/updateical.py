@@ -106,5 +106,7 @@ class Command(BaseCommand):
                       '%s events deleted, ' % len(previous_event_ids) +
                       '%s events created, ' % len(new_events) +
                       '%s left unchanged.' % len(same_events))
-        logger.info(finishText)
+        # Don't log unless something changed
+        if len(previous_event_ids) or len(new_events):
+            logger.info(finishText)
         print(finishText, file=self.stdout)
