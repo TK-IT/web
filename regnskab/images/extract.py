@@ -228,24 +228,6 @@ def extract_crosses(sheet_image):
     sheet_image.crosses = get_initial()
 
 
-def extract_sheet_rows(sheet_image):
-    im = sheet_image.get_image()
-    quad = Quadrilateral(sheet_image.quad)
-    rows = [0] + list(sheet_image.rows) + [1]
-
-    i = 0
-    for idx, person_row_count in enumerate(sheet_image.person_rows):
-        j = i + person_row_count
-        row_coords = [[0, 1, 1, 0], [rows[i], rows[i], rows[j], rows[j]]]
-        row_quad = Quadrilateral(quad.to_world(row_coords).T)
-        row_image = extract_quadrilateral(
-            im, row_quad, 920, 20*(j-i))
-        img = PIL.Image.fromarray(row_image)
-        output = io.BytesIO()
-        img.save(output, 'PNG')
-        yield output.getvalue(), sheet_image.crosses[idx]
-
-
 def get_person_crosses(person_rows):
     col_bounds = [0, 15, 21, 36]
     groups = []
