@@ -65,7 +65,6 @@ def get_exif_date(filename):
                         dt = datetime.strptime(s, '%Y:%m:%d %H:%M:%S.%f')
                         dt = dt.replace(tzinfo=get_current_timezone())
 
-                        logger.info('get_exif_date: returning exif date: %s', dt)
                         return dt
 
                     logger.debug('get_exif_date: the DateTime%s field only contained zeros. Trying next field', t)
