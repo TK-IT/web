@@ -743,6 +743,7 @@ class SheetImage(models.Model):
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE)
     page = models.PositiveIntegerField()
 
+    parameters = JSONField(default={})
     quad = JSONField(default=[])
     cols = JSONField(default=[])
     rows = JSONField(default=[])

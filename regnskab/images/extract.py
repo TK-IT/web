@@ -1,4 +1,6 @@
 import io
+import inspect
+import functools
 
 import numpy as np
 import scipy.ndimage
@@ -15,6 +17,64 @@ from regnskab.models import (
 )
 
 
+PARAMETERS = []
+
+
+def parameter(*keys):
+    if len(keys) == 1:
+        keys = keys[0].split()
+
+    def decorator(fn):
+        signature = inspect.signature(fn)
+        key_params = []
+        for key in keys:
+            try:
+                key_param = signature.parameters[key]
+            except KeyError:
+                raise TypeError(
+                    'Function must accept an argument called %r' % (key,))
+            if key_param.default is signature.empty:
+                raise TypeError(
+                    'Function parameter %r must have a default' % (key,))
+            params_key = '%s.%s' % (fn.__name__, key)
+            key_params.append((params_key, key, key_param.default))
+
+        def update_kwargs(bound_args, parameters, kwargs):
+            for params_key, key, default in key_params:
+                if key in bound_args.arguments:
+                    parameters[params_key] = bound_args.arguments[key]
+                elif params_key in parameters:
+                    kwargs[key] = parameters[params_key]
+                else:
+                    parameters[params_key] = key_param.default
+
+        if 'parameters' in signature.parameters:
+            @functools.wraps(fn)
+            def wrapped(*args, **kwargs):
+                bound_args = signature.bind(*args, **kwargs)
+                parameters = bound_args.arguments['parameters']
+                update_kwargs(bound_args, parameters, kwargs)
+                return fn(*args, **kwargs)
+        elif 'sheet_image' in signature.parameters:
+            @functools.wraps(fn)
+            def wrapped(*args, **kwargs):
+                bound_args = signature.bind(*args, **kwargs)
+                parameters = bound_args.arguments['sheet_image'].parameters
+                update_kwargs(bound_args, parameters, kwargs)
+                return fn(*args, **kwargs)
+        else:
+            @functools.wraps(fn)
+            def wrapped(*args, parameters, **kwargs):
+                bound_args = signature.bind(*args, **kwargs)
+                update_kwargs(bound_args, parameters, kwargs)
+                return fn(*args, **kwargs)
+
+        return wrapped
+
+    return decorator
+
+
+@parameter('q')
 def contrast_stretch(im, q=0.02):
     if im.ndim == 2:
         im_channels = im[:, :, np.newaxis]
@@ -29,9 +89,9 @@ def contrast_stretch(im, q=0.02):
     return (im - mins) / (maxs - mins)
 
 
-def to_grey(im):
+def to_grey(im, parameters):
     if im.ndim == 3:
-        im = contrast_stretch(im)
+        im = contrast_stretch(im, parameters=parameters)
         return im.min(axis=2)
     else:
         return im
@@ -64,6 +124,7 @@ def max_object(labels, max_label, k):
     ]
 
 
+@parameter('sigma')
 def find_bbox(im, sigma=1):
     margin1 = 10
     margin2 = 100
@@ -109,8 +170,32 @@ def find_bbox(im, sigma=1):
 
 
 def extract_quad(sheet_image):
-    quad, obj = find_bbox(to_grey(sheet_image.get_image()))
+    quad, obj = find_bbox(to_grey(sheet_image.get_image(),
+                                  sheet_image.parameters),
+                          parameters=sheet_image.parameters)
     sheet_image.quad = quad.arg().tolist()
+
+
+@parameter('cutoff width max_distance')
+def extract_cols(sheet_image, input_grey,
+                 cutoff=100/255, width=4, max_distance=3):
+    width = input_grey.shape[1]
+    col_avg = np.mean(input_grey, axis=0, keepdims=True)
+    col_peaks = np.asarray(scipy.signal.find_peaks_cwt(
+        -np.minimum(col_avg, cutoff).ravel(), [width],
+        max_distances=[max_distance]))
+    sheet_image.cols = (col_peaks / width).tolist()
+
+
+@parameter('cutoff width max_distance')
+def extract_rows(sheet_image, input_grey,
+                 cutoff=0, width=3, max_distance=3):
+    height = input_grey.shape[0]
+    row_avg = np.mean(input_grey, axis=1, keepdims=True)
+    row_peaks = np.asarray(scipy.signal.find_peaks_cwt(
+        -np.minimum(row_avg, cutoff).ravel(), [width],
+        max_distances=[max_distance]))
+    sheet_image.rows = (row_peaks / height).tolist()
 
 
 def extract_rows_cols(sheet_image):
@@ -120,35 +205,31 @@ def extract_rows_cols(sheet_image):
     resolution = max(im.shape)
     input_transform = extract_quadrilateral(
         im, input_bbox, resolution, resolution)
-    input_grey = to_grey(input_transform)
+    input_grey = to_grey(input_transform, sheet_image.parameters)
 
-    # Compute sheet_image.cols
-    width = input_grey.shape[1]
-    col_avg = np.mean(input_grey, axis=0, keepdims=True)
-    col_peaks = np.asarray(scipy.signal.find_peaks_cwt(
-        -np.minimum(col_avg, 100 / 255).ravel(), [4], max_distances=[3]))
-    sheet_image.cols = (col_peaks / width).tolist()
+    extract_cols(sheet_image, input_grey)
+    extract_rows(sheet_image, input_grey)
+    extract_person_rows(sheet_image, input_grey)
 
-    # Compute sheet_image.rows
-    height = input_grey.shape[0]
-    row_avg = np.mean(input_grey, axis=1, keepdims=True)
-    row_peaks = np.asarray(scipy.signal.find_peaks_cwt(
-        -row_avg.ravel(), [3], max_distances=[3]))
-    sheet_image.rows = (row_peaks / height).tolist()
 
-    # Compute sheet_image.person_rows
+@parameter('cutoff width max_distance')
+def extract_person_rows(sheet_image, input_grey,
+                        cutoff=0, width=3, max_distance=3):
+    im = sheet_image.get_image()
+    input_bbox = Quadrilateral(sheet_image.quad)
+    resolution = max(im.shape)
     name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
                  [0, 0, 1, 1]]
     name_rect = input_bbox.to_world(name_rect)
     name_quad = Quadrilateral(name_rect.T)
 
-    names = extract_quadrilateral(
-        im, name_quad, resolution, resolution)
-    names_grey = to_grey(names)
+    names_grey = extract_quadrilateral(
+        input_grey, name_quad, resolution, resolution)
     height = names_grey.shape[0]
     row_avg = np.mean(names_grey, axis=1, keepdims=True)
     row_peaks = np.asarray(scipy.signal.find_peaks_cwt(
-        -row_avg.ravel(), [3], max_distances=[3])) / height
+        -np.minimum(row_avg.ravel(), cutoff), [width],
+        max_distances=[max_distance])) / height
 
     rows = np.r_[0, sheet_image.rows, 1]
     closest = np.abs(row_peaks.reshape(-1, 1) -
@@ -159,7 +240,8 @@ def extract_rows_cols(sheet_image):
         raise Exception('Person has no rows')
 
 
-def extract_crosses(sheet_image):
+@parameter('lo hi')
+def extract_crosses(sheet_image, lo=0.080, hi=0.116):
     im = sheet_image.get_image()
     quad = Quadrilateral(sheet_image.quad)
 
@@ -197,9 +279,7 @@ def extract_crosses(sheet_image):
         )
         weights /= weights.sum() * depth
         v = ((1 - data) * weights[:, :, np.newaxis]).sum()
-        t1 = 0.080  # Valid crosses as low as 0.080 have been observed
-        t2 = 0.116
-        return (v - t1) / (t2 - t1)
+        return (v - lo) / (hi - lo)
 
     def get_initial():
         cross_imgs = extract_crosses()
@@ -228,8 +308,9 @@ def extract_crosses(sheet_image):
     sheet_image.crosses = get_initial()
 
 
-def get_person_crosses(person_rows):
-    col_bounds = [0, 15, 21, 36]
+@parameter('øl guldøl sodavand')
+def get_person_crosses(person_rows, øl=15, guldøl=6, sodavand=15):
+    col_bounds = np.cumsum([0, øl, guldøl, sodavand])
     groups = []
     for i, j in zip(col_bounds[:-1], col_bounds[1:]):
         group_rows = [r[i:j] for r in person_rows]
