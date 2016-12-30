@@ -181,7 +181,7 @@ def extract_cols(sheet_image, input_grey,
     col_peaks = np.asarray(scipy.signal.find_peaks_cwt(
         -np.minimum(col_avg, cutoff).ravel(), [width],
         max_distances=[max_distance]))
-    sheet_image.cols = (col_peaks / width).tolist()
+    sheet_image.cols = (col_peaks / width).tolist() + [1]
 
 
 @parameter('cutoff width max_distance')
@@ -192,7 +192,7 @@ def extract_rows(sheet_image, input_grey,
     row_peaks = np.asarray(scipy.signal.find_peaks_cwt(
         -np.minimum(row_avg, cutoff).ravel(), [width],
         max_distances=[max_distance]))
-    sheet_image.rows = (row_peaks / height).tolist()
+    sheet_image.rows = [0] + (row_peaks / height).tolist() + [1]
 
 
 def extract_rows_cols(sheet_image):
@@ -242,8 +242,8 @@ def extract_crosses(sheet_image, lo=0.080, hi=0.116):
     im = sheet_image.get_image()
     quad = Quadrilateral(sheet_image.quad)
 
-    rows = [0] + list(sheet_image.rows) + [1]
-    cols = list(sheet_image.cols) + [1]
+    rows = sheet_image.rows
+    cols = sheet_image.cols
 
     def extract_crosses():
         width = height = 24
@@ -353,7 +353,7 @@ def extract_images(sheet, kinds):
     position = 1
     for im in images:
         quad = Quadrilateral(im.quad)
-        im_rows = [0] + list(im.rows) + [1]
+        im_rows = im.rows
         i = 0
         for person_row_count in im.person_rows:
             assert person_row_count != 0
