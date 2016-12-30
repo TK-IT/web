@@ -17,9 +17,6 @@ from regnskab.models import (
 )
 
 
-PARAMETERS = []
-
-
 def parameter(*keys):
     if len(keys) == 1:
         keys = keys[0].split()
