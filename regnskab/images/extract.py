@@ -1,7 +1,3 @@
-import io
-import inspect
-import functools
-
 import numpy as np
 import scipy.ndimage
 import scipy.signal
@@ -10,65 +6,12 @@ import PIL
 from django.core.files.base import ContentFile
 from django.utils import timezone
 
+from .parameters import parameter
 from .utils import save_png
 from .quadrilateral import Quadrilateral, extract_quadrilateral
 from regnskab.models import (
     SheetImage, SheetRow, Purchase,
 )
-
-
-def parameter(*keys):
-    if len(keys) == 1:
-        keys = keys[0].split()
-
-    def decorator(fn):
-        signature = inspect.signature(fn)
-        key_params = []
-        for key in keys:
-            try:
-                key_param = signature.parameters[key]
-            except KeyError:
-                raise TypeError(
-                    'Function must accept an argument called %r' % (key,))
-            if key_param.default is signature.empty:
-                raise TypeError(
-                    'Function parameter %r must have a default' % (key,))
-            params_key = '%s.%s' % (fn.__name__, key)
-            key_params.append((params_key, key, key_param.default))
-
-        def update_kwargs(bound_args, parameters, kwargs):
-            for params_key, key, default in key_params:
-                if key in bound_args.arguments:
-                    parameters[params_key] = bound_args.arguments[key]
-                elif params_key in parameters:
-                    kwargs[key] = parameters[params_key]
-                else:
-                    parameters[params_key] = key_param.default
-
-        if 'parameters' in signature.parameters:
-            @functools.wraps(fn)
-            def wrapped(*args, **kwargs):
-                bound_args = signature.bind(*args, **kwargs)
-                parameters = bound_args.arguments['parameters']
-                update_kwargs(bound_args, parameters, kwargs)
-                return fn(*args, **kwargs)
-        elif 'sheet_image' in signature.parameters:
-            @functools.wraps(fn)
-            def wrapped(*args, **kwargs):
-                bound_args = signature.bind(*args, **kwargs)
-                parameters = bound_args.arguments['sheet_image'].parameters
-                update_kwargs(bound_args, parameters, kwargs)
-                return fn(*args, **kwargs)
-        else:
-            @functools.wraps(fn)
-            def wrapped(*args, parameters, **kwargs):
-                bound_args = signature.bind(*args, **kwargs)
-                update_kwargs(bound_args, parameters, kwargs)
-                return fn(*args, **kwargs)
-
-        return wrapped
-
-    return decorator
 
 
 @parameter('q')
