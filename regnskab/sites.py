@@ -4,7 +4,7 @@ class RegnskabSite(object):
     def get_urls(self):
         from django.conf.urls import url
         from regnskab import views
-        # from regnskab.views import images
+        from regnskab.views import images
 
         return [
             url(r'^$', views.Home.as_view(), name='home'),
@@ -61,6 +61,7 @@ class RegnskabSite(object):
             # url(r'^images/sheet/(?P<pk>\d+)/$',
             #     images.SheetImageUpdate.as_view(),
             #     name='sheet_image_update'),
+            url(r'^images/$', images.Svm.as_view()),
         ]
 
     @property

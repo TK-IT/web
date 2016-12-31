@@ -1,9 +1,10 @@
 import io
+import base64
 import logging
 import tempfile
 
 from django.views.generic import (
-    CreateView, UpdateView, DetailView, FormView,
+    CreateView, UpdateView, DetailView, FormView, View,
 )
 from django.views.generic.detail import (
     BaseDetailView, SingleObjectMixin,
@@ -14,10 +15,6 @@ from django.http import HttpResponse
 
 from regnskab.models import Sheet, SheetImage
 from .auth import regnskab_permission_required_method
-from regnskab.images.utils import imagemagick_page_count
-from regnskab.images.extract import (
-    extract_quad, extract_rows_cols, extract_crosses,
-)
 from regnskab.images.forms import SheetImageForm
 
 import PIL
@@ -75,3 +72,35 @@ class SheetImageUpdate(FormView):
         o.compute_person_counts()
         o.save()
         return  # TODO
+
+
+class Svm(View):
+    def get(self, request):
+        from regnskab.images.extract import get_crosses_from_counts
+
+        pos = []
+        neg = []
+        for o in SheetImage.objects.all():
+            imgs, coords = get_crosses_from_counts(o)
+            coords = frozenset(coords)
+            for i, row in enumerate(imgs):
+                for j, img in enumerate(row):
+                    if (i, j) in coords:
+                        pos.append(img)
+                    else:
+                        neg.append(img)
+        result = []
+
+        from regnskab.images.utils import save_png
+
+        def img_tag(im_data):
+            png_data = save_png(im_data)
+            png_b64 = base64.b64encode(png_data).decode()
+            return '<img src="data:image/png;base64,%s" />' % png_b64
+
+        for o in pos:
+            result.append(img_tag(o))
+        result.append('<hr />')
+        for o in neg:
+            result.append(img_tag(o))
+        return HttpResponse(''.join(result))
