@@ -1,7 +1,6 @@
 import numpy as np
 import scipy.ndimage
 import scipy.signal
-import PIL
 
 from django.core.files.base import ContentFile
 from django.utils import timezone
@@ -177,72 +176,147 @@ def extract_person_rows(sheet_image, input_grey,
         raise Exception('Person has no rows')
 
 
-@parameter('lo hi')
-def extract_crosses(sheet_image, lo=0.080, hi=0.116):
+def extract_cross_images(sheet_image):
     im = sheet_image.get_image()
     quad = Quadrilateral(sheet_image.quad)
 
     rows = sheet_image.rows
     cols = sheet_image.cols
 
-    def extract_crosses():
-        width = height = 24
-        cross_imgs = []
-        for i, (y1, y2) in enumerate(zip(rows[:-1], rows[1:])):
-            cross_imgs.append([])
-            for j, (x1, x2) in enumerate(zip(cols[:-1], cols[1:])):
-                top_left = (x1, y1)
-                top_right = (x2, y1)
-                bottom_right = (x2, y2)
-                bottom_left = (x1, y2)
-                corners = quad.to_world(np.transpose([
-                    top_left, top_right, bottom_right, bottom_left]))
-                cross = Quadrilateral(np.transpose(corners))
-                cross_imgs[-1].append(extract_quadrilateral(
-                    im, cross, width, height))
+    width = height = 24
+    cross_imgs = []
+    for i, (y1, y2) in enumerate(zip(rows[:-1], rows[1:])):
+        cross_imgs.append([])
+        for j, (x1, x2) in enumerate(zip(cols[:-1], cols[1:])):
+            top_left = (x1, y1)
+            top_right = (x2, y1)
+            bottom_right = (x2, y2)
+            bottom_left = (x1, y2)
+            corners = quad.to_world(np.transpose([
+                top_left, top_right, bottom_right, bottom_left]))
+            cross = Quadrilateral(np.transpose(corners))
+            cross_imgs[-1].append(extract_quadrilateral(
+                im, cross, width, height))
 
-        return cross_imgs
+    return cross_imgs
 
-    def naive_cross_value(data):
-        if data.max() > 1:
-            data = data / data.max()
-        height, width, depth = data.shape
-        i, j = np.mgrid[0:height, 0:width].astype(np.float)
-        neg_i = (height - 1) - i
-        neg_j = (width - 1) - j
-        weights = np.minimum(
-            np.minimum(i, neg_i),
-            np.minimum(j, neg_j),
-        )
-        weights /= weights.sum() * depth
-        v = ((1 - data) * weights[:, :, np.newaxis]).sum()
-        return (v - lo) / (hi - lo)
 
-    def get_initial():
-        cross_imgs = extract_crosses()
-        values = [
-            [naive_cross_value(c) for c in row]
-            for row in cross_imgs
-        ]
-        # Treat values <= 0 as "definitely False"
-        # and values >= 1 as "definitely True".
-        # Mark values between 0 and 1 as True if they are between
-        # two entries that are definitely True.
-        labels = []
-        for value_row in values:
-            row = [bool(v >= 1) for v in value_row]
-            prev_decided = 0
-            for i, v in enumerate(value_row):
-                if not (0 < v < 1):
-                    if row[i] and row[prev_decided]:
-                        # Mark everything in-between these definitely True
-                        # as True.
-                        row[prev_decided:i] = (i-prev_decided)*[True]
-                    prev_decided = i
-            labels.append(row)
-        return labels
+def naive_cross_value(data):
+    if data.max() > 1:
+        data = data / data.max()
+    height, width, depth = data.shape
+    i, j = np.mgrid[0:height, 0:width].astype(np.float)
+    neg_i = (height - 1) - i
+    neg_j = (width - 1) - j
+    weights = np.minimum(
+        np.minimum(i, neg_i),
+        np.minimum(j, neg_j),
+    )
+    weights /= weights.sum() * depth
+    return ((1 - data) * weights[:, :, np.newaxis]).sum()
+    # return (v - lo) / (hi - lo)
 
-    sheet_image.crosses = get_initial()
+
+@parameter('lo hi')
+def extract_crosses(sheet_image, lo=0.080, hi=0.116):
+    cross_imgs = extract_cross_images(sheet_image)
+    values = [
+        [naive_cross_value(c) for c in row]
+        for row in cross_imgs
+    ]
+    # Treat values <= lo as "definitely False"
+    # and values >= hi as "definitely True".
+    # Mark values between lo and hi as True if they are between
+    # two entries that are definitely True.
+    labels = []
+    for value_row in values:
+        row = [bool(v >= hi) for v in value_row]
+        prev_decided = 0
+        for i, v in enumerate(value_row):
+            if not (lo < v < hi):
+                if row[i] and row[prev_decided]:
+                    # Mark everything in-between these definitely True
+                    # as True.
+                    row[prev_decided:i] = (i-prev_decided)*[True]
+                prev_decided = i
+        labels.append(row)
+    sheet_image.crosses = labels
+
+
+def get_sheet_rows(sheet_image):
+    prev_pages = SheetImage.objects.filter(sheet=sheet_image.sheet,
+                                           page__lt=sheet_image.page)
+    prev_person_count = sum(len(o.person_rows) for o in prev_pages)
+    n = len(sheet_image.person_rows)
+    # Note position is 1-indexed
+    qs = SheetRow.objects.filter(sheet=sheet_image.sheet,
+                                 position__gte=prev_person_count + 1,
+                                 position__lte=prev_person_count + n)
+    sheet_rows = list(qs)
+    assert len(sheet_rows) == len(sheet_image.person_rows)
+    return sheet_rows
+
+
+def get_cross_counts(sheet_image, kinds):
+    sheet_rows = get_sheet_rows(sheet_image)
+    purchase_kinds = list(sheet_image.sheet.purchasekind_set.all())
+    purchases = {
+        (p.row_id, p.kind_id): p
+        for p in Purchase.objects.filter(row__sheet=sheet_image.sheet)
+    }
+    result = []
+    for sheet_row in sheet_rows:
+        singles = {}
+        boxes = {}
+        for kind in purchase_kinds:
+            try:
+                p = purchases[sheet_row.id, kind.id]
+            except KeyError:
+                continue
+            if kind.name.endswith('kasse'):
+                boxes[kind.name[:-5]] = p.count
+            else:
+                singles[kind.name] = p.count
+        result.append([
+            (singles.get(kind, 0), boxes.get(kind, 0))
+            for kind in kinds
+        ])
+    return result
+
+
+def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
+    values = {
+        (i, j): naive_cross_value(c)
+        for i, row in enumerate(cross_imgs)
+        for j, c in enumerate(row)
+    }
+    order = sorted(values.keys(), key=lambda k: values[k], reverse=True)
+    rank = {k: i for i, k in enumerate(order)}
+    TODO
+
+
+@parameter('get_person_crosses.øl',
+           'get_person_crosses.guldøl',
+           'get_person_crosses.sodavand')
+def get_crosses_from_counts(sheet_image, øl=15, guldøl=6, sodavand=15):
+    cross_counts = get_cross_counts(sheet_image)
+    cross_imgs = extract_cross_images(sheet_image)
+    KINDS = 'øl guldøl sodavand'.split()
+    col_bounds = np.cumsum([0, øl, guldøl, sodavand])
+    row_bounds = np.cumsum([0] + sheet_image.person_rows)
+    n = len(sheet_image.person_rows)
+
+    cross_coordinates = []
+
+    for person_index in range(n):
+        r1, r2 = row_bounds[person_index], row_bounds[person_index+1]
+        for kind_index in len(KINDS):
+            c1, c2 = col_bounds[kind_index], col_bounds[kind_index+1]
+            singles, boxes = cross_counts[person_index][kind_index]
+            cross_coordinates.extend(get_crosses_from_field(
+                [row[c1:c2] for row in cross_imgs[r1:r2]], singles, boxes,
+                r1, c1))
+    return cross_coordinates
 
 
 @parameter('øl guldøl sodavand')
