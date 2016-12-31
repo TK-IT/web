@@ -115,12 +115,12 @@ def extract_quad(sheet_image):
 @parameter('cutoff width max_distance')
 def extract_cols(sheet_image, input_grey,
                  cutoff=100/255, width=4, max_distance=3):
-    width = input_grey.shape[1]
+    image_width = input_grey.shape[1]
     col_avg = np.mean(input_grey, axis=0, keepdims=True)
     col_peaks = np.asarray(scipy.signal.find_peaks_cwt(
         -np.minimum(col_avg, cutoff).ravel(), [width],
         max_distances=[max_distance]))
-    sheet_image.cols = (col_peaks / width).tolist() + [1]
+    sheet_image.cols = (col_peaks / image_width).tolist() + [1]
 
 
 @parameter('cutoff width max_distance')
@@ -151,13 +151,10 @@ def extract_rows_cols(sheet_image):
 @parameter('cutoff width max_distance')
 def extract_person_rows(sheet_image, input_grey,
                         cutoff=0, width=3, max_distance=3):
-    im = sheet_image.get_image()
-    input_bbox = Quadrilateral(sheet_image.quad)
-    resolution = max(im.shape)
+    resolution = max(input_grey.shape)
     name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
                  [0, 0, 1, 1]]
-    name_rect = input_bbox.to_world(name_rect)
-    name_quad = Quadrilateral(name_rect.T)
+    name_quad = Quadrilateral(np.transpose(name_rect))
 
     names_grey = extract_quadrilateral(
         input_grey, name_quad, resolution, resolution)
@@ -167,13 +164,19 @@ def extract_person_rows(sheet_image, input_grey,
         -np.minimum(row_avg.ravel(), cutoff), [width],
         max_distances=[max_distance])) / height
 
-    rows = np.r_[0, sheet_image.rows, 1]
+    rows = np.asarray(sheet_image.rows)
     closest = np.abs(row_peaks.reshape(-1, 1) -
                      rows.reshape(1, -1)).argmin(1)
     sheet_image.person_rows = np.diff(
         [0] + closest.tolist() + [len(rows)-1]).tolist()
     if any(v == 0 for v in sheet_image.person_rows):
-        raise Exception('Person has no rows')
+        print(repr(rows))
+        print(repr(np.diff(rows)))
+        print(repr(row_peaks))
+        print(repr(np.diff(row_peaks)))
+        print(repr(closest))
+        raise Exception('Person has no rows: %s' %
+                        (sheet_image.person_rows,))
 
 
 def extract_cross_images(sheet_image):
@@ -197,6 +200,7 @@ def extract_cross_images(sheet_image):
             cross = Quadrilateral(np.transpose(corners))
             cross_imgs[-1].append(extract_quadrilateral(
                 im, cross, width, height))
+    assert len(cross_imgs) == len(rows)
 
     return cross_imgs
 
@@ -285,6 +289,11 @@ def get_cross_counts(sheet_image, kinds):
 
 
 def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
+    assert cross_imgs, cross_imgs
+    if singles == boxes == 0:
+        return []
+    n = len(cross_imgs)
+    m = len(cross_imgs[0])
     values = {
         (i, j): naive_cross_value(c)
         for i, row in enumerate(cross_imgs)
@@ -292,17 +301,61 @@ def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
     }
     order = sorted(values.keys(), key=lambda k: values[k], reverse=True)
     rank = {k: i for i, k in enumerate(order)}
-    TODO
+    min_extra = int(2*boxes)
+    assert singles + min_extra <= n*m
+    max_extra = min(int(4*boxes), n*m - singles)
+    assert 0 <= min_extra <= max_extra <= n*m - singles
+
+    crosses = []
+    remaining = []
+
+    # Add all strong crosses that are filled up from the left or right.
+    for i in range(n):
+        if all(rank[i, j] < singles + min_extra for j in range(m)):
+            # Entire row is crossed.
+            crosses.extend((i, j) for j in range(m))
+        else:
+            row_singles = next(j for j in range(m)
+                               if rank[i, j] >= singles + min_extra)
+            row_boxes = next(j for j in range(m-1, -1, -1)
+                             if rank[i, j] >= singles + min_extra)
+            # Don't take too many crosses on the right.
+            # FIXME: This allows 'max_extra' from all rows,
+            # which it shouldn't.
+            row_boxes = min(row_boxes, max_extra)
+            crosses.extend((i, j) for j in range(0, row_singles))
+            remaining.extend((i, j) for j in range(row_singles, row_boxes))
+            crosses.extend((i, j) for j in range(row_boxes, m))
+
+    # There must be at least (singles + min_extra) crosses,
+    # so 'certain_cross' is the value of the "weakest" certain cross.
+    certain_cross = values[order[singles + min_extra - 1]]
+    # There are at most (singles + max_extra) crosses,
+    # so 'certain_not_cross' is the value of the "strong" certain not-cross.
+    if singles + max_extra < n*m:
+        certain_not_cross = values[order[singles + max_extra]]
+    else:
+        certain_not_cross = 0
+    # Keep up to (singles + max_extra) - len(crosses) from remaining
+    # that have value greater than 'threshold'.
+    threshold = certain_not_cross + (certain_cross - certain_not_cross) / 2
+    remaining.sort(key=lambda k: values[k], reverse=True)
+    for k in remaining[:singles + max_extra - len(crosses)]:
+        if values[k] > threshold:
+            crosses.append(k)
+    return [(i + row_offset, j + col_offset) for i, j in crosses]
 
 
 @parameter('get_person_crosses.øl',
            'get_person_crosses.guldøl',
            'get_person_crosses.sodavand')
 def get_crosses_from_counts(sheet_image, øl=15, guldøl=6, sodavand=15):
-    cross_counts = get_cross_counts(sheet_image)
-    cross_imgs = extract_cross_images(sheet_image)
     KINDS = 'øl guldøl sodavand'.split()
+    cross_counts = get_cross_counts(sheet_image, KINDS)
+    assert sum(sheet_image.person_rows) == len(sheet_image.rows), (sheet_image.rows, sheet_image.person_rows)
+    cross_imgs = extract_cross_images(sheet_image)
     col_bounds = np.cumsum([0, øl, guldøl, sodavand])
+    assert sum(sheet_image.person_rows) == len(cross_imgs), (sheet_image.person_rows, len(cross_imgs))
     row_bounds = np.cumsum([0] + sheet_image.person_rows)
     n = len(sheet_image.person_rows)
 
@@ -310,13 +363,15 @@ def get_crosses_from_counts(sheet_image, øl=15, guldøl=6, sodavand=15):
 
     for person_index in range(n):
         r1, r2 = row_bounds[person_index], row_bounds[person_index+1]
-        for kind_index in len(KINDS):
+        for kind_index in range(len(KINDS)):
             c1, c2 = col_bounds[kind_index], col_bounds[kind_index+1]
             singles, boxes = cross_counts[person_index][kind_index]
+            assert singles == int(singles)
+            assert 0 <= r1 < r2 <= len(cross_imgs), (r1, r2, len(cross_imgs))
             cross_coordinates.extend(get_crosses_from_field(
-                [row[c1:c2] for row in cross_imgs[r1:r2]], singles, boxes,
-                r1, c1))
-    return cross_coordinates
+                [row[c1:c2] for row in cross_imgs[r1:r2]],
+                int(singles), boxes, r1, c1))
+    return cross_imgs, cross_coordinates
 
 
 @parameter('øl guldøl sodavand')
