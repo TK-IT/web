@@ -49,6 +49,15 @@ def parameter(*keys):
     ...     print('In bar, width is %s' % width)
     >>> bar(sheet_image)
     In bar, width is 10
+
+    You can also declare multiple parameters:
+    >>> @parameter('a b')
+    ... def multi(sheet_image, a=1, b=2):
+    ...     print(a, b)
+    >>> multi(sheet_image)
+    1 2
+    >>> multi(sheet_image)
+    1 2
     '''
 
     if len(keys) == 1:
@@ -78,7 +87,7 @@ def parameter(*keys):
                 elif full_key in parameters:
                     kwargs[key] = parameters[full_key]
                 else:
-                    parameters[full_key] = key_param.default
+                    parameters[full_key] = default
 
         if 'parameters' in signature.parameters:
             @functools.wraps(fn)
