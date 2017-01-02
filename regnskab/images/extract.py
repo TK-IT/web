@@ -218,13 +218,14 @@ def naive_cross_value(data):
         np.minimum(i, neg_i),
         np.minimum(j, neg_j),
     )
+    weights = weights ** 2
     weights /= weights.sum() * depth
     return ((1 - data) * weights[:, :, np.newaxis]).sum()
     # return (v - lo) / (hi - lo)
 
 
 @parameter('lo hi')
-def extract_crosses(sheet_image, lo=0.080, hi=0.116):
+def extract_crosses(sheet_image, lo=0.030, hi=0.045):
     cross_imgs = extract_cross_images(sheet_image)
     values = [
         [naive_cross_value(c) for c in row]
