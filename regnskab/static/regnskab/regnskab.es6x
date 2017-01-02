@@ -120,7 +120,11 @@ function filter_persons(persons, query) {
         return persons.map(p => ({'display': p.title_name + ' ' + p.titles.join(' '), 'person': p}));
     }
     let filters = get_query_filters(query);
-    let persons_keyed = first_matching_filter(persons, filters);
+
+    let persons_keyed = (
+        first_matching_filter(persons.filter((p) => p.in_current), filters) ||
+        first_matching_filter(persons, filters));
+
     persons_keyed.sort((a, b) => (a[1].sort_key - b[1].sort_key));
     let r = persons_keyed.map(
         x => ({'display': (x[0] + ' ' + x[1].name).trim(),
