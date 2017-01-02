@@ -12,6 +12,7 @@ from django.views.generic.detail import (
 )
 from django.views.generic.edit import FormMixin
 from django.shortcuts import redirect, get_object_or_404
+from django.utils.html import format_html, format_html_join
 from django.http import HttpResponse
 
 from regnskab.models import Sheet, SheetImage
@@ -95,12 +96,14 @@ def get_sheetimage_cross_classes(qs):
     return pos, neg
 
 
-def img_tag(im_data):
+def img_tag(im_data, **kwargs):
     from regnskab.images.utils import save_png
 
     png_data = save_png(im_data.reshape((24, 24, 3)))
     png_b64 = base64.b64encode(png_data).decode()
-    return '<img src="data:image/png;base64,%s" />' % png_b64
+    return format_html(
+        '<img src="data:image/png;base64,{}" {}/>', png_b64,
+        format_html_join('', '{}="{}" ', kwargs.items()))
 
 
 class Svm(View):
