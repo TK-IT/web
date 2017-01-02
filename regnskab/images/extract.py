@@ -181,9 +181,11 @@ def extract_person_rows(sheet_image, input_grey,
                         (sheet_image.person_rows,))
 
 
-def extract_cross_images(sheet_image):
+@parameter('gamma')
+def extract_cross_images(sheet_image, gamma=0.6):
     im = sheet_image.get_image()
     im = contrast_stretch(im, parameters=sheet_image.parameters)
+    im = im ** gamma
     quad = Quadrilateral(sheet_image.quad)
 
     rows = sheet_image.rows
