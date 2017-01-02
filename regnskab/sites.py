@@ -2,11 +2,11 @@ class RegnskabSite(object):
     name = 'regnskab'
 
     def get_urls(self):
+        from django.conf import settings
         from django.conf.urls import url
         from regnskab import views
-        from regnskab.views import images
 
-        return [
+        urls = [
             url(r'^$', views.Home.as_view(), name='home'),
             url(r'^log/$', views.Log.as_view(), name='log'),
             url(r'^session/(?P<session>\d+)/sheet/new/$',
@@ -55,15 +55,20 @@ class RegnskabSite(object):
                 name='profile_detail'),
             url(r'^profile/search/$', views.ProfileSearch.as_view(),
                 name='profile_search'),
-            # url(r'^images/sheet/(?P<pk>\d+)\.png$',
-            #     images.SheetImageFile.as_view(),
-            #     name='sheet_image_file'),
-            # url(r'^images/sheet/(?P<pk>\d+)/$',
-            #     images.SheetImageUpdate.as_view(),
-            #     name='sheet_image_update'),
-            url(r'^svm/$', images.Svm.as_view()),
-            url(r'^naive/$', images.NaiveParam.as_view()),
         ]
+        if settings.DEBUG:
+            from regnskab.views import images
+            urls += [
+                # url(r'^images/sheet/(?P<pk>\d+)\.png$',
+                #     images.SheetImageFile.as_view(),
+                #     name='sheet_image_file'),
+                # url(r'^images/sheet/(?P<pk>\d+)/$',
+                #     images.SheetImageUpdate.as_view(),
+                #     name='sheet_image_update'),
+                url(r'^svm/$', images.Svm.as_view()),
+                url(r'^naive/$', images.NaiveParam.as_view()),
+            ]
+        return urls
 
     @property
     def urls(self):
