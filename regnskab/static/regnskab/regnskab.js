@@ -355,7 +355,6 @@ var ColumnEntry = function (_React$Component) {
     }, {
         key: 'handleKeyDown',
         value: function handleKeyDown(ev) {
-            console.log('handleKeyDown(', ev.key, ')');
             if (ev.key === 'ArrowDown') this.props.onArrowDown();else if (ev.key === 'ArrowUp') this.props.onArrowUp();
         }
     }, {
@@ -489,7 +488,6 @@ var Name = function (_React$Component3) {
     }, {
         key: 'handleKeyDown',
         value: function handleKeyDown(ev) {
-            console.log('handleKeyDown(', ev.key, ')');
             if (ev.key === 'ArrowDown') this.props.onArrowDown();else if (ev.key === 'ArrowUp') this.props.onArrowUp();
         }
     }, {
@@ -646,9 +644,7 @@ var Sheet = function (_React$Component5) {
     }, {
         key: 'focusRow',
         value: function focusRow(i) {
-            console.log('focusRow(', i, ')');
             if (0 <= i && i < this.rowElements.length && this.rowElements[i]) {
-                console.log(this.rowElements[i]);
                 this.rowElements[i].nameInputDOMNode.focus();
             }
         }

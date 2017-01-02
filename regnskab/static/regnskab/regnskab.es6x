@@ -177,7 +177,6 @@ class ColumnEntry extends React.Component {
         else { return ''+v; }
     }
     handleKeyDown(ev) {
-        console.log('handleKeyDown(', ev.key, ')');
         if (ev.key === 'ArrowDown') this.props.onArrowDown();
         else if (ev.key === 'ArrowUp') this.props.onArrowUp();
     }
@@ -253,7 +252,6 @@ class Name extends React.Component {
         return filter_persons_cached(this.props.persons, query);
     }
     handleKeyDown(ev) {
-        console.log('handleKeyDown(', ev.key, ')');
         if (ev.key === 'ArrowDown') this.props.onArrowDown();
         else if (ev.key === 'ArrowUp') this.props.onArrowUp();
     }
@@ -358,9 +356,7 @@ class Sheet extends React.Component {
     }
 
     focusRow(i) {
-        console.log('focusRow(',i,')');
         if (0 <= i && i < this.rowElements.length && this.rowElements[i]) {
-            console.log(this.rowElements[i]);
             this.rowElements[i].nameInputDOMNode.focus();
         }
     }
