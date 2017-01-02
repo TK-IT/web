@@ -181,11 +181,8 @@ def extract_person_rows(sheet_image, input_grey,
                         (sheet_image.person_rows,))
 
 
-@parameter('gamma')
-def extract_cross_images(sheet_image, gamma=1.4):
+def extract_cross_images(sheet_image):
     im = sheet_image.get_image()
-    im = contrast_stretch(im, parameters=sheet_image.parameters)
-    im = im ** gamma
     quad = Quadrilateral(sheet_image.quad)
 
     rows = sheet_image.rows
@@ -228,7 +225,7 @@ def naive_cross_value(data):
 
 
 @parameter('lo hi')
-def extract_crosses(sheet_image, lo=0.052, hi=0.110):
+def extract_crosses(sheet_image, lo=0.030, hi=0.045):
     cross_imgs = extract_cross_images(sheet_image)
     values = [
         [naive_cross_value(c) for c in row]
