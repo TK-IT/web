@@ -91,6 +91,10 @@ function get_query_filters(query) {
 
     // `filters` is a list of functions used to determine if query matches title.
     var filters = [];
+    // Exact match on title
+    filters.push(function (t) {
+        return t.toUpperCase() === q_upper;
+    });
     if (mo_fuan) {
         (function () {
             var prefix = age_to_prefix(prefix_to_age(mo_fuan[1]));
