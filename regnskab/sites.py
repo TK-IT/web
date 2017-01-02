@@ -61,7 +61,7 @@ class RegnskabSite(object):
             # url(r'^images/sheet/(?P<pk>\d+)/$',
             #     images.SheetImageUpdate.as_view(),
             #     name='sheet_image_update'),
-            url(r'^images/$', images.Svm.as_view()),
+            url(r'^svm/$', images.Svm.as_view()),
         ]
 
     @property
