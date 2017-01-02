@@ -2,6 +2,7 @@ import io
 import base64
 import logging
 import tempfile
+import collections
 
 from django.views.generic import (
     CreateView, UpdateView, DetailView, FormView, View,
@@ -80,27 +81,54 @@ class Svm(View):
 
         pos = []
         neg = []
-        for o in SheetImage.objects.all():
+        for o in SheetImage.objects.all()[0:4]:
             imgs, coords = get_crosses_from_counts(o)
+            c = collections.Counter(coords)
+            dup = {k: v for k, v in c.items() if v > 1}
+            assert not dup, dup
             coords = frozenset(coords)
             for i, row in enumerate(imgs):
                 for j, img in enumerate(row):
                     if (i, j) in coords:
-                        pos.append(img)
+                        pos.append(img.ravel())
                     else:
-                        neg.append(img)
-        result = []
+                        neg.append(img.ravel())
+
+        from sklearn.svm import SVC
+
+        svm = SVC(C=1e3, kernel='linear')
+        svm.fit(pos + neg, [1] * len(pos) + [0] * len(neg))
 
         from regnskab.images.utils import save_png
 
         def img_tag(im_data):
-            png_data = save_png(im_data)
+            png_data = save_png(im_data.reshape((24, 24, 3)))
             png_b64 = base64.b64encode(png_data).decode()
             return '<img src="data:image/png;base64,%s" />' % png_b64
 
-        for o in pos:
-            result.append(img_tag(o))
+        result = []
+
+        sv_labels = svm.predict(svm.support_vectors_)
+        for i, (img, label) in enumerate(zip(svm.support_vectors_, sv_labels)):
+            if label == 0:
+                result.append(img_tag(img))
         result.append('<hr />')
-        for o in neg:
-            result.append(img_tag(o))
+        for i, (img, label) in enumerate(zip(svm.support_vectors_, sv_labels)):
+            if label == 1:
+                result.append(img_tag(img))
+
+        result.append('<hr />')
+
+        for i, label in enumerate(svm.predict(pos)):
+            assert label in (0, 1), label
+            if label == 0:
+                result.append(img_tag(pos[i]))
+
+        result.append('<hr />')
+
+        for i, label in enumerate(svm.predict(neg)):
+            assert label in (0, 1), label
+            if label == 1:
+                result.append(img_tag(neg[i]))
+
         return HttpResponse(''.join(result))
