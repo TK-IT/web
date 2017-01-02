@@ -154,7 +154,9 @@ def extract_person_rows(sheet_image, input_grey,
     resolution = max(input_grey.shape)
     name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
                  [0, 0, 1, 1]]
-    name_quad = Quadrilateral(np.transpose(name_rect))
+    name_quad = Quadrilateral(
+        np.array((input_grey.shape[1], input_grey.shape[0])) *
+        np.transpose(name_rect))
 
     names_grey = extract_quadrilateral(
         input_grey, name_quad, resolution, resolution)
