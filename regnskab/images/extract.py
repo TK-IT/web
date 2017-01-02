@@ -25,7 +25,7 @@ def contrast_stretch(im, q=0.02):
     fractiles = np.percentile(im_channels, [pct, 100 - pct], (0, 1),
                               interpolation='nearest', keepdims=True)
     mins, maxs = fractiles
-    return (im - mins) / (maxs - mins)
+    return np.minimum(1, np.maximum(0, (im - mins) / (maxs - mins)))
 
 
 def to_grey(im, parameters):
