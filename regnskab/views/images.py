@@ -75,60 +75,63 @@ class SheetImageUpdate(FormView):
         return  # TODO
 
 
+def get_sheetimage_cross_classes(qs):
+    from regnskab.images.extract import get_crosses_from_counts
+
+    pos = []
+    neg = []
+    for o in qs:
+        imgs, coords = get_crosses_from_counts(o)
+        c = collections.Counter(coords)
+        dup = {k: v for k, v in c.items() if v > 1}
+        assert not dup, dup
+        coords = frozenset(coords)
+        for i, row in enumerate(imgs):
+            for j, img in enumerate(row):
+                if (i, j) in coords:
+                    pos.append(img.ravel())
+                else:
+                    neg.append(img.ravel())
+    return pos, neg
+
+
+def img_tag(im_data):
+    from regnskab.images.utils import save_png
+
+    png_data = save_png(im_data.reshape((24, 24, 3)))
+    png_b64 = base64.b64encode(png_data).decode()
+    return '<img src="data:image/png;base64,%s" />' % png_b64
+
+
 class Svm(View):
     def get(self, request):
-        from regnskab.images.extract import get_crosses_from_counts
-
-        pos = []
-        neg = []
-        for o in SheetImage.objects.all()[0:4]:
-            imgs, coords = get_crosses_from_counts(o)
-            c = collections.Counter(coords)
-            dup = {k: v for k, v in c.items() if v > 1}
-            assert not dup, dup
-            coords = frozenset(coords)
-            for i, row in enumerate(imgs):
-                for j, img in enumerate(row):
-                    if (i, j) in coords:
-                        pos.append(img.ravel())
-                    else:
-                        neg.append(img.ravel())
+        pos, neg = get_sheetimage_cross_classes(
+            SheetImage.objects.all()[0:4])
 
         from sklearn.svm import SVC
 
         svm = SVC(C=1e3, kernel='linear')
         svm.fit(pos + neg, [1] * len(pos) + [0] * len(neg))
 
-        from regnskab.images.utils import save_png
-
-        def img_tag(im_data):
-            png_data = save_png(im_data.reshape((24, 24, 3)))
-            png_b64 = base64.b64encode(png_data).decode()
-            return '<img src="data:image/png;base64,%s" />' % png_b64
-
         result = []
 
         sv_labels = svm.predict(svm.support_vectors_)
-        for i, (img, label) in enumerate(zip(svm.support_vectors_, sv_labels)):
-            if label == 0:
-                result.append(img_tag(img))
+        sv_and_labels = list(zip(svm.support_vectors_, sv_labels))
+        result.extend(img_tag(im)
+                      for im, label in sv_and_labels
+                      if label == 0)
         result.append('<hr />')
-        for i, (img, label) in enumerate(zip(svm.support_vectors_, sv_labels)):
-            if label == 1:
-                result.append(img_tag(img))
-
-        result.append('<hr />')
-
-        for i, label in enumerate(svm.predict(pos)):
-            assert label in (0, 1), label
-            if label == 0:
-                result.append(img_tag(pos[i]))
-
+        result.extend(img_tag(im)
+                      for im, label in sv_and_labels
+                      if label == 1)
         result.append('<hr />')
 
-        for i, label in enumerate(svm.predict(neg)):
-            assert label in (0, 1), label
-            if label == 1:
-                result.append(img_tag(neg[i]))
+        result.extend(img_tag(im) for im, label in
+                      zip(pos, svm.predict(pos))
+                      if label == 0)
+        result.append('<hr />')
+        result.extend(img_tag(im) for im, label in
+                      zip(neg, svm.predict(neg))
+                      if label == 1)
 
         return HttpResponse(''.join(result))
