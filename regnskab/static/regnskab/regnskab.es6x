@@ -121,8 +121,10 @@ function filter_persons(persons, query) {
     }
     let filters = get_query_filters(query);
 
+    let persons_current_keyed = (
+        first_matching_filter(persons.filter((p) => p.in_current), filters));
     let persons_keyed = (
-        first_matching_filter(persons.filter((p) => p.in_current), filters) ||
+        persons_current_keyed.length ? persons_current_keyed :
         first_matching_filter(persons, filters));
 
     persons_keyed.sort((a, b) => (a[1].sort_key - b[1].sort_key));

@@ -240,9 +240,10 @@ function filter_persons(persons, query) {
     }
     var filters = get_query_filters(query);
 
-    var persons_keyed = first_matching_filter(persons.filter(function (p) {
+    var persons_current_keyed = first_matching_filter(persons.filter(function (p) {
         return p.in_current;
-    }), filters) || first_matching_filter(persons, filters);
+    }), filters);
+    var persons_keyed = persons_current_keyed.length ? persons_current_keyed : first_matching_filter(persons, filters);
 
     persons_keyed.sort(function (a, b) {
         return a[1].sort_key - b[1].sort_key;
