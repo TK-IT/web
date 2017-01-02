@@ -116,9 +116,9 @@ def extract_quad(sheet_image):
 def extract_cols(sheet_image, input_grey,
                  cutoff=100/255, width=4, max_distance=3):
     image_width = input_grey.shape[1]
-    col_avg = np.mean(input_grey, axis=0, keepdims=True)
+    col_avg = np.mean(input_grey, axis=0)
     col_peaks = np.asarray(scipy.signal.find_peaks_cwt(
-        -np.minimum(col_avg, cutoff).ravel(), [width],
+        -np.minimum(col_avg, cutoff), [width],
         max_distances=[max_distance]))
     sheet_image.cols = (col_peaks / image_width).tolist() + [1]
 
@@ -127,9 +127,9 @@ def extract_cols(sheet_image, input_grey,
 def extract_rows(sheet_image, input_grey,
                  cutoff=1, width=3, max_distance=3):
     height = input_grey.shape[0]
-    row_avg = np.mean(input_grey, axis=1, keepdims=True)
+    row_avg = np.mean(input_grey, axis=1)
     row_peaks = np.asarray(scipy.signal.find_peaks_cwt(
-        -np.minimum(row_avg, cutoff).ravel(), [width],
+        -np.minimum(row_avg, cutoff), [width],
         max_distances=[max_distance]))
     sheet_image.rows = [0] + (row_peaks / height).tolist() + [1]
 
