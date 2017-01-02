@@ -3,15 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <title>{% block fulltitle %}{% block title %}{% endblock %} - INKAs regningsgenerator{% endblock %}</title>
-<style>
-body {
-    background-color: black;
-    color: white;
-    font-family: sans-serif;
-    font-size: 14px;
-}
-a { color: inherit; }
-</style>
+<link rel="stylesheet" type="text/css"
+href="{% static 'regnskab/regnskab.css' %}" />
 {% block head %}
 {% endblock %}
 </head>
