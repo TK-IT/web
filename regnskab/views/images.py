@@ -140,3 +140,29 @@ class Svm(View):
                       if label == 1)
 
         return HttpResponse(''.join(result))
+
+
+class NaiveParam(View):
+    def get(self, request):
+        pos, neg = get_sheetimage_cross_classes(
+            SheetImage.objects.all()[0:4])
+
+        from regnskab.images.extract import naive_cross_value
+        pos = sorted(((im, naive_cross_value(im)) for im in pos),
+                     key=lambda x: x[1])
+        neg = sorted(((im, naive_cross_value(im)) for im in neg),
+                     key=lambda x: x[1])
+        neg_max = max(v for im, v in neg)
+        pos_min = min(v for im, v in pos)
+        neg_certain = ((im, v) for im, v in neg if v < pos_min)
+        neg_maybe = ((im, v) for im, v in neg if v >= pos_min)
+        pos_maybe = ((im, v) for im, v in pos if v < neg_max)
+        pos_certain = ((im, v) for im, v in pos if v >= neg_max)
+
+        def value_tag(x):
+            return img_tag(x[0], title=str(x[1]))
+
+        imgss = [neg_certain, neg_maybe, pos_maybe, pos_certain]
+        return HttpResponse('<hr />'.join(
+            ''.join(map(value_tag, imgs))
+            for imgs in imgss))

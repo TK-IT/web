@@ -62,6 +62,7 @@ class RegnskabSite(object):
             #     images.SheetImageUpdate.as_view(),
             #     name='sheet_image_update'),
             url(r'^svm/$', images.Svm.as_view()),
+            url(r'^naive/$', images.NaiveParam.as_view()),
         ]
 
     @property
