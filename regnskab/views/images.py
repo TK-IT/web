@@ -89,9 +89,9 @@ def get_sheetimage_cross_classes(qs):
         for i, row in enumerate(imgs):
             for j, img in enumerate(row):
                 if (i, j) in coords:
-                    pos.append(img.ravel())
+                    pos.append(img)
                 else:
-                    neg.append(img.ravel())
+                    neg.append(img)
     return pos, neg
 
 
@@ -107,6 +107,8 @@ class Svm(View):
     def get(self, request):
         pos, neg = get_sheetimage_cross_classes(
             SheetImage.objects.all()[0:4])
+        pos = [im.ravel() for im in pos]
+        neg = [im.ravel() for im in neg]
 
         from sklearn.svm import SVC
 
