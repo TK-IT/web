@@ -326,15 +326,14 @@ def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
         else:
             row_singles = next(j for j in range(m)
                                if rank[i, j] >= singles + min_extra)
-            row_boxes = next(j for j in range(m-1, -1, -1)
-                             if rank[i, j] >= singles + min_extra)
-            # Don't take too many crosses on the right.
-            # FIXME: This allows 'max_extra' from all rows,
-            # which it shouldn't.
-            row_boxes = min(row_boxes, max_extra)
+            row_boxes = next(j for j in range(m, 0, -1)
+                             if rank[i, j-1] >= singles + min_extra)
+            # FIXME: Don't take too many crosses on the right,
+            # but use max_extra to limit this.
             crosses.extend((i, j) for j in range(0, row_singles))
             remaining.extend((i, j) for j in range(row_singles, row_boxes))
             crosses.extend((i, j) for j in range(row_boxes, m))
+    assert len(crosses) <= singles + min_extra
 
     # There must be at least (singles + min_extra) crosses,
     # so 'certain_cross' is the value of the "weakest" certain cross.
@@ -352,6 +351,7 @@ def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
     for k in remaining[:singles + max_extra - len(crosses)]:
         if values[k] > threshold:
             crosses.append(k)
+    assert singles + min_extra <= len(crosses) <= singles + max_extra
     return [(i + row_offset, j + col_offset) for i, j in crosses]
 
 
@@ -377,9 +377,13 @@ def get_crosses_from_counts(sheet_image, øl=15, guldøl=6, sodavand=15):
             singles, boxes = cross_counts[person_index][kind_index]
             assert singles == int(singles)
             assert 0 <= r1 < r2 <= len(cross_imgs), (r1, r2, len(cross_imgs))
-            cross_coordinates.extend(get_crosses_from_field(
+            add = get_crosses_from_field(
                 [row[c1:c2] for row in cross_imgs[r1:r2]],
-                int(singles), boxes, r1, c1))
+                int(singles), boxes, r1, c1)
+            assert all(r1 <= r < r2 for r, c in add), add
+            assert all(c1 <= c < c2 for r, c in add), add
+            assert len(set(add)) == len(add), add
+            cross_coordinates.extend(add)
     return cross_imgs, cross_coordinates
 
 
