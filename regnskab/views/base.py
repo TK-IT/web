@@ -132,16 +132,17 @@ class SheetCreate(FormView):
                     raise
                 form.add_error(None, exn)
                 return self.form_invalid(form)
+        else:
+            images, rows, purchases = [], [], []
         sheet.save()
-        if data['image_file']:
-            for o in images + rows + kinds:
-                o.sheet = o.sheet  # Update sheet_id
-            for o in images + rows + kinds:
-                o.save()
-            for o in purchases:
-                o.row = o.row  # Update row_id
-                o.kind = o.kind  # Update kind_id
-            Purchase.objects.bulk_create(purchases)
+        for o in images + rows + kinds:
+            o.sheet = o.sheet  # Update sheet_id
+        for o in images + rows + kinds:
+            o.save()
+        for o in purchases:
+            o.row = o.row  # Update row_id
+            o.kind = o.kind  # Update kind_id
+        Purchase.objects.bulk_create(purchases)
         logger.info("%s: Opret ny krydsliste id=%s i opgørelse=%s " +
                     "med priser %s",
                     self.request.user, sheet.pk, self.regnskab_session.pk,
