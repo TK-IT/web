@@ -145,7 +145,8 @@ class Svm(View):
 class NaiveParam(View):
     def get(self, request):
         pos, neg = get_sheetimage_cross_classes(
-            SheetImage.objects.all()[0:4])
+            list(SheetImage.objects.all()[0:4]) +
+            list(SheetImage.objects.all()[6:8]))
 
         from regnskab.images.extract import naive_cross_value
         pos = sorted(((im, naive_cross_value(im)) for im in pos),
