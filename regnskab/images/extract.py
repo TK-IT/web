@@ -304,6 +304,13 @@ def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
     order = sorted(values.keys(), key=lambda k: values[k], reverse=True)
     rank = {k: i for i, k in enumerate(order)}
     min_extra = int(2*boxes)
+    if singles + min_extra > n*m:
+        # User put in too many crosses.
+        # We can't do better than mark everything as a cross.
+        print("Warning: Too many crosses (%s and %s boxes for %sx%s)" %
+              (singles, boxes, n, m))
+        return [(i + row_offset, j + col_offset)
+                for i in range(n) for j in range(m)]
     assert singles + min_extra <= n*m
     max_extra = min(int(4*boxes), n*m - singles)
     assert 0 <= min_extra <= max_extra <= n*m - singles
