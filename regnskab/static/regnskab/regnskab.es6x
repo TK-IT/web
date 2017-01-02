@@ -374,7 +374,7 @@ class Sheet extends React.Component {
                 counts[j] += (data.counts[j] || 0);
             if (this.rowElements.length < i)
                 this.rowElements.push(null);
-            rows.push(<SheetRow key={i}
+            rows.push(<SheetRow key={i + 'row'}
                 ref={this.setRowElement.bind(this, i)}
                 onArrowDown={this.focusRow.bind(this, i+1)}
                 onArrowUp={this.focusRow.bind(this, i-1)}
@@ -385,7 +385,7 @@ class Sheet extends React.Component {
                 onChange={this.onChangeCell.bind(this, i)}
                 onChangeName={this.onChangeName.bind(this, i)} />);
             if (data.image !== null) {
-                rows.push(<div style={{
+                rows.push(<div key={i + 'img'} style={{
                     'width': data.image.width+'px',
                     'height': (data.image.stop - data.image.start)+'px',
                     'position': 'relative',

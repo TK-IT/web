@@ -660,7 +660,7 @@ var Sheet = function (_React$Component5) {
                 for (var j = 0; j < counts.length; ++j) {
                     counts[j] += data.counts[j] || 0;
                 }if (this.rowElements.length < i) this.rowElements.push(null);
-                rows.push(React.createElement(SheetRow, { key: i,
+                rows.push(React.createElement(SheetRow, { key: i + 'row',
                     ref: this.setRowElement.bind(this, i),
                     onArrowDown: this.focusRow.bind(this, i + 1),
                     onArrowUp: this.focusRow.bind(this, i - 1),
@@ -673,7 +673,7 @@ var Sheet = function (_React$Component5) {
                 if (data.image !== null) {
                     rows.push(React.createElement(
                         'div',
-                        { style: {
+                        { key: i + 'img', style: {
                                 'width': data.image.width + 'px',
                                 'height': data.image.stop - data.image.start + 'px',
                                 'position': 'relative',
