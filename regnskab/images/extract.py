@@ -453,7 +453,8 @@ def extract_images(sheet, kinds):
                                  image_start=stitched_image_height,
                                  image_stop=stitched_image_height + height))
 
-            p_crosses = get_person_crosses(im.crosses[i:j])
+            p_crosses = get_person_crosses(im.crosses[i:j],
+                                           parameters=im.parameters)
             for col_idx, (count, boxcount) in enumerate(p_crosses):
                 kind, boxkind = kinds[2*col_idx:2*(col_idx+1)]
                 if count:
