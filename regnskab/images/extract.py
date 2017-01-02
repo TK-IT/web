@@ -361,10 +361,10 @@ def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
 def get_crosses_from_counts(sheet_image, øl=15, guldøl=6, sodavand=15):
     KINDS = 'øl guldøl sodavand'.split()
     cross_counts = get_cross_counts(sheet_image, KINDS)
-    assert sum(sheet_image.person_rows) == len(sheet_image.rows), (sheet_image.rows, sheet_image.person_rows)
+    assert sum(sheet_image.person_rows) == len(sheet_image.rows) - 1
     cross_imgs = extract_cross_images(sheet_image)
     col_bounds = np.cumsum([0, øl, guldøl, sodavand])
-    assert sum(sheet_image.person_rows) == len(cross_imgs), (sheet_image.person_rows, len(cross_imgs))
+    assert sum(sheet_image.person_rows) == len(cross_imgs)
     row_bounds = np.cumsum([0] + sheet_image.person_rows)
     n = len(sheet_image.person_rows)
 
