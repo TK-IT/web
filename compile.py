@@ -53,15 +53,18 @@ def transform_file(input_filename, output_filename, fn, exn_fn):
         if source == prev_source:
             return
         prev_source = source
-        print("Transform %s to %s" % (input_filename, output_filename))
+        print("Transform %s to %s" % (input_filename, output_filename),
+              end='', flush=True)
         try:
             result = fn(source)
         except dukpy.JSRuntimeError as exn:
+            print('')
             if exn_fn:
                 exn_fn(exn)
             else:
                 print(exn)
         else:
+            print('')
             if isinstance(result, dict):
                 code = result['code']
                 map = result['map']
