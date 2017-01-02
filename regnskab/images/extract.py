@@ -202,7 +202,7 @@ def extract_cross_images(sheet_image):
             cross = Quadrilateral(np.transpose(corners))
             cross_imgs[-1].append(extract_quadrilateral(
                 im, cross, width, height))
-    assert len(cross_imgs) == len(rows)
+    assert len(cross_imgs) == len(rows) - 1
 
     return cross_imgs
 
