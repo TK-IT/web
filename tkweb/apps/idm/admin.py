@@ -5,10 +5,10 @@ from django.db.models import Q
 from django.contrib import admin
 from django.utils.html import format_html
 from constance import config
+import tktitler
 
 from tkweb.apps.idm.models import (
-    Profile, Group, tk_prefix,
-    Title,
+    Profile, Group, Title,
 )
 
 
@@ -104,10 +104,9 @@ class TitleRootFilter(admin.SimpleListFilter):
 def period_display_prefix(period, name, gfyear=None):
     if gfyear is None:
         gfyear = config.GFYEAR
-    second_half = (period + 1) % 100
-    age = gfyear - period
-    prefix = tk_prefix(age)
-    return '%s%s %s/%02d' % (prefix, name, period, second_half)
+    prefixAndName = tktitler.tk_prefix((name, period), gfyear)
+    postfix = tktitler.tk_postfix(("", period), tktitler.POSTFIXTYPE_LONGSLASH)
+    return '%s %s' % (prefixAndName, postfix)
 
 
 class TitlePeriodFilter(admin.AllValuesFieldListFilter):
