@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from constance import config
 from tkweb.apps.tkbrand.util import gfyearPPslash
+import tktitler
 
 
 def unicode_superscript(n):
@@ -156,6 +157,12 @@ def parse_bestfu_alias(alias, gfyear):
     raise ValueError(alias)
 
 
+def get_gfyear(gfyear):
+    if gfyear is None:
+        gfyear = config.GFYEAR
+    return gfyear
+
+
 # Remember to update the migrations that refer to this function
 # if it is moved to a different file.
 def validate_regex_pattern(value):
@@ -236,6 +243,9 @@ class Title(models.Model):
     root = models.CharField(max_length=10, verbose_name='Titel')
     kind = models.CharField(max_length=10, choices=KIND, verbose_name='Slags')
 
+    def titletupel(self):
+        return (self.root, self.period)
+
     def age(self, gfyear=None):
         if gfyear is None:
             gfyear = config.GFYEAR
@@ -245,11 +255,12 @@ class Title(models.Model):
         return self.root.replace('KASS', 'KA$$')
 
     def display_title(self, gfyear=None):
-        return '%s%s' % (tk_prefix(self.age(gfyear)), self.display_root())
+        return tktitler.tk_prefix(self.titletupel(), get_gfyear(gfyear),
+                                  type=tktitler.PREFIXTYPE_UNICODE)
 
     def input_title(self, gfyear=None):
         # The title as it would be typed
-        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str), self.root)
+        return tktitler.tk_prefix(self.titletupel(), get_gfyear(gfyear))
 
     def display_title_and_year(self, gfyear=None):
         if self.root == 'EFUIT':
@@ -262,8 +273,7 @@ class Title(models.Model):
         return self.root.translate(tr)
 
     def email_local_part(self, gfyear=None):
-        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str),
-                         self.ascii_root())
+        return tktitler.email(self.titletupel(), get_gfyear(gfyear))
 
     @classmethod
     def parse(cls, title, gfyear=None, **kwargs):
