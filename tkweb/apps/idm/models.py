@@ -11,7 +11,7 @@ from tkweb.apps.tkbrand.util import gfyearPPslash
 import tktitler
 
 
-def get_gfyear(gfyear):
+def _get_gfyear(gfyear):
     if gfyear is None:
         gfyear = config.GFYEAR
     return gfyear
@@ -109,12 +109,12 @@ class Title(models.Model):
         return self.root.replace('KASS', 'KA$$')
 
     def display_title(self, gfyear=None):
-        return tktitler.tk_prefix(self.titletupel(), get_gfyear(gfyear),
+        return tktitler.tk_prefix(self.titletupel(), _get_gfyear(gfyear),
                                   type=tktitler.PREFIXTYPE_UNICODE)
 
     def input_title(self, gfyear=None):
         # The title as it would be typed
-        return tktitler.tk_prefix(self.titletupel(), get_gfyear(gfyear))
+        return tktitler.tk_prefix(self.titletupel(), _get_gfyear(gfyear))
 
     def display_title_and_year(self, gfyear=None):
         if self.root == 'EFUIT':
@@ -127,11 +127,11 @@ class Title(models.Model):
         return self.root.translate(tr)
 
     def email_local_part(self, gfyear=None):
-        return tktitler.email(self.titletupel(), get_gfyear(gfyear))
+        return tktitler.email(self.titletupel(), _get_gfyear(gfyear))
 
     @classmethod
     def parse(cls, title, gfyear=None, **kwargs):
-        root, period = tktitler.parse(title, get_gfyear(gfyear))
+        root, period = tktitler.parse(title, _get_gfyear(gfyear))
 
         letter = '(?:[A-Z]|Æ|Ø|Å|AE|OE|AA)'
         title_patterns = [
