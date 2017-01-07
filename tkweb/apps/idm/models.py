@@ -277,10 +277,18 @@ class Title(models.Model):
 
     @classmethod
     def parse(cls, title, gfyear=None, **kwargs):
-        if gfyear is None:
-            gfyear = config.GFYEAR
-        kind, root, period = parse_bestfu_alias(title, gfyear)
-        return cls(period=period, root=root, kind=kind, **kwargs)
+        root, period = tktitler.parse(title, get_gfyear(gfyear))
+
+        letter = '(?:[A-Z]|Æ|Ø|Å|AE|OE|AA)'
+        title_patterns = [
+            ('BEST', '^(?:CERM|FORM|INKA|KASS|NF|PR|SEKR|VC)$'),
+            ('FU', '^FU%s%s$' % (letter, letter)),
+            ('EFU', '^EFU%s%s$' % (letter, letter)),
+        ]
+        for kind, p in title_patterns:
+            if re.match(p, root):
+                return cls(period=period, root=root, kind=kind, **kwargs)
+        raise ValueError(title)
 
     class Meta:
         ordering = ['-period', 'kind', 'root']
