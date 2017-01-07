@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 
 from django import template
 from django.utils.safestring import mark_safe
+from constance import config
 from tkweb.apps.tkbrand import util
+import tktitler
 
 register = template.Library()
 
@@ -95,6 +97,7 @@ def gfyearPP(gfyear):
 def gfyearPPslash(gfyear):
     return util.gfyearPPslash(gfyear)
 
+
 @register.filter
 def gfyearPPslash_gallery(gfyear):
     """
@@ -103,6 +106,26 @@ def gfyearPPslash_gallery(gfyear):
     if gfyear == 1960:
         return "60/64"
     return util.gfyearPPslash(gfyear)
+
+
+@register.filter
+def tk_prefix(title):
+    return tktitler.tk_prefix(title, gfyear=config.GFYEAR)
+
+
+@register.filter
+def tk_kprefix(title):
+    return tktitler.tk_kprefix(title, gfyear=config.GFYEAR)
+
+
+@register.filter
+def tk_postfix(title):
+    return tktitler.tk_kprefix(title, gfyear=config.GFYEAR)
+
+
+@register.filter
+def tk_email(title):
+    return tktitler.email(title, gfyear=config.GFYEAR)
 
 
 # For evaluation of tags in flatpages
