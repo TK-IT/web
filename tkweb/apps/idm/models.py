@@ -7,7 +7,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from constance import config
-from tkweb.apps.tkbrand.util import gfyearPPslash
 import tktitler
 
 
@@ -119,8 +118,10 @@ class Title(models.Model):
     def display_title_and_year(self, gfyear=None):
         if self.root == 'EFUIT':
             return self.display_title(gfyear)
-        return '%s (%s)' % (self.display_title(gfyear),
-                            gfyearPPslash(self.period))
+        prefixAndName = self.display_title(gfyear)
+        postfix = tktitler.tk_postfix(("", self.period),
+                                      tktitler.POSTFIXTYPE_LONGSLASH)
+        return '%s (%s)' % (prefixAndName, postfix)
 
     def ascii_root(self):
         tr = {197: 'AA', 198: 'AE', 216: 'OE', 229: 'aa', 230: 'ae', 248: 'oe'}
