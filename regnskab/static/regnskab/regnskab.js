@@ -381,6 +381,7 @@ var ColumnEntry = function (_React$Component) {
                 { className: 'column column-' + this.props.columnKind },
                 React.createElement(Crosses, { count: this.props.value, maxCount: 30 }),
                 React.createElement('input', { className: 'column-entry', value: this.getInputValue(),
+                    onFocus: this.props.onFocus,
                     onChange: function onChange(e) {
                         return _this4.onChange(e.target.value);
                     },
@@ -507,6 +508,7 @@ var Name = function (_React$Component3) {
                 React.createElement('input', { className: 'name-entry',
                     value: this.props.nameValue,
                     ref: this.setNameEntry.bind(this),
+                    onFocus: this.props.onFocus,
                     onKeyDown: this.handleKeyDown.bind(this),
                     onChange: function onChange(e) {
                         return _this8.onNameChange(e.target.value);
@@ -549,6 +551,7 @@ var SheetRow = function (_React$Component4) {
             var columns = this.props.columns.map(function (v, i) {
                 return React.createElement(ColumnEntry, { columnKind: columnKind[i],
                     value: v, key: columnKind[i],
+                    onFocus: _this10.props.onFocus,
                     onArrowDown: _this10.props.onArrowDown,
                     onArrowUp: _this10.props.onArrowUp,
                     onChange: function onChange(v) {
@@ -563,6 +566,7 @@ var SheetRow = function (_React$Component4) {
                         return _this10.nameInputDOMNode = o && o.nameInputDOMNode;
                     },
                     personValue: this.props.personValue,
+                    onFocus: this.props.onFocus,
                     onArrowDown: this.props.onArrowDown,
                     onArrowUp: this.props.onArrowUp,
                     onChange: this.props.onChangeName }),
@@ -601,7 +605,8 @@ var Sheet = function (_React$Component5) {
         }
 
         return _ret6 = (_temp2 = (_this11 = _possibleConstructorReturn(this, (_ref3 = Sheet.__proto__ || Object.getPrototypeOf(Sheet)).call.apply(_ref3, [this].concat(args))), _this11), _this11.state = {
-            rows: _this11.get_initial_rows()
+            rows: _this11.get_initial_rows(),
+            currentRow: null
         }, _temp2), _possibleConstructorReturn(_this11, _ret6);
     }
 
@@ -647,7 +652,28 @@ var Sheet = function (_React$Component5) {
         value: function focusRow(i) {
             if (0 <= i && i < this.rowElements.length && this.rowElements[i]) {
                 this.rowElements[i].nameInputDOMNode.focus();
+                this.scrollIntoView(i);
             }
+        }
+    }, {
+        key: 'scrollIntoView',
+        value: function scrollIntoView(i) {
+            if (!this.rowElements[i]) return;
+            var o = this.rowElements[i].nameInputDOMNode;
+            if (!o) return;
+            var y1 = document.documentElement.scrollTop;
+            var y2 = y1 + document.documentElement.clientHeight;
+            var y = o.offsetTop;
+            var y_rel = (y - y1) / (y2 - y1);
+            if (y_rel < 0 || y_rel > 2 / 3) document.documentElement.scrollTop = y;
+        }
+    }, {
+        key: 'onFocus',
+        value: function onFocus(i) {
+            if (this.currentRow === null || this.currentRow < i) {
+                this.scrollIntoView(i);
+            }
+            this.currentRow = i;
         }
     }, {
         key: 'render',
@@ -668,12 +694,13 @@ var Sheet = function (_React$Component5) {
                     columns: data.counts,
                     nameValue: data.name,
                     personValue: data.profile_id,
+                    onFocus: this.onFocus.bind(this, i),
                     onChange: this.onChangeCell.bind(this, i),
                     onChangeName: this.onChangeName.bind(this, i) }));
                 if (data.image !== null) {
                     rows.push(React.createElement(
                         'div',
-                        { key: i + 'img', style: {
+                        { key: i + 'img', className: 'image', style: {
                                 'width': data.image.width + 'px',
                                 'height': data.image.stop - data.image.start + 'px',
                                 'position': 'relative',

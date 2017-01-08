@@ -197,6 +197,7 @@ class ColumnEntry extends React.Component {
         return <div className={'column column-'+this.props.columnKind}>
             <Crosses count={this.props.value} maxCount={30} />
             <input className='column-entry' value={this.getInputValue()}
+                   onFocus={this.props.onFocus}
                    onChange={e => this.onChange(e.target.value)}
                    onKeyDown={this.handleKeyDown.bind(this)} />
         </div>;
@@ -267,6 +268,7 @@ class Name extends React.Component {
             <input className='name-entry'
                 value={this.props.nameValue}
                 ref={this.setNameEntry.bind(this)}
+                onFocus={this.props.onFocus}
                 onKeyDown={this.handleKeyDown.bind(this)}
                 onChange={e => this.onNameChange(e.target.value)} />
             <PersonChoice choices={this.getChoices()}
@@ -291,6 +293,7 @@ class SheetRow extends React.Component {
         let columns = this.props.columns.map((v, i) =>
             <ColumnEntry columnKind={columnKind[i]}
                 value={v} key={columnKind[i]}
+                onFocus={this.props.onFocus}
                 onArrowDown={this.props.onArrowDown}
                 onArrowUp={this.props.onArrowUp}
                 onChange={v => this.props.onChange(i, v)} />);
@@ -298,6 +301,7 @@ class SheetRow extends React.Component {
             <Name persons={this.props.persons} nameValue={this.props.nameValue}
                 ref={(o) => this.nameInputDOMNode = o && o.nameInputDOMNode}
                 personValue={this.props.personValue}
+                onFocus={this.props.onFocus}
                 onArrowDown={this.props.onArrowDown}
                 onArrowUp={this.props.onArrowUp}
                 onChange={this.props.onChangeName} />
@@ -320,7 +324,8 @@ function save_form_state(o) {
 
 class Sheet extends React.Component {
     state = {
-        rows: this.get_initial_rows()
+        rows: this.get_initial_rows(),
+        currentRow: null
     }
 
     get_initial_rows() {
@@ -360,7 +365,27 @@ class Sheet extends React.Component {
     focusRow(i) {
         if (0 <= i && i < this.rowElements.length && this.rowElements[i]) {
             this.rowElements[i].nameInputDOMNode.focus();
+            this.scrollIntoView(i);
         }
+    }
+
+    scrollIntoView(i) {
+        if (!this.rowElements[i]) return;
+        let o = this.rowElements[i].nameInputDOMNode;
+        if (!o) return;
+        let y1 = document.documentElement.scrollTop;
+        let y2 = y1 + document.documentElement.clientHeight;
+        let y = o.offsetTop;
+        let y_rel = (y - y1) / (y2 - y1);
+        if (y_rel < 0 || y_rel > 2/3)
+            document.documentElement.scrollTop = y;
+    }
+
+    onFocus(i) {
+        if (this.currentRow === null || this.currentRow < i) {
+            this.scrollIntoView(i);
+        }
+        this.currentRow = i;
     }
 
     render() {
@@ -382,10 +407,11 @@ class Sheet extends React.Component {
                 columns={data.counts}
                 nameValue={data.name}
                 personValue={data.profile_id}
+                onFocus={this.onFocus.bind(this, i)}
                 onChange={this.onChangeCell.bind(this, i)}
                 onChangeName={this.onChangeName.bind(this, i)} />);
             if (data.image !== null) {
-                rows.push(<div key={i + 'img'} style={{
+                rows.push(<div key={i + 'img'} className='image' style={{
                     'width': data.image.width+'px',
                     'height': (data.image.stop - data.image.start)+'px',
                     'position': 'relative',
