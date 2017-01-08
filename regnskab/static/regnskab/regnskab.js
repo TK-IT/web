@@ -683,10 +683,12 @@ var Sheet = function (_React$Component5) {
             var rows = [];
             if (typeof this.rowElements === 'undefined') this.rowElements = [];
             var counts = [0, 0, 0, 0, 0, 0];
+            var countsAnon = [0, 0, 0, 0, 0, 0];
             for (var i = 0; i < this.state.rows.length; ++i) {
                 var data = this.state.rows[i];
+                var countsTarget = data.profile_id ? counts : countsAnon;
                 for (var j = 0; j < counts.length; ++j) {
-                    counts[j] += data.counts[j] || 0;
+                    countsTarget[j] += data.counts[j] || 0;
                 }if (this.rowElements.length < i) this.rowElements.push(null);
                 rows.push(React.createElement(SheetRow, { key: i + 'row',
                     ref: this.setRowElement.bind(this, i),
@@ -725,54 +727,54 @@ var Sheet = function (_React$Component5) {
                         { className: 'column column-1' },
                         'øl',
                         React.createElement('br', null),
-                        '(',
                         counts[0],
-                        ')'
+                        '/',
+                        countsAnon[0]
                     ),
                     React.createElement(
                         'div',
                         { className: 'column column-1ks' },
                         'ks',
                         React.createElement('br', null),
-                        '(',
                         counts[1],
-                        ')'
+                        '/',
+                        countsAnon[1]
                     ),
                     React.createElement(
                         'div',
                         { className: 'column column-2' },
                         'guldøl',
                         React.createElement('br', null),
-                        '(',
                         counts[2],
-                        ')'
+                        '/',
+                        countsAnon[2]
                     ),
                     React.createElement(
                         'div',
                         { className: 'column column-2ks' },
                         'ks',
                         React.createElement('br', null),
-                        '(',
                         counts[3],
-                        ')'
+                        '/',
+                        countsAnon[3]
                     ),
                     React.createElement(
                         'div',
                         { className: 'column column-3' },
                         'sodavand',
                         React.createElement('br', null),
-                        '(',
                         counts[4],
-                        ')'
+                        '/',
+                        countsAnon[4]
                     ),
                     React.createElement(
                         'div',
                         { className: 'column column-3ks' },
                         'ks',
                         React.createElement('br', null),
-                        '(',
                         counts[5],
-                        ')'
+                        '/',
+                        countsAnon[5]
                     )
                 ),
                 rows

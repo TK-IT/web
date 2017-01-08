@@ -395,10 +395,12 @@ class Sheet extends React.Component {
         if (typeof this.rowElements === 'undefined')
             this.rowElements = [];
         let counts = [0, 0, 0, 0, 0, 0];
+        let countsAnon = [0, 0, 0, 0, 0, 0];
         for (let i = 0; i < this.state.rows.length; ++i) {
             let data = this.state.rows[i];
+            let countsTarget = data.profile_id ? counts : countsAnon;
             for (let j = 0; j < counts.length; ++j)
-                counts[j] += (data.counts[j] || 0);
+                countsTarget[j] += (data.counts[j] || 0);
             if (this.rowElements.length < i)
                 this.rowElements.push(null);
             rows.push(<SheetRow key={i + 'row'}
@@ -427,12 +429,12 @@ class Sheet extends React.Component {
         return <div className='sheet'>
             <div className="sheetrow sheetrow-header">
                 <div className="name"></div>
-                <div className="column column-1">øl<br/>({counts[0]})</div>
-                <div className="column column-1ks">ks<br/>({counts[1]})</div>
-                <div className="column column-2">guldøl<br/>({counts[2]})</div>
-                <div className="column column-2ks">ks<br/>({counts[3]})</div>
-                <div className="column column-3">sodavand<br/>({counts[4]})</div>
-                <div className="column column-3ks">ks<br/>({counts[5]})</div>
+                <div className="column column-1">øl<br/>{counts[0]}/{countsAnon[0]}</div>
+                <div className="column column-1ks">ks<br/>{counts[1]}/{countsAnon[1]}</div>
+                <div className="column column-2">guldøl<br/>{counts[2]}/{countsAnon[2]}</div>
+                <div className="column column-2ks">ks<br/>{counts[3]}/{countsAnon[3]}</div>
+                <div className="column column-3">sodavand<br/>{counts[4]}/{countsAnon[4]}</div>
+                <div className="column column-3ks">ks<br/>{counts[5]}/{countsAnon[5]}</div>
             </div>
             {rows}
         </div>;
