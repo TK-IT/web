@@ -5,7 +5,7 @@
 <h2>{{ object.recipient_name }}</h2>
 <p>Til: <tt>{{ object.recipient_email }}</tt></p>
 <p>Emne: <tt>{{ object.subject }}</tt></p>
-<pre>{{ object.body }}</pre>
+<pre style="white-space: pre-wrap">{{ object.body }}</pre>
 <h2>Send kopi</h2>
 <form method="post" action="{% url 'regnskab:email_send' pk=session.pk profile=profile.pk %}">{% csrf_token %}
     <p><label>Modtager: <input name="override_recipient" value="{{ user.email }}"></label></p>
