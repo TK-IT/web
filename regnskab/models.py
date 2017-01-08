@@ -500,6 +500,7 @@ class Session(models.Model):
 
         profiles = Profile.objects.all().annotate(profile_id=F('id'))
         profiles = profiles.order_by('profile_id')
+        initial_balances = compute_balance(created_before=self.created_time)
         balances = compute_balance()
         balances = [Balance(profile_id=i, amount=a)
                     for i, a in balances.items()]
@@ -540,9 +541,9 @@ class Session(models.Model):
 
         for profile_id, profile_data in data_by_profile:
             self.regenerate_email(
-                kind_price, profile_data)
+                kind_price, profile_data, initial_balances)
 
-    def regenerate_email(self, kind_price, data_iterable):
+    def regenerate_email(self, kind_price, data_iterable, initial_balances):
         payment_sum = 0
         other_sum = 0
         purchase_count = defaultdict(Decimal)
@@ -571,6 +572,8 @@ class Session(models.Model):
                 profile = o
             else:
                 raise TypeError(type(o))
+
+        initial_balance = initial_balances.get(profile.id, Decimal())
 
         activity = (balance > 0 or any(purchase_count.values()) or
                     payment_sum or other_sum)
@@ -612,6 +615,7 @@ class Session(models.Model):
             'PVAND': format_price_set(kind_price.get('sodavand', ())),
             'PGULD': format_price_set(kind_price.get('guldøl', ())),
             'PKASSER': format_price_set(kind_price.get('ølkasse', ())),
+            'GAELDFOER': format_price(initial_balance),
             'GAELD': format_price(balance),
             'MAXGAELD': format_price(250),  # TODO make this configurable
             'OEL': format_count(purchase_count.get('øl', 0)),
