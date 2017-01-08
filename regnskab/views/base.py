@@ -17,7 +17,7 @@ from django.views.generic import (
 )
 from django.template.response import TemplateResponse
 from regnskab.forms import (
-    SheetCreateForm, SessionForm,
+    SheetCreateForm, SessionForm, SheetRowForm,
     TransactionBatchForm, BalancePrintForm,
 )
 from regnskab.models import (
@@ -180,8 +180,9 @@ class SheetDetail(TemplateView):
         return context_data
 
 
-class SheetRowUpdate(TemplateView):
+class SheetRowUpdate(FormView):
     template_name = 'regnskab/sheet_update.html'
+    form_class = SheetRowForm
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
@@ -190,6 +191,11 @@ class SheetRowUpdate(TemplateView):
         if not self.regnskab_session or self.regnskab_session.sent:
             return already_sent_view(request, self.regnskab_session)
         return super().dispatch(request, *args, **kwargs)
+
+    def get_initial(self):
+        return dict(start_date=self.sheet.start_date,
+                    end_date=self.sheet.end_date,
+                    data=self.get_initial_data())
 
     def get_sheet(self):
         return get_object_or_404(Sheet.objects, pk=self.kwargs['pk'])
@@ -216,34 +222,29 @@ class SheetRowUpdate(TemplateView):
                 in_current=profile.in_current))
         return result
 
+    def get_initial_data(self):
+        row_objects = self.sheet.rows()
+        row_data = []
+        for r in row_objects:
+            counts = []
+            for k in r['kinds']:
+                counts.append(float(k.count) if k.id else None)
+
+            row_data.append(dict(
+                profile_id=r['profile'] and r['profile'].id,
+                name=r['name'] or '',
+                counts=counts,
+                image=r['image'],
+            ))
+        return json.dumps(row_data, indent=2)
+
     def get_context_data(self, **kwargs):
         context_data = super(SheetRowUpdate, self).get_context_data(**kwargs)
         sheet = context_data['sheet'] = self.sheet
         profiles = self.get_profiles()
         context_data['profiles_json'] = json.dumps(profiles, indent=2)
-        if 'rows_json' not in context_data:
-            row_objects = sheet.rows()
-            row_data = []
-            for r in row_objects:
-                counts = []
-                for k in r['kinds']:
-                    counts.append(float(k.count) if k.id else None)
-
-                row_data.append(dict(
-                    profile_id=r['profile'] and r['profile'].id,
-                    name=r['name'] or '',
-                    counts=counts,
-                    image=r['image'],
-                ))
-            context_data['rows_json'] = json.dumps(row_data, indent=2)
-
         context_data['session'] = self.regnskab_session
-
         return context_data
-
-    def post_invalid(self, request, message):
-        return self.render_to_response(
-            self.get_context_data(error=message, rows_json=request.POST['data']))
 
     def clean(self, data_json):
         sheet = self.sheet
@@ -338,16 +339,20 @@ class SheetRowUpdate(TemplateView):
             o.row = o.row  # Update o.row_id
         Purchase.objects.bulk_create(save_purchases)
 
-    def post(self, request, *args, **kwargs):
+    def form_valid(self, form):
         try:
-            row_objects = self.clean(request.POST['data'])
+            row_objects = self.clean(form.cleaned_data['data'])
         except ValidationError as exn:
-            return self.post_invalid(request, str(exn))
+            form.add_error(None, exn)
+            return self.form_invalid(form)
+        self.sheet.start_date = form.cleaned_data['start_date']
+        self.sheet.end_date = form.cleaned_data['end_date']
+        self.sheet.save()
         self.save_rows(row_objects)
         if self.regnskab_session.email_template:
             self.regnskab_session.regenerate_emails()
         return self.render_to_response(
-            self.get_context_data(saved=True))
+            self.get_context_data(form=form, saved=True))
 
 
 class SessionList(ListView):

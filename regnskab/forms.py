@@ -104,3 +104,13 @@ class BalancePrintForm(forms.Form):
 
     highlight = forms.BooleanField(required=False, initial=True)
     mode = forms.ChoiceField(choices=print_choices, initial='pdf')
+
+
+class SheetRowForm(forms.Form):
+    start_date = forms.DateField(label='På-dato',
+                                 help_text='Format DD.MM.YYYY')
+    end_date = forms.DateField(label='Af-dato',
+                               help_text='Format DD.MM.YYYY')
+    data = forms.CharField(
+        widget=forms.HiddenInput(
+            attrs=dict(id='tk_rows')))
