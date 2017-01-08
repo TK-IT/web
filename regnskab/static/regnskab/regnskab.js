@@ -660,12 +660,14 @@ var Sheet = function (_React$Component5) {
         value: function scrollIntoView(i) {
             if (!this.rowElements[i]) return;
             var o = this.rowElements[i].nameInputDOMNode;
+            console.log('scrollIntoView', i, o);
             if (!o) return;
-            var y1 = document.documentElement.scrollTop;
-            var y2 = y1 + document.documentElement.clientHeight;
+            var y1 = document.scrollingElement.scrollTop;
+            var y2 = y1 + document.scrollingElement.clientHeight;
             var y = o.offsetTop;
             var y_rel = (y - y1) / (y2 - y1);
-            if (y_rel < 0 || y_rel > 2 / 3) document.documentElement.scrollTop = y;
+            console.log(y1, y, y2, y_rel);
+            if (y_rel < 0 || y_rel > 2 / 3) document.scrollingElement.scrollTop = y;
         }
     }, {
         key: 'onFocus',

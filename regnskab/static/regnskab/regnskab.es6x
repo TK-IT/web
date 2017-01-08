@@ -372,13 +372,15 @@ class Sheet extends React.Component {
     scrollIntoView(i) {
         if (!this.rowElements[i]) return;
         let o = this.rowElements[i].nameInputDOMNode;
+        console.log('scrollIntoView', i, o);
         if (!o) return;
-        let y1 = document.documentElement.scrollTop;
-        let y2 = y1 + document.documentElement.clientHeight;
+        let y1 = document.scrollingElement.scrollTop;
+        let y2 = y1 + document.scrollingElement.clientHeight;
         let y = o.offsetTop;
         let y_rel = (y - y1) / (y2 - y1);
+        console.log(y1, y, y2, y_rel);
         if (y_rel < 0 || y_rel > 2/3)
-            document.documentElement.scrollTop = y;
+            document.scrollingElement.scrollTop = y;
     }
 
     onFocus(i) {
