@@ -6,9 +6,9 @@ from regnskab.models import EmailTemplate, Session, config
 
 class SheetCreateForm(forms.Form):
     start_date = forms.DateField(label='På-dato',
-                                 help_text='Format YYYY-MM-DD')
+                                 help_text='Format DD.MM.YYYY')
     end_date = forms.DateField(label='Af-dato',
-                               help_text='Format YYYY-MM-DD')
+                               help_text='Format DD.MM.YYYY')
     image_file = forms.FileField(label='Scannet PDF',
                                  required=False)
     name = forms.CharField(max_length=200, required=False,
