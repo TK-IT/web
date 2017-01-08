@@ -1,0 +1,50 @@
+.sheet {
+	border-collapse: collapse;
+}
+.sheet td, .sheet th {
+	border-bottom: 3px solid #aaa;
+	font-weight: normal;
+	padding: 0;
+}
+.crosses {
+	display: flex;
+	position: relative;
+	flex-direction: column;
+	flex-wrap: wrap;
+	height: 40px;
+	align-content: flex-start;
+	overflow: hidden;
+	width: 60px;
+	border-left: 3px solid #aaa;
+}
+.crosses.column-øl {
+	width: 225px;
+}
+.crosses.column-guldøl {
+	width: 90px;
+}
+.crosses.column-sodavand {
+	width: 225px;
+}
+.crosses.column-ølkasse,
+.crosses.column-guldølkasse,
+.crosses.column-sodavandkasse {
+	border-left: 3px solid #ddd;
+}
+.crosses > .cross {
+	width: 15px;
+	line-height: 20px;
+	height: 20px;
+	color: rgb(50%, 50%, 50%);
+}
+.crosses > .count {
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding-left: 10px;
+	line-height: 40px;
+	font-size: 20px;
+	font-weight: bold;
+	right: 0;
+}
+.highlight { background-color: rgba(255, 0, 0, 0.4); }
