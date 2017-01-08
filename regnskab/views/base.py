@@ -176,7 +176,9 @@ class SheetDetail(TemplateView):
             context_data['highlight_profile'] = int(
                 self.request.GET['highlight_profile'])
         except (KeyError, ValueError):
-            pass
+            # Make highlight_profile something that does not
+            # compare equal to a missing profile.
+            context_data['highlight_profile'] = object()
         return context_data
 
 
