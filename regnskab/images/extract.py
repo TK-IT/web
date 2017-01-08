@@ -70,22 +70,6 @@ def find_bbox(im, sigma=1, margin1=10, margin2=100, margin3=20, threshold=0.6):
         im = scipy.ndimage.filters.gaussian_filter(im, sigma, mode='constant')
     dark = (im < threshold)
 
-    # dark is boolean, so argmax returns the first true
-    left = np.argmax(dark, axis=1)
-    # left[i] is the index of the first dark cell in row i
-    left = np.amin(left[margin2:-margin2])
-    # left is the row with the first dark cell
-
-    # multiply by arange to make argmax select the last true in each row
-    right = np.argmax(dark * np.arange(dark.shape[1])[np.newaxis, :], axis=1)
-    # right[i] is the index of the last dark cell in row i
-    right = np.max(right[margin2:-margin2])
-
-    top = np.argmax(dark, axis=0)
-    top = np.max(top[left + margin3:right - margin3])
-    bottom = np.argmax(dark * np.arange(dark.shape[0])[:, np.newaxis], axis=0)
-    bottom = np.max(bottom[left + margin3:right - margin3])
-
     labels, no_labels = scipy.ndimage.label(dark)
     (label, area, count), = max_object(labels, no_labels, 1)
     obj = np.zeros((im.shape[0] + 2*margin1, im.shape[1] + 2*margin1))
