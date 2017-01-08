@@ -5,12 +5,18 @@ from regnskab.models import EmailTemplate, Session, config
 
 
 class SheetCreateForm(forms.Form):
-    name = forms.CharField(max_length=200, required=False)
-    period = forms.IntegerField()
-    start_date = forms.DateField()
-    end_date = forms.DateField()
-    kinds = forms.CharField(widget=forms.Textarea)
-    image_file = forms.FileField(required=False)
+    start_date = forms.DateField(label='På-dato',
+                                 help_text='Format YYYY-MM-DD')
+    end_date = forms.DateField(label='Af-dato',
+                               help_text='Format YYYY-MM-DD')
+    image_file = forms.FileField(label='Scannet PDF',
+                                 required=False)
+    name = forms.CharField(max_length=200, required=False,
+                           label='Særlig krydsliste',
+                           help_text='(f.eks. revy)')
+    period = forms.IntegerField(label='Bestyrelsesår')
+    kinds = forms.CharField(widget=forms.Textarea,
+                            label='Priser')
 
     def clean_kinds(self):
         s = self.cleaned_data['kinds']
