@@ -36,7 +36,7 @@ har krydset på alle krydslisterne siden sidst regningen blev gjort op.</p>
 -->
 <td>
 {% if not sheet.legacy_style %}{{ row.name }}<br />{% endif %}
-{{ row.display_title }} {{ row.profile }}
+{{ row.display_title|default:"" }} {{ row.profile|default:"" }}
 </td>
 {% for kind in row.kinds %}
 <td>
