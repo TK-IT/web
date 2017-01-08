@@ -252,7 +252,11 @@ class Name extends React.Component {
     }
     getChoices(query) {
         if (typeof query === 'undefined') query = this.props.nameValue;
-        return filter_persons_cached(this.props.persons, query);
+        let choices = filter_persons_cached(this.props.persons, query);
+        return choices.map(
+            ({display, person}) =>
+            ({display: person.in_current ? display : `(${display})`,
+              person: person}));
     }
     handleKeyDown(ev) {
         if (ev.key === 'ArrowDown') this.props.onArrowDown();

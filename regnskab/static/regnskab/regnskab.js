@@ -485,7 +485,13 @@ var Name = function (_React$Component3) {
         key: 'getChoices',
         value: function getChoices(query) {
             if (typeof query === 'undefined') query = this.props.nameValue;
-            return filter_persons_cached(this.props.persons, query);
+            var choices = filter_persons_cached(this.props.persons, query);
+            return choices.map(function (_ref3) {
+                var display = _ref3.display;
+                var person = _ref3.person;
+                return { display: person.in_current ? display : '(' + display + ')',
+                    person: person };
+            });
         }
     }, {
         key: 'handleKeyDown',
@@ -594,7 +600,7 @@ var Sheet = function (_React$Component5) {
     _inherits(Sheet, _React$Component5);
 
     function Sheet() {
-        var _ref3;
+        var _ref4;
 
         var _temp2, _this11, _ret6;
 
@@ -604,7 +610,7 @@ var Sheet = function (_React$Component5) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret6 = (_temp2 = (_this11 = _possibleConstructorReturn(this, (_ref3 = Sheet.__proto__ || Object.getPrototypeOf(Sheet)).call.apply(_ref3, [this].concat(args))), _this11), _this11.state = {
+        return _ret6 = (_temp2 = (_this11 = _possibleConstructorReturn(this, (_ref4 = Sheet.__proto__ || Object.getPrototypeOf(Sheet)).call.apply(_ref4, [this].concat(args))), _this11), _this11.state = {
             rows: _this11.get_initial_rows(),
             currentRow: null
         }, _temp2), _possibleConstructorReturn(_this11, _ret6);
