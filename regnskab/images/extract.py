@@ -91,12 +91,10 @@ def find_bbox(im, sigma=1, margin1=10, margin2=100, margin3=20, threshold=0.6):
     obj = np.zeros((im.shape[0] + 2*margin1, im.shape[1] + 2*margin1))
     obj[margin1:-margin1, margin1:-margin1] = (labels == label) * 1.0
     ys, xs = (labels == label).nonzero()
-    sums = xs + ys
-    diffs = xs - ys
-    top_left = np.argmin(sums)
-    bottom_right = np.argmax(sums)
-    bottom_left = np.argmin(diffs)
-    top_right = np.argmax(diffs)
+    top_left = np.argmin(xs + ys)
+    bottom_right = np.argmax(xs + ys)
+    bottom_left = np.argmin(xs - ys)
+    top_right = np.argmax(xs - ys)
 
     corners = np.asarray(
         [[xs[i], ys[i]]
