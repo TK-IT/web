@@ -375,7 +375,7 @@ class Sheet extends React.Component {
         console.log('scrollIntoView', i, o);
         if (!o) return;
         let y1 = document.scrollingElement.scrollTop;
-        let y2 = y1 + document.scrollingElement.clientHeight;
+        let y2 = y1 + document.documentElement.clientHeight;
         let y = o.offsetTop;
         let y_rel = (y - y1) / (y2 - y1);
         console.log(y1, y, y2, y_rel);

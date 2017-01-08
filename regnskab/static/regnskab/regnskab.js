@@ -663,7 +663,7 @@ var Sheet = function (_React$Component5) {
             console.log('scrollIntoView', i, o);
             if (!o) return;
             var y1 = document.scrollingElement.scrollTop;
-            var y2 = y1 + document.scrollingElement.clientHeight;
+            var y2 = y1 + document.documentElement.clientHeight;
             var y = o.offsetTop;
             var y_rel = (y - y1) / (y2 - y1);
             console.log(y1, y, y2, y_rel);
