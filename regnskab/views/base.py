@@ -267,8 +267,7 @@ class SheetRowUpdate(TemplateView):
                 raise ValidationError("profile_id must be an int")
 
         profile_ids = set(row['profile_id'] for row in row_data
-                          if any(c is not None for c in row['counts'])
-                          and row['profile_id'])
+                          if row['profile_id'])
         profiles = {
             p.id: p for p in Profile.objects.filter(id__in=sorted(profile_ids))
         }
