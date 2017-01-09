@@ -5,7 +5,7 @@
 <h2>Opgørelser</h2>
 
 <form method="post" action="{% url 'regnskab:session_create' %}">{% csrf_token %}
-    <input type="submit" value="Begynd ny opgørelse" />
+    <input id="id_create_session" type="submit" value="Begynd ny opgørelse" />
 </form>
 
 <table>
