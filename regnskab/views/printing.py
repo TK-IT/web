@@ -74,7 +74,7 @@ Månedstotal & \hfill \num{%(last_ølkasse).2f} & \hfill \num{%(last_guldøl)d} 
 
 BALANCE_ROW = '\n'.join([
     r'\hline',
-    r'\multirow{2}{6cm}{%(name)-30s} & %(last)s &\\',
+    r'\multirow{2}{6cm}{%(name)s} & %(last)s &\\',
     r'& %(total)s & \hfill %(hl)s{\num{%(balance).2f}}\\'])
 
 
