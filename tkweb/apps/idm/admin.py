@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.contrib import admin
 from django.utils.html import format_html
 from constance import config
-import tktitler
+import tktitler as tk
 
 from tkweb.apps.idm.models import (
     Profile, Group, Title,
@@ -104,8 +104,8 @@ class TitleRootFilter(admin.SimpleListFilter):
 def period_display_prefix(period, name, gfyear=None):
     if gfyear is None:
         gfyear = config.GFYEAR
-    prefixAndName = tktitler.tk_prefix((name, period), gfyear)
-    postfix = tktitler.tk_postfix(("", period), tktitler.POSTFIXTYPE_LONGSLASH)
+    prefixAndName = tk.prefix((name, period), gfyear)
+    postfix = tk.postfix(("", period), tk.POSTFIXTYPE_LONGSLASH)
     return '%s %s' % (prefixAndName, postfix)
 
 

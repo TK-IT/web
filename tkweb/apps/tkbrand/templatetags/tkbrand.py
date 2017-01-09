@@ -5,7 +5,7 @@ from django import template
 from django.utils.safestring import mark_safe
 from constance import config
 from tkweb.apps.tkbrand import util
-import tktitler
+import tktitler as tk
 
 register = template.Library()
 
@@ -110,22 +110,22 @@ def gfyearPPslash_gallery(gfyear):
 
 @register.filter
 def tk_prefix(title):
-    return tktitler.tk_prefix(title, gfyear=config.GFYEAR)
+    return tk.prefix(title, gfyear=config.GFYEAR)
 
 
 @register.filter
 def tk_kprefix(title):
-    return tktitler.tk_kprefix(title, gfyear=config.GFYEAR)
+    return tk.kprefix(title, gfyear=config.GFYEAR)
 
 
 @register.filter
 def tk_postfix(title):
-    return tktitler.tk_postfix(title, gfyear=config.GFYEAR)
+    return tk.postfix(title, gfyear=config.GFYEAR)
 
 
 @register.filter
 def tk_email(title):
-    return tktitler.email(title, gfyear=config.GFYEAR)
+    return tk.email(title, gfyear=config.GFYEAR)
 
 
 # For evaluation of tags in flatpages
