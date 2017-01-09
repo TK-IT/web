@@ -116,12 +116,8 @@ class Title(models.Model):
         return tk.prefix(self.titletupel(), _get_gfyear(gfyear))
 
     def display_title_and_year(self, gfyear=None):
-        if self.root == 'EFUIT':
-            return self.display_title(gfyear)
-        prefixAndName = self.display_title(gfyear)
-        postfix = tk.postfix(("", self.period),
-                             tk.POSTFIXTYPE_LONGSLASH)
-        return '%s (%s)' % (prefixAndName, postfix)
+        return tk.prepostfix(self.titletupel(), _get_gfyear(gfyear),
+                             prefixtype=tk.PREFIXTYPE_UNICODE)
 
     def ascii_root(self):
         tr = {197: 'AA', 198: 'AE', 216: 'OE', 229: 'aa', 230: 'ae', 248: 'oe'}
