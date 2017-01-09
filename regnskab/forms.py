@@ -4,6 +4,15 @@ from django.core.exceptions import ValidationError
 from regnskab.models import EmailTemplate, Session, config
 
 
+def placeholder_from_help(cls):
+    for f in cls.base_fields.values():
+        if f.help_text and 'placeholder' not in f.widget.attrs:
+            f.widget.attrs['placeholder'] = f.help_text
+            f.help_text = None
+    return cls
+
+
+@placeholder_from_help
 class SheetCreateForm(forms.Form):
     start_date = forms.DateField(label='På-dato',
                                  help_text='Format DD.MM.YYYY')
@@ -106,6 +115,7 @@ class BalancePrintForm(forms.Form):
     mode = forms.ChoiceField(choices=print_choices, initial='pdf')
 
 
+@placeholder_from_help
 class SheetRowForm(forms.Form):
     start_date = forms.DateField(label='På-dato',
                                  help_text='Format DD.MM.YYYY')
