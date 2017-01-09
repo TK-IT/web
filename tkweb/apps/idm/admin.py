@@ -104,9 +104,8 @@ class TitleRootFilter(admin.SimpleListFilter):
 def period_display_prefix(period, name, gfyear=None):
     if gfyear is None:
         gfyear = config.GFYEAR
-    prefixAndName = tk.prefix((name, period), gfyear)
-    postfix = tk.postfix(("", period), tk.POSTFIXTYPE_LONGSLASH)
-    return '%s %s' % (prefixAndName, postfix)
+    return tk.prepostfix((name, period), gfyear,
+                         prefixtype=tk.PREFIXTYPE_UNICODE)
 
 
 class TitlePeriodFilter(admin.AllValuesFieldListFilter):
