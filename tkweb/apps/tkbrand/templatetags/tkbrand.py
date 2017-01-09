@@ -120,7 +120,7 @@ def tk_kprefix(title):
 
 @register.filter
 def tk_postfix(title):
-    return tktitler.tk_kprefix(title, gfyear=config.GFYEAR)
+    return tktitler.tk_postfix(title, gfyear=config.GFYEAR)
 
 
 @register.filter
