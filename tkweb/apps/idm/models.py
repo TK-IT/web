@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from constance import config
-import tktitler
+import tktitler as tk
 
 
 def _get_gfyear(gfyear):
@@ -108,19 +108,19 @@ class Title(models.Model):
         return self.root.replace('KASS', 'KA$$')
 
     def display_title(self, gfyear=None):
-        return tktitler.tk_prefix(self.titletupel(), _get_gfyear(gfyear),
-                                  type=tktitler.PREFIXTYPE_UNICODE)
+        return tk.prefix(self.titletupel(), _get_gfyear(gfyear),
+                         type=tk.PREFIXTYPE_UNICODE)
 
     def input_title(self, gfyear=None):
         # The title as it would be typed
-        return tktitler.tk_prefix(self.titletupel(), _get_gfyear(gfyear))
+        return tk.prefix(self.titletupel(), _get_gfyear(gfyear))
 
     def display_title_and_year(self, gfyear=None):
         if self.root == 'EFUIT':
             return self.display_title(gfyear)
         prefixAndName = self.display_title(gfyear)
-        postfix = tktitler.tk_postfix(("", self.period),
-                                      tktitler.POSTFIXTYPE_LONGSLASH)
+        postfix = tk.postfix(("", self.period),
+                             tk.POSTFIXTYPE_LONGSLASH)
         return '%s (%s)' % (prefixAndName, postfix)
 
     def ascii_root(self):
@@ -128,11 +128,11 @@ class Title(models.Model):
         return self.root.translate(tr)
 
     def email_local_part(self, gfyear=None):
-        return tktitler.email(self.titletupel(), _get_gfyear(gfyear))
+        return tk.email(self.titletupel(), _get_gfyear(gfyear))
 
     @classmethod
     def parse(cls, title, gfyear=None, **kwargs):
-        root, period = tktitler.parse(title, _get_gfyear(gfyear))
+        root, period = tk.parse(title, _get_gfyear(gfyear))
 
         letter = '(?:[A-Z]|Æ|Ø|Å|AE|OE|AA)'
         title_patterns = [
