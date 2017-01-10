@@ -416,6 +416,7 @@ def get_images(sheet):
                     raise
                 break
             i += 1
+    return images
 
 
 def extract_images(sheet, kinds):
