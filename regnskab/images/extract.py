@@ -1,6 +1,9 @@
 import numpy as np
 import scipy.ndimage
 import scipy.signal
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 from django.core.files.base import ContentFile
 from django.utils import timezone
@@ -145,6 +148,41 @@ def extract_rows_cols(sheet_image):
     extract_cols(sheet_image, input_grey)
     extract_rows(sheet_image, input_grey)
     extract_person_rows(sheet_image, input_grey)
+
+
+def plot_extract_rows_cols(sheet_image):
+    im = sheet_image.get_image()
+    input_bbox = Quadrilateral(sheet_image.quad)
+
+    resolution = max(im.shape)
+    input_transform = extract_quadrilateral(
+        im, input_bbox, resolution, resolution)
+    input_grey = to_grey(input_transform, sheet_image.parameters)
+
+    fig, (ax1, ax2) = plt.subplots(2)
+
+    sz = resolution - 1
+    col_avg = np.mean(input_grey, axis=0)
+    ax1.plot(np.arange(resolution) / sz, col_avg, 'k-')
+    col_cutoff = sheet_image.parameters['extract_cols.cutoff']
+    ax1.plot([0, 1], [col_cutoff, col_cutoff], 'r-')
+    col_peaks = np.asarray(scipy.signal.find_peaks_cwt(
+        -np.minimum(col_avg, col_cutoff),
+        [sheet_image.parameters['extract_cols.width']],
+        max_distances=[sheet_image.parameters['extract_cols.max_distance']]))
+    ax1.plot(col_peaks / sz, col_avg[col_peaks], '.')
+
+    row_avg = np.mean(input_grey, axis=1)
+    ax2.plot(np.arange(resolution) / sz, row_avg, 'k-')
+    row_cutoff = sheet_image.parameters['extract_rows.cutoff']
+    ax2.plot([0, 1], [row_cutoff, row_cutoff], 'r-')
+    row_peaks = np.asarray(scipy.signal.find_peaks_cwt(
+        -np.minimum(row_avg, row_cutoff),
+        [sheet_image.parameters['extract_rows.width']],
+        max_distances=[sheet_image.parameters['extract_rows.max_distance']]))
+    ax2.plot(row_peaks / sz, row_avg[row_peaks], '.')
+
+    return fig
 
 
 @parameter('cutoff width max_distance')
