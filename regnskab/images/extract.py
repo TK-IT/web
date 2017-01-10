@@ -403,6 +403,12 @@ def get_person_crosses(person_rows, øl=15, guldøl=6, sodavand=15):
 
 
 def get_images(sheet):
+    if sheet.pk:
+        existing = list(SheetImage.objects.filter(sheet=sheet))
+        if existing:
+            for o in existing:
+                o.get_image()
+            return existing
     images = []
     with sheet.image_file_name():
         i = 1
