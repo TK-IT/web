@@ -15,9 +15,15 @@ from django.shortcuts import redirect, get_object_or_404
 from django.utils.html import format_html, format_html_join
 from django.http import HttpResponse
 
-from regnskab.models import Sheet, SheetImage
+from regnskab.models import Sheet, SheetImage, Session
 from .auth import regnskab_permission_required_method
+from regnskab.images.quadrilateral import (
+    Quadrilateral, extract_quadrilateral,
+)
 from regnskab.images.forms import SheetImageForm
+from regnskab.views.base import already_sent_view
+
+import numpy as np
 
 import PIL
 
@@ -28,17 +34,12 @@ logger = logging.getLogger('regnskab')
 class SheetImageFile(BaseDetailView):
     model = SheetImage
 
-    @regnskab_permission_required_method
-    def dispatch(self, request, *args, **kwargs):
-        self.regnskab_session = get_object_or_404(
-            Session.objects, pk=kwargs['session'])
-        return super().dispatch(request, *args, **kwargs)
-
     def render_to_response(self, context):
         im_data = self.object.get_image()
         if self.kwargs.get('projected'):
             quad = Quadrilateral(self.object.quad)
             im_data = extract_quadrilateral(im_data, quad)
+        im_data = (255 * im_data).astype(np.uint8)
         img = PIL.Image.fromarray(im_data)
         output = io.BytesIO()
         img.save(output, 'PNG')
