@@ -94,6 +94,21 @@ def extract_quad(sheet_image):
     sheet_image.quad = quad.arg().tolist()
 
 
+def fill_in_skipped(xs):
+    diff = np.diff(xs)
+    m = np.median(diff)
+    # We expect every row height to be roughly m.
+    # If a row height is more than 1.5 m, we skipped a row.
+    skipped = np.round((diff - m) / m)
+    fixed = []
+    for y, extra in zip(xs[:-1], skipped):
+        fixed.append(y)
+        for i in range(int(extra)):
+            fixed.append(y + (i+1) * m)
+    fixed.append(xs[-1])
+    return fixed
+
+
 @parameter('cutoff width max_distance')
 def extract_cols(sheet_image, input_grey,
                  cutoff=100/255, width=4, max_distance=3):
@@ -102,7 +117,8 @@ def extract_cols(sheet_image, input_grey,
     col_peaks = np.asarray(scipy.signal.find_peaks_cwt(
         -np.minimum(col_avg, cutoff), [width],
         max_distances=[max_distance]))
-    sheet_image.cols = (col_peaks / image_width).tolist() + [1]
+    sheet_image.cols = fill_in_skipped(
+        (col_peaks / image_width).tolist() + [1])
 
 
 @parameter('cutoff width max_distance')
@@ -113,19 +129,8 @@ def extract_rows(sheet_image, input_grey,
     row_peaks = np.asarray(scipy.signal.find_peaks_cwt(
         -np.minimum(row_avg, cutoff), [width],
         max_distances=[max_distance]))
-    sheet_image.rows = [0] + (row_peaks / height).tolist() + [1]
-    row_heights = np.diff(sheet_image.rows)
-    m = np.median(row_heights)
-    # We expect every row height to be roughly m.
-    # If a row height is more than 1.5 m, we skipped a row.
-    skipped = np.round((row_heights - m) / m)
-    fixed = []
-    for y, extra in zip(sheet_image.rows[:-1], skipped):
-        fixed.append(y)
-        for i in range(int(extra)):
-            fixed.append(y + (i+1) * m)
-    fixed.append(1)
-    sheet_image.rows = fixed
+    sheet_image.rows = fill_in_skipped(
+        [0] + (row_peaks / height).tolist() + [1])
 
 
 def extract_rows_cols(sheet_image):
