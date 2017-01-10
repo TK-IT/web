@@ -753,7 +753,20 @@ class SheetImage(models.Model):
     rows = JSONField(default=[])
     person_rows = JSONField(default=[])
     crosses = JSONField(default=[])
+    boxes = JSONField(default=[])
     person_counts = JSONField(default=[])
+
+    verified_time = models.DateTimeField(blank=True, null=True)
+    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                    blank=True, null=True)
+
+    @property
+    def verified(self):
+        return self.verified_time is not None
+
+    def verify(self, verified_by):
+        self.verified_time = timezone.now()
+        self.verified_by = verified_by
 
     def get_image(self):
         try:
