@@ -116,7 +116,7 @@ def extract_rows(sheet_image, input_grey,
     sheet_image.rows = [0] + (row_peaks / height).tolist() + [1]
     row_heights = np.diff(sheet_image.rows)
     m = np.median(row_heights)
-    # We expect every row height to be m.
+    # We expect every row height to be roughly m.
     # If a row height is more than 1.5 m, we skipped a row.
     skipped = np.round((row_heights - m) / m)
     fixed = []
