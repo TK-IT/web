@@ -115,7 +115,13 @@ class Quadrilateral(object):
         return (width, height)
 
 
-def extract_quadrilateral(im, q, width, height, output=None):
+def extract_quadrilateral(im, q, width=None, height=None, output=None):
+    if width is None and height is None:
+        width, height = q.suggested_size()
+    elif width is None or height is None:
+        w, h = q.suggested_size()
+        height = height or h / w * width
+        width = width or w / h * height
     y, x = np.mgrid[0:1:height*1j, 0:1:width*1j]
     xy = np.array((x.ravel(), y.ravel()))
     x, y = q.to_world(xy)
