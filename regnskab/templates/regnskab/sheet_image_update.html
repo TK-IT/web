@@ -1,22 +1,130 @@
-{% extends "regnskab/base.html" %}
+{% extends "regnskab/base.html" %}{# vim:set sw=4 et: #}
 {% block title %}Markér krydser{% endblock %}
 {% block head %}
 <script>
+window.LAYOUT = JSON.parse('{{ layout|escapejs }}');
+</script>
+<script>
 function init() {
-    var inputcontainer = document.getElementById('form-checkboxes');
-    inputcontainer.style.display = 'none';
     var container = document.getElementById('sheet-image');
-    var chks = [].slice.call(inputcontainer.querySelectorAll('input'));
-    for (var i = 0; i < chks.length; ++i) {
-        var o = chks[i];
-        o.className = 'overlay-checkbox';
-        var l = document.createElement('label');
-        l.setAttribute('for', o.getAttribute('id'));
-        l.style.left = o.getAttribute('data-x') + 'px';
-        l.style.top = o.getAttribute('data-y') + 'px';
-        // Ensure l comes right after o
-        container.appendChild(o);
-        container.appendChild(l);
+    var form = container.parentNode;
+    var img = container.querySelector('img');
+    var width = img.naturalWidth, height = img.naturalHeight;
+    container.style.width = width + 'px';
+    container.style.height = height + 'px';
+    var rows = window.LAYOUT.rows, cols = window.LAYOUT.cols;
+    var data = JSON.parse(document.getElementById('id_data').value);
+    var boxes = data['boxes'];
+
+    var chks = [];
+
+    function save() {
+        var crosses = [];
+        for (var i = 0; i < chks.length; ++i) {
+            var row = chks[i];
+            for (var j = 0; j < row.length; ++j) {
+                var chk = row[j];
+                if (chk.checked && !chk.in_box) crosses.push([i, j]);
+            }
+        }
+	document.getElementById('id_data').value = JSON.stringify(
+            {'crosses': crosses, 'boxes': boxes});
+    }
+
+    function make_box(box_data) {
+        var i = box_data.i, j = box_data.j;
+        for (var di = 0; di < box_data.rows; ++di) {
+            for (var dj = 0; dj < box_data.cols; ++dj) {
+                var chk = chks[i + di][j + dj];
+                chk.checked = true;
+                chk.classList.add('box-' + box_data.kind);
+                chk.kind = box_data.kind;
+                chk.di = di;
+                chk.dj = dj;
+                chk.in_box = true;
+            }
+        }
+    }
+
+    function remove_box(i, j) {
+        var clicked_chk = chks[i][j];
+        i -= clicked_chk.di;
+        j -= clicked_chk.dj;
+        var k = 0;
+
+        function is_box(k) {
+            return boxes[k].i === i && boxes[k].j === j;
+        }
+
+        while (k < boxes.length && !is_box(k)) ++k;
+        if (!(k < boxes.length)) return;
+        var box_data = boxes[k];
+        boxes.splice(k, 1);
+        for (var di = 0; di < box_data.rows; ++di) {
+            for (var dj = 0; dj < box_data.cols; ++dj) {
+                var chk = chks[i + di][j + dj];
+                chk.checked = false;
+                chk.classList.remove('box-' + box_data.kind);
+                chk.in_box = false;
+            }
+        }
+    }
+
+    function click(i, j, o) {
+        console.log(i, j, o.checked);
+        if (o.checked) {
+            if (form.kind.value === 'cross') {
+                chk.in_box = false;
+            } else {
+                var box_data = {
+                    i: i, j: j, rows: 1, cols: 2,
+                    kind: form.kind.value};
+                boxes.push(box_data);
+                make_box(box_data);
+            }
+        } else {
+            if (o.in_box) remove_box(i, j);
+            else if (form.kind.value !== 'cross') {
+                var box_data = {
+                    i: i, j: j, rows: 1, cols: 2,
+                    kind: form.kind.value};
+                boxes.push(box_data);
+                make_box(box_data);
+            }
+        }
+        save();
+    }
+
+    for (var i = 0; i < rows.length - 1; ++i) {
+        var row = [];
+        for (var j = 0; j < cols.length - 1; ++j) {
+            var x1 = cols[j], x2 = cols[j+1], x = (x1+x2)/2;
+            var y1 = rows[i], y2 = rows[i+1], y = (y1+y2)/2;
+            var chk = document.createElement('input');
+            chk.className = 'overlay-checkbox';
+            chk.type = 'checkbox';
+            chk.addEventListener('click', click.bind(null, i, j, chk), false);
+            chk.id = 'chk-'+i+'-'+j;
+            var lbl = document.createElement('label');
+            lbl.setAttribute('for', chk.id);
+            lbl.style.left = (100*x1) + '%';
+            lbl.style.top = (100*y1) + '%';
+            lbl.style.right = (100-100*x2) + '%';
+            lbl.style.bottom = (100-100*y2) + '%';
+            // Ensure lbl comes right after chk
+            container.appendChild(chk);
+            container.appendChild(lbl);
+            row.push(chk);
+        }
+        chks.push(row);
+    }
+    var crosses = data['crosses'];
+    for (var k = 0; k < crosses.length; ++k) {
+        var i = crosses[k][0], j = crosses[k][1];
+        chks[i][j].checked = true;
+    }
+    for (var k = 0; k < boxes.length; ++k) {
+        make_box(boxes[k]);
     }
 }
 
@@ -27,26 +135,32 @@ window.addEventListener('load', init, false);
     display: none;
 }
 .overlay-checkbox + label {
-    width: 20px;
-    height: 20px;
-    margin-left: -10px;
-    margin-top: -10px;
     opacity: 0.5;
     position: absolute;
 }
 .overlay-checkbox:checked + label {
     background: rgba(255, 0, 0, 0.5);
 }
+.overlay-checkbox.box-whole:checked + label {
+    background: rgba(0, 255, 0, 0.5);
+}
+.overlay-checkbox.box-half:checked + label {
+    background: rgba(255, 255, 0, 0.5);
+}
 </style>
 {% endblock %}
 {% block content %}
 <form method="post">{% csrf_token %}
+    {% if saved %}Gemt!{% endif %}
+<ul>
+    <li><label><input checked type="radio" name="kind" value="cross"> Alm.</label></li>
+    <li><label><input type="radio" name="kind" value="whole"> Hel kasse</label></li>
+    <li><label><input type="radio" name="kind" value="half"> Halv kasse</label></li>
+</ul>
 <div id="sheet-image" style="position: relative">
-<img src="{% url 'regnskab:sheet_image_file' pk=object.pk %}" />
+	<img src="{{ image_url }}" />
 </div>
-    <div id="form-checkboxes">
     {{ form.as_p }}
-    </div>
     <input type="submit" value="Gem" />
 </form>
 {% endblock %}

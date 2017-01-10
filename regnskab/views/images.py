@@ -1,27 +1,23 @@
 import io
+import json
 import base64
 import logging
-import tempfile
 import collections
 
+from django.core.urlresolvers import reverse
 from django.views.generic import (
-    CreateView, UpdateView, DetailView, FormView, View,
+    FormView, View,
 )
-from django.views.generic.detail import (
-    BaseDetailView, SingleObjectMixin,
-)
-from django.views.generic.edit import FormMixin
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.utils.html import format_html, format_html_join
 from django.http import HttpResponse
 
-from regnskab.models import Sheet, SheetImage, Session
+from regnskab.models import SheetImage
 from .auth import regnskab_permission_required_method
 from regnskab.images.quadrilateral import (
     Quadrilateral, extract_quadrilateral,
 )
 from regnskab.images.forms import SheetImageForm
-from regnskab.views.base import already_sent_view
 
 import numpy as np
 
@@ -31,13 +27,23 @@ import PIL
 logger = logging.getLogger('regnskab')
 
 
-class SheetImageFile(BaseDetailView):
-    model = SheetImage
+class SheetImageMixin:
+    def get_sheet_image(self):
+        return get_object_or_404(
+            SheetImage.objects, sheet__pk=self.kwargs['pk'],
+            page=self.kwargs['page'])
 
-    def render_to_response(self, context):
-        im_data = self.object.get_image()
+
+class SheetImageFile(View, SheetImageMixin):
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, **kwargs):
+        sheet_image = self.get_sheet_image()
+        im_data = sheet_image.get_image()
         if self.kwargs.get('projected'):
-            quad = Quadrilateral(self.object.quad)
+            quad = Quadrilateral(sheet_image.quad)
             im_data = extract_quadrilateral(im_data, quad)
         im_data = (255 * im_data).astype(np.uint8)
         img = PIL.Image.fromarray(im_data)
@@ -48,37 +54,40 @@ class SheetImageFile(BaseDetailView):
             content_type='image/png')
 
 
-class SheetImageUpdate(FormView):
+class SheetImageUpdate(FormView, SheetImageMixin):
     form_class = SheetImageForm
     template_name = 'regnskab/sheet_image_update.html'
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
-        self.regnskab_session = get_object_or_404(
-            Session.objects, pk=kwargs['session'])
-        if not self.regnskab_session or self.regnskab_session.sent:
-            return already_sent_view(request, self.regnskab_session)
         return super().dispatch(request, *args, **kwargs)
-
-    def get_object(self):
-        return get_object_or_404(SheetImage.objects, pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        context_data['object'] = self.get_object()
+        sheet_image = self.get_sheet_image()
+        context_data['image_url'] = reverse(
+            'regnskab:sheet_image_file_projected',
+            kwargs=dict(pk=sheet_image.sheet_id, page=sheet_image.page))
+        context_data['layout'] = json.dumps(
+            {'rows': sheet_image.rows, 'cols': sheet_image.cols},
+            indent=2)
         return context_data
 
     def get_form_kwargs(self, **kwargs):
         r = super().get_form_kwargs(**kwargs)
-        r['instance'] = self.get_object()
+        r['instance'] = self.get_sheet_image()
         return r
 
     def form_valid(self, form):
-        o = self.get_object()
+        o = self.get_sheet_image()
         o.crosses = form.get_crosses()
+        o.boxes = form.get_boxes()
         o.compute_person_counts()
+        if form.cleaned_data['verified']:
+            o.set_verified(self.request.user)
         o.save()
-        return  # TODO
+        return self.render_to_response(
+            self.get_context_data(form=form, saved=True))
 
 
 def get_sheetimage_cross_classes(qs):
@@ -112,6 +121,10 @@ def img_tag(im_data, **kwargs):
 
 
 class Svm(View):
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     def get(self, request):
         pos, neg = get_sheetimage_cross_classes(
             SheetImage.objects.all()[0:4])
@@ -148,6 +161,10 @@ class Svm(View):
 
 
 class NaiveParam(View):
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     def get(self, request):
         pos, neg = get_sheetimage_cross_classes(
             list(SheetImage.objects.all()[0:4]) +

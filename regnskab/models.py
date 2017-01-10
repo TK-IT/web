@@ -14,6 +14,7 @@ from django.db.models import F
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.mail import EmailMessage
+from django.utils import timezone
 from django.utils.text import slugify as dslugify
 from django.utils.html import format_html
 
@@ -474,7 +475,8 @@ Balance = namedtuple('Balance', 'profile_id amount'.split())
 
 
 class Session(models.Model):
-    email_template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL,
+    email_template = models.ForeignKey(EmailTemplate,
+                                       on_delete=models.SET_NULL,
                                        null=True, blank=False,
                                        verbose_name='Emailskabelon')
     period = models.IntegerField(verbose_name='Årgang')
@@ -764,7 +766,7 @@ class SheetImage(models.Model):
     def verified(self):
         return self.verified_time is not None
 
-    def verify(self, verified_by):
+    def set_verified(self, verified_by):
         self.verified_time = timezone.now()
         self.verified_by = verified_by
 

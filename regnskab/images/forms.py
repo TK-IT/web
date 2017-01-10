@@ -1,33 +1,35 @@
+import json
+
 from django import forms
-from regnskab.images.quadrilateral import Quadrilateral
 
 
 class SheetImageForm(forms.Form):
+    verified = forms.BooleanField(required=False, label='Markér som færdig')
+    data = forms.CharField(widget=forms.HiddenInput())
+
     def __init__(self, **kwargs):
         sheet_image = self.instance = kwargs.pop('instance')
         super().__init__(**kwargs)
         cross_matrix = sheet_image.crosses
-        crosses = {(i, j)
+        crosses = [(i, j)
                    for i, row in enumerate(cross_matrix)
-                   for j, v in enumerate(row) if v}
-        row_y = [0] + sheet_image.rows + [1]
-        col_x = sheet_image.cols + [1]
-        quad = Quadrilateral(sheet_image.quad)
-        for i, (y1, y2) in enumerate(zip(row_y[:-1], row_y[1:])):
-            for j, (x1, x2) in enumerate(zip(col_x[:-1], col_x[1:])):
-                v = (i, j) in crosses
-                (x,), (y,) = quad.to_world(
-                    [[(x1 + x2) / 2], [(y1 + y2) / 2]])
-                attrs = {'data-x': x, 'data-y': y}
-                self.fields['c-%s-%s' % (i, j)] = forms.BooleanField(
-                    initial=v, required=False,
-                    widget=forms.CheckboxInput(attrs=attrs))
+                   for j, v in enumerate(row) if v]
+        self.fields['data'].initial = json.dumps(
+            dict(crosses=crosses, boxes=sheet_image.boxes),
+            indent=2)
+
+    def clean_data(self):
+        return json.loads(self.cleaned_data['data'])
 
     def get_crosses(self):
         sheet_image = self.instance
-        data = self.cleaned_data
-        n_rows = len(sheet_image.rows) + 1
-        n_cols = len(sheet_image.cols)
-        return [[bool(data.get('c-%s-%s' % (i, j)))
+        data = self.cleaned_data['data']
+        s = set(map(tuple, data['crosses']))
+        n_rows = len(sheet_image.rows) - 1
+        n_cols = len(sheet_image.cols) - 1
+        return [[bool((i, j) in s)
                  for j in range(n_cols)]
                 for i in range(n_rows)]
+
+    def get_boxes(self):
+        return self.cleaned_data['data']['boxes']

@@ -59,16 +59,16 @@ class RegnskabSite(object):
         ]
         if settings.DEBUG:
             urls += [
-                url(r'^images/sheet/(?P<pk>\d+)\.png$',
+                url(r'^sheet/(?P<pk>\d+)/(?P<page>\d+)/orig\.png$',
                     images.SheetImageFile.as_view(),
                     name='sheet_image_file'),
-                url(r'^images/sheet/(?P<pk>\d+)-proj\.png$',
+                url(r'^sheet/(?P<pk>\d+)/(?P<page>\d+)/proj\.png$',
                     images.SheetImageFile.as_view(),
                     name='sheet_image_file_projected',
                     kwargs={'projected': True}),
-                # url(r'^images/sheet/(?P<pk>\d+)/$',
-                #     images.SheetImageUpdate.as_view(),
-                #     name='sheet_image_update'),
+                url(r'^sheet/(?P<pk>\d+)/(?P<page>\d+)/labeling/$',
+                    images.SheetImageUpdate.as_view(),
+                    name='sheet_image_update'),
                 url(r'^svm/$', images.Svm.as_view()),
                 url(r'^naive/$', images.NaiveParam.as_view()),
             ]
