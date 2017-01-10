@@ -80,7 +80,7 @@ def find_bbox(im, sigma=1, margin1=10, margin2=100, margin3=20, threshold=0.6):
     bottom_left = np.argmax(-xs + ys)
     top_right = np.argmax(xs - ys / 2)
 
-    corners = np.asarray(
+    corners = np.transpose(
         [[xs[i], ys[i]]
          for i in (top_left, top_right, bottom_right, bottom_left)])
     corners += margin1
@@ -149,8 +149,8 @@ def extract_person_rows(sheet_image, input_grey,
     name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
                  [0, 0, 1, 1]]
     name_quad = Quadrilateral(
-        np.array((input_grey.shape[1], input_grey.shape[0])) *
-        np.transpose(name_rect))
+        np.asarray([[input_grey.shape[1]], [input_grey.shape[0]]]) *
+        np.asarray(name_rect))
 
     names_grey = extract_quadrilateral(
         input_grey, name_quad, resolution, resolution)
@@ -193,7 +193,7 @@ def extract_cross_images(sheet_image):
             bottom_left = (x1, y2)
             corners = quad.to_world(np.transpose([
                 top_left, top_right, bottom_right, bottom_left]))
-            cross = Quadrilateral(np.transpose(corners))
+            cross = Quadrilateral(corners)
             cross_imgs[-1].append(extract_quadrilateral(
                 im, cross, width, height))
     assert len(cross_imgs) == len(rows) - 1
@@ -438,7 +438,7 @@ def extract_images(sheet, kinds):
 
             height = 20 * (j - i)
             y1, y2 = im_rows[i], im_rows[j]
-            corners = quad.to_world([[0, 1, 1, 0], [y1, y1, y2, y2]]).T
+            corners = quad.to_world([[0, 1, 1, 0], [y1, y1, y2, y2]])
             person_quad = Quadrilateral(corners)
             stitched_image.append(extract_quadrilateral(
                 im.get_image(), person_quad, width, height))
