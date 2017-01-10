@@ -12,12 +12,17 @@ from django.shortcuts import get_object_or_404
 from django.utils.html import format_html, format_html_join
 from django.http import HttpResponse
 
-from regnskab.models import SheetImage
+from regnskab.models import SheetImage, Purchase
 from .auth import regnskab_permission_required_method
 from regnskab.images.quadrilateral import (
     Quadrilateral, extract_quadrilateral,
 )
-from regnskab.images.forms import SheetImageCrossesForm
+from regnskab.images.forms import (
+    SheetImageCrossesForm, SheetImageParametersForm,
+)
+from regnskab.images.extract import (
+    extract_images, plot_extract_rows_cols,
+)
 
 import numpy as np
 
@@ -86,6 +91,58 @@ class SheetImageCrosses(FormView, SheetImageMixin):
         if form.cleaned_data['verified']:
             o.set_verified(self.request.user)
         o.save()
+        return self.render_to_response(
+            self.get_context_data(form=form, saved=True))
+
+
+class SheetImageParameters(FormView, SheetImageMixin):
+    form_class = SheetImageParametersForm
+    template_name = 'regnskab/sheet_image_parameters.html'
+
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self, **kwargs):
+        r = super().get_form_kwargs(**kwargs)
+        r['parameters'] = self.get_sheet_image().parameters
+        return r
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        computed = []
+        sheet_image = self.get_sheet_image()
+        for k in 'quad cols rows person_rows'.split():
+            d = getattr(sheet_image, k)
+            shape = np.asarray(d).shape
+            v = json.dumps(d, indent=2)
+            computed.append(('%s (%s)' % (k, '×'.join(map(str, shape))), v))
+        context_data['computed'] = computed
+
+        fig = plot_extract_rows_cols(sheet_image)
+        png_buf = io.BytesIO()
+        fig.savefig(png_buf, format='png')
+        png_b64 = base64.b64encode(png_buf.getvalue()).decode()
+        context_data['fig_url'] = 'data:image/png;base64,%s' % png_b64
+
+        return context_data
+
+    def form_valid(self, form):
+        sheet_image = self.get_sheet_image()
+        for k in sheet_image.parameters.keys() & form.cleaned_data.keys():
+            sheet_image.parameters[k] = form.cleaned_data[k]
+        sheet = sheet_image.sheet
+        images, rows, purchases = extract_images(
+            sheet, list(sheet.purchasekind_set.all()))
+        sheet_image, = [im for im in images if im.page == sheet_image.page]
+        sheet_image.save()
+        if form.cleaned_data['reset']:
+            sheet.sheetrow_set.all().delete()
+            for o in rows:
+                o.save()
+            for o in purchases:
+                o.row = o.row  # Update row_id
+            Purchase.objects.bulk_create(purchases)
         return self.render_to_response(
             self.get_context_data(form=form, saved=True))
 

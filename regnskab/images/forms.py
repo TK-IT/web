@@ -3,6 +3,21 @@ import json
 from django import forms
 
 
+class SheetImageParametersForm(forms.Form):
+    reset = forms.BooleanField(required=False)
+
+    def __init__(self, **kwargs):
+        parameters = kwargs.pop('parameters')
+        super().__init__(**kwargs)
+        field_types = {
+            int: forms.IntegerField,
+            float: forms.FloatField,
+        }
+        for k in sorted(parameters):
+            field_type = field_types[type(parameters[k])]
+            self.fields[k] = field_type(initial=parameters[k])
+
+
 class SheetImageCrossesForm(forms.Form):
     verified = forms.BooleanField(required=False, label='Markér som færdig')
     data = forms.CharField(widget=forms.HiddenInput())
