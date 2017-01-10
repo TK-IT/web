@@ -34,18 +34,17 @@ class Quadrilateral(object):
 
     def __init__(self, xy):
         xy = np.asarray(xy)
-        if xy.shape != (4, 2):
+        if xy.shape != (2, 4):
             raise TypeError(
-                "xy must be (4, 2) with corners in rows, not %r"
-                % (xy.shape,))
-        x, y = xy.T
+                "xy must be (2, 4) with corners in columns, not %r" %
+                (xy.shape,))
+        x, y = xy
         self.A = np.eye(3)
-        d1 = xy[1] - xy[2]
-        d2 = xy[3] - xy[2]
-        s = xy[0] - xy[1] + xy[2] - xy[3]
+        d1 = xy[:, 1] - xy[:, 2]
+        d2 = xy[:, 3] - xy[:, 2]
+        s = xy[:, 0] - xy[:, 1] + xy[:, 2] - xy[:, 3]
 
-        self.c = x[0]
-        self.f = y[0]
+        self.c, self.f = xy[0]
         self.i = 1
 
         if (s ** 2).sum() < 1e-6:
@@ -69,8 +68,8 @@ class Quadrilateral(object):
         self.A_inv = np.linalg.inv(self.A)
 
     def arg(self):
-        return np.transpose(self.to_world(
-            [[0, 1, 1, 0], [0, 0, 1, 1]]))
+        return self.to_world(
+            [[0, 1, 1, 0], [0, 0, 1, 1]])
 
     @classmethod
     def from_vertices(cls, corners, vertices):
