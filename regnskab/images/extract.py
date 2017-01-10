@@ -123,7 +123,7 @@ def extract_cols(sheet_image, input_grey,
 
 @parameter('cutoff width max_distance')
 def extract_rows(sheet_image, input_grey,
-                 cutoff=1, width=3, max_distance=3):
+                 cutoff=1.0, width=3, max_distance=3):
     height = input_grey.shape[0]
     row_avg = np.mean(input_grey, axis=1)
     row_peaks = np.asarray(scipy.signal.find_peaks_cwt(
