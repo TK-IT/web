@@ -402,7 +402,7 @@ def get_person_crosses(person_rows, øl=15, guldøl=6, sodavand=15):
     return groups
 
 
-def extract_images(sheet, kinds):
+def get_images(sheet):
     images = []
     with sheet.image_file_name():
         i = 1
@@ -417,15 +417,25 @@ def extract_images(sheet, kinds):
                 break
             i += 1
 
+
+def extract_images(sheet, kinds):
+    images = get_images(sheet)
     for im in images:
         extract_quad(im)
         extract_rows_cols(im)
         extract_crosses(im)
 
-    stitched_image = []
-    stitched_image_height = 0
+    rows, purchases, png_file = extract_row_image(sheet, kinds, images)
+    sheet.row_image = png_file
+    return images, rows, purchases
+
+
+def extract_row_image(sheet, kinds, images):
     rows = []
     purchases = []
+
+    stitched_image = []
+    stitched_image_height = 0
     sheet.row_image_width = width = 920
     position = 1
     for im in images:
@@ -470,6 +480,4 @@ def extract_images(sheet, kinds):
     png_data = save_png(stitched_image)
     png_name = timezone.now().strftime('rows-%Y-%m-%d.png')
     png_file = ContentFile(png_data, png_name)
-    sheet.row_image = png_file
-
-    return images, rows, purchases
+    return rows, purchases, png_file
