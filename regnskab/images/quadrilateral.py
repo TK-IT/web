@@ -72,10 +72,6 @@ class Quadrilateral(object):
         return self.to_world(
             [[0, 1, 1, 0], [0, 0, 1, 1]])
 
-    @classmethod
-    def from_vertices(cls, corners, vertices):
-        return cls([vertices[i] for i in corners])
-
     (a, b, c,
      d, e, f,
      g, h, i) = _coeff_properties(3, 3)
