@@ -40,11 +40,12 @@ class Quadrilateral(object):
                 (xy.shape,))
         x, y = xy
         self.A = np.eye(3)
-        d1 = xy[:, 1] - xy[:, 2]
-        d2 = xy[:, 3] - xy[:, 2]
-        s = xy[:, 0] - xy[:, 1] + xy[:, 2] - xy[:, 3]
+        upper_left, upper_right, lower_right, lower_left = xy.T
+        d1 = upper_right - lower_right
+        d2 = lower_left - lower_right
+        s = upper_left - upper_right + lower_right - lower_left
 
-        self.c, self.f = xy[0]
+        self.c, self.f = upper_left
         self.i = 1
 
         if (s ** 2).sum() < 1e-6:
