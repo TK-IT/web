@@ -17,7 +17,7 @@ from .auth import regnskab_permission_required_method
 from regnskab.images.quadrilateral import (
     Quadrilateral, extract_quadrilateral,
 )
-from regnskab.images.forms import SheetImageForm
+from regnskab.images.forms import SheetImageCrossesForm
 
 import numpy as np
 
@@ -54,9 +54,9 @@ class SheetImageFile(View, SheetImageMixin):
             content_type='image/png')
 
 
-class SheetImageUpdate(FormView, SheetImageMixin):
-    form_class = SheetImageForm
-    template_name = 'regnskab/sheet_image_update.html'
+class SheetImageCrosses(FormView, SheetImageMixin):
+    form_class = SheetImageCrossesForm
+    template_name = 'regnskab/sheet_image_crosses.html'
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):

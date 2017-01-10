@@ -3,7 +3,7 @@ import json
 from django import forms
 
 
-class SheetImageForm(forms.Form):
+class SheetImageCrossesForm(forms.Form):
     verified = forms.BooleanField(required=False, label='Markér som færdig')
     data = forms.CharField(widget=forms.HiddenInput())
 

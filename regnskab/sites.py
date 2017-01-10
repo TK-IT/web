@@ -66,9 +66,9 @@ class RegnskabSite(object):
                     images.SheetImageFile.as_view(),
                     name='sheet_image_file_projected',
                     kwargs={'projected': True}),
-                url(r'^sheet/(?P<pk>\d+)/(?P<page>\d+)/labeling/$',
-                    images.SheetImageUpdate.as_view(),
-                    name='sheet_image_update'),
+                url(r'^sheet/(?P<pk>\d+)/(?P<page>\d+)/crosses/$',
+                    images.SheetImageCrosses.as_view(),
+                    name='sheet_image_crosses'),
                 url(r'^svm/$', images.Svm.as_view()),
                 url(r'^naive/$', images.NaiveParam.as_view()),
             ]
