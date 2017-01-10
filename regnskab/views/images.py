@@ -35,7 +35,11 @@ class SheetImageFile(BaseDetailView):
         return super().dispatch(request, *args, **kwargs)
 
     def render_to_response(self, context):
-        img = PIL.Image.fromarray(self.object.get_image())
+        im_data = self.object.get_image()
+        if self.kwargs.get('projected'):
+            quad = Quadrilateral(self.object.quad)
+            im_data = extract_quadrilateral(im_data, quad)
+        img = PIL.Image.fromarray(im_data)
         output = io.BytesIO()
         img.save(output, 'PNG')
         return HttpResponse(

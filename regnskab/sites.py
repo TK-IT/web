@@ -5,6 +5,7 @@ class RegnskabSite(object):
         from django.conf import settings
         from django.conf.urls import url
         from regnskab import views
+        from regnskab.views import images
 
         urls = [
             url(r'^$', views.Home.as_view(), name='home'),
@@ -57,11 +58,14 @@ class RegnskabSite(object):
                 name='profile_search'),
         ]
         if settings.DEBUG:
-            from regnskab.views import images
             urls += [
-                # url(r'^images/sheet/(?P<pk>\d+)\.png$',
-                #     images.SheetImageFile.as_view(),
-                #     name='sheet_image_file'),
+                url(r'^images/sheet/(?P<pk>\d+)\.png$',
+                    images.SheetImageFile.as_view(),
+                    name='sheet_image_file'),
+                url(r'^images/sheet/(?P<pk>\d+)-proj\.png$',
+                    images.SheetImageFile.as_view(),
+                    name='sheet_image_file_projected',
+                    kwargs={'projected': True}),
                 # url(r'^images/sheet/(?P<pk>\d+)/$',
                 #     images.SheetImageUpdate.as_view(),
                 #     name='sheet_image_update'),
