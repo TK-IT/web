@@ -101,6 +101,19 @@ class Quadrilateral(object):
         """
         return self._projective_transform(self.A_inv, xy)
 
+    def suggested_size(self):
+        '''Compute max (horizontal, vertical) side length as (w, h)-pair'''
+        upper_left, upper_right, lower_right, lower_left = self.arg().T
+
+        def dsq(p, q):
+            return ((p - q) ** 2).sum()
+
+        width = np.sqrt(max(dsq(upper_left, upper_right),
+                            dsq(lower_left, lower_right)))
+        height = np.sqrt(max(dsq(upper_left, lower_left),
+                             dsq(upper_right, lower_right)))
+        return (width, height)
+
 
 def extract_quadrilateral(im, q, width, height, output=None):
     y, x = np.mgrid[0:1:height*1j, 0:1:width*1j]
