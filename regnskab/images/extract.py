@@ -63,8 +63,8 @@ def max_object(labels, max_label, k):
     ]
 
 
-@parameter('sigma margin1 margin2 margin3 threshold')
-def find_bbox(im, sigma=1, margin1=10, margin2=100, margin3=20, threshold=0.6):
+@parameter('sigma margin1 threshold')
+def find_bbox(im, sigma=1, margin1=10, threshold=0.6):
     im = im[margin1:-margin1, margin1:-margin1]
     if sigma > 0.01:
         im = scipy.ndimage.filters.gaussian_filter(im, sigma, mode='constant')
