@@ -122,6 +122,7 @@ def extract_quadrilateral(im, q, width=None, height=None, output=None):
         w, h = q.suggested_size()
         height = height or h / w * width
         width = width or w / h * height
+    width, height = int(width), int(height)
     y, x = np.mgrid[0:1:height*1j, 0:1:width*1j]
     xy = np.array((x.ravel(), y.ravel()))
     x, y = q.to_world(xy)
