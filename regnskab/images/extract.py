@@ -125,13 +125,15 @@ def find_peaks(xs, cutoff, skip_start=True, skip_end=True):
     assert len(start) == len(end)
     peaks = []
     for i, j in zip(start, end):
-        if skip_start and i == 0:
-            continue
-        if skip_end and j == n-1:
-            continue
         peaks.append(i + np.argmax(xs[i:j+1]))
     print(n, peaks)
-    return np.asarray(peaks)
+    peaks = np.array(peaks, dtype=np.intp)
+    m = np.median(np.diff(peaks))
+    if skip_start:
+        peaks = peaks[peaks > m/2]
+    if skip_end:
+        peaks = peaks[peaks < n - m/2]
+    return peaks
 
 
 @parameter('cutoff')
