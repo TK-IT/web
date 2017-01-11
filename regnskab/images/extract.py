@@ -175,7 +175,15 @@ def plot_extract_rows_cols(sheet_image):
         im, input_bbox, resolution, resolution)
     input_grey = to_grey(input_transform, sheet_image.parameters)
 
-    fig, (ax1, ax2) = plt.subplots(2)
+    name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
+                 [0, 0, 1, 1]]
+    name_quad = Quadrilateral(
+        np.asarray([[input_grey.shape[1]], [input_grey.shape[0]]]) *
+        np.asarray(name_rect))
+    names_grey = extract_quadrilateral(
+        input_grey, name_quad, resolution, resolution)
+
+    fig, (ax1, ax2, ax3) = plt.subplots(3)
 
     sz = resolution - 1
     col_avg = np.mean(input_grey, axis=0)
@@ -191,6 +199,13 @@ def plot_extract_rows_cols(sheet_image):
     ax2.plot([0, 1], [row_cutoff, row_cutoff], 'r-')
     row_peaks = find_peaks(-row_avg, -row_cutoff)
     ax2.plot(row_peaks / sz, row_avg[row_peaks], '.')
+
+    name_row_avg = np.mean(names_grey, axis=1, keepdims=True)
+    ax3.plot(np.arange(resolution) / sz, name_row_avg, 'k-')
+    name_row_cutoff = sheet_image.parameters['extract_person_rows.cutoff']
+    name_row_peaks = find_peaks(-name_row_avg, -name_row_cutoff)
+    ax3.plot([0, 1], [name_row_cutoff, name_row_cutoff], 'r-')
+    ax3.plot(name_row_peaks / sz, name_row_avg[name_row_peaks], '.')
 
     return fig
 
