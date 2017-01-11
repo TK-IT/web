@@ -171,7 +171,8 @@ class SheetDetail(TemplateView):
 
     def get_context_data(self, **kwargs):
         context_data = super(SheetDetail, self).get_context_data(**kwargs)
-        context_data['sheet'] = self.get_sheet()
+        sheet = context_data['sheet'] = self.get_sheet()
+        context_data['sheet_images'] = list(sheet.sheetimage_set.all())
         try:
             context_data['highlight_profile'] = int(
                 self.request.GET['highlight_profile'])

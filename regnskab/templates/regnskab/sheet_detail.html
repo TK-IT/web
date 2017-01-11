@@ -15,6 +15,16 @@ har krydset på alle krydslisterne siden sidst regningen blev gjort op.</p>
 <h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <h2>Krydslisten {{ sheet }}</h2>
 {% endif %}
+
+{% if sheet_images or sheet.image_file %}
+<p>Hent original:
+{% if sheet.image_file %}<a href="{{ sheet.image_file.url }}">PDF</a>{% endif %}
+{% for im in sheet_images %}
+<a href="{% url 'regnskab:sheet_image_file_projected' pk=sheet.id page=im.page %}">{{ im.page }}</a>
+{% endfor %}
+</p>
+{% endif %}
+
 <table class="sheet">
 <thead>
 <tr>
