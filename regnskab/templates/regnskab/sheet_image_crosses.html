@@ -9,7 +9,7 @@ function init() {
     var container = document.getElementById('sheet-image');
     var form = container.parentNode;
     var img = container.querySelector('img');
-    var width = img.naturalWidth, height = img.naturalHeight;
+    var width = img.width, height = img.height;
     container.style.width = width + 'px';
     container.style.height = height + 'px';
     var rows = window.LAYOUT.rows, cols = window.LAYOUT.cols;
@@ -150,7 +150,7 @@ function init() {
     }
 }
 
-window.addEventListener('load', init, false);
+// window.addEventListener('load', init, false);
 </script>
 <style>
 .overlay-checkbox {
@@ -180,9 +180,11 @@ window.addEventListener('load', init, false);
     <li><label><input type="radio" name="kind" value="half"> Halv kasse</label></li>
 </ul>
 <div id="sheet-image" style="position: relative">
-	<img src="{{ image_url }}" />
+    <img width="{{ image_width }}" height="{{ image_height }}"
+    src="{{ image_url }}" />
 </div>
     {{ form.as_p }}
     <input type="submit" value="Gem" />
 </form>
+<script>init();</script>
 {% endblock %}

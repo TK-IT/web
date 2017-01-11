@@ -97,6 +97,10 @@ class SheetImageCrosses(FormView, SheetImageMixin):
         context_data['layout'] = json.dumps(
             {'rows': sheet_image.rows, 'cols': sheet_image.cols},
             indent=2)
+        quad = Quadrilateral(sheet_image.quad)
+        width, height = quad.suggested_size()
+        context_data['image_width'] = int(width)
+        context_data['image_height'] = int(height)
         return context_data
 
     def get_form_kwargs(self, **kwargs):
