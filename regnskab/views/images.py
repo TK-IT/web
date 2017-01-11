@@ -153,6 +153,7 @@ class SheetImageParameters(FormView, SheetImageMixin):
         for k in sheet_image.parameters.keys() & form.cleaned_data.keys():
             sheet_image.parameters[k] = form.cleaned_data[k]
         sheet = sheet_image.sheet
+        sheet_image.save()  # Save parameters
         images, rows, purchases = extract_images(
             sheet, list(sheet.purchasekind_set.all()))
         sheet_image, = [im for im in images if im.page == sheet_image.page]
