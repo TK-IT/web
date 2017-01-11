@@ -39,54 +39,46 @@ function init() {
                 chk.checked = true;
                 chk.classList.add('box-' + box_data.kind);
                 chk.kind = box_data.kind;
-                chk.di = di;
-                chk.dj = dj;
-                chk.in_box = true;
+                chk.box_data = box_data;
             }
         }
     }
 
-    function remove_box(i, j) {
-        var clicked_chk = chks[i][j];
-        i -= clicked_chk.di;
-        j -= clicked_chk.dj;
+    function remove_box(clicked_chk) {
+        var box_data = clicked_chk.box_data;
         var k = 0;
-
-        function is_box(k) {
-            return boxes[k].i === i && boxes[k].j === j;
-        }
-
-        while (k < boxes.length && !is_box(k)) ++k;
-        if (!(k < boxes.length)) return;
-        var box_data = boxes[k];
+        while (k < boxes.length && boxes[k] !== box_data) ++k;
         boxes.splice(k, 1);
         for (var di = 0; di < box_data.rows; ++di) {
             for (var dj = 0; dj < box_data.cols; ++dj) {
-                var chk = chks[i + di][j + dj];
+                var chk = chks[box_data.i + di][box_data.j + dj];
                 chk.checked = false;
                 chk.classList.remove('box-' + box_data.kind);
-                chk.in_box = false;
+                chk.box_data = null;
             }
         }
     }
 
-    function click(i, j, o) {
-        console.log(i, j, o.checked);
-        if (o.checked) {
+    var drag_from = null;
+    var dragging = false;
+
+    function click(chk) {
+        console.log('click', chk);
+        if (chk.checked) {
             if (form.kind.value === 'cross') {
-                chk.in_box = false;
+                chk.box_data = null;
             } else {
                 var box_data = {
-                    i: i, j: j, rows: 1, cols: 2,
+                    i: chk.rowIndex, j: chk.colIndex, rows: 1, cols: 2,
                     kind: form.kind.value};
                 boxes.push(box_data);
                 make_box(box_data);
             }
         } else {
-            if (o.in_box) remove_box(i, j);
+            if (chk.box_data) remove_box(chk);
             else if (form.kind.value !== 'cross') {
                 var box_data = {
-                    i: i, j: j, rows: 1, cols: 2,
+                    i: chk.rowIndex, j: chk.colIndex, rows: 1, cols: 2,
                     kind: form.kind.value};
                 boxes.push(box_data);
                 make_box(box_data);
@@ -94,6 +86,32 @@ function init() {
         }
         save();
     }
+
+    function lbl_mousedown(chk, ev) {
+        drag_from = chk;
+    }
+
+    function lbl_mouseover(chk, ev) {
+        if (ev.buttons === 1) {
+            if (!dragging && drag_from) {
+                dragging = true;
+                drag_from.checked = !drag_from.checked;
+                click(chk);
+            }
+            console.log('lbl_mouseover', dragging, drag_from, chk.checked);
+            if (dragging) {
+                if (chk.checked !== drag_from.checked) {
+                    chk.checked = drag_from.checked;
+                    click(chk);
+                }
+            }
+        }
+    }
+
+    function doc_mouseup() {
+        dragging = false; drag_from = null;
+    }
+    document.body.addEventListener('mouseup', doc_mouseup, true);
 
     for (var i = 0; i < rows.length - 1; ++i) {
         var row = [];
@@ -103,14 +121,18 @@ function init() {
             var chk = document.createElement('input');
             chk.className = 'overlay-checkbox';
             chk.type = 'checkbox';
-            chk.addEventListener('click', click.bind(null, i, j, chk), false);
+            chk.addEventListener('click', click.bind(null, chk), false);
             chk.id = 'chk-'+i+'-'+j;
+            chk.rowIndex = i;
+            chk.colIndex = j;
             var lbl = document.createElement('label');
             lbl.setAttribute('for', chk.id);
             lbl.style.left = (100*x1) + '%';
             lbl.style.top = (100*y1) + '%';
             lbl.style.right = (100-100*x2) + '%';
             lbl.style.bottom = (100-100*y2) + '%';
+            lbl.addEventListener('mousedown', lbl_mousedown.bind(null, chk), false);
+            lbl.addEventListener('mouseover', lbl_mouseover.bind(null, chk), false);
             // Ensure lbl comes right after chk
             container.appendChild(chk);
             container.appendChild(lbl);
