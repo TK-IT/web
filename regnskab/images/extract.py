@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.ndimage
-import scipy.signal
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -112,26 +111,43 @@ def fill_in_skipped(xs):
     return fixed
 
 
-@parameter('cutoff width max_distance')
-def extract_cols(sheet_image, input_grey,
-                 cutoff=100/255, width=4, max_distance=3):
+def find_peaks(xs, cutoff, skip_start=True, skip_end=True):
+    xs = np.asarray(xs).ravel()
+    n = len(xs)
+    above = xs > cutoff
+    above_pad = np.r_[False, above, False]
+    is_start = above_pad[1:-1] & ~above_pad[0:-2]
+    is_end = above_pad[1:-1] & ~above_pad[2:]
+    start = is_start.nonzero()[0]
+    end = is_end.nonzero()[0]
+    print(start)
+    print(end)
+    assert len(start) == len(end)
+    peaks = []
+    for i, j in zip(start, end):
+        if skip_start and i == 0:
+            continue
+        if skip_end and j == n-1:
+            continue
+        peaks.append(i + np.argmax(xs[i:j+1]))
+    print(n, peaks)
+    return np.asarray(peaks)
+
+
+@parameter('cutoff')
+def extract_cols(sheet_image, input_grey, cutoff=0.5):
     image_width = input_grey.shape[1]
     col_avg = np.mean(input_grey, axis=0)
-    col_peaks = np.asarray(scipy.signal.find_peaks_cwt(
-        -np.minimum(col_avg, cutoff), [width],
-        max_distances=[max_distance]))
+    col_peaks = find_peaks(-col_avg, -cutoff)
     sheet_image.cols = fill_in_skipped(
         (col_peaks / image_width).tolist() + [1])
 
 
-@parameter('cutoff width max_distance')
-def extract_rows(sheet_image, input_grey,
-                 cutoff=1.0, width=3, max_distance=3):
+@parameter('cutoff')
+def extract_rows(sheet_image, input_grey, cutoff=0.8):
     height = input_grey.shape[0]
     row_avg = np.mean(input_grey, axis=1)
-    row_peaks = np.asarray(scipy.signal.find_peaks_cwt(
-        -np.minimum(row_avg, cutoff), [width],
-        max_distances=[max_distance]))
+    row_peaks = find_peaks(-row_avg, -cutoff)
     sheet_image.rows = fill_in_skipped(
         [0] + (row_peaks / height).tolist() + [1])
 
@@ -166,28 +182,21 @@ def plot_extract_rows_cols(sheet_image):
     ax1.plot(np.arange(resolution) / sz, col_avg, 'k-')
     col_cutoff = sheet_image.parameters['extract_cols.cutoff']
     ax1.plot([0, 1], [col_cutoff, col_cutoff], 'r-')
-    col_peaks = np.asarray(scipy.signal.find_peaks_cwt(
-        -np.minimum(col_avg, col_cutoff),
-        [sheet_image.parameters['extract_cols.width']],
-        max_distances=[sheet_image.parameters['extract_cols.max_distance']]))
+    col_peaks = find_peaks(-col_avg, -col_cutoff)
     ax1.plot(col_peaks / sz, col_avg[col_peaks], '.')
 
     row_avg = np.mean(input_grey, axis=1)
     ax2.plot(np.arange(resolution) / sz, row_avg, 'k-')
     row_cutoff = sheet_image.parameters['extract_rows.cutoff']
     ax2.plot([0, 1], [row_cutoff, row_cutoff], 'r-')
-    row_peaks = np.asarray(scipy.signal.find_peaks_cwt(
-        -np.minimum(row_avg, row_cutoff),
-        [sheet_image.parameters['extract_rows.width']],
-        max_distances=[sheet_image.parameters['extract_rows.max_distance']]))
+    row_peaks = find_peaks(-row_avg, -row_cutoff)
     ax2.plot(row_peaks / sz, row_avg[row_peaks], '.')
 
     return fig
 
 
-@parameter('cutoff width max_distance')
-def extract_person_rows(sheet_image, input_grey,
-                        cutoff=1, width=3, max_distance=3):
+@parameter('cutoff')
+def extract_person_rows(sheet_image, input_grey, cutoff=0.5):
     resolution = max(input_grey.shape)
     name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
                  [0, 0, 1, 1]]
@@ -199,9 +208,7 @@ def extract_person_rows(sheet_image, input_grey,
         input_grey, name_quad, resolution, resolution)
     height = names_grey.shape[0]
     row_avg = np.mean(names_grey, axis=1, keepdims=True)
-    row_peaks = np.asarray(scipy.signal.find_peaks_cwt(
-        -np.minimum(row_avg.ravel(), cutoff), [width],
-        max_distances=[max_distance])) / height
+    row_peaks = find_peaks(-row_avg, -cutoff) / height
 
     rows = np.asarray(sheet_image.rows)
     closest = np.abs(row_peaks.reshape(-1, 1) -
