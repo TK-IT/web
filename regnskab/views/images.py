@@ -2,11 +2,12 @@ import io
 import json
 import base64
 import logging
+import itertools
 import collections
 
 from django.core.urlresolvers import reverse
 from django.views.generic import (
-    FormView, View,
+    FormView, View, TemplateView,
 )
 from django.shortcuts import get_object_or_404
 from django.utils.html import format_html, format_html_join
@@ -30,6 +31,26 @@ import PIL
 
 
 logger = logging.getLogger('regnskab')
+
+
+class SheetImageList(TemplateView):
+    template_name = 'regnskab/sheet_image_list.html'
+
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        qs = SheetImage.objects.all()
+        qs = qs.order_by('sheet', 'page')
+        groups = itertools.groupby(qs, key=lambda o: o.sheet_id)
+        sheets = []
+        for sheet_id, g in groups:
+            sheet_images = list(g)
+            sheets.append((sheet_images[0].sheet, sheet_images))
+        context_data['sheets'] = sheets
+        return context_data
 
 
 class SheetImageMixin:

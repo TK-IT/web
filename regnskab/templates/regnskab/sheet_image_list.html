@@ -1,0 +1,19 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Scannede krydslister{% endblock %}
+{% block head %}
+<style>
+.not-verified { font-weight: bold; }
+</style>
+{% endblock %}
+{% block content %}
+<ul>
+{% for sheet, sheet_images in sheets %}
+<li>{{ sheet }}:
+{% for im in sheet_images %}
+<a href="{% url 'regnskab:sheet_image_crosses' pk=sheet.id page=im.page %}"
+   class="{{ im.verified|yesno:"verified,not-verified" }}">{{ im.page }}</a>
+{% endfor %}
+</li>
+{% endfor %}
+</ul>
+{% endblock %}

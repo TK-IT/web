@@ -69,6 +69,9 @@ class RegnskabSite(object):
             url(r'^sheet/(?P<pk>\d+)/(?P<page>\d+)/crosses/$',
                 images.SheetImageCrosses.as_view(),
                 name='sheet_image_crosses'),
+            url(r'^images/$',
+                images.SheetImageList.as_view(),
+                name='sheet_image_list'),
         ]
         if settings.DEBUG:
             urls += [
