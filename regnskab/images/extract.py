@@ -136,6 +136,16 @@ def find_peaks(xs, cutoff, skip_start=True, skip_end=True):
     return peaks
 
 
+def get_name_part(sheet_image, input_grey, resolution=None):
+    name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
+                 [0, 0, 1, 1]]
+    name_quad = Quadrilateral(
+        np.asarray([[input_grey.shape[1]], [input_grey.shape[0]]]) *
+        np.asarray(name_rect))
+    return extract_quadrilateral(
+        input_grey, name_quad, resolution, resolution)
+
+
 @parameter('cutoff')
 def extract_cols(sheet_image, input_grey, cutoff=0.5):
     image_width = input_grey.shape[1]
@@ -157,14 +167,7 @@ def extract_rows(sheet_image, input_grey, cutoff=0.8):
 @parameter('cutoff')
 def extract_person_rows(sheet_image, input_grey, cutoff=0.5):
     resolution = max(input_grey.shape)
-    name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
-                 [0, 0, 1, 1]]
-    name_quad = Quadrilateral(
-        np.asarray([[input_grey.shape[1]], [input_grey.shape[0]]]) *
-        np.asarray(name_rect))
-
-    names_grey = extract_quadrilateral(
-        input_grey, name_quad, resolution, resolution)
+    names_grey = get_name_part(sheet_image, input_grey, resolution)
     height = names_grey.shape[0]
     row_avg = np.mean(names_grey, axis=1, keepdims=True)
     row_peaks = find_peaks(-row_avg, -cutoff) / height
@@ -201,14 +204,7 @@ def plot_extract_rows_cols(sheet_image):
     input_transform = extract_quadrilateral(
         im, input_bbox, resolution, resolution)
     input_grey = to_grey(input_transform, sheet_image.parameters)
-
-    name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
-                 [0, 0, 1, 1]]
-    name_quad = Quadrilateral(
-        np.asarray([[input_grey.shape[1]], [input_grey.shape[0]]]) *
-        np.asarray(name_rect))
-    names_grey = extract_quadrilateral(
-        input_grey, name_quad, resolution, resolution)
+    names_grey = get_name_part(sheet_image, input_grey, resolution)
 
     fig, (ax1, ax2, ax3) = plt.subplots(3)
 
