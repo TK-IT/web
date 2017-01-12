@@ -250,15 +250,18 @@ def plot_extract_rows_cols(sheet_image):
 def extract_cross_images(sheet_image):
     im = sheet_image.get_image()
     quad = Quadrilateral(sheet_image.quad)
+    input_transform = extract_quadrilateral(im, quad)
 
-    rows = np.multiply(sheet_image.rows, im.shape[0]).astype(np.intp)
-    cols = np.multiply(sheet_image.cols, im.shape[1]).astype(np.intp)
+    height, width, _depth = input_transform.shape
+
+    rows = np.multiply(sheet_image.rows, height).astype(np.intp)
+    cols = np.multiply(sheet_image.cols, width).astype(np.intp)
 
     cross_imgs = []
     for i, (y1, y2) in enumerate(zip(rows[:-1], rows[1:])):
         cross_imgs.append([])
         for j, (x1, x2) in enumerate(zip(cols[:-1], cols[1:])):
-            cross_imgs[-1].append(im[y1:y2, x1:x2])
+            cross_imgs[-1].append(input_transform[y1:y2, x1:x2])
     assert len(cross_imgs) == len(rows) - 1
 
     return cross_imgs
