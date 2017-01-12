@@ -151,22 +151,14 @@ def find_peaks(xs, cutoff, skip_start=True, skip_end=True, full=False):
         peaks, cutoff, min_cutoff, max_cutoff, opt_cutoff)
 
 
-def get_name_part(sheet_image, input_grey):
-    name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
-                 [0, 0, 1, 1]]
-    name_quad = Quadrilateral(
-        np.asarray([[input_grey.shape[1]], [input_grey.shape[0]]]) *
-        np.asarray(name_rect))
-    return extract_quadrilateral(input_grey, name_quad)
+def get_name_part(sheet_image, input):
+    k = int(sheet_image.cols[0] * input.shape[1])
+    return input[:, :k]
 
 
 def get_crosses_part(sheet_image, input):
-    rect = [[sheet_image.cols[0], 1, 1, sheet_image.cols[0]],
-            [0, 0, 1, 1]]
-    quad = Quadrilateral(
-        np.asarray([[input.shape[1]], [input.shape[0]]]) *
-        np.asarray(rect))
-    return extract_quadrilateral(input, quad)
+    k = int(sheet_image.cols[0] * input.shape[1])
+    return input[:, k:]
 
 
 @parameter('cutoff')
