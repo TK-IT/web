@@ -1,5 +1,8 @@
+from collections import namedtuple
+
 import numpy as np
 import scipy.ndimage
+import scipy.signal
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -111,7 +114,11 @@ def fill_in_skipped(xs):
     return fixed
 
 
-def find_peaks(xs, cutoff, skip_start=True, skip_end=True):
+PeaksResult = namedtuple(
+    'PeaksResult', 'peaks cutoff min_cutoff max_cutoff opt_cutoff'.split())
+
+
+def find_peaks(xs, cutoff, skip_start=True, skip_end=True, full=False):
     xs = np.asarray(xs).ravel()
     n = len(xs)
     above = xs > cutoff
@@ -133,7 +140,15 @@ def find_peaks(xs, cutoff, skip_start=True, skip_end=True):
         peaks = peaks[peaks > m/2]
     if skip_end:
         peaks = peaks[peaks < n - m/2]
-    return peaks
+    if not full:
+        return peaks
+    maxima = scipy.signal.argrelmax(xs)[0]
+    maxima_vals = xs[maxima]
+    min_cutoff = np.max(maxima_vals[maxima_vals <= cutoff])
+    max_cutoff = np.min(maxima_vals[maxima_vals > cutoff])
+    opt_cutoff = min_cutoff + (max_cutoff - min_cutoff) / 2
+    return PeaksResult(
+        peaks, cutoff, min_cutoff, max_cutoff, opt_cutoff)
 
 
 def get_name_part(sheet_image, input_grey, resolution=None):
