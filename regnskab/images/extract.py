@@ -154,6 +154,31 @@ def extract_rows(sheet_image, input_grey, cutoff=0.8):
         [0] + (row_peaks / height).tolist() + [1])
 
 
+@parameter('cutoff')
+def extract_person_rows(sheet_image, input_grey, cutoff=0.5):
+    resolution = max(input_grey.shape)
+    name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
+                 [0, 0, 1, 1]]
+    name_quad = Quadrilateral(
+        np.asarray([[input_grey.shape[1]], [input_grey.shape[0]]]) *
+        np.asarray(name_rect))
+
+    names_grey = extract_quadrilateral(
+        input_grey, name_quad, resolution, resolution)
+    height = names_grey.shape[0]
+    row_avg = np.mean(names_grey, axis=1, keepdims=True)
+    row_peaks = find_peaks(-row_avg, -cutoff) / height
+
+    rows = np.asarray(sheet_image.rows)
+    closest = np.abs(row_peaks.reshape(-1, 1) -
+                     rows.reshape(1, -1)).argmin(1)
+    sheet_image.person_rows = np.diff(
+        [0] + closest.tolist() + [len(rows)-1]).tolist()
+    if any(v == 0 for v in sheet_image.person_rows):
+        raise Exception('Person has no rows: %s' %
+                        (sheet_image.person_rows,))
+
+
 def extract_rows_cols(sheet_image):
     im = sheet_image.get_image()
     input_bbox = Quadrilateral(sheet_image.quad)
@@ -210,31 +235,6 @@ def plot_extract_rows_cols(sheet_image):
     ax3.plot(name_row_peaks / sz, name_row_avg[name_row_peaks], '.')
 
     return fig
-
-
-@parameter('cutoff')
-def extract_person_rows(sheet_image, input_grey, cutoff=0.5):
-    resolution = max(input_grey.shape)
-    name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
-                 [0, 0, 1, 1]]
-    name_quad = Quadrilateral(
-        np.asarray([[input_grey.shape[1]], [input_grey.shape[0]]]) *
-        np.asarray(name_rect))
-
-    names_grey = extract_quadrilateral(
-        input_grey, name_quad, resolution, resolution)
-    height = names_grey.shape[0]
-    row_avg = np.mean(names_grey, axis=1, keepdims=True)
-    row_peaks = find_peaks(-row_avg, -cutoff) / height
-
-    rows = np.asarray(sheet_image.rows)
-    closest = np.abs(row_peaks.reshape(-1, 1) -
-                     rows.reshape(1, -1)).argmin(1)
-    sheet_image.person_rows = np.diff(
-        [0] + closest.tolist() + [len(rows)-1]).tolist()
-    if any(v == 0 for v in sheet_image.person_rows):
-        raise Exception('Person has no rows: %s' %
-                        (sheet_image.person_rows,))
 
 
 def extract_cross_images(sheet_image):
