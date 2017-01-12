@@ -284,8 +284,8 @@ def naive_cross_value(data):
     neg_i = (height - 1) - i
     neg_j = (width - 1) - j
     weights = np.minimum(
-        np.minimum(i, neg_i),
-        np.minimum(j, neg_j),
+        np.minimum(i, neg_i) / (height - 1),
+        np.minimum(j, neg_j) / (width - 1),
     )
     weights = weights ** 2
     weights /= weights.sum() * depth
