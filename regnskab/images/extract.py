@@ -161,6 +161,15 @@ def get_name_part(sheet_image, input_grey, resolution=None):
         input_grey, name_quad, resolution, resolution)
 
 
+def get_crosses_part(sheet_image, input):
+    rect = [[sheet_image.cols[0], 1, 1, sheet_image.cols[0]],
+            [0, 0, 1, 1]]
+    quad = Quadrilateral(
+        np.asarray([[input.shape[1]], [input.shape[0]]]) *
+        np.asarray(rect))
+    return extract_quadrilateral(input, quad)
+
+
 @parameter('cutoff')
 def extract_cols(sheet_image, input_grey, cutoff=0.5):
     image_width = input_grey.shape[1]
@@ -172,8 +181,9 @@ def extract_cols(sheet_image, input_grey, cutoff=0.5):
 
 @parameter('cutoff')
 def extract_rows(sheet_image, input_grey, cutoff=0.8):
-    height = input_grey.shape[0]
-    row_avg = np.mean(input_grey, axis=1)
+    crosses_grey = get_crosses_part(sheet_image, input_grey)
+    height = crosses_grey.shape[0]
+    row_avg = np.mean(crosses_grey, axis=1)
     row_peaks = find_peaks(-row_avg, -cutoff)
     sheet_image.rows = fill_in_skipped(
         [0] + (row_peaks / height).tolist() + [1])
@@ -220,6 +230,7 @@ def plot_extract_rows_cols(sheet_image):
         im, input_bbox, resolution, resolution)
     input_grey = to_grey(input_transform, sheet_image.parameters)
     names_grey = get_name_part(sheet_image, input_grey, resolution)
+    crosses_grey = get_crosses_part(sheet_image, input_grey)
 
     fig, (ax1, ax2, ax3) = plt.subplots(3)
 
@@ -231,12 +242,13 @@ def plot_extract_rows_cols(sheet_image):
     col_peaks = find_peaks(-col_avg, -col_cutoff)
     ax1.plot(col_peaks / sz, col_avg[col_peaks], '.')
 
-    row_avg = np.mean(input_grey, axis=1)
-    ax2.plot(np.arange(resolution) / sz, row_avg, 'k-')
+    height = crosses_grey.shape[0]
+    row_avg = np.mean(crosses_grey, axis=1)
+    ax2.plot(np.arange(height) / (height - 1), row_avg, 'k-')
     row_cutoff = sheet_image.parameters['extract_rows.cutoff']
     ax2.plot([0, 1], [row_cutoff, row_cutoff], 'r-')
     row_peaks = find_peaks(-row_avg, -row_cutoff)
-    ax2.plot(row_peaks / sz, row_avg[row_peaks], '.')
+    ax2.plot(row_peaks / (height - 1), row_avg[row_peaks], '.')
 
     name_row_avg = np.mean(names_grey, axis=1, keepdims=True)
     ax3.plot(np.arange(resolution) / sz, name_row_avg, 'k-')
