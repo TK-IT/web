@@ -767,8 +767,12 @@ class SheetImage(models.Model):
         return self.verified_time is not None
 
     def set_verified(self, verified_by):
-        self.verified_time = timezone.now()
-        self.verified_by = verified_by
+        if verified_by is False:
+            self.verified_time = None
+            self.verified_by = None
+        else:
+            self.verified_time = timezone.now()
+            self.verified_by = verified_by
 
     def get_image(self):
         try:
