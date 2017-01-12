@@ -171,7 +171,7 @@ def get_crosses_part(sheet_image, input):
 
 
 @parameter('cutoff')
-def extract_cols(sheet_image, input_grey, cutoff=0.5):
+def extract_cols(sheet_image, input_grey, cutoff=0.39):
     image_width = input_grey.shape[1]
     col_avg = np.mean(input_grey, axis=0)
     col_peaks = find_peaks(-col_avg, -cutoff)
@@ -180,7 +180,7 @@ def extract_cols(sheet_image, input_grey, cutoff=0.5):
 
 
 @parameter('cutoff')
-def extract_rows(sheet_image, input_grey, cutoff=0.8):
+def extract_rows(sheet_image, input_grey, cutoff=0.6):
     crosses_grey = get_crosses_part(sheet_image, input_grey)
     height = crosses_grey.shape[0]
     row_avg = np.mean(crosses_grey, axis=1)
@@ -190,7 +190,7 @@ def extract_rows(sheet_image, input_grey, cutoff=0.8):
 
 
 @parameter('cutoff')
-def extract_person_rows(sheet_image, input_grey, cutoff=0.5):
+def extract_person_rows(sheet_image, input_grey, cutoff=0.45):
     resolution = max(input_grey.shape)
     names_grey = get_name_part(sheet_image, input_grey, resolution)
     height = names_grey.shape[0]
