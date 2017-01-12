@@ -239,7 +239,8 @@ def plot_extract_rows_cols(sheet_image):
     ax1.plot(np.arange(resolution) / sz, col_avg, 'k-')
     col_cutoff = sheet_image.parameters['extract_cols.cutoff']
     ax1.plot([0, 1], [col_cutoff, col_cutoff], 'r-')
-    col_peaks = find_peaks(-col_avg, -col_cutoff)
+    col_peak_data = find_peaks(-col_avg, -col_cutoff, full=True)
+    col_peaks = col_peak_data.peaks
     ax1.plot(col_peaks / sz, col_avg[col_peaks], '.')
 
     height = crosses_grey.shape[0]
@@ -247,16 +248,21 @@ def plot_extract_rows_cols(sheet_image):
     ax2.plot(np.arange(height) / (height - 1), row_avg, 'k-')
     row_cutoff = sheet_image.parameters['extract_rows.cutoff']
     ax2.plot([0, 1], [row_cutoff, row_cutoff], 'r-')
-    row_peaks = find_peaks(-row_avg, -row_cutoff)
+    row_peak_data = find_peaks(-row_avg, -row_cutoff, full=True)
+    row_peaks = row_peak_data.peaks
     ax2.plot(row_peaks / (height - 1), row_avg[row_peaks], '.')
 
     name_row_avg = np.mean(names_grey, axis=1, keepdims=True)
     ax3.plot(np.arange(resolution) / sz, name_row_avg, 'k-')
     name_row_cutoff = sheet_image.parameters['extract_person_rows.cutoff']
-    name_row_peaks = find_peaks(-name_row_avg, -name_row_cutoff)
+    name_row_peak_data = find_peaks(-name_row_avg, -name_row_cutoff, full=True)
+    name_row_peaks = name_row_peak_data.peaks
     ax3.plot([0, 1], [name_row_cutoff, name_row_cutoff], 'r-')
     ax3.plot(name_row_peaks / sz, name_row_avg[name_row_peaks], '.')
 
+    # print(col_peak_data.opt_cutoff)
+    # print(row_peak_data.opt_cutoff)
+    # print(name_row_peak_data.opt_cutoff)
     return fig
 
 
