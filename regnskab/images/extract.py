@@ -254,23 +254,14 @@ def extract_cross_images(sheet_image):
     im = sheet_image.get_image()
     quad = Quadrilateral(sheet_image.quad)
 
-    rows = sheet_image.rows
-    cols = sheet_image.cols
+    rows = (sheet_image.rows * im.shape[0]).astype(np.intp)
+    cols = (sheet_image.cols * im.shape[1]).astype(np.intp)
 
-    width = height = 24
     cross_imgs = []
     for i, (y1, y2) in enumerate(zip(rows[:-1], rows[1:])):
         cross_imgs.append([])
         for j, (x1, x2) in enumerate(zip(cols[:-1], cols[1:])):
-            top_left = (x1, y1)
-            top_right = (x2, y1)
-            bottom_right = (x2, y2)
-            bottom_left = (x1, y2)
-            corners = quad.to_world(np.transpose([
-                top_left, top_right, bottom_right, bottom_left]))
-            cross = Quadrilateral(corners)
-            cross_imgs[-1].append(extract_quadrilateral(
-                im, cross, width, height))
+            cross_imgs[-1].append(im[y1:y2, x1:x2])
     assert len(cross_imgs) == len(rows) - 1
 
     return cross_imgs
