@@ -233,11 +233,6 @@ def extract_person_rows(sheet_image, input_grey, cutoff=0.5):
     sheet_image.person_rows = np.diff(
         [0] + closest.tolist() + [len(rows)-1]).tolist()
     if any(v == 0 for v in sheet_image.person_rows):
-        print(repr(rows))
-        print(repr(np.diff(rows)))
-        print(repr(row_peaks))
-        print(repr(np.diff(row_peaks)))
-        print(repr(closest))
         raise Exception('Person has no rows: %s' %
                         (sheet_image.person_rows,))
 
