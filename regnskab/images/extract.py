@@ -151,14 +151,13 @@ def find_peaks(xs, cutoff, skip_start=True, skip_end=True, full=False):
         peaks, cutoff, min_cutoff, max_cutoff, opt_cutoff)
 
 
-def get_name_part(sheet_image, input_grey, resolution=None):
+def get_name_part(sheet_image, input_grey):
     name_rect = [[0, sheet_image.cols[0], sheet_image.cols[0], 0],
                  [0, 0, 1, 1]]
     name_quad = Quadrilateral(
         np.asarray([[input_grey.shape[1]], [input_grey.shape[0]]]) *
         np.asarray(name_rect))
-    return extract_quadrilateral(
-        input_grey, name_quad, resolution, resolution)
+    return extract_quadrilateral(input_grey, name_quad)
 
 
 def get_crosses_part(sheet_image, input):
@@ -191,8 +190,7 @@ def extract_rows(sheet_image, input_grey, cutoff=0.6):
 
 @parameter('cutoff')
 def extract_person_rows(sheet_image, input_grey, cutoff=0.45):
-    resolution = max(input_grey.shape)
-    names_grey = get_name_part(sheet_image, input_grey, resolution)
+    names_grey = get_name_part(sheet_image, input_grey)
     height = names_grey.shape[0]
     row_avg = np.mean(names_grey, axis=1, keepdims=True)
     row_peaks = find_peaks(-row_avg, -cutoff) / height
@@ -211,9 +209,7 @@ def extract_rows_cols(sheet_image):
     im = sheet_image.get_image()
     input_bbox = Quadrilateral(sheet_image.quad)
 
-    resolution = max(im.shape)
-    input_transform = extract_quadrilateral(
-        im, input_bbox, resolution, resolution)
+    input_transform = extract_quadrilateral(im, input_bbox)
     input_grey = to_grey(input_transform, sheet_image.parameters)
 
     extract_cols(sheet_image, input_grey)
@@ -225,44 +221,40 @@ def plot_extract_rows_cols(sheet_image):
     im = sheet_image.get_image()
     input_bbox = Quadrilateral(sheet_image.quad)
 
-    resolution = max(im.shape)
-    input_transform = extract_quadrilateral(
-        im, input_bbox, resolution, resolution)
+    input_transform = extract_quadrilateral(im, input_bbox)
     input_grey = to_grey(input_transform, sheet_image.parameters)
-    names_grey = get_name_part(sheet_image, input_grey, resolution)
+    names_grey = get_name_part(sheet_image, input_grey)
     crosses_grey = get_crosses_part(sheet_image, input_grey)
 
     fig, (ax1, ax2, ax3) = plt.subplots(3)
 
-    sz = resolution - 1
     col_avg = np.mean(input_grey, axis=0)
-    ax1.plot(np.arange(resolution) / sz, col_avg, 'k-')
+    ax1.plot(np.arange(len(col_avg)) / (len(col_avg) - 1), col_avg, 'k-')
     col_cutoff = sheet_image.parameters['extract_cols.cutoff']
     ax1.plot([0, 1], [col_cutoff, col_cutoff], 'r-')
     col_peak_data = find_peaks(-col_avg, -col_cutoff, full=True)
     col_peaks = col_peak_data.peaks
-    ax1.plot(col_peaks / sz, col_avg[col_peaks], '.')
+    ax1.plot(col_peaks / (len(col_avg) - 1), col_avg[col_peaks], '.')
 
-    height = crosses_grey.shape[0]
     row_avg = np.mean(crosses_grey, axis=1)
-    ax2.plot(np.arange(height) / (height - 1), row_avg, 'k-')
+    ax2.plot(np.arange(len(row_avg)) / (len(row_avg) - 1), row_avg, 'k-')
     row_cutoff = sheet_image.parameters['extract_rows.cutoff']
     ax2.plot([0, 1], [row_cutoff, row_cutoff], 'r-')
     row_peak_data = find_peaks(-row_avg, -row_cutoff, full=True)
     row_peaks = row_peak_data.peaks
-    ax2.plot(row_peaks / (height - 1), row_avg[row_peaks], '.')
+    ax2.plot(row_peaks / (len(row_avg) - 1), row_avg[row_peaks], '.')
 
-    name_row_avg = np.mean(names_grey, axis=1, keepdims=True)
-    ax3.plot(np.arange(resolution) / sz, name_row_avg, 'k-')
-    name_row_cutoff = sheet_image.parameters['extract_person_rows.cutoff']
-    name_row_peak_data = find_peaks(-name_row_avg, -name_row_cutoff, full=True)
-    name_row_peaks = name_row_peak_data.peaks
-    ax3.plot([0, 1], [name_row_cutoff, name_row_cutoff], 'r-')
-    ax3.plot(name_row_peaks / sz, name_row_avg[name_row_peaks], '.')
+    name_avg = np.mean(names_grey, axis=1, keepdims=True)
+    ax3.plot(np.arange(len(name_avg)) / (len(name_avg) - 1), name_avg, 'k-')
+    name_cutoff = sheet_image.parameters['extract_person_rows.cutoff']
+    name_peak_data = find_peaks(-name_avg, -name_cutoff, full=True)
+    name_peaks = name_peak_data.peaks
+    ax3.plot([0, 1], [name_cutoff, name_cutoff], 'r-')
+    ax3.plot(name_peaks / (len(name_avg) - 1), name_avg[name_peaks], '.')
 
     # print(col_peak_data.opt_cutoff)
     # print(row_peak_data.opt_cutoff)
-    # print(name_row_peak_data.opt_cutoff)
+    # print(name_peak_data.opt_cutoff)
     return fig
 
 
