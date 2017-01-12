@@ -161,6 +161,7 @@ class SheetImageParameters(FormView, SheetImageMixin):
         images, rows, purchases = extract_images(
             sheet, list(sheet.purchasekind_set.all()))
         sheet_image, = [im for im in images if im.page == sheet_image.page]
+        sheet_image.set_verified(False)
         sheet_image.save()  # Save computed values
         if form.cleaned_data['reset']:
             sheet.sheetrow_set.all().delete()
