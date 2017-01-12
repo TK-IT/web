@@ -254,8 +254,8 @@ def extract_cross_images(sheet_image):
     im = sheet_image.get_image()
     quad = Quadrilateral(sheet_image.quad)
 
-    rows = (sheet_image.rows * im.shape[0]).astype(np.intp)
-    cols = (sheet_image.cols * im.shape[1]).astype(np.intp)
+    rows = np.multiply(sheet_image.rows, im.shape[0]).astype(np.intp)
+    cols = np.multiply(sheet_image.cols, im.shape[1]).astype(np.intp)
 
     cross_imgs = []
     for i, (y1, y2) in enumerate(zip(rows[:-1], rows[1:])):
