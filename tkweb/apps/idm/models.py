@@ -86,6 +86,7 @@ class Profile(models.Model):
         return self.name
 
 
+@tk.title_class
 @python_2_unicode_compatible
 class Title(models.Model):
     BEST, FU, EFU = 'BEST', 'FU', 'EFU'
