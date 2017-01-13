@@ -20,10 +20,10 @@
     <tbody>
         {% for p in best %}
         <tr>
-            <td>{{ p.title_tuple|tk_prefix }}</td>
+            <td>{{ p|tk_prefix }}</td>
             <td>{{ p.profile.name }}</td>
-            <td class="text-right"><a href="mailto:{{ p.title_tuple|tk_email }}@TAAGEKAMMERET.dk">
-                {{ p.title_tuple|tk_email }}@{% TKETAA %}.dk</a></td>
+            <td class="text-right"><a href="mailto:{{ p|tk_email }}@TAAGEKAMMERET.dk">
+                {{ p|tk_email }}@{% TKETAA %}.dk</a></td>
         </tr>
         {% endfor %}
     </tbody>
