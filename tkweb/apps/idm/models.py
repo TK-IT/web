@@ -109,15 +109,15 @@ class Title(models.Model):
         return self.root.replace('KASS', 'KA$$')
 
     def display_title(self, gfyear=None):
-        return tk.prefix(self.title_tuple(), _get_gfyear(gfyear),
+        return tk.prefix(self, _get_gfyear(gfyear),
                          type=tk.PREFIXTYPE_UNICODE)
 
     def input_title(self, gfyear=None):
         # The title as it would be typed
-        return tk.prefix(self.title_tuple(), _get_gfyear(gfyear))
+        return tk.prefix(self, _get_gfyear(gfyear))
 
     def display_title_and_year(self, gfyear=None):
-        return tk.prepostfix(self.title_tuple(), _get_gfyear(gfyear),
+        return tk.prepostfix(self, _get_gfyear(gfyear),
                              prefixtype=tk.PREFIXTYPE_UNICODE)
 
     def ascii_root(self):
@@ -125,7 +125,7 @@ class Title(models.Model):
         return self.root.translate(tr)
 
     def email_local_part(self, gfyear=None):
-        return tk.email(self.title_tuple(), _get_gfyear(gfyear))
+        return tk.email(self, _get_gfyear(gfyear))
 
     @classmethod
     def parse(cls, title, gfyear=None, **kwargs):
