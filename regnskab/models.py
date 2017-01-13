@@ -20,6 +20,7 @@ from django.utils.html import format_html
 
 from unidecode import unidecode
 from jsonfield import JSONField
+import tktitler as tk
 
 
 def _import_profile_title():
@@ -37,15 +38,13 @@ def _import_profile_title():
             models_module + ' is not a module that can be imported')
 
     try:
-        return (module.Profile, module.Title, module.tk_prefix, module.config,
-                module.parse_bestfu_alias)
+        return (module.Profile, module.Title, module.config)
     except AttributeError:
         raise ImproperlyConfigured(
-            models_module + ' must define Profile, Title, tk_prefix, ' +
-            'config, parse_bestfu_alias')
+            models_module + ' must define Profile, Title, config')
 
 
-Profile, Title, tk_prefix, config, parse_bestfu_alias = _import_profile_title()
+Profile, Title, config = _import_profile_title()
 
 BEST_ORDER = dict(zip('FORM INKA KASS NF CERM SEKR PR VC'.split(), range(8)))
 
@@ -73,6 +72,12 @@ def get_default_prices():
         ('sodavand', vand_price),
         ('sodavandkasse', vandkasse_price),
     ]
+
+
+def _get_gfyear(gfyear):
+    if gfyear is None:
+        return config.GFYEAR
+    return gfyear
 
 
 class SheetStatus(models.Model):
@@ -122,13 +127,16 @@ class Alias(models.Model):
     def display_title(self, gfyear=None):
         if self.period is None:
             return self.root
-        return '%s%s' % (tk_prefix(self.age(gfyear)), self.display_root())
+        return tk.prefix((self.root, self.age(gfyear)),
+                         _get_gfyear(gfyear),
+                         type=tk.PREFIXTYPE_UNICODE)
 
     def input_title(self, gfyear=None):
         # The title as it would be typed
         if self.period is None:
             return self.root
-        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str), self.root)
+        return tk.prefix((self.root, self.age(gfyear)),
+                         _get_gfyear(gfyear))
 
     class Meta:
         ordering = ['period', 'root']

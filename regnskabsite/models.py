@@ -108,45 +108,6 @@ def get_period(prefix, postfix, gfyear):
     return period - grad
 
 
-def parse_bestfu_alias(alias, gfyear):
-    """
-    Resolve a BEST/FU alias into a (kind, root, period)-tuple
-    where kind is 'BEST', 'FU' or 'EFU',
-    root is the actual title, and period is which period the title
-    refers to.
-
-    >>> parse_bestfu_alias('OFORM', 2016)
-    ('BEST', 'FORM', 2013)
-    """
-
-    alias = alias.upper()
-    prefix_pattern = r"(?P<pre>(?:[KGBOT][KGBOT0-9]*)?)"
-    postfix_pattern = r"(?P<post>(?:[0-9]{2}|[0-9]{4})?)"
-    letter = '[A-Z]|Æ|Ø|Å|AE|OE|AA'
-    letter_map = dict(AE='Æ', OE='Ø', AA='Å')
-    title_patterns = [
-        ('BEST', 'CERM|FORM|INKA|KASS|NF|PR|SEKR|VC'),
-        ('FU', '(?P<a>E?FU)(?P<b>%s)(?P<c>%s)' % (letter, letter)),
-    ]
-    for kind, p in title_patterns:
-        pattern = '^%s(?P<root>%s)%s$' % (prefix_pattern, p, postfix_pattern)
-        mo = re.match(pattern, alias)
-        if mo is not None:
-            period = get_period(mo.group("pre"), mo.group("post"), gfyear)
-            root = mo.group('root')
-            if kind == 'FU':
-                fu_kind = mo.group('a')
-                letter1 = mo.group('b')
-                letter2 = mo.group('c')
-                assert root == fu_kind + letter1 + letter2
-                # Translate AE OE AA
-                letter1_int = letter_map.get(letter1, letter1)
-                letter2_int = letter_map.get(letter2, letter2)
-                root = fu_kind + letter1_int + letter2_int
-            return kind, root, period
-    raise ValueError(alias)
-
-
 class Profile(models.Model):
     name = models.CharField(max_length=50, verbose_name="Navn")
     email = models.EmailField(max_length=50, blank=True,

@@ -15,9 +15,11 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.views.generic import FormView
 
+import tktitler as tk
+
 from regnskab.models import (
     Session, Purchase, Transaction, Sheet, PurchaseKind,
-    tk_prefix, compute_balance, get_default_prices,
+    compute_balance, get_default_prices,
     get_profiles_title_status,
 )
 from regnskab.forms import BalancePrintForm
@@ -212,7 +214,7 @@ class BalancePrint(FormView):
                 if age > 4:
                     tex_prefix = 'T$^{%s}$O' % (age - 3)
                 else:
-                    tex_prefix = tk_prefix(age)
+                    tex_prefix = tk.prefix(('', p.title.period), period)
                 if p.title.root == 'KASS':
                     root = 'KA\\$\\$'
                 else:
