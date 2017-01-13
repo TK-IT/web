@@ -3,9 +3,6 @@ from collections import namedtuple
 import numpy as np
 import scipy.ndimage
 import scipy.signal
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 
 from django.core.files.base import ContentFile
 from django.utils import timezone
@@ -16,6 +13,10 @@ from .quadrilateral import Quadrilateral, extract_quadrilateral
 from regnskab.models import (
     SheetImage, SheetRow, Purchase,
 )
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt  # noqa
 
 
 @parameter('q')
