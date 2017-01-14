@@ -170,13 +170,15 @@ class Transaction(models.Model):
 
 def title_key(t):
     # EFU after others. Latest period first.
-    kind = t.kind
+    kind = 'Alias' if isinstance(t, Alias) else t.kind
     if kind == Title.BEST:
         return (0, -t.period, BEST_ORDER[t.root])
     elif kind == Title.FU:
         return (0, -t.period, 10, t.root)
     elif kind == Title.EFU:
         return (1, -t.period, t.root)
+    elif kind == 'Alias':
+        return (2, t.root)
     else:
         raise ValueError(kind)
 
@@ -184,16 +186,24 @@ def title_key(t):
 def get_titles(profile_ids=None, period=None, time=None):
     '''dict mapping profile id to list of titles in priority order'''
     title_qs = Title.objects.all()
+    alias_qs = Alias.objects.filter(is_title=True)
     if profile_ids:
         title_qs = title_qs.filter(profile_id__in=profile_ids)
+        alias_qs = alias_qs.filter(profile_id__in=profile_ids)
 
     if period is not None:
         title_qs = title_qs.filter(period__lte=period)
     title_qs = title_qs.order_by('profile_id')
+    alias_qs = alias_qs.order_by('-start_time')
+    if time is not None:
+        alias_qs = alias_qs.exclude(start_time__gt=time)
 
     groups = itertools.groupby(title_qs, key=lambda t: t.profile_id)
     titles = {pk: sorted(g, key=title_key) for pk, g in groups}
 
+    # Add primary aliases
+    for t in alias_qs:
+        titles.setdefault(t.profile_id, []).append(t)
     return titles
 
 
@@ -287,10 +297,11 @@ class Sheet(models.Model):
         if self.legacy_style():
             # Sort rows by title, period
             def key(row):
-                return (row['title'] is None,
-                        row['title'] and (-row['title'].period,
-                                          row['title'].kind,
-                                          row['title'].root))
+                if isinstance(row['title'], Title):
+                    return (0, -row['title'].period,
+                            row['title'].kind,
+                            row['title'].root)
+                return (1,)
 
             result.sort(key=key)
         return result
@@ -592,7 +603,7 @@ class Session(models.Model):
                 existing_email = o
             elif isinstance(o, Purchase):
                 purchase_count[o.name] += o.count
-            elif isinstance(o, Title):
+            elif isinstance(o, (Title, Alias)):
                 assert primary_title is None
                 primary_title = o
             elif isinstance(o, Balance):
@@ -736,6 +747,8 @@ def get_profiles_title_status(period=None, time=None):
             return (2, p.name)
         elif p.title is None:
             return (1, p.name)
+        elif isinstance(p.title, Alias):
+            return (1, '%s %s' % (p.title, p.name))
         else:
             return (0, title_key(p.title))
 
