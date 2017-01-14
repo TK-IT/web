@@ -2,6 +2,8 @@ import re
 from django.db import models
 from regnskabsite import config
 
+import tktitler as tk
+
 
 def unicode_superscript(n):
     digits = '⁰¹²³⁴⁵⁶⁷⁸⁹'
@@ -122,6 +124,13 @@ class Profile(models.Model):
         return str(self.name)
 
 
+def _get_gfyear(gfyear):
+    if gfyear is None:
+        gfyear = config.GFYEAR
+    return gfyear
+
+
+@tk.title_class
 class Title(models.Model):
     BEST, FU, EFU = 'BEST', 'FU', 'EFU'
     KIND = [(BEST, 'BEST'), (FU, 'FU'), (EFU, 'EFU')]
@@ -130,6 +139,9 @@ class Title(models.Model):
     period = models.IntegerField(verbose_name='Årgang')
     root = models.CharField(max_length=10, verbose_name='Titel')
     kind = models.CharField(max_length=10, choices=KIND, verbose_name='Slags')
+
+    def title_tuple(self):
+        return (self.root, self.period)
 
     def age(self, gfyear=None):
         if gfyear is None:
@@ -140,28 +152,38 @@ class Title(models.Model):
         return self.root.replace('KASS', 'KA$$')
 
     def display_title(self, gfyear=None):
-        return '%s%s' % (tk_prefix(self.age(gfyear)), self.display_root())
+        return tk.prefix(self, _get_gfyear(gfyear),
+                         type=tk.PREFIXTYPE_UNICODE)
 
     def input_title(self, gfyear=None):
         # The title as it would be typed
-        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str), self.root)
+        return tk.prefix(self, _get_gfyear(gfyear))
 
     def display_title_and_year(self, gfyear=None):
-        return '%s (%02d/%02d)' % (self.display_title(gfyear),
-                                   self.period % 100, (self.period+1) % 100)
+        return tk.prepostfix(self, _get_gfyear(gfyear),
+                             prefixtype=tk.PREFIXTYPE_UNICODE)
 
     def ascii_root(self):
         tr = {197: 'AA', 198: 'AE', 216: 'OE', 229: 'aa', 230: 'ae', 248: 'oe'}
         return self.root.translate(tr)
 
     def email_local_part(self, gfyear=None):
-        return '%s%s' % (tk_prefix(self.age(gfyear), sup_fn=str),
-                         self.ascii_root())
+        return tk.email(self, _get_gfyear(gfyear))
 
     @classmethod
-    def parse(cls, title, gfyear, **kwargs):
-        kind, root, period = parse_bestfu_alias(title, gfyear)
-        return cls(period=period, root=root, kind=kind, **kwargs)
+    def parse(cls, title, gfyear=None, **kwargs):
+        root, period = tk.parse(title, _get_gfyear(gfyear))
+
+        letter = '(?:[A-Z]|Æ|Ø|Å|AE|OE|AA)'
+        title_patterns = [
+            ('BEST', '^(?:CERM|FORM|INKA|KASS|NF|PR|SEKR|VC)$'),
+            ('FU', '^FU%s%s$' % (letter, letter)),
+            ('EFU', '^EFU%s%s$' % (letter, letter)),
+        ]
+        for kind, p in title_patterns:
+            if re.match(p, root):
+                return cls(period=period, root=root, kind=kind, **kwargs)
+        raise ValueError(title)
 
     class Meta:
         ordering = ['-period', 'kind', 'root']
