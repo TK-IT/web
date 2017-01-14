@@ -53,8 +53,11 @@
 <p>Vist titel: {{ real_title }}</p>
 {% else %}
 <form method="post">{% csrf_token %}
-    <p>Vist titel: <input name="primary_alias" value="{{ primary_alias|default:"" }}" /></p>
-    <p><input name="set_primary_alias" type="submit" value="Gem" /></p>
+    <p>
+    Vist titel:
+    <input name="primary_alias" value="{{ primary_alias|default:"" }}" />
+    <input name="set_primary_alias" type="submit" value="Gem vist titel" />
+    </p>
 </form>
 {% endif %}
 
