@@ -210,16 +210,8 @@ class BalancePrint(FormView):
                 title_str = title_to_tex(p.title.root)
                 p_context['name'] = '%s %s' % (title_str, p.name)
             elif p.title:
-                age = p.title.age(period)
-                if age > 4:
-                    tex_prefix = 'T$^{%s}$O' % (age - 3)
-                else:
-                    tex_prefix = tk.prefix(('', p.title.period), period)
-                if p.title.root == 'KASS':
-                    root = 'KA\\$\\$'
-                else:
-                    root = p.title.root
-                p_context['name'] = '%s%s %s' % (tex_prefix, root, p.name)
+                title_str = tk.prefix(p.title, period, type=tk.PREFIXTYPE_TEX)
+                p_context['name'] = '%s %s' % (title_str, p.name)
             else:
                 p_context['name'] = p.name
             FMT = dict(betalt='\\hfill \\num{%.2f}', andet='\\hfill \\num{%.2f}',
