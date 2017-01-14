@@ -231,13 +231,13 @@ class BalancePrint(FormView):
         try:
             pdf = tex_to_pdf(tex_source)
         except RenderError as exn:
-            form.add_error(None, str(exn))
+            form.add_error(None, str(exn) + ': ' + exn.output)
             return self.form_invalid(form)
 
         try:
             pdf = pdfnup(pdf)
         except RenderError as exn:
-            form.add_error(None, str(exn))
+            form.add_error(None, str(exn) + ': ' + exn.output)
             return self.form_invalid(form)
 
         if mode == BalancePrintForm.PDF:
