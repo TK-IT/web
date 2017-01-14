@@ -160,19 +160,39 @@ class Transaction(models.Model):
         return '%.2f kr.' % self.amount
 
 
-def get_primary_titles(title_qs=None, period=None):
-    if title_qs is None:
-        title_qs = Title.objects.all()
-    if period is None:
-        period = config.GFYEAR
-    title_qs = title_qs.filter(period__lte=period)
-    title_qs = title_qs.exclude(root='EFUIT', period__lt=period)
-    title_qs = title_qs.order_by('period')
-    titles = {}
-    for t in title_qs:
-        # Override older titles
-        titles[t.profile_id] = t
+def title_key(t):
+    # EFU after others. Latest period first.
+    kind = t.kind
+    if kind == Title.BEST:
+        return (0, -t.period, BEST_ORDER[t.root])
+    elif kind == Title.FU:
+        return (0, -t.period, 10, t.root)
+    elif kind == Title.EFU:
+        return (1, -t.period, t.root)
+    else:
+        raise ValueError(kind)
+
+
+def get_titles(profile_ids=None, period=None, time=None):
+    '''dict mapping profile id to list of titles in priority order'''
+    title_qs = Title.objects.all()
+    if profile_ids:
+        title_qs = title_qs.filter(profile_id__in=profile_ids)
+
+    if period is not None:
+        title_qs = title_qs.filter(period__lte=period)
+    title_qs = title_qs.order_by('profile_id')
+
+    groups = itertools.groupby(title_qs, key=lambda t: t.profile_id)
+    titles = {pk: sorted(g, key=title_key) for pk, g in groups}
+
     return titles
+
+
+@functools.wraps(get_titles)
+def get_primary_titles(*args, **kwargs):
+    all_titles = get_titles(*args, **kwargs)
+    return {p: ts[0] for p, ts in all_titles.items()}
 
 
 def slugify(string):
@@ -245,9 +265,8 @@ class Sheet(models.Model):
                 image=image,
             ))
         profile_ids = set(row['profile'] for row in result)
-        titles = get_primary_titles(
-            Title.objects.filter(profile_id__in=profile_ids),
-            self.period)
+        titles = get_primary_titles(profile_ids=profile_ids,
+                                    period=self.period)
 
         for row in result:
             try:
@@ -702,11 +721,6 @@ def set_default(fn, *default_args, **default_kwargs):
 
 
 def get_profiles_title_status(period=None, time=None):
-    def title_key(t):
-        # EFU after others. Latest period first.
-        return (t.kind == Title.EFU, -t.period, t.kind,
-                BEST_ORDER.get(t.root, 10), t.root)
-
     def profile_key(p):
         if p.status is None:
             return (3, p.name)
@@ -717,12 +731,7 @@ def get_profiles_title_status(period=None, time=None):
         else:
             return (0, title_key(p.title))
 
-    title_qs = Title.objects.all().order_by('profile_id')
-    if period is not None:
-        title_qs = title_qs.filter(period__lte=period)
-    groups = itertools.groupby(title_qs, key=lambda t: t.profile_id)
-    titles = {pk: sorted(g, key=title_key) for pk, g in groups}
-
+    titles = get_titles(period=period, time=time)
     status_qs = SheetStatus.objects.all().order_by('profile_id')
     if time is not None:
         status_qs = status_qs.exclude(start_time__gt=time)
