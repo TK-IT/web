@@ -1,4 +1,5 @@
 import io
+import re
 import random
 import logging
 from decimal import Decimal
@@ -76,6 +77,21 @@ BALANCE_ROW = '\n'.join([
     r'\hline',
     r'\multirow{2}{6cm}{%(name)s} & %(last)s &\\',
     r'& %(total)s & \hfill %(hl)s{\num{%(balance).2f}}\\'])
+
+
+def title_to_tex(s):
+    tokens = [
+        ('pow', r'\^[a-z]|\^[0-9]+', lambda s: '$^{%s}$' % s[1:]),
+        ('hat', r'\^', lambda s: '\\' + s + '{}'),
+        ('escape', r'[$^\\{}]', lambda s: '\\' + s),
+    ]
+    pattern = '|'.join('(%s)' % pattern for name, pattern, r in tokens)
+
+    def repl(mo):
+        name, pattern, r = tokens[mo.lastindex - 1]
+        return r(mo.group())
+
+    return re.sub(pattern, repl, s)
 
 
 class BalancePrint(FormView):
@@ -185,7 +201,10 @@ class BalancePrint(FormView):
                 context['total_%s' % k] += counts[p.id, k]
                 context['last_%s' % k] += cur_counts[p.id, k]
             p_context = {}
-            if p.title:
+            if p.title and p.title.period is None:
+                title_str = title_to_tex(p.title.root)
+                p_context['name'] = '%s %s' % (title_str, p.name)
+            elif p.title:
                 age = p.title.age(period)
                 if age > 4:
                     tex_prefix = 'T$^{%s}$O' % (age - 3)
