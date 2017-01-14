@@ -97,6 +97,10 @@ class Alias(models.Model):
         help_text='Bruges kun hvis aliaset skal opdateres automatisk ' +
                   'efter hver GF')
     root = models.CharField(max_length=200, verbose_name='Alias')
+    is_title = models.BooleanField(
+        blank=True, default=False, verbose_name='Primær titel',
+        help_text='Markeres hvis aliaset skal vises foran personens navn ' +
+                  'som om det var en titel.')
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
