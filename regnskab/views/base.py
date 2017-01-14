@@ -489,6 +489,44 @@ class ProfileDetail(TemplateView):
                                      root=s,
                                      start_time=timezone.now(),
                                      created_by=request.user)
+        elif 'set_primary_alias' in self.request.POST:
+            k, current_alias = self.get_alias_data()
+            if k == 'real_title':
+                return self.post_error('Kan ikke ændre vist titel for ' +
+                                       'person med rigtig titel')
+            s = self.request.POST.get('primary_alias') or ''
+            current_alias_display = str(current_alias or '')
+            if s == current_alias_display:
+                # No change
+                pass
+            else:
+                now = timezone.now()
+                if current_alias:
+                    logger.info("%s: Fjern primær alias %r fra %s",
+                                self.request.user, current_alias_display,
+                                self.profile)
+                    # Deactivate current_alias and create new current_alias
+                    # without is_title.
+                    current_alias.end_time = now
+                    current_alias.save()
+                    Alias.objects.create(profile=self.profile,
+                                         root=current_alias.root,
+                                         is_title=False,
+                                         start_time=now,
+                                         created_by=request.user)
+                if s:
+                    logger.info("%s: Tilføj primær alias %r til %s",
+                                self.request.user, s, self.profile)
+                    existing_same = Alias.objects.filter(
+                        profile=self.profile,
+                        root=s,
+                        end_time=None)
+                    existing_same.update(end_time=now)
+                    Alias.objects.create(profile=self.profile,
+                                         root=s,
+                                         is_title=True,
+                                         start_time=now,
+                                         created_by=request.user)
         else:
             for k in self.request.POST:
                 if k.startswith(self.REMOVE_ALIAS):
@@ -504,6 +542,9 @@ class ProfileDetail(TemplateView):
                         logger.info("%s: Fjern alias %r fra %s",
                                     self.request.user, o.root, self.profile)
         return self.render_to_response(self.get_context_data())
+
+    def post_error(self, msg):
+        return self.render_to_response(self.get_context_data(error=msg))
 
     def get_purchases(self):
         qs = Purchase.objects.all()
@@ -561,6 +602,7 @@ class ProfileDetail(TemplateView):
             names.append(dict(
                 name=o.display_title(),
                 since='Titel siden %s/%02d' % (o.period, (o.period+1) % 100),
+                period=o.period,
                 remove=None,
             ))
         for o in self.profile.alias_set.all():
@@ -571,6 +613,7 @@ class ProfileDetail(TemplateView):
                     name=o.display_title(),
                     since='Siden %s' % start,
                     remove=self.REMOVE_ALIAS + str(o.pk),
+                    is_title=o.is_title,
                 ))
             else:
                 names.append(dict(
@@ -580,10 +623,24 @@ class ProfileDetail(TemplateView):
                 ))
         return names
 
+    def get_alias_data(self):
+        title_qs = Title.objects.filter(profile=self.profile)
+        title_qs = title_qs.order_by('-period')
+        if title_qs:
+            return ('real_title', title_qs[0])
+        alias_qs = Alias.objects.filter(profile=self.profile)
+        alias_qs = alias_qs.filter(is_title=True, end_time=None)
+        alias_qs = alias_qs.order_by()
+        if alias_qs:
+            assert len(alias_qs) == 1
+            assert alias_qs[0].period is None
+            return ('primary_alias', alias_qs[0])
+        return ('primary_alias', None)
+
     def get_context_data(self, **kwargs):
         context_data = super(ProfileDetail, self).get_context_data(**kwargs)
 
-        profile = context_data['profile'] = self.profile
+        context_data['profile'] = self.profile
         context_data['sheetstatus'] = self.sheetstatus
 
         rows = []
@@ -600,6 +657,8 @@ class ProfileDetail(TemplateView):
 
         context_data['rows'] = rows
         context_data['names'] = self.get_names()
+        alias_key, alias_value = self.get_alias_data()
+        context_data[alias_key] = alias_value
         return context_data
 
 

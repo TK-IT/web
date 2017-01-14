@@ -8,6 +8,11 @@
 {% block content %}
 <h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <h2>{{ profile }}</h2>
+
+{% if error %}
+<p>Fejl: {{ error }}</p>
+{% endif %}
+
 <form method="post">{% csrf_token %}
     {% if sheetstatus %}
     <input type="submit" name="remove_status" value="Fjern fra krydslisten" />
@@ -43,6 +48,15 @@
     <p>Alias: <input name="alias" /></p>
     <p><input name="add_alias" type="submit" value="Tilføj alias" /></p>
 </form>
+
+{% if real_title %}
+<p>Vist titel: {{ real_title }}</p>
+{% else %}
+<form method="post">{% csrf_token %}
+    <p>Vist titel: <input name="primary_alias" value="{{ primary_alias|default:"" }}" /></p>
+    <p><input name="set_primary_alias" type="submit" value="Gem" /></p>
+</form>
+{% endif %}
 
 <table>
     <thead>
