@@ -45,8 +45,11 @@
 {% endif %}
 
 <form method="post">{% csrf_token %}
-    <p>Alias: <input name="alias" /></p>
-    <p><input name="add_alias" type="submit" value="Tilføj alias" /></p>
+    <p>
+    Alias:
+    <input name="alias" />
+    <input name="add_alias" type="submit" value="Tilføj alias" />
+    </p>
 </form>
 
 {% if real_title %}
