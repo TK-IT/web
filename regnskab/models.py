@@ -172,7 +172,7 @@ def title_key(t):
     # EFU after others. Latest period first.
     kind = 'Alias' if isinstance(t, Alias) else t.kind
     if kind == Title.BEST:
-        return (0, -t.period, BEST_ORDER[t.root])
+        return (0, -t.period, BEST_ORDER.get(t.root, 9))
     elif kind == Title.FU:
         return (0, -t.period, 10, t.root)
     elif kind == Title.EFU:
