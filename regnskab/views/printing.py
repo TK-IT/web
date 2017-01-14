@@ -206,11 +206,11 @@ class BalancePrint(FormView):
                 context['total_%s' % k] += counts[p.id, k]
                 context['last_%s' % k] += cur_counts[p.id, k]
             p_context = {}
-            if p.title and p.title.period is None:
-                title_str = title_to_tex(p.title.root)
-                p_context['name'] = '%s %s' % (title_str, p.name)
-            elif p.title:
-                title_str = tk.prefix(p.title, period, type=tk.PREFIXTYPE_TEX)
+            if p.title:
+                if p.title.period is None:
+                    title_str = title_to_tex(p.title.root)
+                else:
+                    title_str = tk.prefix(p.title, period, type=tk.PREFIXTYPE_TEX)
                 p_context['name'] = '%s %s' % (title_str, p.name)
             else:
                 p_context['name'] = p.name
