@@ -266,6 +266,35 @@ def get_aliases(persons, gfyears):
     return result
 
 
+def get_primary_alias(persons):
+    for person_history in persons:
+        name = person_history[-1][0].navn
+
+        display_titles = [
+            # (t, 'real_title', p.titel.split()[0]) if p.titel else
+            (t, 'blank', '') if (p.aliaser or '-').startswith('-') else
+            (t, 'primary_alias', p.aliaser.split()[0])
+            for p, t in person_history]
+
+        def key(x):
+            if x[1] == 'primary_alias':
+                return x[2]
+            else:
+                return ''
+
+        groups = itertools.groupby(display_titles, key=key)
+        prev = ''
+        prev_time = None
+        for s, times in groups:
+            time = next(times)[0]
+            if prev:
+                yield (name, prev_time, time, prev)
+            prev = s
+            prev_time = time
+        if prev:
+            yield (name, prev_time, None, prev)
+
+
 def extract_status_times(statuses, name):
     groups = itertools.groupby(statuses, key=lambda x: x[1])
     for skjul, group in groups:
@@ -318,6 +347,17 @@ def get_alias_dicts(persons, gfyears):
     return dicts
 
 
+def get_primary_alias_dicts(persons):
+    aliases = get_primary_alias(persons)
+    dicts = []
+    for name, start_time, end_time, root in aliases:
+        dicts.append(dict(
+            name=name, start_time=start_time.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            end_time=end_time and end_time.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            root=root))
+    return dicts
+
+
 def get_status_dicts(persons):
     statuses = get_statuses(persons)
     statuses = [
@@ -359,13 +399,16 @@ def main():
     args = parser.parse_args()
     if not args.git_dir and not args.backup_dir:
         parser.error("must specify at least one data source")
-    output, aliases, statuses = export_data(args.git_dir, args.backup_dir)
+    output, aliases, statuses, primary_aliases = (
+        export_data(args.git_dir, args.backup_dir))
     with open('regnskab-aliases.json', 'w') as fp:
         json.dump(aliases, fp, indent=2)
     with open('regnskab-statuses.json', 'w') as fp:
         json.dump(statuses, fp, indent=2)
     with open('regnskab-history.json', 'w') as fp:
         json.dump(output, fp, indent=2)
+    with open('regnskab-primary-aliases.json', 'w') as fp:
+        json.dump(primary_aliases, fp, indent=2)
 
 
 def get_data(git_dir, backup_dir, name_trans=None):
@@ -499,8 +542,9 @@ def export_data(git_dir, backup_dir, name_trans=None):
         ))
 
     aliases = get_alias_dicts(persons, gfyears)
+    primary_aliases = get_primary_alias_dicts(persons)
     statuses = get_status_dicts(persons)
-    return output, aliases, statuses
+    return output, aliases, statuses, primary_aliases
 
 
 def fix_person_name(person, name_trans):
