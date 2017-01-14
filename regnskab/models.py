@@ -107,6 +107,10 @@ class Alias(models.Model):
                                    null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
 
+    def clean(self):
+        if self.is_title and self.period is not None:
+            raise ValidationError('Primær titel må ikke have en årgang')
+
     def age(self, gfyear=None):
         if gfyear is None:
             gfyear = config.GFYEAR
