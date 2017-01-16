@@ -124,6 +124,16 @@ def tk_postfix(title, arg=tk.POSTFIXTYPE_SINGLE):
 
 
 @register.filter
+def tk_prepostfix(title, arg=tk.POSTFIXTYPE_SINGLE):
+    """
+    :param str arg: postfixtype til :func:`tktitler.prepostfix`.
+    Det er ikke muligt at ændre prefixtype.
+    """
+    return tk.prepostfix(title, gfyear=config.GFYEAR,
+                         prefixtype=tk.PREFIXTYPE_UNICODE, postfixtype=arg)
+
+
+@register.filter
 def tk_email(title, arg=tk.EMAILTYPE_POSTFIX):
     return tk.email(title, gfyear=config.GFYEAR, type=arg)
 
