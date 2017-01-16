@@ -22,8 +22,8 @@
         <tr>
             <td>{{ p|tk_prefix }}</td>
             <td>{{ p.profile.name }}</td>
-            <td class="text-right"><a href="mailto:{{ p|tk_email }}@TAAGEKAMMERET.dk">
-                {{ p|tk_email }}@{% TKETAA %}.dk</a></td>
+            <td class="text-right"><a href="mailto:{{ p|tk_email:'prefix' }}@TAAGEKAMMERET.dk">
+                {{ p|tk_email:'prefix' }}@{% TKETAA %}.dk</a></td>
         </tr>
         {% endfor %}
     </tbody>
@@ -117,10 +117,10 @@
     <tbody>
         {% for p in fu %}
         <tr>
-            <td>{{ p.display_title }}</td>
+            <td>{{ p|tk_prefix }}</td>
             <td>{{ p.profile.name }}</td>
-            <td class="text-right"><a href="mailto:{{ p.email_local_part }}@TAAGEKAMMERET.dk">
-                {{ p.email_local_part }}@{% TKETAA %}.dk</a></td>
+            <td class="text-right"><a href="mailto:{{ p|tk_email:'prefix' }}@TAAGEKAMMERET.dk">
+                {{ p|tk_email:'prefix' }}@{% TKETAA %}.dk</a></td>
         </tr>
         {% endfor %}
     </tbody>
