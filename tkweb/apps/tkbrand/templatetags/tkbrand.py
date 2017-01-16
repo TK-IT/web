@@ -109,23 +109,23 @@ def gfyearPPslash_gallery(gfyear):
 
 
 @register.filter
-def tk_prefix(title):
-    return tk.prefix(title, gfyear=config.GFYEAR)
+def tk_prefix(title, arg=tk.PREFIXTYPE_UNICODE):
+    return tk.prefix(title, gfyear=config.GFYEAR,  type=arg)
 
 
 @register.filter
-def tk_kprefix(title):
-    return tk.kprefix(title, gfyear=config.GFYEAR)
+def tk_kprefix(title, arg=tk.PREFIXTYPE_UNICODE):
+    return tk.kprefix(title, gfyear=config.GFYEAR, type=arg)
 
 
 @register.filter
-def tk_postfix(title):
-    return tk.postfix(title, gfyear=config.GFYEAR)
+def tk_postfix(title, arg=tk.POSTFIXTYPE_SINGLE):
+    return tk.postfix(title, gfyear=config.GFYEAR, type=arg)
 
 
 @register.filter
-def tk_email(title):
-    return tk.email(title, gfyear=config.GFYEAR)
+def tk_email(title, arg=tk.EMAILTYPE_POSTFIX):
+    return tk.email(title, gfyear=config.GFYEAR, type=arg)
 
 
 # For evaluation of tags in flatpages
