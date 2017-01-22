@@ -143,7 +143,8 @@ class ProfileAdmin(admin.ModelAdmin):
     def get_titles(self, profile):
         titles = list(profile.title_set.all())
         if titles:
-            return ' '.join(sorted(t.display_title_and_year() for t in titles))
+            with tk.set_gfyear(config.GFYEAR):
+                return ' '.join(sorted(tk.prepostfix(t) for t in titles))
 
     get_titles.short_description = 'Titler'
 
@@ -231,7 +232,7 @@ class TitleAdmin(admin.ModelAdmin):
     get_email.admin_order_field = 'profile__email'
 
     def get_display_title(self, title):
-        return title.display_title_and_year()
+        return tk.prepostfix(title, config.GFYEAR)
 
     get_display_title.short_description = 'Titel'
 
