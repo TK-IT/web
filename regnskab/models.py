@@ -95,6 +95,7 @@ class SheetStatus(models.Model):
             return 'siden %s' % (self.start_time.date(),)
 
 
+@tk.title_class
 class Alias(models.Model):
     profile = models.ForeignKey(Profile)
     period = models.IntegerField(
@@ -112,31 +113,14 @@ class Alias(models.Model):
                                    null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
 
+    def title_tuple(self):
+        if self.period is None:
+            raise ValueError('Cannot take tk.prefix of Alias with no period')
+        return (self.root, self.period)
+
     def clean(self):
         if self.is_title and self.period is not None:
             raise ValidationError('Primær titel må ikke have en årgang')
-
-    def age(self, gfyear=None):
-        if gfyear is None:
-            gfyear = config.GFYEAR
-        return gfyear - self.period
-
-    def display_root(self):
-        return self.root
-
-    def display_title(self, gfyear=None):
-        if self.period is None:
-            return self.root
-        return tk.prefix((self.root, self.age(gfyear)),
-                         _get_gfyear(gfyear),
-                         type='unicode')
-
-    def input_title(self, gfyear=None):
-        # The title as it would be typed
-        if self.period is None:
-            return self.root
-        return tk.prefix((self.root, self.age(gfyear)),
-                         _get_gfyear(gfyear))
 
     class Meta:
         ordering = ['period', 'root']
@@ -144,7 +128,7 @@ class Alias(models.Model):
         verbose_name_plural = verbose_name + 'er'
 
     def __str__(self):
-        return self.display_title()
+        return tk.postfix(self) if self.period else self.root
 
 
 class Transaction(models.Model):
