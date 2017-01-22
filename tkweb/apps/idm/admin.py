@@ -105,7 +105,7 @@ def period_display_prefix(period, name, gfyear=None):
     if gfyear is None:
         gfyear = config.GFYEAR
     return tk.prepostfix((name, period), gfyear,
-                         prefixtype=tk.PREFIXTYPE_UNICODE)
+                         prefixtype='unicode')
 
 
 class TitlePeriodFilter(admin.AllValuesFieldListFilter):
