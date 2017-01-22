@@ -2,6 +2,7 @@ import collections
 from django import forms
 from django.core.exceptions import ValidationError
 from regnskab.models import EmailTemplate, Session, config
+import tktitler as tk
 
 
 def placeholder_from_help(cls):
@@ -65,17 +66,19 @@ class SessionForm(forms.Form):
 
 
 class TransactionBatchForm(forms.Form):
+    @tk.set_gfyear(lambda: config.GFYEAR)
     def __init__(self, **kwargs):
         profiles = kwargs.pop('profiles')
         super().__init__(**kwargs)
         self._profiles = []
-        GFYEAR = config.GFYEAR
         for profile, amount, selected in profiles:
             p = 'profile%d_' % profile.id
             if profile.title:
-                profile.display_name = ('%s %s' %
-                                        (profile.title.display_title(GFYEAR),
-                                         profile.name))
+                profile.display_name = (
+                    '%s %s' %
+                    (tk.prefix(profile.title, type='unicode')
+                     if profile.title.period else profile.title.root,
+                     profile.name))
             else:
                 profile.display_name = profile.name
             self.fields[p + 'selected'] = forms.BooleanField(
