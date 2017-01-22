@@ -153,7 +153,7 @@ class Title(models.Model):
 
     def display_title(self, gfyear=None):
         return tk.prefix(self, _get_gfyear(gfyear),
-                         type=tk.PREFIXTYPE_UNICODE)
+                         type='unicode')
 
     def input_title(self, gfyear=None):
         # The title as it would be typed
@@ -161,7 +161,7 @@ class Title(models.Model):
 
     def display_title_and_year(self, gfyear=None):
         return tk.prepostfix(self, _get_gfyear(gfyear),
-                             prefixtype=tk.PREFIXTYPE_UNICODE)
+                             prefixtype='unicode')
 
     def ascii_root(self):
         tr = {197: 'AA', 198: 'AE', 216: 'OE', 229: 'aa', 230: 'ae', 248: 'oe'}

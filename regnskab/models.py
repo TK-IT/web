@@ -129,7 +129,7 @@ class Alias(models.Model):
             return self.root
         return tk.prefix((self.root, self.age(gfyear)),
                          _get_gfyear(gfyear),
-                         type=tk.PREFIXTYPE_UNICODE)
+                         type='unicode')
 
     def input_title(self, gfyear=None):
         # The title as it would be typed
