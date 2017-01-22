@@ -677,6 +677,7 @@ class ProfileSearch(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
+    @tk.set_gfyear(lambda: config.GFYEAR)
     def get_results(self, q, only_current):
         if not q:
             return
@@ -691,12 +692,13 @@ class ProfileSearch(TemplateView):
             alias_qs = alias_qs.exclude(profile__sheetstatus=None)
             alias_qs = alias_qs.filter(profile__sheetstatus__end_time=None)
         for o in alias_qs:
-            if o.input_title().lower() == q.lower():
+            input_title = tk.prefix(o) if o.period else o.root
+            if input_title.lower() == q.lower():
                 sort_key = (4, o.profile_id)
             else:
-                matcher.set_seq1(o.input_title().lower())
-                sort_key = (0, matcher.ratio(), o.input_title(), o.pk)
-            value = (o.input_title(), o.profile)
+                matcher.set_seq1(input_title.lower())
+                sort_key = (0, matcher.ratio(), input_title, o.pk)
+            value = (input_title, o.profile)
             results.append((sort_key, value))
 
         title_qs = Title.objects.all()
@@ -704,13 +706,14 @@ class ProfileSearch(TemplateView):
             title_qs = title_qs.exclude(profile__sheetstatus=None)
             title_qs = title_qs.filter(profile__sheetstatus__end_time=None)
         for o in title_qs:
-            if q.upper() == o.input_title():
+            input_title = tk.prefix(o) if o.period else o.root
+            if q.upper() == input_title:
                 sort_key = (4, o.profile_id)
-                value = (o.input_title(), o.profile)
+                value = (input_title, o.profile)
                 results.append((sort_key, value))
             elif o.kind == Title.FU and q.upper() == o.root != 'FUAN':
                 sort_key = (3, o.profile_id)
-                value = (o.input_title(), o.profile)
+                value = (input_title, o.profile)
                 results.append((sort_key, value))
 
         profile_qs = Profile.objects.all()
