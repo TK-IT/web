@@ -749,6 +749,14 @@ def get_profiles_title_status(period=None, time=None):
         p.status = statuses.get(p.id)
         p.titles = titles.get(p.id, [])
         p.title = p.titles[0] if p.titles else None
+        if p.title:
+            p.title_name = (
+                '%s %s' %
+                (tk.prefix(p.title, period, 'unicode')
+                 if p.title.period else p.title.root),
+                p.name)
+        else:
+            p.title_name = p.name
         p.in_current = (p.status and
                         (p.status.end_time is None or
                          (time is not None and p.status.end_time > time)))
