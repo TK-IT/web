@@ -185,6 +185,10 @@ class SheetDetail(TemplateView):
         return context_data
 
 
+def auto_prefix(t, period):
+    return tk.prefix(t, period) if t.period else t.root
+
+
 class SheetRowUpdate(FormView):
     template_name = 'regnskab/sheet_update.html'
     form_class = SheetRowForm
@@ -218,13 +222,12 @@ class SheetRowUpdate(FormView):
         result = []
         for i, profile in enumerate(profiles):
             titles = aliases.get(profile.id, ())
-            titles_input = [tk.prefix(t, period) for t in titles]
-            title_input = profile.title and tk.prefix(profile.title, period)
-            title_name = ' '.join((title_input or '', profile.name)).strip()
+            titles_input = [auto_prefix(t, period) for t in titles]
+            title_input = profile.title and auto_prefix(profile.title, period)
             result.append(dict(
                 titles=titles_input, title=title_input, sort_key=i,
-                name=profile.name, title_name=title_name, id=profile.pk,
-                in_current=profile.in_current))
+                name=profile.name, title_name=profile.title_name,
+                id=profile.pk, in_current=profile.in_current))
         return result
 
     def get_initial_data(self):
