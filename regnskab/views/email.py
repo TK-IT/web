@@ -110,6 +110,7 @@ class EmailList(TemplateView):
         emails.sort(key=lambda o: order.get(o.profile_id, 0))
         for o in emails:
             o.profile = profiles.get(o.profile_id, o.profile)
+            o.title_name = getattr(o.profile, 'title_name', o.profile.name)
         return emails
 
     def get_context_data(self, **kwargs):

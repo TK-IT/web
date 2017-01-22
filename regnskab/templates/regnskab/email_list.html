@@ -16,7 +16,7 @@
         <tr>
             <td><a class="profile-link"
                    href="{% url 'regnskab:email_detail' pk=session.pk profile=o.profile_id %}">
-                    {{ o.profile.title.display_title }} {{ o.recipient_name }}</a></td>
+                    {{ o.title_name }}</a></td>
             <td><a href="mailto:{{ o.recipient_email }}">{{ o.recipient_email }}</a></td>
         </tr>
         {% endfor %}
