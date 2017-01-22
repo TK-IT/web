@@ -753,8 +753,8 @@ def get_profiles_title_status(period=None, time=None):
             p.title_name = (
                 '%s %s' %
                 (tk.prefix(p.title, period or config.GFYEAR, type='unicode')
-                 if p.title.period else p.title.root),
-                p.name)
+                 if p.title.period else p.title.root,
+                 p.name))
         else:
             p.title_name = p.name
         p.in_current = (p.status and
