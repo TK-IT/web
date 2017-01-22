@@ -29,6 +29,8 @@ from regnskab.models import (
 )
 from .auth import regnskab_permission_required_method
 
+import tktitler as tk
+
 logger = logging.getLogger('regnskab')
 
 
@@ -216,8 +218,8 @@ class SheetRowUpdate(FormView):
         result = []
         for i, profile in enumerate(profiles):
             titles = aliases.get(profile.id, ())
-            titles_input = [t.input_title(period) for t in titles]
-            title_input = profile.title and profile.title.input_title(period)
+            titles_input = [tk.prefix(t, period) for t in titles]
+            title_input = profile.title and tk.prefix(profile.title, period)
             title_name = ' '.join((title_input or '', profile.name)).strip()
             result.append(dict(
                 titles=titles_input, title=title_input, sort_key=i,
