@@ -243,7 +243,7 @@ class SheetRowUpdate(FormView):
 
     def get_context_data(self, **kwargs):
         context_data = super(SheetRowUpdate, self).get_context_data(**kwargs)
-        sheet = context_data['sheet'] = self.sheet
+        context_data['sheet'] = self.sheet
         profiles = self.get_profiles()
         context_data['profiles_json'] = json.dumps(profiles, indent=2)
         context_data['session'] = self.regnskab_session
