@@ -109,32 +109,32 @@ def gfyearPPslash_gallery(gfyear):
 
 
 @register.filter
-def tk_prefix(title, arg=tk.PREFIXTYPE_UNICODE):
+def tk_prefix(title, arg='unicode'):
     return tk.prefix(title, gfyear=config.GFYEAR,  type=arg)
 
 
 @register.filter
-def tk_kprefix(title, arg=tk.PREFIXTYPE_UNICODE):
+def tk_kprefix(title, arg='unicode'):
     return tk.kprefix(title, gfyear=config.GFYEAR, type=arg)
 
 
 @register.filter
-def tk_postfix(title, arg=tk.POSTFIXTYPE_SINGLE):
+def tk_postfix(title, arg='single'):
     return tk.postfix(title, gfyear=config.GFYEAR, type=arg)
 
 
 @register.filter
-def tk_prepostfix(title, arg=tk.POSTFIXTYPE_SINGLE):
+def tk_prepostfix(title, arg='single'):
     """
     :param str arg: postfixtype til :func:`tktitler.prepostfix`.
     Det er ikke muligt at ændre prefixtype.
     """
     return tk.prepostfix(title, gfyear=config.GFYEAR,
-                         prefixtype=tk.PREFIXTYPE_UNICODE, postfixtype=arg)
+                         prefixtype='unicode', postfixtype=arg)
 
 
 @register.filter
-def tk_email(title, arg=tk.EMAILTYPE_POSTFIX):
+def tk_email(title, arg='postfix'):
     return tk.email(title, gfyear=config.GFYEAR, type=arg)
 
 
