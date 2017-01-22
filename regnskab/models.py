@@ -283,10 +283,13 @@ class Sheet(models.Model):
                 title = row['title'] = titles[row['profile'].id]
             except (KeyError, AttributeError):
                 title = row['title'] = row['display_title'] = None
+                row['title_name'] = row['profile'].name
             else:
                 row['display_title'] = (
                     tk.prefix(title, self.period, type='unicode')
                     if title.period else title.root)
+                row['title_name'] = ' '.join(
+                    (row['display_title'], row['profile'].name))
 
         if self.legacy_style():
             # Sort rows by title, period
