@@ -284,7 +284,9 @@ class Sheet(models.Model):
             except (KeyError, AttributeError):
                 title = row['title'] = row['display_title'] = None
             else:
-                row['display_title'] = title.display_title(self.period)
+                row['display_title'] = (
+                    tk.prefix(title, self.period, type='unicode')
+                    if title.period else title.root)
 
         if self.legacy_style():
             # Sort rows by title, period
