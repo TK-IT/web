@@ -627,7 +627,8 @@ class Session(models.Model):
             kasse_count += vand_ratio * purchase_count['sodavandkasse']
 
         if primary_title:
-            title = primary_title.display_title(self.period)
+            title = (tk.prefix(primary_title, self.period, type='unicode')
+                     if primary_title.period else primary_title.root)
         else:
             title = None
 
