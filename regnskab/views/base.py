@@ -634,7 +634,8 @@ class ProfileDetail(TemplateView):
         title_qs = Title.objects.filter(profile=self.profile)
         title_qs = title_qs.order_by('-period')
         if title_qs:
-            return ('real_title', title_qs[0])
+            return ('real_title',
+                    tk.prefix(title_qs[0], config.GFYEAR, type='unicode'))
         alias_qs = Alias.objects.filter(profile=self.profile)
         alias_qs = alias_qs.filter(is_title=True, end_time=None)
         alias_qs = alias_qs.order_by()
