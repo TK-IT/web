@@ -707,7 +707,7 @@ class ProfileSearch(TemplateView):
             title_qs = title_qs.filter(profile__sheetstatus__end_time=None)
         for o in title_qs:
             input_title = tk.prefix(o) if o.period else o.root
-            if q.upper() == input_title:
+            if q.upper().replace('$', 'S') == input_title.replace('$', 'S'):
                 sort_key = (4, o.profile_id)
                 value = (input_title, o.profile)
                 results.append((sort_key, value))
