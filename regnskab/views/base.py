@@ -601,11 +601,12 @@ class ProfileDetail(TemplateView):
                 for x in xs:
                     yield date, sheet, x['balance_change'], x['name']
 
+    @tk.set_gfyear(lambda: config.GFYEAR)
     def get_names(self):
         names = []
         for o in self.profile.title_set.all():
             names.append(dict(
-                name=o.display_title(),
+                name=tk.prefix(o),
                 since='Titel siden %s/%02d' % (o.period, (o.period+1) % 100),
                 period=o.period,
                 remove=None,
@@ -613,16 +614,17 @@ class ProfileDetail(TemplateView):
         for o in self.profile.alias_set.all():
             start = o.start_time.date() if o.start_time else 'altid'
             end = o.end_time.date() if o.end_time else 'altid'
+            name = tk.prefix(o, type='unicode') if o.period else o.root
             if o.end_time is None:
                 names.append(dict(
-                    name=o.display_title(),
+                    name=name,
                     since='Siden %s' % start,
                     remove=self.REMOVE_ALIAS + str(o.pk),
                     is_title=o.is_title,
                 ))
             else:
                 names.append(dict(
-                    name=o.display_title(),
+                    name=name,
                     since='Fra %s til %s' % (start, end),
                     remove=None,
                 ))
