@@ -16,7 +16,7 @@
         <tr>
             <td><a class="profile-link"
                    href="{% url 'regnskab:profile_detail' pk=person.pk %}">
-                    {{ person.title.display_title }} {{ person.name }}</a></td>
+                    {{ person.title_name }}</a></td>
             <td>{{ person.status.since }}</td>
             <td align=right>{{ person.balance|floatformat:2 }}</td>
         </tr>
