@@ -144,7 +144,7 @@ class ProfileAdmin(admin.ModelAdmin):
         titles = list(profile.title_set.all())
         if titles:
             with tk.set_gfyear(config.GFYEAR):
-                return ' '.join(sorted(tk.prepostfix(t) for t in titles))
+                return ', '.join(sorted(tk.prepostfix(t, prefixtype="unicode") for t in titles))
 
     get_titles.short_description = 'Titler'
 
