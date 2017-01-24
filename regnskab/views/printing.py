@@ -154,8 +154,8 @@ class BalancePrint(FormView):
         transaction_qs = Transaction.objects.all()
         period_start_date, = (
             Sheet.objects.filter(period=period).aggregate(Min('start_date')).values())
-        period_start_time = timezone.localtime(datetime.datetime.combine(
-            period_start_date, datetime.time()))
+        period_start_time = timezone.get_current_timezone().localize(
+            datetime.datetime.combine(period_start_date, datetime.time()))
         transaction_qs = transaction_qs.filter(time__gte=period_start_time)
         for o in transaction_qs:
             if o.kind == Transaction.PAYMENT:
