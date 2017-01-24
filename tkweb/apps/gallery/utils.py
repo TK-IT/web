@@ -4,7 +4,7 @@ from __future__ import absolute_import, unicode_literals, division
 from PIL.ExifTags import TAGS
 from constance import config
 from datetime import datetime
-from django.utils.timezone import localtime
+from django.utils.timezone import get_current_timezone
 from django.utils.text import slugify as dslugify
 from PIL import Image as PilImage
 from unidecode import unidecode
@@ -63,7 +63,7 @@ def get_exif_date(filename):
 
                     if any(str(n) in s for n in range(1,10)):
                         dt = datetime.strptime(s, '%Y:%m:%d %H:%M:%S.%f')
-                        dt = localtime(dt)
+                        dt = dt.replace(tzinfo=get_current_timezone())
 
                         return dt
 
