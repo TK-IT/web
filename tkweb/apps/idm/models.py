@@ -120,5 +120,6 @@ class Title(models.Model):
         verbose_name = 'titel'
         verbose_name_plural = 'titler'
 
+    @tk.set_gfyear(lambda: config.GFYEAR)
     def __str__(self):
-        return '%s %s' % (self.display_title(), getattr(self, 'profile', ''))
+        return '%s %s' % (tk.prefix(self, type='unicode'), getattr(self, 'profile', ''))
