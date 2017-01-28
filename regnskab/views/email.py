@@ -12,7 +12,7 @@ from django.views.generic import (
 from regnskab.forms import EmailTemplateForm
 from regnskab.models import (
     EmailTemplate, Email,
-    Profile, Session,
+    Profile, Session, SheetRow,
     get_profiles_title_status,
 )
 
@@ -136,7 +136,33 @@ class EmailDetail(DetailView):
         context_data = super().get_context_data(**kwargs)
         context_data['session'] = self.regnskab_session
         context_data['profile'] = self.profile
+        context_data['images'] = self.get_images()
         return context_data
+
+    def get_images(self):
+        qs = SheetRow.objects.filter(
+            profile=self.profile,
+            sheet__session=self.regnskab_session)
+        qs = qs.exclude(image_start=None)
+        qs = qs.exclude(sheet__row_image=None)
+
+        sheets = set(row.sheet for row in qs)
+        files = {sheet.row_image.name: sheet.row_image
+                 for sheet in sheets}
+
+        import numpy as np
+        import scipy.misc
+        import regnskab.images.utils
+
+        file_images = {name: scipy.misc.imread(f) for name, f in files.items()}
+        images = []
+
+        for row in qs:
+            file_image = file_images[row.sheet.row_image.name]
+            images.append(file_image[row.image_start:row.image_stop])
+        together = np.concatenate(images)
+        png_data = regnskab.images.utils.save_png(together)
+        return regnskab.images.utils.png_data_uri(png_data)
 
     def get_object(self):
         return get_object_or_404(
