@@ -214,6 +214,10 @@ class EmailSend(View):
             raise Http404()
 
         messages = [e.to_message() for e in emails]
+        for message, image in zip(messages, get_image_for_emails(emails)):
+            if image is not None:
+                png_data = save_png(image)
+                message.attach('krydser.png', png_data, 'image/png')
         override_recipient = (len(messages) == 1 and
                               self.request.POST.get('override_recipient'))
         if override_recipient:
