@@ -520,12 +520,12 @@ def extract_row_image(sheet, kinds, images):
             assert person_row_count != 0
             j = i + person_row_count
 
-            height = 20 * (j - i)
             y1, y2 = im_rows[i], im_rows[j]
             corners = quad.to_world([[0, 1, 1, 0], [y1, y1, y2, y2]])
             person_quad = Quadrilateral(corners)
             stitched_image.append(extract_quadrilateral(
-                im.get_image(), person_quad, width, height))
+                im.get_image(), person_quad, width, height=None))
+            height = stitched_image[-1].shape[0]
 
             rows.append(SheetRow(sheet=sheet, position=position,
                                  image_start=stitched_image_height,
