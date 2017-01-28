@@ -12,9 +12,10 @@ from django.views.generic import (
 from regnskab.forms import EmailTemplateForm
 from regnskab.models import (
     EmailTemplate, Email,
-    Profile, Session, SheetRow,
+    Profile, Session,
     get_profiles_title_status,
 )
+from regnskab.images.utils import save_png, png_data_uri
 
 from .auth import regnskab_permission_required_method
 
@@ -121,6 +122,49 @@ class EmailList(TemplateView):
         return context_data
 
 
+def get_image_for_emails(emails):
+    import numpy as np
+    import scipy.misc
+
+    assert all(isinstance(email, Email) for email in emails)
+    if not emails:
+        return []
+
+    session = emails[0].session
+    assert all(email.session == session for email in emails)
+    assert all(email.profile_id for email in emails)
+    sheets = session.sheet_set.exclude(row_image=None)
+    sheets = sheets.prefetch_related('sheetrow_set')
+    rows_by_profile = {email.profile_id: [] for email in emails}
+    for sheet in sheets:
+        row_image = scipy.misc.imread(sheet.row_image)
+        for row in sheet.sheetrow_set.all():
+            try:
+                p = rows_by_profile[row.profile_id]
+            except KeyError:
+                continue
+            p.append(row_image[row.image_start:row.image_stop])
+    for email in emails:
+        images = rows_by_profile.pop(email.profile_id)
+        if not images:
+            yield None
+            continue
+        image_width = max(image.shape[1] for image in images)
+        for i, image in enumerate(images):
+            if image.shape[1] < image_width:
+                images[i] = np.pad(
+                    image,
+                    [(0, 0), (0, image_width - image.shape[1])],
+                    'maximum')
+        images_concat = np.concatenate(images)
+        yield images_concat
+
+
+def get_image_for_email(email):
+    result, = get_image_for_emails([email])
+    return result
+
+
 class EmailDetail(DetailView):
     template_name = 'regnskab/email_detail.html'
 
@@ -140,29 +184,10 @@ class EmailDetail(DetailView):
         return context_data
 
     def get_images(self):
-        qs = SheetRow.objects.filter(
-            profile=self.profile,
-            sheet__session=self.regnskab_session)
-        qs = qs.exclude(image_start=None)
-        qs = qs.exclude(sheet__row_image=None)
-
-        sheets = set(row.sheet for row in qs)
-        files = {sheet.row_image.name: sheet.row_image
-                 for sheet in sheets}
-
-        import numpy as np
-        import scipy.misc
-        import regnskab.images.utils
-
-        file_images = {name: scipy.misc.imread(f) for name, f in files.items()}
-        images = []
-
-        for row in qs:
-            file_image = file_images[row.sheet.row_image.name]
-            images.append(file_image[row.image_start:row.image_stop])
-        together = np.concatenate(images)
-        png_data = regnskab.images.utils.save_png(together)
-        return regnskab.images.utils.png_data_uri(png_data)
+        together = get_image_for_email(self.get_object())
+        if together is not None:
+            png_data = save_png(together)
+            return png_data_uri(png_data)
 
     def get_object(self):
         return get_object_or_404(

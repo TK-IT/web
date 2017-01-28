@@ -11,5 +11,9 @@
     <p><label>Modtager: <input name="override_recipient" value="{{ user.email }}"></label></p>
     <p><input type="submit" value="Send kopi" /></p>
 </form>
+{% if images %}
 <img src="{{ images }}" />
+{% else %}
+<p>Intet billede at vedhæfte.</p>
+{% endif %}
 {% endblock %}
