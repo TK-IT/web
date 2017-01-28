@@ -1,4 +1,5 @@
 import io
+import base64
 import tempfile
 import subprocess
 
@@ -60,3 +61,8 @@ def save_png(im_array):
     output = io.BytesIO()
     img.save(output, 'PNG')
     return output.getvalue()
+
+
+def png_data_uri(png_data):
+    png_b64 = base64.b64encode(png_data).decode()
+    return 'data:image/png;base64,%s' % png_b64

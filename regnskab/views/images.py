@@ -1,6 +1,5 @@
 import io
 import json
-import base64
 import logging
 import itertools
 import collections
@@ -24,6 +23,7 @@ from regnskab.images.forms import (
 from regnskab.images.extract import (
     extract_images, plot_extract_rows_cols,
 )
+from regnskab.images.utils import png_data_uri
 
 import numpy as np
 
@@ -147,8 +147,7 @@ class SheetImageParameters(FormView, SheetImageMixin):
         fig = plot_extract_rows_cols(sheet_image)
         png_buf = io.BytesIO()
         fig.savefig(png_buf, format='png')
-        png_b64 = base64.b64encode(png_buf.getvalue()).decode()
-        context_data['fig_url'] = 'data:image/png;base64,%s' % png_b64
+        context_data['fig_url'] = png_data_uri(png_buf.getvalue())
 
         return context_data
 
@@ -195,12 +194,12 @@ def get_sheetimage_cross_classes(qs):
 
 
 def img_tag(im_data, **kwargs):
-    from regnskab.images.utils import save_png
+    from regnskab.images.utils import save_png, png_data_uri
 
     png_data = save_png(im_data.reshape((24, 24, 3)))
-    png_b64 = base64.b64encode(png_data).decode()
+    png_uri = png_data_uri(png_data)
     return format_html(
-        '<img src="data:image/png;base64,{}" {}/>', png_b64,
+        '<img src="{}" {}/>', png_uri,
         format_html_join('', '{}="{}" ', kwargs.items()))
 
 
