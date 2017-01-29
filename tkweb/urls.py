@@ -78,4 +78,5 @@ urlpatterns = [
 ]
 
 if 'regnskab' in settings.INSTALLED_APPS:
-    urlpatterns.append(url(r'^regnskab/', include('regnskab.urls')))
+    import regnskab
+    urlpatterns.append(url(r'^regnskab/', regnskab.site.urls))
