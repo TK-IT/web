@@ -80,3 +80,7 @@ urlpatterns = [
 if 'regnskab' in settings.INSTALLED_APPS:
     import regnskab
     urlpatterns.append(url(r'^regnskab/', regnskab.site.urls))
+
+if 'uniprint' in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        url(r'^print/', include(('uniprint.urls', 'uniprint', 'uniprint'))))
