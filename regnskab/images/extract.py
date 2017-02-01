@@ -511,8 +511,6 @@ def rerun_extract_images(sheet):
     images, rows, purchases = extract_images(sheet, kinds)
     if len(rows) != len(sheet.sheetrow_set.all()):
         raise ValueError("Wrong number of existing SheetRows")
-    for r1, r2 in zip(rows, sheet.sheetrow_set.all()):
-        print(r1.image_start, r1.image_stop, r2.image_start, r2.image_stop)
     for r1, r2 in zip(sheet.sheetrow_set.all(), rows):
         r1.image_start, r1.image_stop = r2.image_start, r2.image_stop
         r1.save()
