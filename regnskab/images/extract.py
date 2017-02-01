@@ -82,13 +82,15 @@ def find_bbox(im, sigma=1, margin1=10, threshold=0.6):
     obj[margin1:-margin1, margin1:-margin1] = (labels == label) * 1.0
     ys, xs = (labels == label).nonzero()
     top_left = np.argmax(-xs - ys / 2)
+    top_right = np.argmax(xs - ys / 2)  # Top right not used, see below
     bottom_right = np.argmax(xs + ys)
     bottom_left = np.argmax(-xs + ys)
-    top_right = np.argmax(xs - ys / 2)
 
     corners = np.transpose(
         [[xs[i], ys[i]]
          for i in (top_left, top_right, bottom_right, bottom_left)])
+    # Set top_right to be top_left + (bottom_right - bottom_left)
+    corners[:, 1] = corners[:, 0] + (corners[:, 2] - corners[:, 3])
     corners += margin1
     return Quadrilateral(corners), obj
 
