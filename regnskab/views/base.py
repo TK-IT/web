@@ -601,6 +601,7 @@ class ProfileDetail(TemplateView):
             if has_sheet:
                 xs = list(xs)
                 href, = set(x['href'] for x in xs)
+                assert all(x['balance_change'] is not None for x in xs)
                 amount = sum(x['balance_change'] for x in xs)
                 name = ', '.join(x['name'] for x in xs)
                 yield date, sheet, href, amount, name
@@ -662,13 +663,14 @@ class ProfileDetail(TemplateView):
         rows = []
         balance = Decimal()
         for date, sheet, href, amount, name in self.get_rows():
-            balance += amount
+            if amount is not None:
+                balance += amount
             rows.append(dict(
                 date=date,
                 sheet=sheet,
                 href=href,
                 name=name,
-                amount=floatformat(amount, 2),
+                amount=floatformat(amount, 2) if amount is not None else '',
                 balance=floatformat(balance, 2),
             ))
 
