@@ -590,6 +590,7 @@ class ProfileDetail(TemplateView):
     def get_rows(self):
         purchases = self.get_purchases()
         transactions = self.get_transactions()
+        # TODO: List SheetStatus, Alias, Title, Email
         data = transactions + purchases
 
         def key(x):
