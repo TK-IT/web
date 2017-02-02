@@ -6,6 +6,7 @@ from collections import Counter
 import json
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
+from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.http import HttpResponse
 from django.db.models import F
@@ -21,7 +22,7 @@ from regnskab.forms import (
     TransactionBatchForm, BalancePrintForm,
 )
 from regnskab.models import (
-    Sheet, SheetRow, SheetStatus, Profile, Alias, Title,
+    Sheet, SheetRow, SheetStatus, Profile, Alias, Title, Email,
     EmailTemplate, Session, SheetImage, PurchaseKind,
     Transaction, Purchase,
     compute_balance, get_inka, get_default_prices,
@@ -587,11 +588,28 @@ class ProfileDetail(TemplateView):
             o['href'] = None
         return transactions
 
+    def get_emails(self):
+        qs = Email.objects.all()
+        qs = qs.filter(profile=self.profile)
+        qs = qs.exclude(session__send_time=None)
+        qs = qs.annotate(time=F('session__send_time'))
+        qs = qs.values('session_id', 'time')
+        emails = list(qs)
+        for o in emails:
+            o['href'] = reverse('regnskab:email_detail',
+                                kwargs=dict(pk=o['session_id'],
+                                            profile=self.profile.id))
+            o['amount'] = o['balance_change'] = None
+            o['date'] = o['time'].date()
+            o['name'] = 'Email'
+        return emails
+
     def get_rows(self):
         purchases = self.get_purchases()
         transactions = self.get_transactions()
-        # TODO: List SheetStatus, Alias, Title, Email
-        data = transactions + purchases
+        emails = self.get_emails()
+        # TODO: List SheetStatus, Alias, Title
+        data = transactions + purchases + emails
 
         def key(x):
             return (x['date'], 'sheet' in x, x.get('sheet'))
