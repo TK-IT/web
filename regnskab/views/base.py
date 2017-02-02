@@ -564,6 +564,11 @@ class ProfileDetail(TemplateView):
         purchases = list(qs)
         for o in purchases:
             o['name'] = '%s× %s' % (floatformat(o['count']), o['kind__name'])
+            o['href'] = (
+                '%s?highlight_profile=%s' %
+                (reverse('regnskab:sheet_detail', kwargs=dict(pk=o['sheet'])),
+                 self.profile.id))
+
         return purchases
 
     def get_transactions(self):
@@ -579,6 +584,7 @@ class ProfileDetail(TemplateView):
 
             t = Transaction(kind=kind, note=note)
             o['name'] = t.get_kind_display()
+            o['href'] = None
         return transactions
 
     def get_rows(self):
@@ -594,12 +600,14 @@ class ProfileDetail(TemplateView):
         for (date, has_sheet, sheet), xs in groups:
             if has_sheet:
                 xs = list(xs)
+                href, = set(x['href'] for x in xs)
                 amount = sum(x['balance_change'] for x in xs)
                 name = ', '.join(x['name'] for x in xs)
-                yield date, sheet, amount, name
+                yield date, sheet, href, amount, name
             else:
                 for x in xs:
-                    yield date, sheet, x['balance_change'], x['name']
+                    yield (date, sheet, x['href'],
+                           x['balance_change'], x['name'])
 
     @tk.set_gfyear(lambda: config.GFYEAR)
     def get_names(self):
@@ -653,11 +661,12 @@ class ProfileDetail(TemplateView):
 
         rows = []
         balance = Decimal()
-        for date, sheet, amount, name in self.get_rows():
+        for date, sheet, href, amount, name in self.get_rows():
             balance += amount
             rows.append(dict(
                 date=date,
                 sheet=sheet,
+                href=href,
                 name=name,
                 amount=floatformat(amount, 2),
                 balance=floatformat(balance, 2),
