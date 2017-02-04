@@ -40,11 +40,6 @@
     box-sizing: border-box;
     white-space: nowrap;
 }
-.sheetrow > .column-1ks,
-.sheetrow > .column-2ks,
-.sheetrow > .column-3ks {
-    border-left: 3px solid #ddd;
-}
 .sheetrow.sheetrow-header > .column,
 .sheetrow .column-entry { padding-left: 10px; }
 .sheetrow .column-entry,
@@ -68,9 +63,12 @@
     width: 100%;
     box-sizing: border-box;
 }
-.sheetrow > .column-1 { width: 242px; }
-.sheetrow > .column-2 { width: 63px; }
-.sheetrow > .column-3 { width: 242px; }
-.sheetrow > .column-1ks { width: 60px; }
-.sheetrow > .column-2ks { width: 60px; }
-.sheetrow > .column-3ks { width: 60px; }
+.sheetrow > .column-øl { width: 242px; }
+.sheetrow > .column-guldøl { width: 63px; }
+.sheetrow > .column-sodavand { width: 242px; }
+.sheetrow > .column-ølkasse,
+.sheetrow > .column-guldølkasse,
+.sheetrow > .column-sodavandkasse {
+    width: 60px;
+    border-left: 3px solid #ddd;
+}
