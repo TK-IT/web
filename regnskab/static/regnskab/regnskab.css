@@ -8,6 +8,7 @@ body {
 }
 a { color: inherit; }
 .regnskab-icon { height: 1em; width: 1em; vertical-align: middle; }
+nav .regnskab-icon { height: 28px; width: 28px; margin-right: 6px;}
 
 .container {
     padding: 0 8px;
@@ -18,25 +19,30 @@ a { color: inherit; }
 nav {
     -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 5px rgba(0,0,0,.075);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 5px rgba(0,0,0,.075);
-    background-image:-webkit-linear-gradient(top,#fff 0,#f8f8f8 100%);
-    background-image:-o-linear-gradient(top,#fff 0,#f8f8f8 100%);
-    background-image:-webkit-gradient(linear,left top,left bottom,from(#fff),to(#f8f8f8));
-    background-image:linear-gradient(to bottom,#fff 0,#f8f8f8 100%);
+    background-image:-webkit-linear-gradient(top,#f9f9f9 0,#eee 100%);
+    background-image:-o-linear-gradient(top,#f9f9f9 0,#eee 100%);
+    background-image:-webkit-gradient(linear,left top,left bottom,from(#f9f9f9),to(#eee));
+    background-image:linear-gradient(to bottom,#f9f9f9 0,#eee 100%);
     border: 1px solid #E7E7E7;
     border-width: 1px 0;
+    color: #090909;
 }
 
 nav ul {
-    list-style-type: none;
     display: flex;
     display: -webkit-flex;
     flex-direction: row;
     -webkit-flex-direction: row;
     min-height: 50px;
+    list-style-type: '»  ';
+}
+
+nav > ul > a:first-child > li, nav > ul > li:first-child {
+    list-style-type: none;
 }
 
 nav li {
-    margin-right: 1em;
+    margin-right: 2em;
     line-height: 50px;
 }
 
