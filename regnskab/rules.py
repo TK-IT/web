@@ -10,4 +10,4 @@ def get_max_debt():
 
 
 def get_max_debt_after_payment():
-    return 0
+    return 250
