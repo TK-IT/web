@@ -12,7 +12,6 @@ href="{% static 'regnskab/sheet_update.css' %}" />
 {% endblock %}
 {% block title %}Opgør krydsliste{% endblock %}
 {% block content %}
-<h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <form method="post">{% csrf_token %}
 {{ form.as_p }}
 

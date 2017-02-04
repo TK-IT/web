@@ -1,5 +1,7 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Opgørelse{% endblock %}
+{% block navsession %}{% endblock %}
+{% block navcurrent %}<li>Opgørelse {{ session.pk }}</li>{% endblock %}
 {% block content %}
 <h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <h2>Opgørelse</h2>

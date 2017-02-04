@@ -1,9 +1,6 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Opgørelser{% endblock %}
 {% block content %}
-<h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
-<h2>Opgørelser</h2>
-
 <form method="post" action="{% url 'regnskab:session_create' %}">{% csrf_token %}
     <input id="id_create_session" type="submit" value="Begynd ny opgørelse" />
 </form>
