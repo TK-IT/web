@@ -103,6 +103,11 @@ class SheetCreate(FormView):
             return already_sent_view(request, self.regnskab_session)
         return super().dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['session'] = self.regnskab_session
+        return context_data
+
     def get_initial(self):
         kinds = get_default_prices()
         return dict(kinds='\n'.join('%s %s' % x for x in kinds),
@@ -398,7 +403,7 @@ class SessionUpdate(FormView):
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        context_data['object'] = self.object
+        context_data['session'] = context_data['object'] = self.object
         context_data['print'] = self.request.GET.get('print')
         context_data['print_form'] = BalancePrintForm()
         return context_data
