@@ -13,7 +13,7 @@ href="{% static 'regnskab/regnskab.css' %}" />
 <nav>
     <ul class="container">
         <a href="{% url 'regnskab:home' %}"><li>{% regnskab_icon %} INKAs regnskab</li></a>
-        {% if session %}{% nav_session session %}{% endif %}
+        {% block navsession %}{% if session %}{% nav_session session %}{% endif %}{% endblock %}
         {% block nav %}
         {% endblock %}
         {% block navcurrent %}<li>{% repeat title %}</li>{% endblock %}
