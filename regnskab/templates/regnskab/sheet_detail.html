@@ -33,7 +33,6 @@ har krydset på alle krydslisterne siden sidst regningen blev gjort op.</p>
 {% for row in sheet.rows %}
 <div class="sheetrow {% if row.profile.id == highlight_profile %}highlight{% endif %}">
  <div class="name">
-  {% if not sheet.legacy_style %}<div class="name-entry">{{ row.name|default:"" }}</div>{% endif %}
   <div class="chosen-person">{{ row.title_name|default:"" }}</div>
  </div>
  {% for kind in row.kinds %}
