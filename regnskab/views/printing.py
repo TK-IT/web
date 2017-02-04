@@ -237,7 +237,8 @@ class BalancePrint(FormView):
     def form_valid(self, form):
         mode = form.cleaned_data['mode']
         should_highlight = form.cleaned_data['highlight']
-        threshold = 250 if should_highlight else float('inf')
+        from regnskab.rules import get_max_debt
+        threshold = get_max_debt() if should_highlight else float('inf')
 
         tex_source = self.get_tex_source(threshold=threshold)
         if mode == BalancePrintForm.SOURCE:

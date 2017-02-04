@@ -579,6 +579,9 @@ class Session(models.Model):
 
         # Cache call to get_inka
         self._inka = get_inka()
+        # Cache call to get_max_debt
+        from regnskab.rules import get_max_debt
+        self._max_debt = get_max_debt()
 
         for profile_id, profile_data in data_by_profile:
             self.regenerate_email(
@@ -659,7 +662,7 @@ class Session(models.Model):
             'PKASSER': format_price_set(kind_price.get('ølkasse', ())),
             'GAELDFOER': format_price(initial_balance),
             'GAELD': format_price(balance),
-            'MAXGAELD': format_price(250),  # TODO make this configurable
+            'MAXGAELD': format_price(self._max_debt),
             'OEL': format_count(purchase_count.get('øl', 0)),
             'VAND': format_count(purchase_count.get('sodavand', 0)),
             'GULD': format_count(purchase_count.get('guldøl', 0)),

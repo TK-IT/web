@@ -406,6 +406,8 @@ class SessionUpdate(FormView):
         context_data['session'] = context_data['object'] = self.object
         context_data['print'] = self.request.GET.get('print')
         context_data['print_form'] = BalancePrintForm()
+        from regnskab.rules import get_max_debt
+        context_data['max_debt'] = get_max_debt()
         return context_data
 
     def form_valid(self, form):
@@ -1067,8 +1069,12 @@ class PaymentPurchaseList(TemplateView):
                 p.sheets.append((sheets[s_id], purchases_str, n_rows, n_rows > 1))
             if not p.sheets:
                 continue
-            # TODO make 250 configurable
-            p.warn = 250 < p.b0 and 0 < p.b1 and p.sheets
+
+            from regnskab.rules import get_max_debt, get_max_debt_after_payment
+            max_debt = get_max_debt()
+            max_debt_paid = get_max_debt_after_payment()
+
+            p.warn = max_debt < p.b0 and max_debt_paid < p.b1 and p.sheets
             rows.append(p)
 
         context_data['object_list'] = rows

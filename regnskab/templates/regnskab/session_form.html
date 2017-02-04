@@ -32,7 +32,7 @@ Hvem har krydset uden at have betalt?</a></p>
 
 <form method="post" action="{% url 'regnskab:balance_print' pk=object.pk %}">{% csrf_token %}
     <p>
-    {{ print_form.mode }} <label>Highlight over 250: {{ print_form.highlight }}</label>
+    {{ print_form.mode }} <label>Highlight over {{ max_debt }}: {{ print_form.highlight }}</label>
     <input type="submit" value="Udskriv opgørelse" />
     {% if print %}Opgørelsen er udskrevet på A2.{% endif %}
     </p>
