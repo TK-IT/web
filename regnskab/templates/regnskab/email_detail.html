@@ -1,7 +1,10 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Email til {{ object.recipient_name }}{% endblock %}
+{% block nav %}
+<a href="{% url 'regnskab:email_list' pk=session.pk %}"><li>Emails</li></a>
+{% endblock %}
+{% block navcurrent %}<li>{{ object.recipient_name }}</li>{% endblock %}
 {% block content %}
-<h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
 <h2>{{ object.recipient_name }}</h2>
 <p>Til: <tt>{{ object.recipient_email }}</tt></p>
 <p>Emne: <tt>{{ object.subject }}</tt></p>
