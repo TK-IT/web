@@ -19,9 +19,6 @@ href="{% static 'regnskab/sheet_update.css' %}" />
 
 {% if error %}<p>Der er sket en fejl. {{ error }}</p>{% endif %}
 
-{% if session %}<p><a href="{% url 'regnskab:session_update' pk=session.pk %}">
-    Gå tilbage til opgørelsen</a></p>{% endif %}
-
 <div id="sheet-container"></div>
 <input type="submit" value="Gem" />
 </form>
