@@ -263,7 +263,8 @@ class Sheet(models.Model):
             im_url, im_width, im_start, im_stop = row.image_data()
             if im_url:
                 image = dict(url=im_url, width=im_width,
-                             start=im_start, stop=im_stop)
+                             start=im_start, stop=im_stop,
+                             height=im_stop - im_start)
             else:
                 image = None
             result.append(dict(
