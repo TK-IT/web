@@ -1024,6 +1024,10 @@ class PaymentPurchaseList(TemplateView):
         context_data = super().get_context_data(**kwargs)
         context_data['session'] = self.regnskab_session
 
+        from regnskab.rules import get_max_debt, get_max_debt_after_payment
+        context_data['max_debt'] = get_max_debt()
+        context_data['max_debt_paid'] = get_max_debt_after_payment()
+
         payments = {}
         payment_qs = Transaction.objects.filter(
             session=self.regnskab_session,
