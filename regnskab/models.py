@@ -267,6 +267,7 @@ class Sheet(models.Model):
                              height=im_stop - im_start)
             else:
                 image = None
+            row_empty = not any(p.count for p in purchase_list)
             result.append(dict(
                 id=row.id,
                 profile=row.profile,
@@ -274,6 +275,7 @@ class Sheet(models.Model):
                 name=row.name,
                 kinds=purchase_list,
                 image=image,
+                empty=row_empty,
             ))
         profile_ids = set(row['profile'] for row in result)
         titles = get_primary_titles(profile_ids=profile_ids,
