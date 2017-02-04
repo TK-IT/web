@@ -1,11 +1,3 @@
-.sheet {
-	border-collapse: collapse;
-}
-.sheet td, .sheet th {
-	border-bottom: 3px solid #aaa;
-	font-weight: normal;
-	padding: 0;
-}
 .crosses {
 	display: flex;
 	position: relative;
@@ -14,37 +6,74 @@
 	height: 40px;
 	align-content: flex-start;
 	overflow: hidden;
-	width: 60px;
-	border-left: 3px solid #aaa;
-}
-.crosses.column-øl {
-	width: 225px;
-}
-.crosses.column-guldøl {
-	width: 90px;
-}
-.crosses.column-sodavand {
-	width: 225px;
-}
-.crosses.column-ølkasse,
-.crosses.column-guldølkasse,
-.crosses.column-sodavandkasse {
-	border-left: 3px solid #ddd;
 }
 .crosses > .cross {
-	width: 15px;
-	line-height: 20px;
 	height: 20px;
-	color: rgb(50%, 50%, 50%);
+	width: 20px;
+	text-align: center;
+	line-height: 20px;
 }
 .crosses > .count {
 	position: absolute;
 	top: 0;
 	left: 0;
-	padding-left: 10px;
 	line-height: 40px;
 	font-size: 20px;
 	font-weight: bold;
-	right: 0;
+	box-shadow: 0px 0px 8px #fff;
 }
+
+.sheetrow {
+    display: flex;
+    height: 40px;
+    border-top: 3px solid #aaa;
+}
+.sheetrow.sheetrow-header {
+    /*height: 18px;*/
+    border-top: 0 none;
+}
+.sheetrow > .summary { width: 30px; }
+.sheetrow > .name { width: 189px; }
+.sheetrow > .column {
+    position: relative;
+    border-left: 3px solid #aaa;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+.sheetrow.sheetrow-header > .column,
+.sheetrow .count { padding-left: 10px; }
+.sheetrow .count,
+.sheetrow .name-entry,
+.sheetrow .chosen-person {
+    box-sizing: border-box;
+    width: 100%;
+    border: 0 none;
+    background-color: rgba(100%, 100%, 100%, 0.5);
+    color: inherit;
+}
+.sheetrow .count {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    font-size: 20px;
+    font-weight: bold;
+}
+.sheetrow .count {
+    line-height: 40px;
+}
+.sheetrow .chosen-person {
+    width: 100%;
+    box-sizing: border-box;
+}
+.sheetrow > .column-øl { width: 242px; }
+.sheetrow > .column-guldøl { width: 63px; }
+.sheetrow > .column-sodavand { width: 242px; }
+.sheetrow > .column-ølkasse,
+.sheetrow > .column-guldølkasse,
+.sheetrow > .column-sodavandkasse {
+    width: 60px;
+    border-left: 3px solid #ddd;
+}
+
 .highlight { background-color: rgba(255, 0, 0, 0.4); }

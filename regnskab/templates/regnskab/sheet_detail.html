@@ -23,39 +23,37 @@ har krydset på alle krydslisterne siden sidst regningen blev gjort op.</p>
 </p>
 {% endif %}
 
-<table class="sheet">
-<thead>
-<tr>
-<!--<th></th>-->
-<th>Navn</th>
-{% for kind in sheet.columns %}
-<th>{{ kind.short_name }}</th>
-{% endfor %}
-</tr>
-</thead>
-<tbody>
+<div class="sheet">
+<div class="sheetrow sheetrow-header">
+ <div class="name"></div>
+ {% for kind in sheet.columns %}
+ <div class="column column-{{ kind.name }}">{{ kind.short_name }}</div>
+ {% endfor %}
+</div>
 {% for row in sheet.rows %}
-<tr class="{% if row.profile.id == highlight_profile %}highlight{% endif %}">
-<!--
-<td>
-{% for kind in row.kinds %}{{ kind.count|floatformat }}
+<div class="sheetrow {% if row.profile.id == highlight_profile %}highlight{% endif %}">
+ <div class="name">
+  {% if not sheet.legacy_style %}<div class="name-entry">{{ row.name|default:"" }}</div>{% endif %}
+  <div class="chosen-person">{{ row.title_name|default:"" }}</div>
+ </div>
+ {% for kind in row.kinds %}
+  <div class="column column-{{ kind.kind.name }}">
+  <div class="crosses">
+   {% for _ in kind.counter %}<div class="cross">&times;</div>{% endfor %}
+  </div>
+  {% if kind.count %}<div class="count">{{ kind.count|floatformat }}</div>{% endif %}
+  </div>
+ {% endfor %}
+</div>
+{% with row.image as img %}
+{% if img %}
+<div style="overflow: hidden; position: relative;
+width: {{ img.width }}px; height: {{ img.height }}px">
+<img src="{{ img.url }}" style="position: absolute;
+top: -{{ img.start }}px; left: 0" />
+</div>
+{% endif %}
+{% endwith %}
 {% endfor %}
-</td>
--->
-<td>
-{% if not sheet.legacy_style %}{{ row.name }}<br />{% endif %}
-{{ row.title_name }}
-</td>
-{% for kind in row.kinds %}
-<td>
-<span class="crosses column-{{ kind.kind.name }}">
-{% for _ in kind.counter %}<span class="cross">&times;</span>{% endfor %}
-{% if kind.count %}<span class="count">{{ kind.count|floatformat }}</span>{% endif %}
-</span>
-</td>
-{% endfor %}
-</tr>
-{% endfor %}
-</tbody>
-</table>
+</div>
 {% endblock %}
