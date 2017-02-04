@@ -1,8 +1,7 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Allerede udsendt{% endblock %}
 {% block content %}
-<h1><a href="{% url 'regnskab:home' %}">INKAs regnskab</a></h1>
-<h2>Fejl: Allerede udsendt</h2>
+<h1>Fejl: Allerede udsendt</h1>
 {% if session %}
 <p>Du har prøvet at ændre opgørelsen
 <a href="{% url 'regnskab:session_update' pk=session.pk %}">{{ session }}</a>
