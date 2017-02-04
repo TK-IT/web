@@ -88,3 +88,5 @@
 .sheetrow.highlight > .column-sodavandkasse {
     border-color: #eb8484;
 }
+
+.hide-empty .empty { display: none; }

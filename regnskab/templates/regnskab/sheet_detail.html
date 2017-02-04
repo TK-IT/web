@@ -3,6 +3,24 @@
 {% block head %}
 <link rel="stylesheet" type="text/css"
 href="{% static 'regnskab/sheet_detail.css' %}" />
+<script>
+function sheet_detail_init() {
+	var linkContainer = document.getElementById('hide-empty');
+	var anyEmpty = document.getElementsByClassName('empty').length > 0;
+	if (!(linkContainer && anyEmpty)) return;
+	linkContainer.style.display = 'block';
+	var chk = linkContainer.querySelector('input');
+
+	function chkClick() {
+		console.log(chk.checked);
+		if (chk.checked) document.body.classList.add('hide-empty');
+		else document.body.classList.remove('hide-empty');
+	}
+
+	chk.addEventListener('click', chkClick, false);
+	chkClick();
+}
+</script>
 {% endblock %}
 {% block title %}Krydslisten {{ sheet }}{% endblock %}
 {% block content %}
@@ -23,6 +41,10 @@ har krydset på alle krydslisterne siden sidst regningen blev gjort op.</p>
 </p>
 {% endif %}
 
+<p id="hide-empty" style="display: none">
+<label><input type="checkbox" checked> Skjul tomme indgange</label>
+</p>
+
 <div class="sheet">
 <div class="sheetrow sheetrow-header">
  <div class="name"></div>
@@ -31,7 +53,7 @@ har krydset på alle krydslisterne siden sidst regningen blev gjort op.</p>
  {% endfor %}
 </div>
 {% for row in sheet.rows %}
-<div class="sheetrow {% if row.profile.id == highlight_profile %}highlight{% endif %}">
+<div class="sheetrow {{ row.empty|yesno:"empty,nonempty"}} {% if row.profile.id == highlight_profile %}highlight{% endif %}">
  <div class="name">
   <div class="chosen-person">{{ row.title_name|default:"" }}</div>
  </div>
@@ -46,7 +68,8 @@ har krydset på alle krydslisterne siden sidst regningen blev gjort op.</p>
 </div>
 {% with row.image as img %}
 {% if img %}
-<div style="overflow: hidden; position: relative;
+<div class="{{ row.empty|yesno:"empty,nonempty"}}"
+style="overflow: hidden; position: relative;
 width: {{ img.width }}px; height: {{ img.height }}px">
 <img src="{{ img.url }}" style="position: absolute;
 top: -{{ img.start }}px; left: 0" />
@@ -55,4 +78,7 @@ top: -{{ img.start }}px; left: 0" />
 {% endwith %}
 {% endfor %}
 </div>
+<script>
+sheet_detail_init();
+</script>
 {% endblock %}
