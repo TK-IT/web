@@ -293,10 +293,9 @@ class SheetRow extends React.Component {
         return false;
     }
     render() {
-        let columnKind = ['1', '1ks', '2', '2ks', '3', '3ks'];
         let columns = this.props.columns.map((v, i) =>
-            <ColumnEntry columnKind={columnKind[i]}
-                value={v} key={columnKind[i]}
+            <ColumnEntry columnKind={this.props.columnKinds[i]}
+                value={v} key={this.props.columnKinds[i]}
                 onFocus={this.props.onFocus}
                 onArrowDown={this.props.onArrowDown}
                 onArrowUp={this.props.onArrowUp}
@@ -396,6 +395,10 @@ class Sheet extends React.Component {
 
     render() {
         let rows = [];
+        let columnKinds = ['øl', 'ølkasse', 'guldøl', 'guldølkasse',
+                           'sodavand', 'sodavandkasse'];
+        let columnNames = columnKinds.map(
+            (s) => (s.substring(s.length-5, s.length) === 'kasse') ? 'ks' : s);
         if (typeof this.rowElements === 'undefined')
             this.rowElements = [];
         let counts = [0, 0, 0, 0, 0, 0];
@@ -412,6 +415,7 @@ class Sheet extends React.Component {
                 onArrowDown={this.focusRow.bind(this, i+1)}
                 onArrowUp={this.focusRow.bind(this, i-1)}
                 persons={this.props.persons}
+                columnKinds={columnKinds}
                 columns={data.counts}
                 nameValue={data.name}
                 personValue={data.profile_id}
@@ -430,15 +434,15 @@ class Sheet extends React.Component {
                 </div>);
             }
         }
+        let header = columnNames.map((name, i) =>
+            <div key={columnKinds[i]}
+                className={"column column-" + columnKinds[i]}>{name}<br />
+                {counts[i]}/{countsAnon[i]}</div>)
+
         return <div className='sheet'>
             <div className="sheetrow sheetrow-header">
                 <div className="name"></div>
-                <div className="column column-1">øl<br/>{counts[0]}/{countsAnon[0]}</div>
-                <div className="column column-1ks">ks<br/>{counts[1]}/{countsAnon[1]}</div>
-                <div className="column column-2">guldøl<br/>{counts[2]}/{countsAnon[2]}</div>
-                <div className="column column-2ks">ks<br/>{counts[3]}/{countsAnon[3]}</div>
-                <div className="column column-3">sodavand<br/>{counts[4]}/{countsAnon[4]}</div>
-                <div className="column column-3ks">ks<br/>{counts[5]}/{countsAnon[5]}</div>
+                {header}
             </div>
             {rows}
         </div>;

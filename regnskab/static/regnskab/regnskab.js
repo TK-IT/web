@@ -553,10 +553,9 @@ var SheetRow = function (_React$Component4) {
         value: function render() {
             var _this10 = this;
 
-            var columnKind = ['1', '1ks', '2', '2ks', '3', '3ks'];
             var columns = this.props.columns.map(function (v, i) {
-                return React.createElement(ColumnEntry, { columnKind: columnKind[i],
-                    value: v, key: columnKind[i],
+                return React.createElement(ColumnEntry, { columnKind: _this10.props.columnKinds[i],
+                    value: v, key: _this10.props.columnKinds[i],
                     onFocus: _this10.props.onFocus,
                     onArrowDown: _this10.props.onArrowDown,
                     onArrowUp: _this10.props.onArrowUp,
@@ -687,6 +686,10 @@ var Sheet = function (_React$Component5) {
         key: 'render',
         value: function render() {
             var rows = [];
+            var columnKinds = ['øl', 'ølkasse', 'guldøl', 'guldølkasse', 'sodavand', 'sodavandkasse'];
+            var columnNames = columnKinds.map(function (s) {
+                return s.substring(s.length - 5, s.length) === 'kasse' ? 'ks' : s;
+            });
             if (typeof this.rowElements === 'undefined') this.rowElements = [];
             var counts = [0, 0, 0, 0, 0, 0];
             var countsAnon = [0, 0, 0, 0, 0, 0];
@@ -701,6 +704,7 @@ var Sheet = function (_React$Component5) {
                     onArrowDown: this.focusRow.bind(this, i + 1),
                     onArrowUp: this.focusRow.bind(this, i - 1),
                     persons: this.props.persons,
+                    columnKinds: columnKinds,
                     columns: data.counts,
                     nameValue: data.name,
                     personValue: data.profile_id,
@@ -721,6 +725,19 @@ var Sheet = function (_React$Component5) {
                     ));
                 }
             }
+            var header = columnNames.map(function (name, i) {
+                return React.createElement(
+                    'div',
+                    { key: columnKinds[i],
+                        className: "column column-" + columnKinds[i] },
+                    name,
+                    React.createElement('br', null),
+                    counts[i],
+                    '/',
+                    countsAnon[i]
+                );
+            });
+
             return React.createElement(
                 'div',
                 { className: 'sheet' },
@@ -728,60 +745,7 @@ var Sheet = function (_React$Component5) {
                     'div',
                     { className: 'sheetrow sheetrow-header' },
                     React.createElement('div', { className: 'name' }),
-                    React.createElement(
-                        'div',
-                        { className: 'column column-1' },
-                        'øl',
-                        React.createElement('br', null),
-                        counts[0],
-                        '/',
-                        countsAnon[0]
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'column column-1ks' },
-                        'ks',
-                        React.createElement('br', null),
-                        counts[1],
-                        '/',
-                        countsAnon[1]
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'column column-2' },
-                        'guldøl',
-                        React.createElement('br', null),
-                        counts[2],
-                        '/',
-                        countsAnon[2]
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'column column-2ks' },
-                        'ks',
-                        React.createElement('br', null),
-                        counts[3],
-                        '/',
-                        countsAnon[3]
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'column column-3' },
-                        'sodavand',
-                        React.createElement('br', null),
-                        counts[4],
-                        '/',
-                        countsAnon[4]
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'column column-3ks' },
-                        'ks',
-                        React.createElement('br', null),
-                        counts[5],
-                        '/',
-                        countsAnon[5]
-                    )
+                    header
                 ),
                 rows
             );
