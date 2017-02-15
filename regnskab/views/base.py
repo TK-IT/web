@@ -547,20 +547,23 @@ class ProfileDetail(TemplateView):
                                          start_time=now,
                                          created_by=self.request.user)
         else:
-            for k in self.request.POST:
-                if k.startswith(self.REMOVE_ALIAS):
-                    pk = k[len(self.REMOVE_ALIAS):]
-                    try:
-                        o = Alias.objects.get(profile=self.profile,
-                                              pk=pk)
-                    except Alias.DoesNotExist:
-                        pass
-                    else:
-                        o.end_time = timezone.now()
-                        o.save()
-                        logger.info("%s: Fjern alias %r fra %s",
-                                    self.request.user, o.root, self.profile)
+            self.post_default()
         return self.render_to_response(self.get_context_data())
+
+    def post_default(self):
+        for k in self.request.POST:
+            if k.startswith(self.REMOVE_ALIAS):
+                pk = k[len(self.REMOVE_ALIAS):]
+                try:
+                    o = Alias.objects.get(profile=self.profile,
+                                          pk=pk)
+                except Alias.DoesNotExist:
+                    pass
+                else:
+                    o.end_time = timezone.now()
+                    o.save()
+                    logger.info("%s: Fjern alias %r fra %s",
+                                self.request.user, o.root, self.profile)
 
     def post_error(self, msg):
         return self.render_to_response(self.get_context_data(error=msg))
