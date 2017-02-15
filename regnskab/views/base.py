@@ -501,14 +501,7 @@ class ProfileDetail(TemplateView):
                 start_time=timezone.now(),
                 created_by=self.request.user)
         elif 'add_alias' in self.request.POST:
-            s = self.request.POST.get('alias')
-            if s:
-                logger.info("%s: Tilføj alias %r til %s",
-                            self.request.user, s, self.profile)
-                Alias.objects.create(profile=self.profile,
-                                     root=s,
-                                     start_time=timezone.now(),
-                                     created_by=self.request.user)
+            self.post_action_add_alias()
         elif 'set_primary_alias' in self.request.POST:
             response = self.post_action_set_primary_alias()
         else:
@@ -517,6 +510,16 @@ class ProfileDetail(TemplateView):
         if response is None:
             response = self.render_to_response(self.get_context_data())
         return response
+
+    def post_action_add_alias(self):
+        s = self.request.POST.get('alias')
+        if s:
+            logger.info("%s: Tilføj alias %r til %s",
+                        self.request.user, s, self.profile)
+            Alias.objects.create(profile=self.profile,
+                                 root=s,
+                                 start_time=timezone.now(),
+                                 created_by=self.request.user)
 
     def post_action_set_primary_alias(self):
         k, current_alias = self.get_alias_data()
