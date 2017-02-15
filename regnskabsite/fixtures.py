@@ -44,18 +44,18 @@ class RandomState:
 
     def choice(self, iterable):
         xs = list(iterable)
-        return xs[rng.choice(len(xs))]
+        return xs[self.rng.choice(len(xs))]
 
     def letter_choice(self):
-        return choice(string.ascii_uppercase + 'ÆØÅ')
+        return self.choice(string.ascii_uppercase + 'ÆØÅ')
 
-    def add_aliases(self, profiles):
-        for i in range(len(profiles)):
-            if i == n:
-                rng = np.random.RandomState(314159265)
-            profile = self.choice(profiles)
+    def make_aliases(self, n):
+        result = {}
+        for i in range(n):
+            profile = self.rng.choice(n)
             root = ''.join(self.letter_choice() for _ in range(4))
-            aliases.append(Alias(profile=profile, root=root))
+            result.setdefault(profile, []).append(root)
+        return result
 
     def fu_name(self):
         return 'FU%s%s' % (self.letter_choice(), self.letter_choice())
@@ -83,14 +83,15 @@ def auto_data(gfyear=None, years=5, best=BEST, n_fu=10, hangarounds=40):
         rng = RandomState(314159)
 
         profiles = []
+
         def make(name, root, age, in_current):
-            profiles.append(Profile(
+            profile = Profile(
                 name=name,
-                email='dummy%s%s@example.com' % (root, age)))
+                email='dummy%s%s@example.com' % (root, age))
             kind = Title.FU if root.startswith('FU') else Title.BEST
-            titles.append(Title(profile=profiles[-1], kind=kind,
+            titles.append(Title(profile=profile, kind=kind,
                                 root=root, period=gfyear - age))
-            aliases.append(get_status(profiles[-1], in_current))
+            aliases.append(get_status(profile, in_current))
 
         for age in range(years):
             for root in best:
@@ -108,11 +109,11 @@ def auto_data(gfyear=None, years=5, best=BEST, n_fu=10, hangarounds=40):
         rng = RandomState(3141592)
         profiles = []
         for i in range(hangarounds):
-            profiles.append(Profile(
+            profile = Profile(
                 name='Hænger%s Hængersen' % i,
-                email='dummyhangaround%s@example.com' % i))
+                email='dummyhangaround%s@example.com' % i)
             if i % 4 < 3:
-                aliases.append(get_status(profiles[-1], i % 4 < 2))
+                aliases.append(get_status(profile, i % 4 < 2))
         rng.add_aliases(profiles)
         return profiles
 
