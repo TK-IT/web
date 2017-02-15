@@ -480,6 +480,7 @@ class ProfileDetail(TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        response = None
         if 'remove_status' in self.request.POST:
             if not self.sheetstatus:
                 return self.post_error(
@@ -509,46 +510,52 @@ class ProfileDetail(TemplateView):
                                      start_time=timezone.now(),
                                      created_by=self.request.user)
         elif 'set_primary_alias' in self.request.POST:
-            k, current_alias = self.get_alias_data()
-            if k == 'real_title':
-                return self.post_error('Kan ikke ændre vist titel for ' +
-                                       'person med rigtig titel')
-            s = self.request.POST.get('primary_alias') or ''
-            current_alias_display = str(current_alias or '')
-            if s == current_alias_display:
-                # No change
-                pass
-            else:
-                now = timezone.now()
-                if current_alias:
-                    logger.info("%s: Fjern primær alias %r fra %s",
-                                self.request.user, current_alias_display,
-                                self.profile)
-                    # Deactivate current_alias and create new current_alias
-                    # without is_title.
-                    current_alias.end_time = now
-                    current_alias.save()
-                    Alias.objects.create(profile=self.profile,
-                                         root=current_alias.root,
-                                         is_title=False,
-                                         start_time=now,
-                                         created_by=self.request.user)
-                if s:
-                    logger.info("%s: Tilføj primær alias %r til %s",
-                                self.request.user, s, self.profile)
-                    existing_same = Alias.objects.filter(
-                        profile=self.profile,
-                        root=s,
-                        end_time=None)
-                    existing_same.update(end_time=now)
-                    Alias.objects.create(profile=self.profile,
-                                         root=s,
-                                         is_title=True,
-                                         start_time=now,
-                                         created_by=self.request.user)
+            response = self.post_action_set_primary_alias()
         else:
             self.post_default()
-        return self.render_to_response(self.get_context_data())
+
+        if response is None:
+            response = self.render_to_response(self.get_context_data())
+        return response
+
+    def post_action_set_primary_alias(self):
+        k, current_alias = self.get_alias_data()
+        if k == 'real_title':
+            return self.post_error('Kan ikke ændre vist titel for ' +
+                                   'person med rigtig titel')
+        s = self.request.POST.get('primary_alias') or ''
+        current_alias_display = str(current_alias or '')
+        if s == current_alias_display:
+            # No change
+            pass
+        else:
+            now = timezone.now()
+            if current_alias:
+                logger.info("%s: Fjern primær alias %r fra %s",
+                            self.request.user, current_alias_display,
+                            self.profile)
+                # Deactivate current_alias and create new current_alias
+                # without is_title.
+                current_alias.end_time = now
+                current_alias.save()
+                Alias.objects.create(profile=self.profile,
+                                     root=current_alias.root,
+                                     is_title=False,
+                                     start_time=now,
+                                     created_by=self.request.user)
+            if s:
+                logger.info("%s: Tilføj primær alias %r til %s",
+                            self.request.user, s, self.profile)
+                existing_same = Alias.objects.filter(
+                    profile=self.profile,
+                    root=s,
+                    end_time=None)
+                existing_same.update(end_time=now)
+                Alias.objects.create(profile=self.profile,
+                                     root=s,
+                                     is_title=True,
+                                     start_time=now,
+                                     created_by=self.request.user)
 
     def post_default(self):
         for k in self.request.POST:
