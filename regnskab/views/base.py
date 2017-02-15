@@ -482,14 +482,7 @@ class ProfileDetail(TemplateView):
     def post(self, request, *args, **kwargs):
         response = None
         if 'remove_status' in self.request.POST:
-            if not self.sheetstatus:
-                return self.post_error(
-                    'Personen allerede fjernet fra krydslisten')
-            logger.info("%s: Fjern %s fra krydslisten",
-                        self.request.user, self.profile)
-            self.sheetstatus.end_time = timezone.now()
-            self.sheetstatus.save()
-            self.sheetstatus = None
+            response = self.post_action_remove_status()
         elif 'add_status' in self.request.POST:
             response = self.post_action_add_status()
         elif 'add_alias' in self.request.POST:
@@ -502,6 +495,16 @@ class ProfileDetail(TemplateView):
         if response is None:
             response = self.render_to_response(self.get_context_data())
         return response
+
+    def post_action_remove_status(self):
+        if not self.sheetstatus:
+            return self.post_error(
+                'Personen allerede fjernet fra krydslisten')
+        logger.info("%s: Fjern %s fra krydslisten",
+                    self.request.user, self.profile)
+        self.sheetstatus.end_time = timezone.now()
+        self.sheetstatus.save()
+        self.sheetstatus = None
 
     def post_action_add_status(self):
         if self.sheetstatus:
