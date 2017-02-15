@@ -1099,7 +1099,6 @@ class PaymentPurchaseList(TemplateView):
             if not p.sheets:
                 continue
 
-            from regnskab.rules import get_max_debt, get_max_debt_after_payment
             max_debt = get_max_debt()
             max_debt_paid = get_max_debt_after_payment()
 
