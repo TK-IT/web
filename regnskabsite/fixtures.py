@@ -38,76 +38,85 @@ EMAIL_SUBJECT = '[TK] Status på ølregningen'
 EMAIL_NAME = 'Standard'
 
 
+class RandomState:
+    def __init__(self, seed):
+        self.rng = np.random.RandomState(seed)
+
+    def choice(self, iterable):
+        xs = list(iterable)
+        return xs[rng.choice(len(xs))]
+
+    def letter_choice(self):
+        return choice(string.ascii_uppercase + 'ÆØÅ')
+
+    def add_aliases(self, profiles):
+        for i in range(len(profiles)):
+            if i == n:
+                rng = np.random.RandomState(314159265)
+            profile = self.choice(profiles)
+            root = ''.join(self.letter_choice() for _ in range(4))
+            aliases.append(Alias(profile=profile, root=root))
+
+    def fu_name(self):
+        return 'FU%s%s' % (self.letter_choice(), self.letter_choice())
+
+
+def get_status(profile, in_current):
+    start_time = datetime.datetime(year=1980, month=1, day=1)
+    if in_current:
+        end_time = None
+    else:
+        end_time = datetime.datetime(year=1981, month=1, day=1)
+    return SheetStatus(profile=profile, start_time=start_time,
+                       end_time=end_time)
+
+
 def auto_data(gfyear=None, years=5, best=BEST, n_fu=10, hangarounds=40):
     if gfyear is None:
         gfyear = config.GFYEAR
-    profiles = []
+
     titles = []
     aliases = []
     statuses = []
 
-    rng = None  # Initialized below
+    def make_bestfu(years):
+        rng = RandomState(314159)
 
-    def choice(iterable):
-        xs = list(iterable)
-        return xs[rng.choice(len(xs))]
+        profiles = []
+        def make(name, root, age, in_current):
+            profiles.append(Profile(
+                name=name,
+                email='dummy%s%s@example.com' % (root, age)))
+            kind = Title.FU if root.startswith('FU') else Title.BEST
+            titles.append(Title(profile=profiles[-1], kind=kind,
+                                root=root, period=gfyear - age))
+            aliases.append(get_status(profiles[-1], in_current))
 
-    def letter_choice():
-        return choice(string.ascii_uppercase + 'ÆØÅ')
+        for age in range(years):
+            for root in best:
+                in_current = age == 0 or root != best[age % len(best)]
+                make('BEST%s %ssen' % (age, root), root, age, in_current)
+            fu = [rng.fu_name() for _ in range(n_fu)]
+            for root in fu:
+                in_current = age == 0 or root[2] < 'N'
+                make('Fjolle%s%s' % (root, age), root, age, in_current)
 
-    def make_fu():
-        return 'FU%s%s' % (letter_choice(), letter_choice())
+        rng.add_aliases(profiles)
+        return profiles
 
-    def current_status(profile):
-        start_time = datetime.datetime(year=1980, month=1, day=1)
-        return SheetStatus(profile=profile, start_time=start_time,
-                           end_time=None)
+    def make_hangarounds(hangarounds):
+        rng = RandomState(3141592)
+        profiles = []
+        for i in range(hangarounds):
+            profiles.append(Profile(
+                name='Hænger%s Hængersen' % i,
+                email='dummyhangaround%s@example.com' % i))
+            if i % 4 < 3:
+                aliases.append(get_status(profiles[-1], i % 4 < 2))
+        rng.add_aliases(profiles)
+        return profiles
 
-    def old_status(profile):
-        start_time = datetime.datetime(year=1980, month=1, day=1)
-        end_time = datetime.datetime(year=1981, month=1, day=1)
-        return SheetStatus(profile=profile, start_time=start_time,
-                           end_time=end_time)
-
-    def append_bestfu(name, root, age, in_current):
-        profiles.append(Profile(
-            name=name,
-            email='dummy%s%s@example.com' % (root, age)))
-        kind = Title.FU if root.startswith('FU') else Title.BEST
-        titles.append(Title(profile=profiles[-1], kind=kind,
-                            root=root, period=gfyear - age))
-        if in_current:
-            statuses.append(current_status(profiles[-1]))
-        else:
-            statuses.append(old_status(profiles[-1]))
-
-    rng = np.random.RandomState(314159)
-    for age in range(years):
-        for root in best:
-            in_current = age == 0 or root != best[age % len(best)]
-            append_bestfu('BEST%s %ssen' % (age, root), root, age, in_current)
-        fu = [make_fu() for _ in range(n_fu)]
-        for root in fu:
-            root = make_fu()
-            in_current = age == 0 or root[2] < 'N'
-            append_bestfu('Fjolle%s%s' % (root, age), root, age, in_current)
-    n = len(profiles)
-    rng = np.random.RandomState(3141592)
-    for i in range(hangarounds):
-        profiles.append(Profile(
-            name='Hænger%s Hængersen' % i,
-            email='dummyhangaround%s@example.com' % i))
-        if i % 4 < 2:
-            statuses.append(current_status(profiles[-1]))
-        elif i % 4 < 3:
-            statuses.append(old_status(profiles[-1]))
-    rng = np.random.RandomState(31415926)
-    for i in range(len(profiles)):
-        if i == n:
-            rng = np.random.RandomState(314159265)
-        profile = choice(profiles)
-        root = ''.join(letter_choice() for _ in range(4))
-        aliases.append(Alias(profile=profile, root=root))
+    profiles = make_bestfu(years) + make_hangarounds(hangarounds)
     return profiles, titles, aliases, statuses
 
 
