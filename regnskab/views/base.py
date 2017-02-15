@@ -491,15 +491,7 @@ class ProfileDetail(TemplateView):
             self.sheetstatus.save()
             self.sheetstatus = None
         elif 'add_status' in self.request.POST:
-            if self.sheetstatus:
-                return self.post_error(
-                    'Personen allerede tilføjet til krydslisten')
-            logger.info("%s: Tilføj %s til krydslisten",
-                        self.request.user, self.profile)
-            self.sheetstatus = SheetStatus.objects.create(
-                profile=self.profile,
-                start_time=timezone.now(),
-                created_by=self.request.user)
+            response = self.post_action_add_status()
         elif 'add_alias' in self.request.POST:
             self.post_action_add_alias()
         elif 'set_primary_alias' in self.request.POST:
@@ -510,6 +502,17 @@ class ProfileDetail(TemplateView):
         if response is None:
             response = self.render_to_response(self.get_context_data())
         return response
+
+    def post_action_add_status(self):
+        if self.sheetstatus:
+            return self.post_error(
+                'Personen allerede tilføjet til krydslisten')
+        logger.info("%s: Tilføj %s til krydslisten",
+                    self.request.user, self.profile)
+        self.sheetstatus = SheetStatus.objects.create(
+            profile=self.profile,
+            start_time=timezone.now(),
+            created_by=self.request.user)
 
     def post_action_add_alias(self):
         s = self.request.POST.get('alias')
