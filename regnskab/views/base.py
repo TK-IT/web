@@ -28,6 +28,7 @@ from regnskab.models import (
     compute_balance, get_inka, get_default_prices,
     config, get_profiles_title_status,
 )
+from regnskab.rules import get_max_debt, get_max_debt_after_payment
 from .auth import regnskab_permission_required_method
 
 import tktitler as tk
@@ -406,7 +407,6 @@ class SessionUpdate(FormView):
         context_data['session'] = context_data['object'] = self.object
         context_data['print'] = self.request.GET.get('print')
         context_data['print_form'] = BalancePrintForm()
-        from regnskab.rules import get_max_debt
         context_data['max_debt'] = get_max_debt()
         return context_data
 
@@ -1048,8 +1048,6 @@ class PaymentPurchaseList(TemplateView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         context_data['session'] = self.regnskab_session
-
-        from regnskab.rules import get_max_debt, get_max_debt_after_payment
         context_data['max_debt'] = get_max_debt()
         context_data['max_debt_paid'] = get_max_debt_after_payment()
 
