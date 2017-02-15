@@ -480,13 +480,19 @@ class ProfileDetail(TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        if self.sheetstatus and 'remove_status' in self.request.POST:
+        if 'remove_status' in self.request.POST:
+            if not self.sheetstatus:
+                return self.post_error(
+                    'Personen allerede fjernet fra krydslisten')
             logger.info("%s: Fjern %s fra krydslisten",
                         self.request.user, self.profile)
             self.sheetstatus.end_time = timezone.now()
             self.sheetstatus.save()
             self.sheetstatus = None
-        elif not self.sheetstatus and 'add_status' in self.request.POST:
+        elif 'add_status' in self.request.POST:
+            if self.sheetstatus:
+                return self.post_error(
+                    'Personen allerede tilføjet til krydslisten')
             logger.info("%s: Tilføj %s til krydslisten",
                         self.request.user, self.profile)
             self.sheetstatus = SheetStatus.objects.create(
