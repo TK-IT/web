@@ -584,41 +584,50 @@ class ProfileDetail(TemplateView):
     def post_error(self, msg):
         return self.render_to_response(self.get_context_data(error=msg))
 
-    def get_purchases(self):
+    def get_sheets(self):
         qs = Purchase.objects.all()
         qs = qs.filter(row__profile=self.profile)
         qs = qs.annotate(
             amount=F('kind__unit_price') * F('count'))
-        qs = qs.annotate(balance_change=F('amount'))
         qs = qs.annotate(date=F('row__sheet__end_date'))
         qs = qs.annotate(sheet=F('row__sheet__pk'))
+        qs = qs.annotate(session=F('row__sheet__session__pk'))
         qs = qs.values(
-            'sheet', 'date', 'count', 'kind__name', 'amount', 'balance_change')
-        purchases = list(qs)
-        for o in purchases:
-            o['name'] = '%s× %s' % (floatformat(o['count']), o['kind__name'])
-            o['href'] = (
+            'sheet', 'date', 'count', 'kind__name', 'amount',
+            'session')
+        qs = qs.order_by('date', 'sheet')
+        groups = itertools.groupby(qs, key=lambda o: o['sheet'])
+        for sheet_id, xs in groups:
+            xs = list(xs)
+            href = (
                 '%s?highlight_profile=%s' %
-                (reverse('regnskab:sheet_detail', kwargs=dict(pk=o['sheet'])),
+                (reverse('regnskab:sheet_detail', kwargs=dict(pk=sheet_id)),
                  self.profile.id))
-
-        return purchases
+            session, = set(x['session'] for x in xs)
+            date, = set(x['date'] for x in xs)
+            assert all(x['amount'] is not None for x in xs)
+            amount = sum(x['amount'] for x in xs)
+            name = ', '.join(
+                '%s× %s' % (floatformat(o['count']), o['kind__name'])
+                for o in xs
+            )
+            yield date, href, amount, name
 
     def get_transactions(self):
         qs = Transaction.objects.all()
         qs = qs.filter(profile=self.profile)
-        qs = qs.annotate(balance_change=F('amount'))
-        qs = qs.values('kind', 'time', 'note', 'amount', 'balance_change')
+        qs = qs.values('kind', 'time', 'note', 'amount')
         transactions = list(qs)
         for o in transactions:
             kind = o.pop('kind')
             note = o.pop('note')
-            o['date'] = o['time'].date()
-
             t = Transaction(kind=kind, note=note)
-            o['name'] = t.get_kind_display()
-            o['href'] = None
-        return transactions
+            name = t.get_kind_display()
+
+            date = o['time'].date()
+            href = None
+            amount = o['amount']
+            yield date, href, amount, name
 
     def get_emails(self):
         qs = Email.objects.all()
@@ -628,38 +637,20 @@ class ProfileDetail(TemplateView):
         qs = qs.values('session_id', 'time')
         emails = list(qs)
         for o in emails:
-            o['href'] = reverse('regnskab:email_detail',
-                                kwargs=dict(pk=o['session_id'],
-                                            profile=self.profile.id))
-            o['amount'] = o['balance_change'] = None
-            o['date'] = o['time'].date()
-            o['name'] = 'Email'
-        return emails
+            href = reverse('regnskab:email_detail',
+                           kwargs=dict(pk=o['session_id'],
+                                       profile=self.profile.id))
+            amount = None
+            date = o['time'].date()
+            name = 'Email'
+            yield date, href, amount, name
 
     def get_rows(self):
-        purchases = self.get_purchases()
-        transactions = self.get_transactions()
-        emails = self.get_emails()
+        sheets = list(self.get_sheets())
+        transactions = list(self.get_transactions())
+        emails = list(self.get_emails())
         # TODO: List SheetStatus, Alias, Title
-        data = transactions + purchases + emails
-
-        def key(x):
-            return (x['date'], 'sheet' in x, x.get('sheet'))
-
-        data.sort(key=key)
-        groups = itertools.groupby(data, key=key)
-        for (date, has_sheet, sheet), xs in groups:
-            if has_sheet:
-                xs = list(xs)
-                href, = set(x['href'] for x in xs)
-                assert all(x['balance_change'] is not None for x in xs)
-                amount = sum(x['balance_change'] for x in xs)
-                name = ', '.join(x['name'] for x in xs)
-                yield date, sheet, href, amount, name
-            else:
-                for x in xs:
-                    yield (date, sheet, x['href'],
-                           x['balance_change'], x['name'])
+        return sorted(transactions + sheets + emails, key=lambda x: x[0])
 
     @tk.set_gfyear(lambda: config.GFYEAR)
     def get_names(self):
@@ -713,12 +704,11 @@ class ProfileDetail(TemplateView):
 
         rows = []
         balance = Decimal()
-        for date, sheet, href, amount, name in self.get_rows():
+        for date, href, amount, name in self.get_rows():
             if amount is not None:
                 balance += amount
             rows.append(dict(
                 date=date,
-                sheet=sheet,
                 href=href,
                 name=name,
                 amount=floatformat(amount, 2) if amount is not None else '',
