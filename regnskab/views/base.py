@@ -507,7 +507,7 @@ class ProfileDetail(TemplateView):
                 Alias.objects.create(profile=self.profile,
                                      root=s,
                                      start_time=timezone.now(),
-                                     created_by=request.user)
+                                     created_by=self.request.user)
         elif 'set_primary_alias' in self.request.POST:
             k, current_alias = self.get_alias_data()
             if k == 'real_title':
@@ -532,7 +532,7 @@ class ProfileDetail(TemplateView):
                                          root=current_alias.root,
                                          is_title=False,
                                          start_time=now,
-                                         created_by=request.user)
+                                         created_by=self.request.user)
                 if s:
                     logger.info("%s: Tilføj primær alias %r til %s",
                                 self.request.user, s, self.profile)
@@ -545,7 +545,7 @@ class ProfileDetail(TemplateView):
                                          root=s,
                                          is_title=True,
                                          start_time=now,
-                                         created_by=request.user)
+                                         created_by=self.request.user)
         else:
             for k in self.request.POST:
                 if k.startswith(self.REMOVE_ALIAS):
