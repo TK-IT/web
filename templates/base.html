@@ -59,6 +59,14 @@
                     <li><a href="{% static "jubi/J60/J60-Jubiskrift.pdf" %}">Jubilæumsskrift</a></li>
                     <li><a href="{% static "jubi/J60/j60revy.pdf" %}">Revymanuskript</a></li>
                     <li><a href="{% static "jubi/J60/J60-Sangbog.pdf" %}">Sangbog</a></li>
+                    <li class="dropdown-header">Billeder</li>
+                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-lovfaldstur' %}">Løvfaldstur</a></li>
+                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-foredrag' %}">Foredrag</a></li>
+                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-reception' %}">Reception</a></li>
+                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-torsdags-mode' %}">Torgsdagsmøde</a></li>
+                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-revy' %}">Revy</a></li>
+                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-gruppebilleder' %}">Gruppebilleder</a></li>
+                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-fest' %}">Fest</a></li>
                 </ul>
             </li>
             <li><a href="{% url 'kontakt' %}">Kontakt</a></li>
