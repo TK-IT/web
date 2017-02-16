@@ -1,6 +1,8 @@
 import string
 import datetime
+import itertools
 import numpy as np
+import collections
 
 from regnskab.models import (
     Profile, Title, Alias, EmailTemplate, SheetStatus,
@@ -61,6 +63,38 @@ class RandomState:
         return 'FU%s%s' % (self.letter_choice(), self.letter_choice())
 
 
+PersonBase = collections.namedtuple(
+    'Person', 'name email titles statuses aliases')
+
+
+class Person(PersonBase):
+    def models(self):
+        profile = Profile(name=self.name, email=self.email)
+        titles = [Title(profile=profile, root=root, period=period)
+                  for root, period in self.titles]
+        statuses = [SheetStatus(profile=profile,
+                                start_time=start, end_time=end)
+                    for start, end in self.statuses]
+        aliases = [Alias(profile=profile, root=root)
+                   for root in self.aliases]
+        return profile, titles, statuses, aliases
+
+
+def models_from_persons(persons):
+    profiles = []
+    extra = []
+    for person in persons:
+        profile, *e = person.models()
+        profiles.append(profile)
+        extra.append(e)
+    extra_by_type = zip(*extra)
+    # Each extra_by_type[i] is a list of lists (of Titles, Aliases, ...)
+    extra_flat = [list(itertools.chain.from_iterable(e))
+                  for e in extra_by_type]
+    # Each extra_flat[i] is a flattening of extra_by_type[i]
+    return (profiles,) + tuple(extra_flat)
+
+
 def get_status(profile, in_current):
     start_time = datetime.datetime(year=1980, month=1, day=1)
     if in_current:
@@ -83,6 +117,7 @@ def auto_data(gfyear=None, years=5, best=BEST, n_fu=10, hangarounds=40):
         rng = RandomState(314159)
 
         profiles = []
+        alias_dict = rng.make_aliases(profiles)
 
         def make(name, root, age, in_current):
             profile = Profile(
@@ -91,7 +126,8 @@ def auto_data(gfyear=None, years=5, best=BEST, n_fu=10, hangarounds=40):
             kind = Title.FU if root.startswith('FU') else Title.BEST
             titles.append(Title(profile=profile, kind=kind,
                                 root=root, period=gfyear - age))
-            aliases.append(get_status(profile, in_current))
+            statuses.append(get_status(profile, in_current))
+            for root in alias_dict.get(len(profiles
 
         for age in range(years):
             for root in best:
@@ -102,19 +138,18 @@ def auto_data(gfyear=None, years=5, best=BEST, n_fu=10, hangarounds=40):
                 in_current = age == 0 or root[2] < 'N'
                 make('Fjolle%s%s' % (root, age), root, age, in_current)
 
-        rng.add_aliases(profiles)
         return profiles
 
     def make_hangarounds(hangarounds):
         rng = RandomState(3141592)
         profiles = []
+        alias_dict = rng.make_aliases(profiles)
         for i in range(hangarounds):
             profile = Profile(
                 name='Hænger%s Hængersen' % i,
                 email='dummyhangaround%s@example.com' % i)
             if i % 4 < 3:
-                aliases.append(get_status(profile, i % 4 < 2))
-        rng.add_aliases(profiles)
+                statuses.append(get_status(profile, i % 4 < 2))
         return profiles
 
     profiles = make_bestfu(years) + make_hangarounds(hangarounds)
