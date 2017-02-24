@@ -9,7 +9,7 @@ register = template.Library()
 
 @register.simple_tag
 def regnskab_site_name():
-    return 'INKAs regningsgenerator'
+    return 'INKAs rudekuverter'
 
 
 @register.simple_tag
