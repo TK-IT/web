@@ -619,9 +619,12 @@ class Session(models.Model):
 
         initial_balance = initial_balances.get(profile.id, Decimal())
 
-        activity = (balance > 0 or any(purchase_count.values()) or
-                    payment_sum or other_sum)
-        if not activity or not profile.email:
+        any_debt = balance > 0
+        any_crosses = any(purchase_count.values())
+        any_payments = payment_sum != 0
+        any_others = other_sum != 0
+        send_email = any_debt or any_crosses or any_payments or any_others
+        if not send_email or not profile.email:
             if existing_email:
                 existing_email.delete()
             return
