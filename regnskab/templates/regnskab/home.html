@@ -1,5 +1,6 @@
 {% extends "regnskab/base.html" %}
-{% block fulltitle %}INKAs regningsgenerator{% endblock %}
+{% load regnskab %}
+{% block fulltitle %}{% regnskab_site_name %}{% endblock %}
 {% block navcurrent %}{% endblock %}
 {% block content %}
 <p>Velkommen {{ inka.name }}</p>

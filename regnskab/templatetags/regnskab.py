@@ -8,6 +8,11 @@ register = template.Library()
 
 
 @register.simple_tag
+def regnskab_site_name():
+    return 'INKAs regningsgenerator'
+
+
+@register.simple_tag
 def regnskab_icon():
     return format_html(
         '<img src="{}" class="regnskab-icon" />',
