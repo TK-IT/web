@@ -5,14 +5,17 @@
 {% block content %}
 <p>Velkommen til {% regnskab_site_name %}, {{ inka.name }}.</p>
 
-<p>Seneste krydslisteopgørelse:
+<p>
 {% if latest_session %}
-<a href="{% url 'regnskab:session_update' pk=latest_session.pk %}">{{ latest_session.created_time }}</a>
 {% if latest_session.sent %}
-udsendt {{ latest_session.send_time }}
+<a href="{% url 'regnskab:session_update' pk=latest_session.pk %}">
+Vis opgørelsen der blev udsendt {{ latest_session.send_time }}</a>
+{% else %}
+<a href="{% url 'regnskab:session_update' pk=latest_session.pk %}">
+Gå til opgørelse af krydslisten</a>
 {% endif %}
 {% else %}
-Ingen endnu
+Ingen opgørelser i databasen
 {% endif %}
 </p>
 
@@ -23,7 +26,7 @@ Ingen endnu
 </form>
 {% endif %}
 
-<p><a href="{% url 'regnskab:session_list' %}">Vis alle opgørelser</a></p>
+<p><a href="{% url 'regnskab:session_list' %}">Vis alle tidligere opgørelser</a></p>
 
 <p><a href="{% url 'regnskab:profile_list' %}">Vis liste af personer</a>
 &bull; <a href="{% url 'regnskab:profile_search' %}">Søg efter person</a>
