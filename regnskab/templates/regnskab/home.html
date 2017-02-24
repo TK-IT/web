@@ -31,7 +31,8 @@ Ingen endnu
 
 <p><a href="{% url 'regnskab:email_template_list' %}">Vis og opret emailskabeloner</a></p>
 
-<p><a href="{% url 'regnskab:log' %}">Vis aktivitetslog</a></p>
+<p><a href="{% url 'regnskab:log' %}">Vis aktivitetslog</a>
+(dit brugernavn: {{ user.username }})</p>
 
 <p><a href="{% url 'regnskab:sheet_image_list' %}">Vis scannede krydslister</a></p>
 {% endblock %}
