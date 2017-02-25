@@ -121,8 +121,10 @@ class BalancePrint(FormView):
             'sheet_id', 'name', 'profile_id', 'session_id', 'count')
 
         kinds = {
-            (o.sheet_id, o.name): o.unit_price
-            for o in PurchaseKind.objects.all()}
+            (sheet_id, o.name): o.unit_price
+            for o in PurchaseKind.objects.all()
+            for sheet_id in o.sheets.all().values_list('id', flat=True)
+        }
 
         kind_last_sheet = {}
         for sheet_id, name in kinds.keys():
