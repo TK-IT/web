@@ -19,9 +19,9 @@ import tktitler as tk
 
 from regnskab.models import (
     Session, Purchase, Transaction, Sheet, PurchaseKind,
-    compute_balance, get_default_prices,
-    get_profiles_title_status,
+    compute_balance, get_profiles_title_status,
 )
+from regnskab.rules import get_max_debt, get_default_prices
 from regnskab.forms import BalancePrintForm
 from regnskab.texrender import tex_to_pdf, RenderError, pdfnup
 from .auth import regnskab_permission_required_method
@@ -237,7 +237,6 @@ class BalancePrint(FormView):
     def form_valid(self, form):
         mode = form.cleaned_data['mode']
         should_highlight = form.cleaned_data['highlight']
-        from regnskab.rules import get_max_debt
         threshold = get_max_debt() if should_highlight else float('inf')
 
         tex_source = self.get_tex_source(threshold=threshold)

@@ -25,10 +25,12 @@ from regnskab.models import (
     Sheet, SheetRow, SheetStatus, Profile, Alias, Title, Email,
     EmailTemplate, Session, SheetImage, PurchaseKind,
     Transaction, Purchase,
-    compute_balance, get_inka, get_default_prices,
+    compute_balance, get_inka,
     config, get_profiles_title_status,
 )
-from regnskab.rules import get_max_debt, get_max_debt_after_payment
+from regnskab.rules import (
+    get_max_debt, get_max_debt_after_payment, get_default_prices,
+)
 from .auth import regnskab_permission_required_method
 
 import tktitler as tk
