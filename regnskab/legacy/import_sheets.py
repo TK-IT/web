@@ -166,6 +166,7 @@ def get_sheets(data, profiles):
         kind_map = {}
         for i, kind in enumerate(o['kinds']):
             name = purchase_kind_names[kind['key']]
+            raise NotImplementedError('PurchaseKind.sheet no longer exists')
             purchase_kinds.append(PurchaseKind(
                 sheet=sheet,
                 position=i+1,
@@ -211,6 +212,7 @@ def import_sheets(data, helper):
 
     sheets = save_all(sheets, unique_attrs=('start_date', 'end_date'),
                       only_new=True)
+    raise NotImplementedError('PurchaseKind.sheet no longer exists')
     purchase_kinds = filter_related(sheets, purchase_kinds, 'sheet')
     purchase_kinds = save_all(purchase_kinds, unique_attrs=('sheet', 'name'),
                               only_new=True)
