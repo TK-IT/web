@@ -343,6 +343,20 @@ class PurchaseKind(models.Model):
             return 'ks'
         return self.name
 
+    @classmethod
+    def get_or_create(cls, name, position, unit_price):
+        qs = cls.objects.filter(name=name, position=position,
+                                unit_price=unit_price)
+        try:
+            kind = qs[0]
+        except IndexError:
+            kind = PurchaseKind(name=name, position=position,
+                                unit_price=unit_price)
+            raise NotImplementedError('No sheet to assign to PurchaseKind')
+            # kind.sheet = sheet
+            kind.save()
+        return kind
+
     class Meta:
         ordering = ['position']
         verbose_name = 'prisklasse'
