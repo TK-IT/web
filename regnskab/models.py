@@ -453,7 +453,7 @@ def compute_balance(profile_ids=None, created_before=None):
         sheet_qs = sheet_qs.filter(created_time__lt=created_before)
         sheets = sheet_qs.values('id')
         row_qs = row_qs.filter(sheet_id__in=sheets)
-        kind_qs = kind_qs.filter(sheet_id__in=sheets)
+        kind_qs = kind_qs.filter(sheets__in=sheets)
     rows = {o.id: o for o in row_qs
             if profile_ids is None or o.profile_id in profile_ids}
     kinds = {o.id: o for o in kind_qs}
@@ -549,7 +549,7 @@ class Session(models.Model):
         transactions = self.transaction_set.all()
         transactions = transactions.order_by('profile_id')
 
-        kind_qs = PurchaseKind.objects.filter(sheet__session=self)
+        kind_qs = PurchaseKind.objects.filter(sheets__session=self)
         kind_qs = kind_qs.order_by('name', 'unit_price')
         kind_groups = itertools.groupby(kind_qs, key=lambda k: k.name)
         kind_price = {n: set(k.unit_price for k in g)
