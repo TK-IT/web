@@ -329,7 +329,6 @@ class Sheet(models.Model):
 
 
 class PurchaseKind(models.Model):
-    sheet = models.ForeignKey(Sheet, related_name='+')
     sheets = models.ManyToManyField(Sheet)
     position = models.PositiveIntegerField()
     name = models.CharField(max_length=200,
