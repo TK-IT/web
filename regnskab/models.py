@@ -351,8 +351,6 @@ class PurchaseKind(models.Model):
         except IndexError:
             kind = PurchaseKind(name=name, position=position,
                                 unit_price=unit_price)
-            raise NotImplementedError('No sheet to assign to PurchaseKind')
-            # kind.sheet = sheet
             kind.save()
         return kind
 
