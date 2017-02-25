@@ -329,8 +329,8 @@ class Sheet(models.Model):
 
 
 class PurchaseKind(models.Model):
-    sheet = models.ForeignKey(Sheet)
-    sheets = models.ManyToManyField(Sheet, related_name='+')
+    sheet = models.ForeignKey(Sheet, related_name='+')
+    sheets = models.ManyToManyField(Sheet)
     position = models.PositiveIntegerField()
     name = models.CharField(max_length=200,
                             help_text='f.eks. guldøl, guldølskasser')
@@ -344,7 +344,7 @@ class PurchaseKind(models.Model):
         return self.name
 
     class Meta:
-        ordering = ['sheet', 'position']
+        ordering = ['position']
         verbose_name = 'prisklasse'
         verbose_name_plural = verbose_name + 'r'
 
