@@ -1,6 +1,14 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Personer{% endblock %}
 {% block content %}
+<form method="get" action="{% url 'regnskab:profile_search' %}">
+<p>
+Søg efter navn, titel eller alias:
+<input name="q" value="" size="60" autofocus /></p>
+<p><label><input name="c" checked type="checkbox" />
+Kun folk på krydslisten</label></p>
+<input type="submit" value="Søg" />
+</form>
 <table>
     <thead>
         <tr>

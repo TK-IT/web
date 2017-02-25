@@ -1,5 +1,8 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Søg person{% endblock %}
+{% block nav %}
+<a href="{% url 'regnskab:profile_list' %}"><li>Personer</li></a>
+{% endblock %}
 {% block content %}
 <p>
 På denne side kan du finde en person ved at søge efter vedkommendes
