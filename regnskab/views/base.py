@@ -128,8 +128,7 @@ class SheetCreate(FormView):
                       session=self.regnskab_session,
                       image_file=data['image_file'])
         kinds = [
-            PurchaseKind(
-                sheet=sheet,
+            PurchaseKind.get_or_create(
                 name=kind['name'],
                 position=i + 1,
                 unit_price=kind['unit_price'])
@@ -146,13 +145,14 @@ class SheetCreate(FormView):
         else:
             images, rows, purchases = [], [], []
         sheet.save()
-        for o in images + rows + kinds:
+        for o in images + rows:
             o.sheet = o.sheet  # Update sheet_id
-        for o in images + rows + kinds:
+        for o in images + rows:
             o.save()
+        for o in kinds:
+            o.sheets.add(sheet)
         for o in purchases:
             o.row = o.row  # Update row_id
-            o.kind = o.kind  # Update kind_id
         Purchase.objects.bulk_create(purchases)
         logger.info("%s: Opret ny krydsliste id=%s i opgørelse=%s " +
                     "med priser %s",
