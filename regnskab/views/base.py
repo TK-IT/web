@@ -372,13 +372,102 @@ class SheetRowUpdate(FormView):
             self.get_context_data(form=form, saved=True))
 
 
-class SessionList(ListView):
+class SessionList(TemplateView):
     template_name = 'regnskab/session_list.html'
-    queryset = Session.objects.all()
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
+
+    @staticmethod
+    def sum_matrix(qs, column_spec, row_spec, value_spec):
+        qs = qs.values_list(row_spec, column_spec, value_spec)
+        res = {}
+        for row, column, count in qs:
+            cells = res.setdefault(column, {})
+            try:
+                cells[row] += count
+            except KeyError:
+                cells[row] = count
+        return res
+
+    @staticmethod
+    def transpose_sparse(matrix):
+        transpose = {}
+        for k1, kvs in matrix.items():
+            for k2, v in kvs.items():
+                transpose.setdefault(k2, {})[k1] = v
+        return transpose
+
+    @staticmethod
+    def dense_rows(columns):
+        kind_labels_data = [
+            ('ølkasser', 'kasser'),
+            ('øl', 'Øl'),
+            ('ølkasse', 'ks'),
+            ('guldøl', 'Guld'),
+            ('guldølkasse', 'ks'),
+            ('sodavand', 'Vand'),
+            ('sodavandkasse', 'ks'),
+            (Transaction.PURCHASE, 'Diverse'),
+            (Transaction.PAYMENT, 'Betalt'),
+        ]
+        kind_order = [k for k, v in kind_labels_data]
+        kind_labels_dict = dict(kind_labels_data)
+        kind_labels = [kind_labels_dict[k]
+                       for k in kind_order]
+        places = [
+            1 if 'kasse' in kind else
+            2 if kind in (Transaction.PURCHASE, Transaction.PAYMENT)
+            else 0
+            for kind in kind_order
+        ]
+        rows = {
+            row_label: [
+                floatformat(
+                    (-1 if k == Transaction.PAYMENT else 1) *
+                    row.get(k, 0), p)
+                for k, p in zip(kind_order, places)]
+            for row_label, row in
+            SessionList.transpose_sparse(columns).items()}
+        return rows, kind_labels
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+
+        period = self.kwargs.get('period', config.GFYEAR)
+
+        by_year = self.sum_matrix(
+            Purchase.objects.all(),
+            'kind__name', 'row__sheet__period', 'count')
+        purchases_by_session_qs = Purchase.objects.filter(
+            row__sheet__session__period=period)
+        by_session = self.sum_matrix(
+            purchases_by_session_qs,
+            'kind__name', 'row__sheet__session_id', 'count')
+
+        by_year.update(self.sum_matrix(
+            Transaction.objects.all(), 'kind', 'period', 'amount'))
+        transactions_by_session_qs = Transaction.objects.filter(
+            session__period=period).annotate(key=F('session_id'))
+        by_session.update(self.sum_matrix(
+            transactions_by_session_qs, 'kind', 'period', 'amount'))
+
+        by_year, by_year_columns = self.dense_rows(by_year)
+        by_session, by_session_columns = self.dense_rows(by_session)
+
+        sessions = list(Session.objects.filter(period=period))
+        for s in sessions:
+            s.stats = by_session.pop(s.id, None)
+        years = sorted(by_year.items())
+
+        context_data['sessions'] = sessions
+        context_data['sessions_columns'] = by_session_columns
+        context_data['years'] = years
+        context_data['years_columns'] = by_year_columns
+        context_data['period'] = period
+
+        return context_data
 
 
 class SessionUpdate(FormView):

@@ -1,31 +1,83 @@
 {% extends "regnskab/base.html" %}
-{% block title %}Opgørelser{% endblock %}
+{% block title %}Opgørelser i {{ period }}{% endblock %}
+{% block head %}
+<style>
+.purchase-stats {
+	border-collapse: collapse;
+}
+.purchase-stats td, .purchase-stats th {
+	padding: 4px;
+}
+.purchase-stats > thead > tr > * {
+	border-top: 1px solid #666;
+	border-bottom: 1px solid #666;
+}
+.purchase-stats > tbody > tr > * {
+	border-bottom: 1px solid #666;
+	text-align: right;
+}
+.purchase-stats > tbody > tr > *.row-key {
+	text-align: left;
+}
+.purchase-stats > tbody > tr:nth-child(odd) > * {
+	border-bottom: 1px solid #666;
+	background-color: rgba(0, 0, 0, 0.05);
+}
+</style>
+{% endblock %}
 {% block content %}
+
+<h1>Opgørelser i årgang {{ period }}</h1>
 <form method="post" action="{% url 'regnskab:session_create' %}">{% csrf_token %}
     <input id="id_create_session" type="submit" value="Begynd ny opgørelse" />
 </form>
 
-<table>
+<table class='purchase-stats'>
     <thead>
         <tr>
-            <th>Oprettet</th>
-            <th>Skabelon</th>
-            <th>Sendt</th>
+            <th>Dato</th>
+            {% for c in sessions_columns %}
+            <th>{{ c }}</th>
+            {% endfor %}
         </tr>
     </thead>
     <tbody>
-        {% for o in object_list %}
+        {% for o in sessions %}
         <tr>
-            <td><a href="{% url 'regnskab:session_update' pk=o.pk %}">
-                    {{ o.created_time }}</a></td>
-            <td>{{ o.email_template.name }}</td>
-            <td>
-                {% if o.sent %}
-                {{ o.send_time }}
-                {% else %}
-                ikke endnu
-                {% endif %}
+            <td class='row-key'>
+                <a href="{% url 'regnskab:session_update' pk=o.pk %}">
+                    {% if o.sent %}
+                    Udsendt {{ o.send_time }}
+                    {% else %}
+                    Oprettet {{ o.created_time }}
+                    {% endif %}</a>
             </td>
+            {% for n in o.stats %}
+            <td>{{ n }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Alle årgange</h2>
+
+<table class='purchase-stats'>
+    <thead>
+        <tr>
+            <th>Årgang</th>
+            {% for c in years_columns %}
+            <th>{{ c }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for year, stats in years %}
+        <tr>
+            <td class='row-key'>{{ year }}</td>
+            {% for n in stats %}
+            <td>{{ n }}</td>
+            {% endfor %}
         </tr>
         {% endfor %}
     </tbody>
