@@ -1,30 +1,5 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Opgørelser i {{ period }}{% endblock %}
-{% block head %}
-<style>
-.purchase-stats {
-	border-collapse: collapse;
-}
-.purchase-stats td, .purchase-stats th {
-	padding: 4px;
-}
-.purchase-stats > thead > tr > * {
-	border-top: 1px solid #666;
-	border-bottom: 1px solid #666;
-}
-.purchase-stats > tbody > tr > * {
-	border-bottom: 1px solid #666;
-	text-align: right;
-}
-.purchase-stats > tbody > tr > *.row-key {
-	text-align: left;
-}
-.purchase-stats > tbody > tr:nth-child(odd) > * {
-	border-bottom: 1px solid #666;
-	background-color: rgba(0, 0, 0, 0.05);
-}
-</style>
-{% endblock %}
 {% block content %}
 
 <h1>Opgørelser i årgang {{ period }}</h1>
