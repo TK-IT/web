@@ -129,6 +129,7 @@ class Transaction(models.Model):
     kind = models.CharField(max_length=10, choices=KIND)
     profile = models.ForeignKey(Profile)
     time = models.DateTimeField()
+    period = models.IntegerField(verbose_name='Årgang')
     amount = models.DecimalField(max_digits=9, decimal_places=2)
     note = models.CharField(max_length=255, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
