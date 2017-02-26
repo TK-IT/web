@@ -426,7 +426,8 @@ class SessionList(TemplateView):
             row_label: [
                 floatformat(
                     (-1 if k == Transaction.PAYMENT else 1) *
-                    row.get(k, 0), p)
+                    row[k], p)
+                if k in row else '\N{EM DASH}'
                 for k, p in zip(kind_order, places)]
             for row_label, row in
             SessionList.transpose_sparse(columns).items()}
