@@ -21,7 +21,8 @@
     Tilføj krydsliste til opgørelse</a></p>
 
 <p>
-<a href="{% url 'regnskab:payment_batch_create' pk=object.pk %}">Tilføj betalinger</a>
+<a href="{% url 'regnskab:payment_batch_create' pk=object.pk %}">Tilføj betalinger
+({{ payment_sum|floatformat:2 }} kr./{{ payment_count }})</a>
 &bullet;
 <a href="{% url 'regnskab:purchase_note_list' pk=object.pk %}">Tilføj "Andet"</a>
 </p>

@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.http import HttpResponse
-from django.db.models import F
+from django.db.models import F, Sum
 from django.utils import timezone
 from django.template.defaultfilters import floatformat
 from django.shortcuts import redirect, get_object_or_404
@@ -410,6 +410,10 @@ class SessionUpdate(FormView):
         context_data['print'] = self.request.GET.get('print')
         context_data['print_form'] = BalancePrintForm()
         context_data['max_debt'] = get_max_debt()
+        payments = self.object.transaction_set.filter(kind=Transaction.PAYMENT)
+        payment_sum, = payments.aggregate(Sum('amount')).values()
+        context_data['payment_sum'] = -(payment_sum or 0)
+        context_data['payment_count'] = payments.count()
         return context_data
 
     def form_valid(self, form):
