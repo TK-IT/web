@@ -986,6 +986,7 @@ class TransactionBatchCreateBase(FormView):
         for profile, amount, selected in form.profile_data():
             if selected:
                 o = Transaction(
+                    period=self.regnskab_session.period,
                     kind=self.get_transaction_kind(),
                     profile=profile, time=now, amount=self.sign * amount,
                     created_by=self.request.user, created_time=now,
