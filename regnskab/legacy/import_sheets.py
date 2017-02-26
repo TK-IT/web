@@ -126,6 +126,7 @@ def get_transactions(data, profiles):
     transactions = []
 
     for o in data:
+        raise NotImplementedError('Transaction.period needs to be populated')
         time = strptime(o['time'])
         for name, amount in o['payments'].items():
             transactions.append(
