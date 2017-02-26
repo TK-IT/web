@@ -435,7 +435,10 @@ class SessionList(TemplateView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
-        period = self.kwargs.get('period', config.GFYEAR)
+        try:
+            period = int(self.request.GET['year'])
+        except (ValueError, KeyError):
+            period = config.GFYEAR
 
         by_year = self.sum_matrix(
             Purchase.objects.all(),

@@ -74,7 +74,7 @@
     <tbody>
         {% for year, stats in years %}
         <tr>
-            <td class='row-key'>{{ year }}</td>
+            <td class='row-key'><a href="?year={{ year }}">{{ year }}</a></td>
             {% for n in stats %}
             <td>{{ n }}</td>
             {% endfor %}
