@@ -543,6 +543,8 @@ class SessionUpdate(FormView):
         return context_data
 
     def form_valid(self, form):
+        if self.object.sent:
+            return already_sent_view(self.request, self.regnskab_session)
         if not self.object.email_template:
             self.object.email_template = EmailTemplate()
             save_it = True
