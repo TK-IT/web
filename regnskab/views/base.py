@@ -432,6 +432,19 @@ class SessionList(TemplateView):
             SessionList.transpose_sparse(columns).items()}
         return rows, kind_labels
 
+    @staticmethod
+    def merge_legacy_data(by_sheet_time, by_sheet, period):
+        if not by_sheet_time:
+            return
+        date_to_sheet = dict(
+            Sheet.objects.filter(session=None, period=period).values_list(
+                'end_date', 'id'))
+        for col_key, column in by_sheet_time.items():
+            output = by_sheet.setdefault(col_key, {})
+            for time, v in column.items():
+                sheet_id = date_to_sheet[time.date()]
+                output[sheet_id] = v
+
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
@@ -448,24 +461,44 @@ class SessionList(TemplateView):
         by_session = self.sum_matrix(
             purchases_by_session_qs,
             'kind__name', 'row__sheet__session_id', 'count')
+        purchases_by_sheet_qs = Purchase.objects.filter(
+            row__sheet__session=None,
+            row__sheet__period=period)
+        by_sheet = self.sum_matrix(
+            purchases_by_sheet_qs,
+            'kind__name', 'row__sheet_id', 'count')
 
         by_year.update(self.sum_matrix(
             Transaction.objects.all(), 'kind', 'period', 'amount'))
         transactions_by_session_qs = Transaction.objects.filter(
-            session__period=period).annotate(key=F('session_id'))
+            session__period=period)
         by_session.update(self.sum_matrix(
-            transactions_by_session_qs, 'kind', 'period', 'amount'))
+            transactions_by_session_qs, 'kind', 'session_id', 'amount'))
+        transactions_by_sheet_qs = Transaction.objects.filter(
+            session=None, period=period)
+        by_sheet_time = self.sum_matrix(
+            transactions_by_sheet_qs, 'kind', 'time', 'amount')
+        self.merge_legacy_data(by_sheet_time, by_sheet, period)
 
         by_year, by_year_columns = self.dense_rows(by_year)
         by_session, by_session_columns = self.dense_rows(by_session)
+        by_sheet, by_sheet_columns = self.dense_rows(by_sheet)
 
+        sheets = list(Sheet.objects.filter(session=None, period=period))
+        for s in sheets:
+            s.stats = by_sheet.pop(s.id, None)
+            s.href = reverse('regnskab:sheet_detail', kwargs=dict(pk=s.id))
+            s.sent = True
+            s.send_time = s.end_date
         sessions = list(Session.objects.filter(period=period))
         for s in sessions:
             s.stats = by_session.pop(s.id, None)
+            s.href = reverse('regnskab:session_update', kwargs=dict(pk=s.id))
         years = sorted(by_year.items())
 
-        context_data['sessions'] = sessions
-        context_data['sessions_columns'] = by_session_columns
+        context_data['sessions'] = sheets + sessions
+        context_data['sessions_columns'] = (
+            by_session_columns or by_sheet_columns)
         context_data['years'] = years
         context_data['years_columns'] = by_year_columns
         context_data['period'] = period

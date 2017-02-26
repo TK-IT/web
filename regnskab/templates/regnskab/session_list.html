@@ -45,7 +45,7 @@
         {% for o in sessions %}
         <tr>
             <td class='row-key'>
-                <a href="{% url 'regnskab:session_update' pk=o.pk %}">
+                <a href="{{ o.href }}">
                     {% if o.sent %}
                     Udsendt {{ o.send_time }}
                     {% else %}
