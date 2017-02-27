@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.template.defaultfilters import floatformat
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
-    TemplateView, FormView, ListView, View,
+    TemplateView, FormView, View,
 )
 from django.template.response import TemplateResponse
 from regnskab.forms import (
@@ -23,7 +23,7 @@ from regnskab.forms import (
 )
 from regnskab.models import (
     Sheet, SheetRow, SheetStatus, Profile, Alias, Title, Email,
-    EmailTemplate, Session, SheetImage, PurchaseKind,
+    EmailTemplate, Session, PurchaseKind,
     Transaction, Purchase,
     compute_balance, get_inka,
     config, get_profiles_title_status,
