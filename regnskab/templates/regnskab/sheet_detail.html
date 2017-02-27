@@ -62,7 +62,7 @@ har krydset på alle krydslisterne siden sidst regningen blev gjort op.</p>
   <div class="crosses">
    {% for _ in kind.counter %}<div class="cross">&times;</div>{% endfor %}
   </div>
-  <div class="count">{% if kind.count %}{{ kind.count|floatformat }}{% endif %}</div>
+  <div class="count">{% if kind.count %}{{ kind.get_count_display }}{% endif %}</div>
   </div>
  {% endfor %}
 </div>

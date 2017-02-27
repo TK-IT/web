@@ -17,6 +17,7 @@ from django.core.mail import EmailMessage
 from django.utils import timezone
 from django.utils.text import slugify as dslugify
 from django.utils.html import format_html
+from django.template.defaultfilters import floatformat
 
 from unidecode import unidecode
 from jsonfield import JSONField
@@ -406,6 +407,12 @@ class Purchase(models.Model):
 
     def __str__(self):
         return '%g× %s' % (self.count, self.kind)
+
+    def get_count_display(self):
+        if self.count % 1 == 0:
+            return str(int(self.count))
+        else:
+            return floatformat(self.count, '4').rstrip('0')
 
     class Meta:
         ordering = ['row', 'kind__position']
