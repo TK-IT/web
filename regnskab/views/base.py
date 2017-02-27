@@ -746,7 +746,7 @@ class ProfileDetail(TemplateView):
         qs = qs.annotate(
             amount=F('kind__unit_price') * F('count'))
         qs = qs.annotate(date=F('row__sheet__end_date'))
-        qs = qs.annotate(sheet=F('row__sheet__pk'))
+        qs = qs.annotate(sheet=F('row__sheet_id'))
         qs = qs.annotate(session=F('row__sheet__session_id'))
         qs = qs.values(
             'sheet', 'date', 'count', 'kind__name', 'amount',
