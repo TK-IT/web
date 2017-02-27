@@ -137,6 +137,8 @@ def get_image_for_emails(emails):
     sheets = sheets.prefetch_related('sheetrow_set')
     rows_by_profile = {email.profile_id: [] for email in emails}
     for sheet in sheets:
+        if not sheet.row_image:
+            continue
         row_image = scipy.misc.imread(sheet.row_image)
         for row in sheet.sheetrow_set.all():
             try:
