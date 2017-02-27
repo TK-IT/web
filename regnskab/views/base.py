@@ -754,6 +754,7 @@ class ProfileDetail(TemplateView):
         qs = qs.order_by('date', 'sheet')
         groups = itertools.groupby(qs, key=lambda o: o['sheet'])
         result = []
+        session_start = {}
         for sheet_id, xs in groups:
             xs = list(xs)
             href = (
@@ -762,6 +763,8 @@ class ProfileDetail(TemplateView):
                  self.profile.id))
             session, = set(x['session'] for x in xs)
             date, = set(x['date'] for x in xs)
+            if session:
+                session_start.setdefault(session, date)
             assert all(x['amount'] is not None for x in xs)
             amount = sum(x['amount'] for x in xs)
             name = ', '.join(
@@ -769,16 +772,17 @@ class ProfileDetail(TemplateView):
                 for o in xs
             )
             result.append((date, href, amount, name))
-        return result
+        return result, session_start
 
-    def get_transactions(self):
+    def get_transactions(self, session_start):
         qs = Transaction.objects.all()
         qs = qs.filter(profile=self.profile)
-        qs = qs.values_list('kind', 'time', 'note', 'amount')
-        for kind, time, note, amount in qs:
+        qs = qs.values_list('kind', 'time', 'note', 'amount', 'session_id')
+        for kind, time, note, amount, session in qs:
             name = Transaction(kind=kind, note=note).get_kind_display()
             href = None
-            yield time.date(), href, amount, name
+            date = session_start.get(session, time.date())
+            yield date, href, amount, name
 
     def get_emails(self):
         qs = Email.objects.all()
@@ -797,8 +801,8 @@ class ProfileDetail(TemplateView):
             yield date, href, amount, name
 
     def get_rows(self):
-        sheets = self.get_sheets()
-        transactions = list(self.get_transactions())
+        sheets, session_start = self.get_sheets()
+        transactions = list(self.get_transactions(session_start))
         emails = list(self.get_emails())
         # TODO: List SheetStatus, Alias, Title
         return sorted(transactions + sheets + emails, key=lambda x: x[0])
