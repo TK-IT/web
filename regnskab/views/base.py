@@ -753,6 +753,7 @@ class ProfileDetail(TemplateView):
             'session')
         qs = qs.order_by('date', 'sheet')
         groups = itertools.groupby(qs, key=lambda o: o['sheet'])
+        result = []
         for sheet_id, xs in groups:
             xs = list(xs)
             href = (
@@ -767,7 +768,8 @@ class ProfileDetail(TemplateView):
                 '%s× %s' % (floatformat(o['count']), o['kind__name'])
                 for o in xs
             )
-            yield date, href, amount, name
+            result.append((date, href, amount, name))
+        return result
 
     def get_transactions(self):
         qs = Transaction.objects.all()
@@ -795,7 +797,7 @@ class ProfileDetail(TemplateView):
             yield date, href, amount, name
 
     def get_rows(self):
-        sheets = list(self.get_sheets())
+        sheets = self.get_sheets()
         transactions = list(self.get_transactions())
         emails = list(self.get_emails())
         # TODO: List SheetStatus, Alias, Title
