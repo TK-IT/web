@@ -781,7 +781,10 @@ class ProfileDetail(TemplateView):
         for kind, time, note, amount, session in qs:
             name = Transaction(kind=kind, note=note).get_kind_display()
             href = None
-            date = session_start.get(session, time.date())
+            if kind == Transaction.PAYMENT:
+                date = session_start.get(session, time.date())
+            else:
+                date = time.date()
             yield date, href, amount, name
 
     def get_emails(self):
