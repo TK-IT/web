@@ -773,8 +773,7 @@ class ProfileDetail(TemplateView):
         qs = Transaction.objects.all()
         qs = qs.filter(profile=self.profile)
         qs = qs.values_list('kind', 'time', 'note', 'amount')
-        transactions = list(qs)
-        for kind, time, note, amount in transactions:
+        for kind, time, note, amount in qs:
             t = Transaction(kind=kind, note=note)
             name = t.get_kind_display()
             date = time.date()
