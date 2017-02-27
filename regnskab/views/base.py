@@ -1208,7 +1208,8 @@ class PaymentPurchaseList(TemplateView):
             for s_id, purchases in profile_sheets.get(p.id, {}).items():
                 purchases_str = self.describe_purchases(purchases)
                 n_rows = len(set(p.row_id for p in purchases))
-                p.sheets.append((sheets[s_id], purchases_str, n_rows, n_rows > 1))
+                p.sheets.append(
+                    (sheets[s_id], purchases_str, n_rows, n_rows > 1))
             if not p.sheets:
                 continue
 
