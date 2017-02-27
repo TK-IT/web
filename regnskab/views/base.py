@@ -772,17 +772,13 @@ class ProfileDetail(TemplateView):
     def get_transactions(self):
         qs = Transaction.objects.all()
         qs = qs.filter(profile=self.profile)
-        qs = qs.values('kind', 'time', 'note', 'amount')
+        qs = qs.values_list('kind', 'time', 'note', 'amount')
         transactions = list(qs)
-        for o in transactions:
-            kind = o.pop('kind')
-            note = o.pop('note')
+        for kind, time, note, amount in transactions:
             t = Transaction(kind=kind, note=note)
             name = t.get_kind_display()
-
-            date = o['time'].date()
+            date = time.date()
             href = None
-            amount = o['amount']
             yield date, href, amount, name
 
     def get_emails(self):
