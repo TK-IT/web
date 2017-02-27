@@ -72,13 +72,16 @@ class EmailTemplateCreate(CreateView):
     form_class = EmailTemplateForm
 
     def get_initial(self):
+        name = self.request.GET.get('name', '')
         try:
             email_template = EmailTemplate.objects.get(
                 name='Standard')
         except EmailTemplate.DoesNotExist:
-            return dict(subject='[TK] Status på ølregningen')
+            return dict(subject='[TK] Status på ølregningen',
+                        name=name)
         else:
             return dict(subject=email_template.subject,
+                        name=name,
                         body=email_template.body)
 
     def form_valid(self, form):
