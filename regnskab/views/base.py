@@ -53,6 +53,12 @@ class Home(TemplateView):
             latest_session = None
         context_data['latest_session'] = latest_session
         context_data['inka'] = get_inka()
+        try:
+            email_template = EmailTemplate.objects.get(
+                name='Standard')
+        except EmailTemplate.DoesNotExist:
+            email_template = None
+        context_data['email_template'] = email_template
         return context_data
 
 

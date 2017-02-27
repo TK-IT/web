@@ -31,7 +31,13 @@ Ingen opgørelser i databasen
 <p><a href="{% url 'regnskab:profile_list' %}">Vis liste af personer</a>
 </p>
 
-<p><a href="{% url 'regnskab:email_template_list' %}">Vis og opret emailskabeloner</a></p>
+{% if email_template %}
+<p><a href="{% url 'regnskab:email_template_update' pk=email_template.pk %}">
+    Ret standardemail</a></p>
+{% else %}
+<p><a href="{% url 'regnskab:email_template_create' %}?name=Standard">
+    Opret standardemail</a></p>
+{% endif %}
 
 <p><a href="{% url 'regnskab:log' %}">Vis aktivitetslog</a>
 (dit brugernavn: {{ user.username }})</p>
