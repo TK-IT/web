@@ -4,17 +4,37 @@
 {% block navcurrent %}<li>Opgørelse {{ session.pk }}</li>{% endblock %}
 {% block content %}
 <p>Krydslister:</p>
-<ul>
-    {% for s in object.sheet_set.all %}
-    {% if object.sent %}
-    <li><a href="{% url 'regnskab:sheet_detail' pk=s.pk %}">{{ s }}</a></li>
-    {% else %}
-    <li><a href="{% url 'regnskab:sheet_update' pk=s.pk %}">{{ s }}</a></li>
-    {% endif %}
-    {% empty %}
-    <li>Ingen endnu</li>
-    {% endfor %}
-</ul>
+
+{% if sheets %}
+<table class='purchase-stats'>
+    <thead>
+        <tr>
+            <th>Dato</th>
+            {% for c in sheet_columns %}
+            <th>{{ c }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in sheets %}
+        <tr>
+            <td class='row-key'>
+                {% if object.sent %}
+                <a href="{% url 'regnskab:sheet_detail' pk=o.pk %}">{{ o }}</a>
+                {% else %}
+                <a href="{% url 'regnskab:sheet_update' pk=o.pk %}">{{ o }}</a>
+                {% endif %}
+            </td>
+            {% for n in o.stats %}
+            <td>{{ n }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Ingen endnu</p>
+{% endif %}
 
 {% if not object.sent %}
 <p><a href="{% url 'regnskab:sheet_create' session=object.pk %}">

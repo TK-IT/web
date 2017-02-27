@@ -400,7 +400,7 @@ class SessionList(TemplateView):
         return transpose
 
     @staticmethod
-    def dense_rows(columns):
+    def dense_rows(columns, remove_empty=False):
         kind_labels_data = [
             ('ølkasser', 'kasser'),
             ('øl', 'Øl'),
@@ -412,7 +412,8 @@ class SessionList(TemplateView):
             (Transaction.PURCHASE, 'Diverse'),
             (Transaction.PAYMENT, 'Betalt'),
         ]
-        kind_order = [k for k, v in kind_labels_data]
+        kind_order = [k for k, v in kind_labels_data
+                      if not remove_empty or k in columns]
         kind_labels_dict = dict(kind_labels_data)
         kind_labels = [kind_labels_dict[k]
                        for k in kind_order]
@@ -530,9 +531,24 @@ class SessionUpdate(FormView):
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
+    def get_sheets(self):
+        purchases_by_sheet_qs = Purchase.objects.filter(
+            row__sheet__session=self.object)
+        by_sheet = SessionList.sum_matrix(
+            purchases_by_sheet_qs,
+            'kind__name', 'row__sheet_id', 'count')
+        stats, columns = SessionList.dense_rows(by_sheet, remove_empty=True)
+        sheets = list(self.object.sheet_set.all())
+        for s in sheets:
+            s.stats = stats.pop(s.id, None)
+        return sheets, columns
+
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         context_data['session'] = context_data['object'] = self.object
+        sheets, sheet_columns = self.get_sheets()
+        context_data['sheets'] = sheets
+        context_data['sheet_columns'] = sheet_columns
         context_data['print'] = self.request.GET.get('print')
         context_data['print_form'] = BalancePrintForm()
         context_data['max_debt'] = get_max_debt()
