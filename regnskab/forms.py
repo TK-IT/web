@@ -127,3 +127,9 @@ class SheetRowForm(forms.Form):
     data = forms.CharField(
         widget=forms.HiddenInput(
             attrs=dict(id='tk_rows')))
+
+
+@placeholder_from_help
+class ProfileListForm(forms.Form):
+    purchases_after = forms.DateField(label='Forbrug siden', required=False,
+                                      help_text='Format DD.MM.YYYY')

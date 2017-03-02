@@ -20,6 +20,7 @@ from django.template.response import TemplateResponse
 from regnskab.forms import (
     SheetCreateForm, SessionForm, SheetRowForm,
     TransactionBatchForm, BalancePrintForm,
+    ProfileListForm,
 )
 from regnskab.models import (
     Sheet, SheetRow, SheetStatus, Profile, Alias, Title, Email,
@@ -406,7 +407,7 @@ class SessionList(TemplateView):
         return transpose
 
     @staticmethod
-    def dense_rows(columns, remove_empty=False):
+    def dense_rows(columns, *, remove_empty=False):
         kind_labels_data = [
             ('ølkasser', 'kasser'),
             ('øl', 'Øl'),
@@ -613,13 +614,26 @@ class ProfileList(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
+    def get_filter_form(self):
+        return ProfileListForm(data=self.request.GET)
+
     def get_context_data(self, **kwargs):
         context_data = super(ProfileList, self).get_context_data(**kwargs)
+        context_data['form'] = form = self.get_filter_form()
+        if form.is_valid():
+            purchases_after = form.cleaned_data['purchases_after']
+        else:
+            purchases_after = None
         profiles = get_profiles_title_status()
-        balances = compute_balance()
+        balances, purchases = compute_balance(
+            output_matrix=True, purchases_after=purchases_after)
+        purchases, kind_labels = SessionList.dense_rows(
+            purchases, remove_empty=True)
         for p in profiles:
             p.balance = balances.get(p.id)
+            p.stats = purchases.get(p.id, ('',) * len(kind_labels))
         context_data['object_list'] = profiles
+        context_data['columns'] = kind_labels
         return context_data
 
 
