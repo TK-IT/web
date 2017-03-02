@@ -22,9 +22,9 @@
             <td class='row-key'>
                 <a href="{{ o.href }}">
                     {% if o.sent %}
-                    Udsendt {{ o.send_time }}
+                    Udsendt {{ o.send_date }}
                     {% else %}
-                    Oprettet {{ o.created_time }}
+                    Oprettet {{ o.created_date }}
                     {% endif %}</a>
             </td>
             {% for n in o.stats %}
