@@ -267,12 +267,14 @@ class EmailTemplateData(base('EmailTemplate')):
     fields = ('id', 'name', 'subject', 'body', 'format', 'created_time')
 
 
-class SheetKindRelationData(base('PurchaseKind.sheets.through')):
-    fields = ('sheet_id', 'purchasekind_id')
-
-
 class PurchaseKindData(base('PurchaseKind')):
     fields = ('id', 'position', 'name', 'unit_price')
+
+
+class SheetKindRelationData(base('PurchaseKind.sheets.through')):
+    parent_field = 'sheet'
+    fields = ('purchasekind',)
+    bulk = True
 
 
 class PurchaseData(base('Purchase')):
@@ -294,6 +296,7 @@ class SheetData(base('Sheet')):
     fields = ('name', 'start_date', 'end_date', 'period', 'created_time')
     children = {
         'rows': SheetRowData,
+        'kinds': SheetKindRelationData,
     }
 
     def get_queryset(self):
@@ -327,6 +330,7 @@ class LegacySheetData(base('Sheet')):
     fields = ('name', 'start_date', 'end_date', 'period', 'created_time')
     children = {
         'rows': LegacySheetRowData,
+        'kinds': SheetKindRelationData,
     }
 
     def get_queryset(self):
@@ -344,6 +348,7 @@ class LegacyTransactionData(base('Transaction')):
 class RegnskabData:
     attributes = [
         ('templates', EmailTemplateData),
+        ('kinds', PurchaseKindData),
         ('profiles', ProfileData),
         ('sessions', SessionData),
         ('old_sheets', LegacySheetData),
