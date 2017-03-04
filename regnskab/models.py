@@ -508,10 +508,10 @@ def compute_balance(profile_ids=None, created_before=None, *,
         transaction_qs = transaction_qs.filter(created_time__lt=created_before)
     transaction_qs = transaction_qs.values_list(
         'profile_id', 'amount', 'kind', 'time')
-    for profile_id, amount, kind, time in transaction_qs:
+    for profile_id, amount, kind, time_ in transaction_qs:
         if profile_ids is None or profile_id in profile_ids:
             balance[profile_id] += amount
-            if purchases_after is None or time.date() >= purchases_after:
+            if purchases_after is None or time_.date() >= purchases_after:
                 kind_purchases = purchases.setdefault(kind, {})
                 try:
                     kind_purchases[profile_id] += amount
