@@ -16,6 +16,17 @@ DATE_FORMAT = '%Y-%m-%d'
 
 
 def field_dumper(field):
+    '''
+    Return a method for dumping data for the given Django model field.
+    If the model field data is not directly serializable to JSON,
+    the returned method converts it to a suitable representation:
+
+    * datetime to str (via DATETIME_FORMAT)
+    * date to str (via DATE_FORMAT)
+    * Decimal to str
+    * ForeignKey to int
+    '''
+
     field_name = field.name
 
     if field.__class__.__name__ == 'DateTimeField':
@@ -41,6 +52,11 @@ def field_dumper(field):
 
 
 def field_loader(field):
+    '''
+    Return a method for loading data for the Django model field
+    dumped by field_dumper(field). See field_dumper for the conversions.
+    '''
+
     field_name = field.name
 
     if field.__class__.__name__ == 'DateTimeField':
@@ -69,7 +85,35 @@ def field_loader(field):
     return load_field
 
 
-class SetParents:
+class DataLoadCallback:
+    '''
+    Base class of callbacks returned by Data.load().
+
+    The 'objects' attribute is a homogenous list of Django model instances.
+    The callback either modifies the instances somehow, or saves them to
+    the database.
+    '''
+
+    def __repr__(self):
+        if self.objects:
+            return '<%s on %d\N{MULTIPLICATION SIGN} %s>' % (
+                self.__class__.__name__,
+                len(self.objects),
+                self.objects[0].__class__.__name__,
+            )
+        else:
+            return '<%s on 0 objects>' % self.__class__.__name__
+
+
+class SetParents(DataLoadCallback):
+    '''
+    Update the PARENT_id attribute on the child objects.
+    When the PARENT attribute is set to a Django model instance
+    without a pk, the PARENT_id is set to None.
+    After saving the parent object, we must update the PARENT attribute
+    in order to refresh the PARENT_id attribute.
+    '''
+
     def __init__(self, objects, parent_field):
         self.objects = list(objects)
         self.parent_field = parent_field
@@ -78,11 +122,12 @@ class SetParents:
         for o in self.objects:
             setattr(o, self.parent_field, getattr(o, self.parent_field))
 
-    def __repr__(self):
-        return 'SetParents(%r, %r)' % (self.objects, self.parent_field)
 
+class SaveAll(DataLoadCallback):
+    '''
+    Save the list of objects to the database, retrieving their pks.
+    '''
 
-class SaveAll:
     def __init__(self, objects):
         self.objects = list(objects)
 
@@ -90,11 +135,14 @@ class SaveAll:
         for o in self.objects:
             o.save()
 
-    def __repr__(self):
-        return 'SaveAll(%r)' % (self.objects,)
 
+class BulkSaveAll(DataLoadCallback):
+    '''
+    Save the list of objects to the database with bulk_create
+    (in case no other objects need the pks).
+    Used when the 'bulk' attribute on the Data subclass is True.
+    '''
 
-class BulkSaveAll:
     def __init__(self, objects):
         self.objects = list(objects)
 
@@ -102,11 +150,12 @@ class BulkSaveAll:
         if self.objects:
             self.objects[0].__class__.objects.bulk_create(self.objects)
 
-    def __repr__(self):
-        return 'SaveAll(%r)' % (self.objects,)
-
 
 class Data:
+    '''
+    Base class for Django model (un-)serializers.
+    '''
+
     OMIT = object()
 
     def _fields(self):
@@ -368,6 +417,11 @@ class LegacyTransactionData(base('Transaction')):
 
 
 class RegnskabData:
+    # EmailTemplateData, PurchaseKindData and ProfileData must come before
+    # SessionData, LegacySheetData and LegacyTransactionData, since the
+    # sessions, sheets and transactions refer by pk to EmailTemplate,
+    # PurchaseKind and Profile objects. When loading, the objects referred to
+    # by pk must exist, or InnoDB throws an error.
     attributes = [
         ('templates', EmailTemplateData),
         ('kinds', PurchaseKindData),
@@ -388,6 +442,10 @@ class RegnskabData:
 
 
 def debug_json_dump(data, path='data'):
+    '''
+    In case json.dump raises a TypeError, this function will track down the
+    paths to the unserializable objects.
+    '''
     if isinstance(data, list):
         for i, o in enumerate(data):
             debug_json_dump(o, path='%s[%s]' % (path, i))
