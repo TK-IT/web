@@ -501,8 +501,8 @@ class SessionList(TemplateView):
             s.send_time = s.send_date = s.end_date
         sessions = list(Session.objects.filter(period=period))
         for s in sessions:
-            s.send_date = s.send_time.date()
-            s.created_date = s.created_date.date()
+            s.send_date = s.send_time and s.send_time.date()
+            s.created_date = s.created_time.date()
             s.stats = by_session.pop(s.id, None)
             s.href = reverse('regnskab:session_update', kwargs=dict(pk=s.id))
         years = sorted(by_year.items())
