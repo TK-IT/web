@@ -3,7 +3,19 @@ from .codegen import base
 
 class TitleData(base('Title')):
     parent_field = 'profile'
-    fields = ('root', 'period', 'kind')
+    fields = ('root', 'period')
+    shape = 'list'
+
+    def load_children(self, parent, child_data):
+        children = super().load_children(parent, child_data)
+        for title in children:
+            if title.root.startswith('FU'):
+                title.kind = 'FU'
+            elif title.root.startswith('EFU'):
+                title.kind = 'EFU'
+            else:
+                title.kind = 'BEST'
+        return children
 
 
 class AliasData(base('Alias')):
