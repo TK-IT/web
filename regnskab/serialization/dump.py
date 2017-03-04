@@ -94,6 +94,18 @@ class SaveAll:
         return 'SaveAll(%r)' % (self.objects,)
 
 
+class BulkSaveAll:
+    def __init__(self, objects):
+        self.objects = list(objects)
+
+    def __call__(self):
+        if self.objects:
+            self.objects[0].__class__.objects.bulk_create(self.objects)
+
+    def __repr__(self):
+        return 'SaveAll(%r)' % (self.objects,)
+
+
 class Data:
     OMIT = object()
 
@@ -187,7 +199,10 @@ class Data:
 
         if parent_field is not None:
             callbacks.append(SetParents(result, parent_field))
-        callbacks.append(SaveAll(result))
+        if getattr(self, 'bulk', False):
+            callbacks.append(BulkSaveAll(result))
+        else:
+            callbacks.append(SaveAll(result))
 
         for child_name, child_type in getattr(self, 'children', {}).items():
             try:
