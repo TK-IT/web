@@ -1,5 +1,8 @@
 import decimal
 import datetime
+import operator
+
+from .base import Data
 
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S%z'
@@ -74,3 +77,26 @@ def field_loader(field):
             setattr(instance, attr_name, data[field_name])
 
     return load_field
+
+
+def base(model):
+    '''
+    Create a subclass of Data with the following model specific methods:
+
+    - get_queryset() (returns model.objects.all())
+    - new_instance() (returns model())
+    - dump_<field>(instance: model) (returns the field attr of instance)
+    - load_<field>(data: dict, instance: model) (sets the field attr)
+    '''
+
+    if isinstance(model, str):
+        import regnskab.models
+        model = operator.attrgetter(model)(regnskab.models)
+
+    members = {}
+    for field in model._meta.fields:
+        members['dump_' + field.name] = field_dumper(field)
+        members['load_' + field.name] = field_loader(field)
+    members['get_queryset'] = lambda self: model.objects.all()
+    members['new_instance'] = lambda self: model()
+    return type(model.__name__, (Data,), members)
