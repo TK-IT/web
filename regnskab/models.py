@@ -431,6 +431,7 @@ def compute_balance_double_join(profile_ids=None, created_before=None):
     purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'))
     purchase_qs = purchase_qs.annotate(
         amount=F('count') * F('kind__unit_price'))
+    purchase_qs = purchase_qs.exclude(profile_id=None)
     purchase_qs = purchase_qs.values_list('profile_id', 'amount')
     for profile, amount in purchase_qs:
         balance[profile] += amount
