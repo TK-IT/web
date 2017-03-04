@@ -83,17 +83,20 @@ class Data:
                 if data is not self.OMIT:
                     children.setdefault(parent, {})[child_name] = data
 
-        field_names = self._fields()
         for instance in self.get_queryset():
-            instance_data = {}
-            for field_name in field_names:
-                dump_method = getattr(self, 'dump_' + field_name)
-                dumped_value = dump_method(instance)
-                if dumped_value is not self.OMIT:
-                    instance_data[field_name] = dumped_value
-            instance_data.update(children.get(instance.pk, {}))
+            instance_data = self.get_instance_data(instance, children)
             by_parent.setdefault(parent_fn(instance), []).append(instance_data)
         return result
+
+    def get_instance_data(self, instance, children):
+        instance_data = {}
+        for field_name in self._fields():
+            dump_method = getattr(self, 'dump_' + field_name)
+            dumped_value = dump_method(instance)
+            if dumped_value is not self.OMIT:
+                instance_data[field_name] = dumped_value
+        instance_data.update(children.get(instance.pk, {}))
+        return instance_data
 
     def load_children(self, parent, child_data):
         field_names = self._fields()
