@@ -264,7 +264,7 @@ class EmailData(base('Email')):
 
 
 class EmailTemplateData(base('EmailTemplate')):
-    fields = ('name', 'subject', 'body', 'format', 'created_time')
+    fields = ('id', 'name', 'subject', 'body', 'format', 'created_time')
 
 
 class SheetKindRelationData(base('PurchaseKind.sheets.through')):
@@ -342,19 +342,20 @@ class LegacyTransactionData(base('Transaction')):
 
 
 class RegnskabData:
-    attributes = {
-        'profiles': ProfileData,
-        'sessions': SessionData,
-        'old_sheets': LegacySheetData,
-        'old_transactions': LegacyTransactionData,
-    }
+    attributes = [
+        ('templates', EmailTemplateData),
+        ('profiles', ProfileData),
+        ('sessions', SessionData),
+        ('old_sheets', LegacySheetData),
+        ('old_transactions', LegacyTransactionData),
+    ]
 
     def dump(self):
-        return {k: v().dump() for k, v in self.attributes.items()}
+        return {k: v().dump() for k, v in self.attributes}
 
     def load(self, data):
         callbacks = []
-        for k, v in self.attributes.items():
+        for k, v in self.attributes:
             callbacks.extend(v().load([data[k]], [None]))
         return callbacks
 
