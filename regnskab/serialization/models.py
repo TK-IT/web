@@ -45,12 +45,14 @@ class PurchaseKindData(base('PurchaseKind')):
 class SheetKindRelationData(base('PurchaseKind.sheets.through')):
     parent_field = 'sheet'
     fields = ('purchasekind',)
+    shape = 'value'
     bulk = True
 
 
 class PurchaseData(base('Purchase')):
     parent_field = 'row'
     fields = ('kind', 'count')
+    shape = 'list'
     bulk = True
 
 

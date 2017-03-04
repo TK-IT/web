@@ -28,6 +28,7 @@ class Data:
     '''
 
     OMIT = object()
+    shape = 'dict'
 
     def _fields(self):
         try:
@@ -96,12 +97,28 @@ class Data:
             if dumped_value is not self.OMIT:
                 instance_data[field_name] = dumped_value
         instance_data.update(children.get(instance.pk, {}))
-        return instance_data
+        if self.shape == 'dict':
+            return instance_data
+        elif self.shape == 'list':
+            return [instance_data[n] for n in self._fields()]
+        elif self.shape == 'value':
+            value, = instance_data.values()
+            return value
+        else:
+            raise ValueError(self.shape)
 
     def load_children(self, parent, child_data):
         field_names = self._fields()
         children = []
         for d in child_data:
+            if self.shape == 'dict':
+                pass
+            elif self.shape == 'list':
+                d = dict(zip(field_names, d))
+            elif self.shape == 'value':
+                d = dict(zip(field_names, [d]))
+            else:
+                raise ValueError(self.shape)
             instance = self.new_instance()
             for field_name in field_names:
                 getattr(self, 'load_' + field_name)(d, instance)
