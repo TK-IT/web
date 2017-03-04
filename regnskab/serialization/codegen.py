@@ -9,6 +9,12 @@ DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S%z'
 DATE_FORMAT = '%Y-%m-%d'
 
 
+def remove_exponent(d):
+    '''From Python docs decimal FAQ'''
+    return (d.quantize(decimal.Decimal(1)) if d == d.to_integral()
+            else d.normalize())
+
+
 def field_dumper(field):
     '''
     Return a method for dumping data for the given Django model field.
@@ -34,7 +40,7 @@ def field_dumper(field):
     elif field.__class__.__name__ == 'DecimalField':
         def dump_field(self, instance):
             v = getattr(instance, field_name)
-            return v if v is None else str(v)
+            return v if v is None else str(remove_exponent(v))
     else:
         if field.__class__.__name__ == 'ForeignKey':
             field_name += '_id'
