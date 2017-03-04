@@ -1,129 +1,13 @@
-import os
 import sys
 import json
 import operator
 
-from .callback import SetParents, SaveAll, BulkSaveAll
+from .base import django_setup, Data
 from .codegen import field_dumper, field_loader
 
 
 if __name__ == "__main__":
-    from .base import django_setup
     django_setup()
-
-
-class Data:
-    '''
-    Base class for Django model (un-)serializers.
-    '''
-
-    OMIT = object()
-
-    def _fields(self):
-        try:
-            return self._fields_cache
-        except AttributeError:
-            pass
-        try:
-            self._fields_cache = self.fields
-            return self._fields_cache
-        except AttributeError:
-            pass
-        try:
-            exclude = set(self.exclude)
-        except AttributeError:
-            exclude = set()
-        method_order = []
-        dump_methods = set()
-        load_methods = set()
-        for k in dir(self):
-            if k.startswith('dump_'):
-                dump_methods.add(k[5:])
-                if k[5:] not in exclude:
-                    method_order.append(k[5:])
-            elif k.startswith('load_'):
-                load_methods.add(k[5:])
-        diff = (dump_methods - exclude) ^ (load_methods - exclude)
-        if diff:
-            raise TypeError(diff)
-        explicit_fields = getattr(self, 'fields', ())
-        self._fields_cache = list(explicit_fields) + method_order
-        return self._fields_cache
-
-    def dump(self):
-        by_parent = {}
-        try:
-            parent_field = self.parent_field
-        except AttributeError:
-            parent_fn = lambda instance: None  # noqa
-            result = by_parent[None] = []
-        else:
-            parent_fn = operator.attrgetter(parent_field + '_id')
-            result = by_parent
-
-        children = {}
-        for child_name, child_type in getattr(self, 'children', {}).items():
-            try:
-                child_dump_fn = getattr(self, 'dump_' + child_name)
-            except AttributeError:
-                child_dump_fn = child_type().dump
-            child_dump = child_dump_fn()
-            assert isinstance(child_dump, dict)
-            for parent, data in child_dump.items():
-                if data is not self.OMIT:
-                    children.setdefault(parent, {})[child_name] = data
-
-        field_names = self._fields()
-        for instance in self.get_queryset():
-            instance_data = {}
-            for field_name in field_names:
-                dump_method = getattr(self, 'dump_' + field_name)
-                dumped_value = dump_method(instance)
-                if dumped_value is not self.OMIT:
-                    instance_data[field_name] = dumped_value
-            instance_data.update(children.get(instance.pk, {}))
-            by_parent.setdefault(parent_fn(instance), []).append(instance_data)
-        return result
-
-    def load_children(self, parent, child_data):
-        field_names = self._fields()
-        children = []
-        for d in child_data:
-            instance = self.new_instance()
-            for field_name in field_names:
-                getattr(self, 'load_' + field_name)(d, instance)
-            children.append(instance)
-        try:
-            for instance in children:
-                setattr(instance, self.parent_field, parent)
-        except AttributeError:
-            pass
-        return children
-
-    def load(self, data_lists, parents):
-        callbacks = []
-        result = []
-        parent_field = getattr(self, 'parent_field', None)
-        for parent, child_data in zip(parents, data_lists):
-            result.extend(self.load_children(parent, child_data))
-
-        if parent_field is not None:
-            callbacks.append(SetParents(result, parent_field))
-        if getattr(self, 'bulk', False):
-            callbacks.append(BulkSaveAll(result))
-        else:
-            callbacks.append(SaveAll(result))
-
-        for child_name, child_type in getattr(self, 'children', {}).items():
-            try:
-                child_load_fn = getattr(self, 'load_' + child_name)
-            except AttributeError:
-                child_load_fn = child_type().load
-            data_flat = [d.get(child_name, ())
-                         for child_data in data_lists for d in child_data]
-            callbacks.extend(child_load_fn(data_flat, result))
-
-        return callbacks
 
 
 def base(model):
