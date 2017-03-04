@@ -280,6 +280,7 @@ class SheetKindRelationData(base('PurchaseKind.sheets.through')):
 class PurchaseData(base('Purchase')):
     parent_field = 'row'
     fields = ('kind', 'count')
+    bulk = True
 
 
 class SheetRowData(base('SheetRow')):
@@ -340,6 +341,7 @@ class LegacySheetData(base('Sheet')):
 class LegacyTransactionData(base('Transaction')):
     fields = ('kind', 'profile', 'time', 'period', 'amount', 'note',
               'created_time')
+    bulk = True
 
     def get_queryset(self):
         return super().get_queryset().filter(session=None)
