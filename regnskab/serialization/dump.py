@@ -304,11 +304,22 @@ class SheetData(base('Sheet')):
         return super().get_queryset().exclude(session=None)
 
 
+class TransactionData(base('Transaction')):
+    parent_field = 'session'
+    fields = ('kind', 'profile', 'time', 'period', 'amount', 'note',
+              'created_time')
+    bulk = True
+
+    def get_queryset(self):
+        return super().get_queryset().exclude(session=None)
+
+
 class SessionData(base('Session')):
     fields = ('email_template', 'period', 'send_time', 'created_time')
     children = {
         'emails': EmailData,
         'sheets': SheetData,
+        'transactions': TransactionData,
     }
 
 
