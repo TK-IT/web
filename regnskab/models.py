@@ -1,6 +1,8 @@
 import os
 import re
+import time
 import heapq
+import logging
 import tempfile
 import functools
 import itertools
@@ -24,6 +26,8 @@ from jsonfield import JSONField
 import tktitler as tk
 
 from regnskab.rules import get_default_prices
+
+logger = logging.getLogger('regnskab')
 
 
 def _import_profile_title():
@@ -420,6 +424,78 @@ class Purchase(models.Model):
         verbose_name_plural = verbose_name
 
 
+def compute_balance_raw_sql(profile_ids=None, created_before=None, *,
+                            output_matrix=False, purchases_after=None):
+    if profile_ids is not None:
+        raise NotImplementedError
+    if created_before is not None:
+        raise NotImplementedError
+    if purchases_after is not None:
+        raise NotImplementedError
+    purchases = defaultdict(lambda: defaultdict(Decimal))
+    balance = defaultdict(Decimal)
+
+    purchase_query = '''
+        SELECT row.profile_id, kind.name,
+        SUM(purchase.count) AS count,
+        SUM(purchase.count * kind.unit_price) AS amount
+        FROM regnskab_sheetrow row
+        INNER JOIN regnskab_purchase purchase ON (row.id = purchase.row_id)
+        INNER JOIN regnskab_purchasekind kind ON (purchase.kind_id = kind.id)
+        WHERE row.profile_id IS NOT NULL
+        GROUP BY row.profile_id, kind.id
+    '''
+    transaction_query = '''
+        SELECT profile_id, SUM(amount), kind FROM regnskab_transaction
+        GROUP BY profile_id, kind
+    '''
+
+    from django.db import connection
+
+    with connection.cursor() as cursor:
+        cursor.execute(purchase_query)
+        for profile_id, kind_name, count, amount in cursor.fetchall():
+            purchases[kind_name][profile_id] += count
+            balance[profile_id] += Decimal(amount)
+
+        cursor.execute(transaction_query)
+        for profile_id, amount, kind in cursor.fetchall():
+            balance[profile_id] += Decimal(amount)
+            purchases[kind][profile_id] += amount
+
+    if output_matrix:
+        return balance, purchases
+    else:
+        return balance
+
+
+def compare_balance(profile_ids, created_before, purchases_after,
+                    balance, purchases, time_taken):
+    errors = []
+    if profile_ids is created_before is purchases_after is None:
+        t1 = time.time()
+        raw_balance, raw_purchases = compute_balance_raw_sql(
+            output_matrix=True)
+        for p in balance.keys() | raw_balance.keys():
+            x = balance.get(p, 0)
+            y = raw_balance.get(p, 0)
+            if x != y:
+                errors.append((p, x, y))
+        for kind in purchases.keys() | raw_purchases.keys():
+            xs = purchases.get(kind, {})
+            ys = raw_purchases.get(kind, {})
+            for p in xs.keys() | ys.keys():
+                x = xs.get(p, 0)
+                y = ys.get(p, 0)
+                if x != y:
+                    errors.append((kind, p, x, y))
+        t2 = time.time()
+        logger.info('compute_balance took %.4f s, raw sql took %.4f s',
+                    time_taken, t2 - t1)
+    if errors:
+        raise Exception(errors)
+
+
 def compute_balance_double_join(profile_ids=None, created_before=None):
     balance = defaultdict(Decimal)
     purchase_qs = Purchase.objects.all().order_by()
@@ -448,6 +524,7 @@ def compute_balance_double_join(profile_ids=None, created_before=None):
 
 def compute_balance(profile_ids=None, created_before=None, *,
                     output_matrix=False, purchases_after=None):
+    t1 = time.time()
     if profile_ids is None:
         balance = defaultdict(Decimal)
     else:
@@ -518,6 +595,10 @@ def compute_balance(profile_ids=None, created_before=None, *,
                     kind_purchases[profile_id] += amount
                 except KeyError:
                     kind_purchases[profile_id] = amount
+
+    t2 = time.time()
+    compare_balance(profile_ids, created_before, purchases_after,
+                    balance, purchases, t2 - t1)
 
     if output_matrix:
         return balance, purchases
