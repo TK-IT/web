@@ -217,6 +217,15 @@ class Data:
 
 
 def base(model):
+    '''
+    Create a subclass of Data with the following model specific methods:
+
+    - get_queryset() (returns model.objects.all())
+    - new_instance() (returns model())
+    - dump_<field>(instance: model) (returns the field attr of instance)
+    - load_<field>(data: dict, instance: model) (sets the field attr)
+    '''
+
     if isinstance(model, str):
         import regnskab.models
         model = operator.attrgetter(model)(regnskab.models)
