@@ -524,6 +524,12 @@ def compute_balance_double_join(profile_ids=None, created_before=None):
 
 def compute_balance(profile_ids=None, created_before=None, *,
                     output_matrix=False, purchases_after=None):
+    try:
+        return compute_balance_raw_sql(
+            profile_ids, created_before,
+            output_matrix=output_matrix, purchases_after=purchases_after)
+    except NotImplementedError:
+        pass
     t1 = time.time()
     if profile_ids is None:
         balance = defaultdict(Decimal)
