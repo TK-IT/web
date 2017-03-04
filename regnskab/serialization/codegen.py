@@ -98,5 +98,5 @@ def base(model):
         members['dump_' + field.name] = field_dumper(field)
         members['load_' + field.name] = field_loader(field)
     members['get_queryset'] = lambda self: model.objects.all()
-    members['new_instance'] = lambda self: model()
+    members['new_instance'] = lambda self, **kwargs: model(**kwargs)
     return type(model.__name__, (Data,), members)
