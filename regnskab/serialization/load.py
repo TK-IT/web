@@ -3,7 +3,9 @@ import json
 
 
 def main():
-    from .dump import RegnskabData
+    from .base import django_setup
+    django_setup()
+    from .models import RegnskabData
     cbs = RegnskabData().load(json.load(sys.stdin))
     for cb in cbs:
         if cb.objects:
@@ -15,6 +17,4 @@ def main():
 
 
 if __name__ == '__main__':
-    from .base import django_setup
-    django_setup()
     main()
