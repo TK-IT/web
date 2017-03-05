@@ -97,6 +97,8 @@ def base(model):
 
     if isinstance(model, str):
         import regnskab.models
+        # Use operator.attrgetter instead of getattr to allow specifying
+        # e.g. 'PurchaseKind.sheets.through'
         model = operator.attrgetter(model)(regnskab.models)
 
     members = {}
