@@ -31,35 +31,7 @@ class Data:
     shape = 'dict'
 
     def _fields(self):
-        try:
-            return self._fields_cache
-        except AttributeError:
-            pass
-        try:
-            self._fields_cache = self.fields
-            return self._fields_cache
-        except AttributeError:
-            pass
-        try:
-            exclude = set(self.exclude)
-        except AttributeError:
-            exclude = set()
-        method_order = []
-        dump_methods = set()
-        load_methods = set()
-        for k in dir(self):
-            if k.startswith('dump_'):
-                dump_methods.add(k[5:])
-                if k[5:] not in exclude:
-                    method_order.append(k[5:])
-            elif k.startswith('load_'):
-                load_methods.add(k[5:])
-        diff = (dump_methods - exclude) ^ (load_methods - exclude)
-        if diff:
-            raise TypeError(diff)
-        explicit_fields = getattr(self, 'fields', ())
-        self._fields_cache = list(explicit_fields) + method_order
-        return self._fields_cache
+        return self.fields
 
     def dump(self):
         by_parent = {}
