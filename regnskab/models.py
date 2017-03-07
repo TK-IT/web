@@ -420,6 +420,23 @@ class Purchase(models.Model):
         verbose_name_plural = verbose_name
 
 
+def execute_helper(cursor, select, tables, where, group):
+    if not where:
+        where = [('1', ())]
+    select_terms, select_vars = zip(*select)
+    where_terms, where_vars = zip(*where)
+    vars = sum(select_vars + where_vars, ())
+
+    query = (
+        'SELECT {select} {tables} WHERE {where} GROUP BY {group}'.format(
+            select=', '.join(select_terms),
+            tables=' '.join(tables),
+            where=' AND '.join(where_terms),
+            group=', '.join(group),
+        ))
+    return cursor.execute(query, vars)
+
+
 def compute_balance_raw_sql(profile_ids=None, created_before=None, *,
                             output_matrix=False, purchases_after=None):
     if profile_ids is not None:
@@ -431,30 +448,56 @@ def compute_balance_raw_sql(profile_ids=None, created_before=None, *,
     purchases = defaultdict(lambda: defaultdict(Decimal))
     balance = defaultdict(Decimal)
 
-    purchase_query = '''
-        SELECT row.profile_id, kind.name,
-        SUM(purchase.count) AS count,
-        SUM(purchase.count * kind.unit_price) AS amount
-        FROM regnskab_sheetrow row
-        INNER JOIN regnskab_purchase purchase ON (row.id = purchase.row_id)
-        INNER JOIN regnskab_purchasekind kind ON (purchase.kind_id = kind.id)
-        WHERE row.profile_id IS NOT NULL
-        GROUP BY row.profile_id, kind.id
-    '''
-    transaction_query = '''
-        SELECT profile_id, SUM(amount), kind FROM regnskab_transaction
-        GROUP BY profile_id, kind
-    '''
+    p_select = [
+        ('row.sheet_id', ()),
+        ('row.profile_id', ()),
+        ('kind.name', ()),
+        ('SUM(purchase.count) AS count', ()),
+        ('SUM(purchase.count * kind.unit_price) AS amount', ()),
+    ]
+    p_tables = [
+        'FROM regnskab_sheetrow row',
+        'INNER JOIN regnskab_purchase purchase ON (row.id = purchase.row_id)',
+        ('INNER JOIN regnskab_purchasekind kind ON ' +
+         '(purchase.kind_id = kind.id)'),
+        'INNER JOIN regnskab_sheet sheet ON (sheet.id = row.sheet_id)',
+    ]
+    p_where = [('row.profile_id IS NOT NULL', ())]
+    p_group = ['row.profile_id', 'kind.id', 'include_purchase']
+
+    t_select = [('profile_id', ()), ('SUM(amount)', ()), ('kind', ())]
+    t_tables = ['regnskab_transaction']
+    t_where = []
+    t_group = ['profile_id', 'kind']
+
+    if profile_ids is not None:
+        profile_ids = tuple(map(int, profile_ids))
+        p_where.append(
+            ('row.profile_id IN (%s)' % ', '.join(('%s',) * len(profile_ids)),
+             profile_ids))
+        t_where.append(
+            ('profile_id IN (%s)' % ', '.join(('%s',) * len(profile_ids)),
+             profile_ids))
+
+    # if created_before is not None:
+
+    if purchases_after is None:
+        p_select.append(('1 AS include_purchase', ()))
+    else:
+        p_select.append(('(sheet.start_date >= %s) AS include_purchase',
+                         (purchases_after.strftime('%Y-%m-%d'),)))
 
     from django.db import connection
 
     with connection.cursor() as cursor:
-        cursor.execute(purchase_query)
-        for profile_id, kind_name, count, amount in cursor.fetchall():
-            purchases[kind_name][profile_id] += count
-            balance[profile_id] += Decimal(amount)
+        execute_helper(cursor, p_select, p_tables, p_where, p_group)
+        for sheet, profile, kind, count, amount, include in cursor.fetchall():
+            assert isinstance(include, int)
+            if include:
+                purchases[kind][profile] += count
+            balance[profile] += Decimal(amount)
 
-        cursor.execute(transaction_query)
+        execute_helper(cursor, t_select, t_tables, t_where, t_group)
         for profile_id, amount, kind in cursor.fetchall():
             balance[profile_id] += Decimal(amount)
             purchases[kind][profile_id] += amount
