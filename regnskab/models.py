@@ -299,11 +299,7 @@ class Sheet(models.Model):
         return result
 
     def legacy_style(self):
-        try:
-            return self._legacy_style
-        except AttributeError:
-            self._legacy_style = (len(self.purchasekind_set.all()) == 4)
-            return self._legacy_style
+        return self.session_id is None
 
     @contextlib.contextmanager
     def image_file_name(self):
