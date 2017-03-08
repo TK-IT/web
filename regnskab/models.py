@@ -420,34 +420,6 @@ class Purchase(models.Model):
         verbose_name_plural = verbose_name
 
 
-def compare_balance(profile_ids, created_before, purchases_after,
-                    balance, purchases, time_taken):
-    errors = []
-    t1 = time.time()
-    raw_balance, raw_purchases = compute_balance_double_join(
-        profile_ids=profile_ids, created_before=created_before,
-        output_matrix=True, purchases_after=purchases_after)
-    for p in balance.keys() | raw_balance.keys():
-        x = balance.get(p, 0)
-        y = raw_balance.get(p, 0)
-        if x != y:
-            errors.append((p, x, y))
-    for kind in purchases.keys() | raw_purchases.keys():
-        xs = purchases.get(kind, {})
-        ys = raw_purchases.get(kind, {})
-        for p in xs.keys() | ys.keys():
-            x = xs.get(p, 0)
-            y = ys.get(p, 0)
-            if x != y:
-                errors.append((kind, p, x, y))
-    t2 = time.time()
-    logger.info('compute_balance took %.4f s, compute_balance_double_join took %.4f s',
-                time_taken, t2 - t1)
-    if errors:
-        logger.error('%s errors', len(errors))
-        raise Exception(errors)
-
-
 def compute_purchase_table(profile_ids=None, created_before=None,
                            purchases_after=None):
     purchases = {}
@@ -494,8 +466,8 @@ def compute_purchase_table(profile_ids=None, created_before=None,
     return purchases
 
 
-def compute_balance_double_join(profile_ids=None, created_before=None, *,
-                                output_matrix=False, purchases_after=None):
+def compute_balance(profile_ids=None, created_before=None, *,
+                    output_matrix=False, purchases_after=None):
     balance = defaultdict(Decimal)
     purchase_qs = Purchase.objects.all().order_by()
     purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'))
@@ -525,96 +497,6 @@ def compute_balance_double_join(profile_ids=None, created_before=None, *,
     if output_matrix:
         return balance, compute_purchase_table(
             profile_ids, created_before, purchases_after)
-    else:
-        return balance
-
-
-def compute_balance(profile_ids=None, created_before=None, *,
-                    output_matrix=False, purchases_after=None):
-    # try:
-    #     return compute_balance_double_join(
-    #         profile_ids, created_before,
-    #         output_matrix=output_matrix, purchases_after=purchases_after)
-    # except NotImplementedError:
-    #     pass
-    t1 = time.time()
-    if profile_ids is None:
-        balance = defaultdict(Decimal)
-    else:
-        # Ensure only profile_ids is in the result
-        balance = {p: Decimal() for p in profile_ids}
-        if not balance:
-            if output_matrix:
-                return balance, {}
-            else:
-                return balance
-
-    row_qs = SheetRow.objects.exclude(profile=None).order_by()
-    kind_qs = PurchaseKind.objects.all().order_by()
-    if created_before:
-        sheet_qs = Sheet.objects.all()
-        sheet_qs = sheet_qs.filter(created_time__lt=created_before)
-        sheets = sheet_qs.values('id')
-        row_qs = row_qs.filter(sheet_id__in=sheets)
-        kind_qs = kind_qs.filter(sheets__in=sheets)
-    if purchases_after is None:
-        purchase_filter = None
-    else:
-        sheet_qs = Sheet.objects.filter(start_date__gte=purchases_after)
-        purchase_filter_sheet_ids = set(sheet_qs.values_list('id', flat=True))
-    rows = {o.id: o for o in row_qs
-            if profile_ids is None or o.profile_id in profile_ids}
-    kinds = {o.id: o for o in kind_qs}
-
-    purchases = {}
-
-    if rows:
-        purchase_qs = Purchase.objects.all().order_by()
-        if created_before:
-            max_row = max(rows.keys())
-            purchase_qs = purchase_qs.filter(row_id__lte=max_row)
-
-        purchase_qs = purchase_qs.values_list('row_id', 'kind_id', 'count')
-        for row_id, kind_id, count in purchase_qs:
-            try:
-                row = rows[row_id]
-            except KeyError:
-                continue
-            kind = kinds[kind_id]
-            profile_id = row.profile_id
-
-            if (purchases_after is None or
-                row.sheet_id in purchase_filter_sheet_ids):
-                kind_purchases = purchases.setdefault(kind.name, {})
-                try:
-                    kind_purchases[profile_id] += count
-                except KeyError:
-                    kind_purchases[profile_id] = count
-
-            amount = count * kind.unit_price
-            balance[profile_id] += amount
-
-    transaction_qs = Transaction.objects.all()
-    if created_before:
-        transaction_qs = transaction_qs.filter(created_time__lt=created_before)
-    transaction_qs = transaction_qs.values_list(
-        'profile_id', 'amount', 'kind', 'time')
-    for profile_id, amount, kind, time_ in transaction_qs:
-        if profile_ids is None or profile_id in profile_ids:
-            balance[profile_id] += amount
-            if purchases_after is None or time_.date() >= purchases_after:
-                kind_purchases = purchases.setdefault(kind, {})
-                try:
-                    kind_purchases[profile_id] += amount
-                except KeyError:
-                    kind_purchases[profile_id] = amount
-
-    t2 = time.time()
-    compare_balance(profile_ids, created_before, purchases_after,
-                    balance, purchases, t2 - t1)
-
-    if output_matrix:
-        return balance, purchases
     else:
         return balance
 
