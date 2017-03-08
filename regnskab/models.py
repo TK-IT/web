@@ -1,6 +1,5 @@
 import os
 import re
-import time
 import heapq
 import logging
 import tempfile
@@ -12,7 +11,7 @@ from decimal import Decimal
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.db import models
-from django.db.models import F, Sum
+from django.db.models import F
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.mail import EmailMessage
