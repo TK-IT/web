@@ -26,6 +26,7 @@ from jsonfield import JSONField
 import tktitler as tk
 
 from regnskab.rules import get_default_prices
+from regnskab.utils import sum_vector
 
 logger = logging.getLogger('regnskab')
 
@@ -468,32 +469,22 @@ def compute_purchase_table(profile_ids=None, created_before=None,
 
 def compute_balance(profile_ids=None, created_before=None, *,
                     output_matrix=False, purchases_after=None):
-    balance = defaultdict(Decimal)
-    purchase_qs = Purchase.objects.all().order_by()
-    purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'))
-    purchase_qs = purchase_qs.values('profile_id')
-    # Using annotate after values makes a SQL GROUP BY on the values.
-    purchase_qs = purchase_qs.annotate(
-        amount=Sum(F('count') * F('kind__unit_price')))
+    purchase_qs = Purchase.objects.all()
     if created_before:
         purchase_qs = purchase_qs.filter(
             row__sheet__created_time__lt=created_before)
     if profile_ids:
-        purchase_qs = purchase_qs.filter(profile_id__in=profile_ids)
-    purchase_qs = purchase_qs.exclude(profile_id=None)
-    for record in purchase_qs:
-        balance[record['profile_id']] += record['amount']
+        purchase_qs = purchase_qs.filter(row__profile_id__in=profile_ids)
+    purchase_qs = purchase_qs.exclude(row__profile_id=None)
+    balance = sum_vector(purchase_qs, 'row__profile_id',
+                         F('count') * F('kind__unit_price'))
 
-    transaction_qs = Transaction.objects.all().order_by()
-    transaction_qs = transaction_qs.values('profile_id')
-    transaction_qs = transaction_qs.annotate(
-        total_amount=Sum(F('amount')))
+    transaction_qs = Transaction.objects.all()
     if profile_ids:
         transaction_qs = transaction_qs.filter(profile_id__in=profile_ids)
     if created_before:
         transaction_qs = transaction_qs.filter(created_time__lt=created_before)
-    for record in transaction_qs:
-        balance[record['profile_id']] += record['total_amount']
+    balance.update(sum_vector(transaction_qs, 'profile_id', 'amount'))
     if output_matrix:
         return balance, compute_purchase_table(
             profile_ids, created_before, purchases_after)
