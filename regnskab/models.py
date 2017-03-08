@@ -420,33 +420,6 @@ class Purchase(models.Model):
         verbose_name_plural = verbose_name
 
 
-def compute_purchase_table(profile_ids=None, created_before=None,
-                           purchases_after=None):
-    purchase_qs = Purchase.objects.all()
-    if created_before:
-        purchase_qs = purchase_qs.filter(
-            row__sheet__created_time__lt=created_before)
-    if profile_ids:
-        purchase_qs = purchase_qs.filter(row__profile_id__in=profile_ids)
-    if purchases_after:
-        purchase_qs = purchase_qs.filter(
-            row__sheet__start_date__gte=purchases_after)
-    purchase_qs = purchase_qs.exclude(row__profile_id=None)
-    purchases = sum_matrix(purchase_qs, 'kind__name',
-                           'row__profile_id', 'count')
-
-    transaction_qs = Transaction.objects.all()
-    if profile_ids:
-        transaction_qs = transaction_qs.filter(profile_id__in=profile_ids)
-    if created_before:
-        transaction_qs = transaction_qs.filter(created_time__lt=created_before)
-    if purchases_after:
-        transaction_qs = transaction_qs.filter(time__gt=purchases_after)
-    purchases.update(sum_matrix(transaction_qs, 'kind',
-                                'profile_id', 'amount'))
-    return purchases
-
-
 def compute_balance(profile_ids=None, created_before=None, *,
                     output_matrix=False, purchases_after=None):
     purchase_qs = Purchase.objects.all()
@@ -471,8 +444,15 @@ def compute_balance(profile_ids=None, created_before=None, *,
         except KeyError:
             balance[profile_id] = amount
     if output_matrix:
-        return balance, compute_purchase_table(
-            profile_ids, created_before, purchases_after)
+        if purchases_after:
+            purchase_qs = purchase_qs.filter(
+                row__sheet__start_date__gte=purchases_after)
+            transaction_qs = transaction_qs.filter(time__gt=purchases_after)
+        purchases = sum_matrix(purchase_qs, 'kind__name',
+                               'row__profile_id', 'count')
+        purchases.update(sum_matrix(transaction_qs, 'kind',
+                                    'profile_id', 'amount'))
+        return balance, purchases
     else:
         return balance
 
