@@ -508,12 +508,10 @@ def compute_balance_double_join(profile_ids=None, created_before=None, *,
                                 output_matrix=False, purchases_after=None):
     balance = defaultdict(Decimal)
     purchase_qs = Purchase.objects.all().order_by()
-    purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'),
-                                       kind_name=F('kind__name'))
-    purchase_qs = purchase_qs.values('profile_id', 'kind_name')
+    purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'))
+    purchase_qs = purchase_qs.values('profile_id')
     # Using annotate after values makes a SQL GROUP BY on the values.
     purchase_qs = purchase_qs.annotate(
-        total_count=Sum('count'),
         amount=Sum(F('count') * F('kind__unit_price')))
     if created_before:
         purchase_qs = purchase_qs.filter(
