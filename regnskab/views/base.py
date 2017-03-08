@@ -33,6 +33,7 @@ from regnskab.rules import (
     get_max_debt, get_max_debt_after_payment, get_default_prices,
 )
 from .auth import regnskab_permission_required_method
+from regnskab.utils import sum_matrix
 
 import tktitler as tk
 
@@ -387,22 +388,6 @@ class SessionList(TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     @staticmethod
-    def sum_matrix(qs, column_spec, row_spec, value_spec):
-        qs = qs.order_by()
-        qs = qs.annotate(row_spec=F(row_spec), column_spec=F(column_spec))
-        qs = qs.values('row_spec', 'column_spec')
-        qs = qs.annotate(value_spec=Sum(value_spec))
-        res = {}
-        for record in qs:
-            row = record.pop('row_spec')
-            column = record.pop('column_spec')
-            value = record.pop('value_spec')
-            cells = res.setdefault(column, {})
-            assert row not in cells
-            cells[row] = value
-        return res
-
-    @staticmethod
     def transpose_sparse(matrix):
         transpose = {}
         for k1, kvs in matrix.items():
@@ -466,30 +451,30 @@ class SessionList(TemplateView):
         except (ValueError, KeyError):
             period = config.GFYEAR
 
-        by_year = self.sum_matrix(
+        by_year = sum_matrix(
             Purchase.objects.all(),
             'kind__name', 'row__sheet__period', 'count')
         purchases_by_session_qs = Purchase.objects.filter(
             row__sheet__session__period=period)
-        by_session = self.sum_matrix(
+        by_session = sum_matrix(
             purchases_by_session_qs,
             'kind__name', 'row__sheet__session_id', 'count')
         purchases_by_sheet_qs = Purchase.objects.filter(
             row__sheet__session=None,
             row__sheet__period=period)
-        by_sheet = self.sum_matrix(
+        by_sheet = sum_matrix(
             purchases_by_sheet_qs,
             'kind__name', 'row__sheet_id', 'count')
 
-        by_year.update(self.sum_matrix(
+        by_year.update(sum_matrix(
             Transaction.objects.all(), 'kind', 'period', 'amount'))
         transactions_by_session_qs = Transaction.objects.filter(
             session__period=period)
-        by_session.update(self.sum_matrix(
+        by_session.update(sum_matrix(
             transactions_by_session_qs, 'kind', 'session_id', 'amount'))
         transactions_by_sheet_qs = Transaction.objects.filter(
             session=None, period=period)
-        by_sheet_time = self.sum_matrix(
+        by_sheet_time = sum_matrix(
             transactions_by_sheet_qs, 'kind', 'time', 'amount')
         self.merge_legacy_data(by_sheet_time, by_sheet, period)
 
@@ -547,7 +532,7 @@ class SessionUpdate(FormView):
     def get_sheets(self):
         purchases_by_sheet_qs = Purchase.objects.filter(
             row__sheet__session=self.object)
-        by_sheet = SessionList.sum_matrix(
+        by_sheet = sum_matrix(
             purchases_by_sheet_qs,
             'kind__name', 'row__sheet_id', 'count')
         stats, columns = SessionList.dense_rows(by_sheet, remove_empty=True)
