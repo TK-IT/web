@@ -484,7 +484,12 @@ def compute_balance(profile_ids=None, created_before=None, *,
         transaction_qs = transaction_qs.filter(profile_id__in=profile_ids)
     if created_before:
         transaction_qs = transaction_qs.filter(created_time__lt=created_before)
-    balance.update(sum_vector(transaction_qs, 'profile_id', 'amount'))
+    transaction_balance = sum_vector(transaction_qs, 'profile_id', 'amount')
+    for profile_id, amount in transaction_balance.items():
+        try:
+            balance[profile_id] += amount
+        except KeyError:
+            balance[profile_id] = amount
     if output_matrix:
         return balance, compute_purchase_table(
             profile_ids, created_before, purchases_after)
