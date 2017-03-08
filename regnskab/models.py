@@ -423,7 +423,6 @@ class Purchase(models.Model):
 
 def compute_purchase_table(profile_ids=None, created_before=None,
                            purchases_after=None):
-    purchases = {}
     purchase_qs = Purchase.objects.all()
     if created_before:
         purchase_qs = purchase_qs.filter(
