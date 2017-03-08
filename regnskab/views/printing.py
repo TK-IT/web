@@ -203,7 +203,8 @@ class BalancePrint(FormView):
 
         rows = []
         for p in profiles:
-            context['total_balance'] += balances.get(p.id, 0)
+            balance = balances.get(p.id, 0)
+            context['total_balance'] += balance
             for k in keys:
                 context['total_%s' % k] += counts[p.id, k]
                 context['last_%s' % k] += cur_counts[p.id, k]
@@ -224,8 +225,8 @@ class BalancePrint(FormView):
             p_context['total'] = ' & '.join(
                 FMT.get(k, '\\hfill \\num{%g}') % counts.get((p.id, k), 0)
                 for k in keys)
-            p_context['balance'] = balances[p.id]
-            p_context['hl'] = '\\hl' if balances[p.id] > threshold else ''
+            p_context['balance'] = balance
+            p_context['hl'] = '\\hl' if balance > threshold else ''
             if not p.status or p.status.end_time is not None:
                 continue
             rows.append(BALANCE_ROW % p_context)
