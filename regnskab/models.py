@@ -12,7 +12,7 @@ from decimal import Decimal
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.db import models
-from django.db.models import F
+from django.db.models import F, Sum
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -420,94 +420,6 @@ class Purchase(models.Model):
         verbose_name_plural = verbose_name
 
 
-def execute_helper(cursor, select, tables, where, group):
-    if not where:
-        where = [('1', ())]
-    select_terms, select_vars = zip(*select)
-    where_terms, where_vars = zip(*where)
-    vars = sum(select_vars + where_vars, ())
-
-    query = (
-        'SELECT {select} {tables} WHERE {where} GROUP BY {group}'.format(
-            select=', '.join(select_terms),
-            tables=' '.join(tables),
-            where=' AND '.join(where_terms),
-            group=', '.join(group),
-        ))
-    return cursor.execute(query, vars)
-
-
-def compute_balance_raw_sql(profile_ids=None, created_before=None, *,
-                            output_matrix=False, purchases_after=None):
-    if profile_ids is not None:
-        raise NotImplementedError
-    if created_before is not None:
-        raise NotImplementedError
-    if purchases_after is not None:
-        raise NotImplementedError
-    purchases = defaultdict(lambda: defaultdict(Decimal))
-    balance = defaultdict(Decimal)
-
-    p_select = [
-        ('row.sheet_id', ()),
-        ('row.profile_id', ()),
-        ('kind.name', ()),
-        ('SUM(purchase.count) AS count', ()),
-        ('SUM(purchase.count * kind.unit_price) AS amount', ()),
-    ]
-    p_tables = [
-        'FROM regnskab_sheetrow row',
-        'INNER JOIN regnskab_purchase purchase ON (row.id = purchase.row_id)',
-        ('INNER JOIN regnskab_purchasekind kind ON ' +
-         '(purchase.kind_id = kind.id)'),
-        'INNER JOIN regnskab_sheet sheet ON (sheet.id = row.sheet_id)',
-    ]
-    p_where = [('row.profile_id IS NOT NULL', ())]
-    p_group = ['row.profile_id', 'kind.id', 'include_purchase']
-
-    t_select = [('profile_id', ()), ('SUM(amount)', ()), ('kind', ())]
-    t_tables = ['regnskab_transaction']
-    t_where = []
-    t_group = ['profile_id', 'kind']
-
-    if profile_ids is not None:
-        profile_ids = tuple(map(int, profile_ids))
-        p_where.append(
-            ('row.profile_id IN (%s)' % ', '.join(('%s',) * len(profile_ids)),
-             profile_ids))
-        t_where.append(
-            ('profile_id IN (%s)' % ', '.join(('%s',) * len(profile_ids)),
-             profile_ids))
-
-    # if created_before is not None:
-
-    if purchases_after is None:
-        p_select.append(('1 AS include_purchase', ()))
-    else:
-        p_select.append(('(sheet.start_date >= %s) AS include_purchase',
-                         (purchases_after.strftime('%Y-%m-%d'),)))
-
-    from django.db import connection
-
-    with connection.cursor() as cursor:
-        execute_helper(cursor, p_select, p_tables, p_where, p_group)
-        for sheet, profile, kind, count, amount, include in cursor.fetchall():
-            assert isinstance(include, int)
-            if include:
-                purchases[kind][profile] += count
-            balance[profile] += Decimal(amount)
-
-        execute_helper(cursor, t_select, t_tables, t_where, t_group)
-        for profile_id, amount, kind in cursor.fetchall():
-            balance[profile_id] += Decimal(amount)
-            purchases[kind][profile_id] += amount
-
-    if output_matrix:
-        return balance, purchases
-    else:
-        return balance
-
-
 def compare_balance(profile_ids, created_before, purchases_after,
                     balance, purchases, time_taken):
     errors = []
@@ -535,36 +447,49 @@ def compare_balance(profile_ids, created_before, purchases_after,
         raise Exception(errors)
 
 
-def compute_balance_double_join(profile_ids=None, created_before=None):
+def compute_balance_double_join(profile_ids=None, created_before=None, *,
+                                output_matrix=False, purchases_after=None):
+    if profile_ids is not None:
+        raise NotImplementedError
+    if created_before is not None:
+        raise NotImplementedError
+    if purchases_after is not None:
+        raise NotImplementedError
     balance = defaultdict(Decimal)
     purchase_qs = Purchase.objects.all().order_by()
+    purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'),
+                                       kind_name=F('kind__name'))
+    purchase_qs = purchase_qs.values('profile_id', 'kind_name')
+    # Using annotate after values makes a SQL GROUP BY on the values.
+    purchase_qs = purchase_qs.annotate(
+        total_count=Sum('count'),
+        amount=Sum(F('count') * F('kind__unit_price')))
     if created_before:
         purchase_qs = purchase_qs.filter(
             row__sheet__created_time__lt=created_before)
     if profile_ids:
-        purchase_qs = purchase_qs.filter(row__profile_id__in=profile_ids)
-    purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'))
-    purchase_qs = purchase_qs.annotate(
-        amount=F('count') * F('kind__unit_price'))
+        purchase_qs = purchase_qs.filter(profile_id__in=profile_ids)
     purchase_qs = purchase_qs.exclude(profile_id=None)
-    purchase_qs = purchase_qs.values_list('profile_id', 'amount')
-    for profile, amount in purchase_qs:
-        balance[profile] += amount
-    transaction_qs = Transaction.objects.all()
+    for record in purchase_qs:
+        balance[record['profile_id']] += record['amount']
+
+    transaction_qs = Transaction.objects.all().order_by()
+    transaction_qs = transaction_qs.values('profile_id')
+    transaction_qs = transaction_qs.annotate(
+        total_amount=Sum(F('amount')))
     if profile_ids:
         transaction_qs = transaction_qs.filter(profile_id__in=profile_ids)
-    transaction_qs = transaction_qs.values_list('profile_id', 'amount')
     if created_before:
         transaction_qs = transaction_qs.filter(created_time__lt=created_before)
-    for profile, amount in transaction_qs:
-        balance[profile] += amount
+    for record in transaction_qs:
+        balance[record['profile_id']] += record['total_amount']
     return balance
 
 
 def compute_balance(profile_ids=None, created_before=None, *,
                     output_matrix=False, purchases_after=None):
     try:
-        return compute_balance_raw_sql(
+        return compute_balance_double_join(
             profile_ids, created_before,
             output_matrix=output_matrix, purchases_after=purchases_after)
     except NotImplementedError:
