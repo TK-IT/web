@@ -471,13 +471,8 @@ def compute_purchase_table(profile_ids=None, created_before=None,
         count = record.pop('total_count')
         kind_name = record.pop('kind_name')
         kind_purchases = purchases.setdefault(kind_name, {})
-        try:
-            kind_purchases[profile_id] += count
-        except KeyError:
-            kind_purchases[profile_id] = count
-        else:
-            raise Exception("Database returned multiple answers for %s" %
-                            ((profile_id, kind_name),))
+        assert profile_id not in kind_purchases
+        kind_purchases[profile_id] = count
 
     transaction_qs = Transaction.objects.all().order_by()
     transaction_qs = transaction_qs.values('profile_id', 'kind')
@@ -494,13 +489,8 @@ def compute_purchase_table(profile_ids=None, created_before=None,
         amount = record.pop('total_amount')
         kind = record.pop('kind')
         kind_purchases = purchases.setdefault(kind, {})
-        try:
-            kind_purchases[profile_id] += amount
-        except KeyError:
-            kind_purchases[profile_id] = amount
-        else:
-            raise Exception("Database returned multiple answers for %s" %
-                            ((profile_id, kind),))
+        assert profile_id not in kind_purchases
+        kind_purchases[profile_id] = amount
     return purchases
 
 
