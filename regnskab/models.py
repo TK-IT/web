@@ -423,38 +423,89 @@ class Purchase(models.Model):
 def compare_balance(profile_ids, created_before, purchases_after,
                     balance, purchases, time_taken):
     errors = []
-    if profile_ids is created_before is purchases_after is None:
-        t1 = time.time()
-        raw_balance, raw_purchases = compute_balance_raw_sql(
-            output_matrix=True)
-        for p in balance.keys() | raw_balance.keys():
-            x = balance.get(p, 0)
-            y = raw_balance.get(p, 0)
+    t1 = time.time()
+    raw_balance, raw_purchases = compute_balance_double_join(
+        profile_ids=profile_ids, created_before=created_before,
+        output_matrix=True, purchases_after=purchases_after)
+    for p in balance.keys() | raw_balance.keys():
+        x = balance.get(p, 0)
+        y = raw_balance.get(p, 0)
+        if x != y:
+            errors.append((p, x, y))
+    for kind in purchases.keys() | raw_purchases.keys():
+        xs = purchases.get(kind, {})
+        ys = raw_purchases.get(kind, {})
+        for p in xs.keys() | ys.keys():
+            x = xs.get(p, 0)
+            y = ys.get(p, 0)
             if x != y:
-                errors.append((p, x, y))
-        for kind in purchases.keys() | raw_purchases.keys():
-            xs = purchases.get(kind, {})
-            ys = raw_purchases.get(kind, {})
-            for p in xs.keys() | ys.keys():
-                x = xs.get(p, 0)
-                y = ys.get(p, 0)
-                if x != y:
-                    errors.append((kind, p, x, y))
-        t2 = time.time()
-        logger.info('compute_balance took %.4f s, raw sql took %.4f s',
-                    time_taken, t2 - t1)
+                errors.append((kind, p, x, y))
+    t2 = time.time()
+    logger.info('compute_balance took %.4f s, compute_balance_double_join took %.4f s',
+                time_taken, t2 - t1)
     if errors:
+        logger.error('%s errors', len(errors))
         raise Exception(errors)
+
+
+def compute_purchase_table(profile_ids=None, created_before=None,
+                           purchases_after=None):
+    purchases = {}
+    purchase_qs = Purchase.objects.all().order_by()
+    purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'),
+                                       kind_name=F('kind__name'))
+    purchase_qs = purchase_qs.values('profile_id', 'kind_name')
+    # Using annotate after values makes a SQL GROUP BY on the values.
+    purchase_qs = purchase_qs.annotate(total_count=Sum('count'))
+    if created_before:
+        purchase_qs = purchase_qs.filter(
+            row__sheet__created_time__lt=created_before)
+    if profile_ids:
+        purchase_qs = purchase_qs.filter(profile_id__in=profile_ids)
+    if purchases_after:
+        purchase_qs = purchase_qs.filter(
+            row__sheet__start_date__gte=purchases_after)
+    purchase_qs = purchase_qs.exclude(profile_id=None)
+    for record in purchase_qs:
+        profile_id = record.pop('profile_id')
+        count = record.pop('total_count')
+        kind_name = record.pop('kind_name')
+        kind_purchases = purchases.setdefault(kind_name, {})
+        try:
+            kind_purchases[profile_id] += count
+        except KeyError:
+            kind_purchases[profile_id] = count
+        else:
+            raise Exception("Database returned multiple answers for %s" %
+                            ((profile_id, kind_name),))
+
+    transaction_qs = Transaction.objects.all().order_by()
+    transaction_qs = transaction_qs.values('profile_id', 'kind')
+    transaction_qs = transaction_qs.annotate(
+        total_amount=Sum(F('amount')))
+    if profile_ids:
+        transaction_qs = transaction_qs.filter(profile_id__in=profile_ids)
+    if created_before:
+        transaction_qs = transaction_qs.filter(created_time__lt=created_before)
+    if purchases_after:
+        transaction_qs = transaction_qs.filter(time__gt=purchases_after)
+    for record in transaction_qs:
+        profile_id = record.pop('profile_id')
+        amount = record.pop('total_amount')
+        kind = record.pop('kind')
+        kind_purchases = purchases.setdefault(kind, {})
+        try:
+            kind_purchases[profile_id] += amount
+        except KeyError:
+            kind_purchases[profile_id] = amount
+        else:
+            raise Exception("Database returned multiple answers for %s" %
+                            ((profile_id, kind),))
+    return purchases
 
 
 def compute_balance_double_join(profile_ids=None, created_before=None, *,
                                 output_matrix=False, purchases_after=None):
-    if profile_ids is not None:
-        raise NotImplementedError
-    if created_before is not None:
-        raise NotImplementedError
-    if purchases_after is not None:
-        raise NotImplementedError
     balance = defaultdict(Decimal)
     purchase_qs = Purchase.objects.all().order_by()
     purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'),
@@ -483,17 +534,21 @@ def compute_balance_double_join(profile_ids=None, created_before=None, *,
         transaction_qs = transaction_qs.filter(created_time__lt=created_before)
     for record in transaction_qs:
         balance[record['profile_id']] += record['total_amount']
-    return balance
+    if output_matrix:
+        return balance, compute_purchase_table(
+            profile_ids, created_before, purchases_after)
+    else:
+        return balance
 
 
 def compute_balance(profile_ids=None, created_before=None, *,
                     output_matrix=False, purchases_after=None):
-    try:
-        return compute_balance_double_join(
-            profile_ids, created_before,
-            output_matrix=output_matrix, purchases_after=purchases_after)
-    except NotImplementedError:
-        pass
+    # try:
+    #     return compute_balance_double_join(
+    #         profile_ids, created_before,
+    #         output_matrix=output_matrix, purchases_after=purchases_after)
+    # except NotImplementedError:
+    #     pass
     t1 = time.time()
     if profile_ids is None:
         balance = defaultdict(Decimal)
