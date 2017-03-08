@@ -26,7 +26,7 @@ from jsonfield import JSONField
 import tktitler as tk
 
 from regnskab.rules import get_default_prices
-from regnskab.utils import sum_vector
+from regnskab.utils import sum_vector, sum_matrix
 
 logger = logging.getLogger('regnskab')
 
@@ -424,46 +424,28 @@ class Purchase(models.Model):
 def compute_purchase_table(profile_ids=None, created_before=None,
                            purchases_after=None):
     purchases = {}
-    purchase_qs = Purchase.objects.all().order_by()
-    purchase_qs = purchase_qs.annotate(profile_id=F('row__profile_id'),
-                                       kind_name=F('kind__name'))
-    purchase_qs = purchase_qs.values('profile_id', 'kind_name')
-    # Using annotate after values makes a SQL GROUP BY on the values.
-    purchase_qs = purchase_qs.annotate(total_count=Sum('count'))
+    purchase_qs = Purchase.objects.all()
     if created_before:
         purchase_qs = purchase_qs.filter(
             row__sheet__created_time__lt=created_before)
     if profile_ids:
-        purchase_qs = purchase_qs.filter(profile_id__in=profile_ids)
+        purchase_qs = purchase_qs.filter(row__profile_id__in=profile_ids)
     if purchases_after:
         purchase_qs = purchase_qs.filter(
             row__sheet__start_date__gte=purchases_after)
-    purchase_qs = purchase_qs.exclude(profile_id=None)
-    for record in purchase_qs:
-        profile_id = record.pop('profile_id')
-        count = record.pop('total_count')
-        kind_name = record.pop('kind_name')
-        kind_purchases = purchases.setdefault(kind_name, {})
-        assert profile_id not in kind_purchases
-        kind_purchases[profile_id] = count
+    purchase_qs = purchase_qs.exclude(row__profile_id=None)
+    purchases = sum_matrix(purchase_qs, 'kind__name',
+                           'row__profile_id', 'count')
 
-    transaction_qs = Transaction.objects.all().order_by()
-    transaction_qs = transaction_qs.values('profile_id', 'kind')
-    transaction_qs = transaction_qs.annotate(
-        total_amount=Sum(F('amount')))
+    transaction_qs = Transaction.objects.all()
     if profile_ids:
         transaction_qs = transaction_qs.filter(profile_id__in=profile_ids)
     if created_before:
         transaction_qs = transaction_qs.filter(created_time__lt=created_before)
     if purchases_after:
         transaction_qs = transaction_qs.filter(time__gt=purchases_after)
-    for record in transaction_qs:
-        profile_id = record.pop('profile_id')
-        amount = record.pop('total_amount')
-        kind = record.pop('kind')
-        kind_purchases = purchases.setdefault(kind, {})
-        assert profile_id not in kind_purchases
-        kind_purchases[profile_id] = amount
+    purchases.update(sum_matrix(transaction_qs, 'kind',
+                                'profile_id', 'amount'))
     return purchases
 
 
