@@ -1,5 +1,4 @@
 import os
-import re
 import heapq
 import logging
 import tempfile
@@ -473,14 +472,6 @@ class EmailTemplate(models.Model):
         return self.name or str(self.created_time)
 
 
-def format(template, context):
-    try:
-        return re.sub(r'#([^#]*)#', lambda mo: context[mo.group(1)], template)
-    except KeyError as exn:
-        raise ValidationError("Emailskabelon har en ukendt variabel %r" %
-                              exn.args[0])
-
-
 Balance = namedtuple('Balance', 'profile_id amount'.split())
 
 
@@ -559,6 +550,10 @@ class Session(models.Model):
                 kind_price, profile_data, initial_balances)
 
     def regenerate_email(self, kind_price, data_iterable, initial_balances):
+        from regnskab.emailtemplate import (
+            format, format_price, format_price_set, format_count,
+        )
+
         payment_sum = 0
         other_sum = 0
         purchase_count = defaultdict(Decimal)
@@ -616,15 +611,6 @@ class Session(models.Model):
         else:
             title = None
 
-        def format_price(p):
-            return ('%.2f' % p).replace('.', ',')
-
-        def format_price_set(ps):
-            return '/'.join(map(format_price, sorted(ps)))
-
-        def format_count(c):
-            return ('%.2f' % c).rstrip('0').rstrip('.').replace('.', ',')
-
         context = {
             'TITEL ': title + ' ' if title else '',
             'NAVN': profile.name,
@@ -645,14 +631,18 @@ class Session(models.Model):
         }
 
         email_fields = ('subject', 'body', 'recipient_name', 'recipient_email')
-        email = Email(
-            session=self,
-            profile=profile,
-            subject=format(self.email_template.subject, context),
-            body=format(self.email_template.body, context),
-            recipient_name=profile.name,
-            recipient_email=profile.email,
-        )
+        try:
+            email = Email(
+                session=self,
+                profile=profile,
+                subject=format(self.email_template.subject, context),
+                body=format(self.email_template.body, context),
+                recipient_name=profile.name,
+                recipient_email=profile.email,
+            )
+        except KeyError as exn:
+            raise ValidationError("Emailskabelon har en ukendt variabel %r" %
+                                  exn.args[0])
         if existing_email:
             changed_keys = [k for k in email_fields
                             if getattr(email, k) != getattr(existing_email, k)]
