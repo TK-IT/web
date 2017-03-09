@@ -396,7 +396,7 @@ class SessionList(TemplateView):
         return transpose
 
     @staticmethod
-    def dense_rows(columns, *, remove_empty=False):
+    def dense_rows(*matrices, remove_empty=False):
         kind_labels_data = [
             ('ølkasser', 'kasser'),
             ('øl', 'Øl'),
@@ -409,7 +409,8 @@ class SessionList(TemplateView):
             (Transaction.PAYMENT, 'Betalt'),
         ]
         kind_order = [k for k, v in kind_labels_data
-                      if not remove_empty or k in columns]
+                      if not remove_empty or any(k in columns
+                                                 for columns in matrices)]
         kind_labels_dict = dict(kind_labels_data)
         kind_labels = [kind_labels_dict[k]
                        for k in kind_order]
@@ -419,16 +420,21 @@ class SessionList(TemplateView):
             else 0
             for kind in kind_order
         ]
-        rows = {
-            row_label: [
-                floatformat(
-                    (-1 if k == Transaction.PAYMENT else 1) *
-                    row[k], p)
-                if k in row else '\N{EM DASH}'
-                for k, p in zip(kind_order, places)]
-            for row_label, row in
-            SessionList.transpose_sparse(columns).items()}
-        return rows, kind_labels
+        transposed = []
+        for columns in matrices:
+            transposed.append({
+                row_label: [
+                    floatformat(
+                        (-1 if k == Transaction.PAYMENT else 1) *
+                        row[k], p)
+                    if k in row else '\N{EM DASH}'
+                    for k, p in zip(kind_order, places)]
+                for row_label, row in
+                SessionList.transpose_sparse(columns).items()})
+        if len(transposed) == 1:
+            return transposed[0], kind_labels
+        else:
+            return transposed, kind_labels
 
     @staticmethod
     def merge_legacy_data(by_sheet_time, by_sheet, period):
