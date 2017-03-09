@@ -485,8 +485,11 @@ class SessionList(TemplateView):
         self.merge_legacy_data(by_sheet_time, by_sheet, period)
 
         by_year, by_year_columns = self.dense_rows(by_year)
-        by_session, by_session_columns = self.dense_rows(by_session)
-        by_sheet, by_sheet_columns = self.dense_rows(by_sheet)
+
+        # If we have both new and old data, then we cannot
+        # remove empty columns.
+        (by_session, by_sheet), by_session_columns = self.dense_rows(
+            by_session, by_sheet, remove_empty=True)
 
         sheets = list(Sheet.objects.filter(session=None, period=period))
         for s in sheets:
