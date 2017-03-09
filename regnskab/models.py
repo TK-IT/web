@@ -595,6 +595,7 @@ class Session(models.Model):
                 existing_email.delete()
             return
 
+        # kasse_count is legacy
         kasse_count = purchase_count['ølkasse']
         if 'guldølkasse' in purchase_count:
             guld_ratio = (next(iter(kind_price['guldølkasse'])) /
@@ -620,13 +621,19 @@ class Session(models.Model):
             'PVAND': format_price_set(kind_price.get('sodavand', ())),
             'PGULD': format_price_set(kind_price.get('guldøl', ())),
             'PKASSER': format_price_set(kind_price.get('ølkasse', ())),
+            'POELKS': format_price_set(kind_price.get('ølkasse', ())),
+            'PGULDKS': format_price_set(kind_price.get('guldølkasse', ())),
+            'PVANDKS': format_price_set(kind_price.get('sodavandkasse', ())),
             'GAELDFOER': format_price(initial_balance),
             'GAELD': format_price(balance),
             'MAXGAELD': format_price(self._max_debt),
             'OEL': format_count(purchase_count.get('øl', 0)),
             'VAND': format_count(purchase_count.get('sodavand', 0)),
             'GULD': format_count(purchase_count.get('guldøl', 0)),
-            'KASSER': format_count(kasse_count),
+            'OELKS': format_count(purchase_count.get('ølkasse', 0)),
+            'VANDKS': format_count(purchase_count.get('sodavandkasse', 0)),
+            'GULDKS': format_count(purchase_count.get('guldølkasse', 0)),
+            'KASSER': format_count(kasse_count),  # Legacy
             'INKA': self._inka.name,
         }
 
