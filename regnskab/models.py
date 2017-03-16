@@ -1,6 +1,7 @@
 import os
 import heapq
 import logging
+import datetime
 import tempfile
 import functools
 import itertools
@@ -228,6 +229,7 @@ class Sheet(models.Model):
 
     def rows(self):
         result = []
+        transactions = self.legacy_transactions()
         kinds = list(self.columns())
         kind_dict = {kind.id: kind for kind in kinds}
         sheetrow_qs = self.sheetrow_set.all()
@@ -266,6 +268,7 @@ class Sheet(models.Model):
                 kinds=purchase_list,
                 image=image,
                 empty=row_empty,
+                legacy_transactions=transactions.pop(row.profile_id, {}),
             ))
         profile_ids = set(row['profile'] for row in result)
         titles = get_primary_titles(profile_ids=profile_ids,
@@ -299,6 +302,24 @@ class Sheet(models.Model):
 
     def legacy_style(self):
         return self.session_id is None
+
+    def legacy_transactions(self):
+        if not self.legacy_style():
+            return {}
+        d = self.end_date
+        d1 = d - datetime.timedelta(1)
+        d2 = d + datetime.timedelta(1)
+        qs = Transaction.objects.filter(time__gt=d1, time__lt=d2)
+        qs = (t for t in qs if t.time.date() == d)
+        transactions = {}
+        for t in qs:
+            for_profile = transactions.setdefault(t.profile_id, {})
+            amount = -t.amount if t.kind == Transaction.PAYMENT else t.amount
+            try:
+                for_profile[t.kind] += amount
+            except KeyError:
+                for_profile[t.kind] = amount
+        return transactions
 
     @contextlib.contextmanager
     def image_file_name(self):

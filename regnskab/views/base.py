@@ -171,14 +171,18 @@ class SheetCreate(FormView):
 
 
 class SheetDetail(TemplateView):
-    template_name = 'regnskab/sheet_detail.html'
-
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
+    def get_template_names(self):
+        if self.get_sheet().legacy_style():
+            return ['regnskab/sheet_legacy.html']
+        else:
+            return ['regnskab/sheet_detail.html']
+
     def get(self, request, *args, **kwargs):
-        s = self.get_sheet()
+        s = self.get_sheet()  # type: Sheet
         qs = SheetRow.objects.filter(sheet=s)
         if not qs.exists():
             return redirect('regnskab:sheet_update', pk=s.pk)

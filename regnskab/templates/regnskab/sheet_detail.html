@@ -24,13 +24,7 @@ function sheet_detail_init() {
 {% endblock %}
 {% block title %}Krydslisten {{ sheet }}{% endblock %}
 {% block content %}
-{% if sheet.legacy_style %}
-<h2>Opgørelsen {{ sheet.end_date }}</h2>
-<p>Denne opgørelse er fra det gamle INKA-program (før 2017) og viser hvad folk
-har krydset på alle krydslisterne siden sidst regningen blev gjort op.</p>
-{% else %}
 <h2>Krydslisten {{ sheet }}</h2>
-{% endif %}
 
 {% if sheet_images or sheet.image_file %}
 <p>Hent original:
