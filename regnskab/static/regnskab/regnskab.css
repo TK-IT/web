@@ -58,6 +58,9 @@ nav a { text-decoration: none; }
 	border-top: 1px solid #666;
 	border-bottom: 1px solid #666;
 }
+.tabular > tbody > tr > * {
+	border-bottom: 1px solid #666;
+}
 .purchase-stats > tbody > tr > * {
 	text-align: right;
 }
@@ -65,6 +68,5 @@ nav a { text-decoration: none; }
 	text-align: left;
 }
 .tabular > tbody > tr:nth-child(odd) > * {
-	border-bottom: 1px solid #666;
 	background-color: rgba(0, 0, 0, 0.05);
 }
