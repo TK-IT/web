@@ -1,3 +1,4 @@
+import os
 import time
 import traceback
 
@@ -5,16 +6,16 @@ import django
 from django.test import Client
 from django.core.urlresolvers import reverse
 
-from regnskab.models import Session, Profile, EmailTemplate
-
 
 def get_sent_session():
+    from regnskab.models import Session
     qs = Session.objects.exclude(sheet=None).exclude(send_time=None)
     qs = qs.order_by('-id')
     return qs[0]
 
 
 def get_fresh_session():
+    from regnskab.models import Session
     qs = Session.objects.filter(send_time=None).order_by('-id')
     if qs:
         return qs[0]
@@ -22,7 +23,9 @@ def get_fresh_session():
 
 
 def main():
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "regnskabsite.settings")
     django.setup()
+    from regnskab.models import Profile, EmailTemplate
     c = Client()
 
     def assert_get(name, data=None, code=200, **kwargs):
