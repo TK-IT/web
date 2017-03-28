@@ -1090,7 +1090,7 @@ class PaymentBatchCreate(TransactionBatchCreateBase):
             try:
                 o = existing[p.id]
             except KeyError:
-                amount = amounts[p.id]
+                amount = amounts.get(p.id, 0)
                 selected = False
             else:
                 amount = self.sign * o.amount
