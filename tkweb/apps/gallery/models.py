@@ -44,7 +44,7 @@ class Album(models.Model):
             m.isCoverFile = False
             m.save()
 
-        f = self.basemedia.first()
+        f = self.basemedia.filter(visibility=BaseMedia.PUBLIC).first()
         if f:
             f.isCoverFile = True
             f.save()
