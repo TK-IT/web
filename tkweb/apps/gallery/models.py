@@ -70,6 +70,20 @@ class BaseMedia(models.Model):
         (AUDIO, 'Audio'),
         (OTHER, 'Other'),
     )
+
+    PUBLIC = 'public'
+    DISCARDED = 'discarded'
+    SENSITIVE = 'sensitive'
+    DELETE = 'delete'
+    NEW = 'new'
+    VISIBILITY = (
+        (PUBLIC, 'Synligt'),
+        (DISCARDED, 'Frasorteret'),
+        (SENSITIVE, 'Skjult'),
+        (DELETE, 'Slet'),
+        (NEW, 'Ubesluttet'),
+    )
+
     type = models.CharField(max_length=1,
                                       choices=TYPE_CHOICES,
                                       default=OTHER)
@@ -78,7 +92,8 @@ class BaseMedia(models.Model):
     album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name='basemedia')
 
     date = models.DateTimeField(null=True, blank=True, verbose_name='Dato')
-    notPublic = models.BooleanField(default=False, verbose_name='Skjult')
+    visibility = models.CharField(max_length=10, choices=VISIBILITY,
+                                  verbose_name='Synlighed', default=NEW)
     caption = models.CharField(
         max_length=200, blank=True, verbose_name='Overskrift')
 
@@ -97,6 +112,10 @@ class BaseMedia(models.Model):
             return self.image.admin_thumbnail()
 
     admin_thumbnail.short_description = 'Thumbnail'
+
+    @property
+    def notPublic(self):
+        return self.visibility != self.PUBLIC
 
     def __str__(self):
         return '%s' % (self.slug)
