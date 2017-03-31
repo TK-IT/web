@@ -50,7 +50,7 @@ $(document).ready(function() {
         deferMedia(next);
 
         // Rewrite history
-        window.history.replaceState(null, null, newimage);
+        window.history.replaceState(null, null, newimage + location.search);
     }
 
     // Call swipehandler on swipe
