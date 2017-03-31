@@ -384,10 +384,10 @@ for yearFolder in os.listdir(rootdir):
                         continue
 
                     if os.path.basename(filepath) in missingFromResized:
-                        instance.notPublic = True
+                        instance.visibility = BaseMedia.DISCARDED
 
                     if os.path.basename(filepath) in notPublicFiles:
-                        instance.notPublic = True
+                        instance.visibility = BaseMedia.DISCARDED
 
                     instance.forcedOrder = i
                     i += 1
