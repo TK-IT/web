@@ -9,6 +9,9 @@
 {% block js %}
   <script src="{% static "gallery/jquery.touchswipe.min.js" %}"></script>
   <script src="{% static "gallery/tkgal.js" %}"></script>
+  {% if edit_visibility %}
+  <script src="{% static "gallery/tkgal-visibility.js" %}"></script>
+  {% endif %}
 {% endblock js %}
 
 {% block canonical_url %}{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=start_file.slug %}{% endblock canonical_url %}
@@ -20,6 +23,9 @@
 {% endblock opengraph %}
 
 {% block raw_content %}
+{% if edit_visibility %}
+<form id="tkgal-form" style="height: 100%" method="post" action="{% url 'set_image_visibility' %}">{% csrf_token %}
+{% endif %}
 <div id="tkgal-container" role="main">
 	{% for file, next_file, prev_file in file_orders %}
 	<div class="{% if file != start_file %}hidden{% endif %}" data-permlink="{{ file.slug }}">
@@ -66,6 +72,10 @@
 					<li><a id="albumlink" href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">{{ album.title }}</a></li>
 					<li>{{ forloop.counter }} af {{ file_count }}{% if file.type == "I" %} <span class="hidden-xs">billede{{ file_count|pluralize:"r" }}</span>{% endif %}</li>
 				</ol>
+                                {% if edit_visibility %}
+		{{ file.visibility_field }}
+                <input type="submit" name="r{{ file.pk }}" value="Gem album" style="background-color: transparent"/>
+{% endif %}
 			</div>
 			<div class="overlay overlay-bottom">
 				<div class="row">
@@ -87,6 +97,7 @@
 	</div>
 	{% endfor %}
 </div>
+{% if edit_visibility %}</form>{% endif %}
 
 <div class="container">
     <div id="tkgal-caption-container">
