@@ -99,6 +99,19 @@ def album(request, gfyear, album_slug):
                       image_slug=file.slug)
         context['edit_visibility_link'] = (
             reverse('image', kwargs=kwargs) + '?v=1')
+
+        qs = album.basemedia.all().order_by()
+        qs_visibility = qs.values_list('visibility')
+        visibility_counts = dict(qs_visibility.annotate(count=Count('pk')))
+        c_public = visibility_counts.pop(BaseMedia.PUBLIC, 0)
+        c_discarded = visibility_counts.pop(BaseMedia.DISCARDED, 0)
+        c_sensitive = visibility_counts.pop(BaseMedia.SENSITIVE, 0)
+        c_new = visibility_counts.pop(BaseMedia.NEW, 0)
+        if visibility_counts:
+            raise ValueError(visibility_counts)
+        context['visible_count'] = c_public
+        context['hidden_count'] = c_discarded + c_sensitive + c_new
+        context['new_count'] = c_new
     return render(request, 'album.html', context)
 
 
