@@ -51,7 +51,7 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
     album = get_object_or_404(Album, gfyear=gfyear, slug=album_slug)
 
     # list() will force evaluation of the QuerySet. It is now iterable.
-    files = list(album.basemedia.exclude(notPublic=True).select_subclasses())
+    files = list(album.basemedia.filter(visibility=BaseMedia.PUBLIC).select_subclasses())
     start_file = album.basemedia.filter(album=album, slug=image_slug).select_subclasses().first()
 
     if not start_file:
