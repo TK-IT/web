@@ -52,10 +52,10 @@ def album(request, gfyear, album_slug):
                'files': files}
 
     edit_visibility = request.user.has_perms('gallery.change_image')
-    file = album.basemedia.first()
-    if edit_visibility and file:
+    new_file = album.basemedia.filter(visibility=BaseMedia.NEW).first()
+    if edit_visibility and new_file:
         kwargs = dict(gfyear=album.gfyear, album_slug=album.slug,
-                      image_slug=file.slug)
+                      image_slug=new_file.slug)
         context['edit_visibility_link'] = (
             reverse('image', kwargs=kwargs) + '?v=1')
 
