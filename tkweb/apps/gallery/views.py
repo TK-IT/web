@@ -29,7 +29,8 @@ def gallery(request, **kwargs):
     show_year = kwargs.get('gfyear', latest_year)
     show_year = int(show_year) if show_year else None
 
-    albums = allalbums.filter(gfyear__exact=show_year).prefetch_related('basemedia').annotate(count=Count('basemedia'))
+    albums = allalbums.filter(gfyear__exact=show_year)
+    albums = albums.annotate(count=Count('basemedia'))
 
     firstImages = BaseMedia.objects.filter(album__in=albums, isCoverFile=True).prefetch_related('album').select_subclasses()
     firstImages = {fi.album: fi for fi in firstImages}
