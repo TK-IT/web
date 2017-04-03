@@ -17,7 +17,8 @@ import os
 
 
 def gallery(request, **kwargs):
-    allalbums = Album.objects.exclude(basemedia__isnull=True)
+    allalbums = Album.objects.filter(basemedia__visibility=BaseMedia.PUBLIC)
+    allalbums = allalbums.exclude(basemedia__isnull=True)
     # Without order_by(), distinct() still returns duplicate gfyears.
     years = allalbums.order_by().values_list('gfyear', flat=True).distinct()
     years = sorted(years, reverse=True)
