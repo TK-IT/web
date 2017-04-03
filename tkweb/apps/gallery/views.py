@@ -32,9 +32,10 @@ def gallery(request, **kwargs):
     albums = allalbums.filter(gfyear__exact=show_year)
     albums = albums.annotate(count=Count('basemedia'))
 
-    firstImages = BaseMedia.objects.filter(album__in=albums, isCoverFile=True).prefetch_related('album').select_subclasses()
-    firstImages = {fi.album: fi for fi in firstImages}
-    albumSets = [(a, firstImages.get(a)) for a in albums]
+    firstImages = BaseMedia.objects.filter(album__in=albums, isCoverFile=True)
+    firstImages = firstImages.select_subclasses()
+    firstImages = {fi.album_id: fi for fi in firstImages}
+    albumSets = [(a, firstImages.get(a.id)) for a in albums]
 
     context = {'years': years,
                'show_year': show_year,
