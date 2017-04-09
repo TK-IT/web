@@ -399,10 +399,13 @@ class SheetRow(models.Model):
         verbose_name_plural = verbose_name + 'e'
 
     def image_data(self):
-        if not self.sheet.row_image:
+        if self.image_start is None or self.image_stop is None:
             return None, None, None, None
-        return (self.sheet.row_image.url,
-                self.sheet.row_image_width,
+        row_image = self.sheet.row_image
+        row_image_width = self.sheet.row_image_width
+        if not row_image or not row_image_width:
+            return None, None, None, None
+        return (row_image.url, row_image_width,
                 self.image_start, self.image_stop)
 
     def image_html(self):
