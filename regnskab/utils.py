@@ -1,4 +1,7 @@
+import re
 from django.db.models import F, Sum
+from django.utils import html, safestring
+import html2text
 
 
 def sum_vector(qs, index_spec, value_spec):
@@ -48,3 +51,30 @@ def sum_matrix(qs, column_spec, row_spec, value_spec):
         assert row not in cells
         cells[row] = value
     return res
+
+
+def line_to_html(line):
+    strip = line.lstrip()
+    leading_ws = len(line) - len(strip)
+    return safestring.mark_safe(leading_ws * '&nbsp;' + html.escape(strip))
+
+
+def plain_to_html(body):
+    body = re.sub(r'\r\n|\r|\n', '\n', body.strip())
+    paras = re.split(r'\n\n+', body)
+    paras_html = []
+    for p in paras:
+        lines = p.split('\n')
+        paras_html.append(
+            '<p>%s</p>' % '<br>\n'.join(map(line_to_html, lines)))
+    return safestring.mark_safe('\n'.join(paras_html))
+
+
+def html_to_plain(body):
+    h = html2text.HTML2Text()
+    h.ignore_links = True
+    h.unicode_snob = True
+    h.default_image_alt = '(Billede)'
+    h.images_to_alt = True
+    h.body_width = 0
+    return h.handle(str(body))
