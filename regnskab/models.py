@@ -483,11 +483,15 @@ def compute_balance(profile_ids=None, created_before=None, *,
 class EmailTemplate(models.Model):
     POUND = 'pound'
     FORMAT = [(POUND, 'pound')]
+    PLAIN = 'plain'
+    HTML = 'html'
+    MARKUP = [(PLAIN, 'Ren tekst'), (HTML, 'HTML')]
 
     name = models.CharField(max_length=255, blank=True)
     subject = models.TextField(blank=False)
     body = models.TextField(blank=False)
     format = models.CharField(max_length=10, choices=FORMAT)
+    markup = models.CharField(max_length=10, choices=MARKUP)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                    null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
