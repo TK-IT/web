@@ -1,5 +1,8 @@
 {% extends "regnskab/base.html" %}
 {% block title %}Emailskabelon{% endblock %}
+{% block head %}
+{{ form.media }}
+{% endblock %}
 {% block content %}
 <form method="post">{% csrf_token %}
     {{ form.as_p }}

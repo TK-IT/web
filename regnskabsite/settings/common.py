@@ -41,6 +41,48 @@ INSTALLED_APPS = [
     'regnskabsite',
 ]
 
+try:
+    import mediumeditor
+except ImportError:
+    USE_MEDIUM_EDITOR = False
+else:
+    INSTALLED_APPS.append('mediumeditor')
+    USE_MEDIUM_EDITOR = True
+
+
+# Theme options `default`, `roman`, `mani`, `flat`, `bootstrap`, `tim`, `beagle`
+MEDIUM_EDITOR_THEME = 'bootstrap'
+MEDIUM_EDITOR_OPTIONS = {
+    'toolbar': {
+        'static': True,
+        'buttons': [
+            'bold',
+            'italic',
+            'underline',
+            'strikethrough',
+            # 'subscript',
+            # 'superscript',
+            # 'h1',
+            # 'h2',
+            # 'h3',
+            # 'h4',
+            # 'h5',
+            # 'h6',
+            # 'removeFormat',
+            # 'image',
+        ]
+    },
+    'imageDragging': {},
+    'paste': {
+        'forcePlainText': True,
+        # 'cleanPastedHTML': True,
+        'cleanReplacements': [],
+        'cleanAttrs': ['class', 'style', 'dir'],
+        'cleanTags': ['meta']
+    }
+}
+
+
 MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

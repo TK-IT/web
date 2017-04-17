@@ -2,6 +2,7 @@ import collections
 from django import forms
 from django.core.exceptions import ValidationError
 from regnskab.models import EmailTemplate, Session, config
+from regnskab.widgets import RichTextarea
 import tktitler as tk
 
 
@@ -53,7 +54,8 @@ class EmailTemplateForm(forms.ModelForm):
     class Meta:
         model = EmailTemplate
         fields = ('name', 'subject', 'body', 'format')
-        widgets = {'subject': forms.TextInput(attrs={'size': 60})}
+        widgets = {'subject': forms.TextInput(attrs={'size': 60}),
+                   'body': RichTextarea()}
 
     name = forms.CharField(required=True)
 
@@ -61,7 +63,7 @@ class EmailTemplateForm(forms.ModelForm):
 class SessionForm(forms.Form):
     subject = forms.CharField(max_length=200,
                               widget=forms.TextInput(attrs={'size': 60}))
-    body = forms.CharField(widget=forms.Textarea(attrs={'cols': 70, 'rows': 20}))
+    body = forms.CharField(widget=RichTextarea(attrs={'cols': 70, 'rows': 20}))
     format = forms.ChoiceField(choices=EmailTemplate.FORMAT)
 
 
