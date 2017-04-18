@@ -748,14 +748,15 @@ class EmailSetBase(models.Model):
         email_fields = ('subject', 'body_plain', 'body_html',
                         'recipient_name', 'recipient_email')
         try:
-            email = Email(
-                session=self,
+            email = self.email_set.model(
                 profile=profile,
                 subject=format(self.email_template.subject, context),
                 body_plain=format(self.email_template.body_plain(), context),
                 recipient_name=profile.name,
                 recipient_email=profile.email,
             )
+            field_name = self.__class__.email_set.related.field.name
+            setattr(email, field_name, self)
             if self.email_template.markup == EmailTemplate.HTML:
                 email.body_html = format(
                     self.email_template.body_html(), context)
