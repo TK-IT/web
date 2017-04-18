@@ -28,8 +28,6 @@ Ingen opgørelser i databasen
 
 <p><a href="{% url 'regnskab:session_list' %}">Vis alle tidligere opgørelser</a></p>
 
-<p><a href="{% url 'regnskab:newsletter_list' %}">Vis nyhedsbreve</a></p>
-
 <p><a href="{% url 'regnskab:profile_list' %}">Vis liste af personer</a>
 </p>
 
@@ -40,6 +38,8 @@ Ingen opgørelser i databasen
 <p><a href="{% url 'regnskab:email_template_create' %}?name=Standard">
     Opret standardemail</a></p>
 {% endif %}
+
+<p><a href="{% url 'regnskab:newsletter_list' %}">Send mail ut til hele krydslisten</a></p>
 
 <p><a href="{% url 'regnskab:log' %}">Vis aktivitetslog</a>
 (dit brugernavn: {{ user.username }})</p>
