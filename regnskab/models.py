@@ -523,7 +523,7 @@ def _process_inlines(body_html, cb):
             return q1 + cb(inline) + q2
 
     pattern = r'([\'"])cid:regnskab-(\d+)-([a-zA-Z0-9-]+)([\'"])'
-    return mark_safe(re.sub(pattern, repl, body_html))
+    return re.sub(pattern, repl, body_html)
 
 
 def body_html_inlines(body_html):

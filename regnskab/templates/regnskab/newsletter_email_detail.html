@@ -9,7 +9,7 @@
 <h2>{{ object.recipient_name }}</h2>
 <p>Til: <tt>{{ object.recipient_email }}</tt></p>
 <p>Emne: <tt>{{ object.subject }}</tt></p>
-{{ object.body_html_data_uris }}
+{{ object.body_html_data_uris|safe }}
 <h2>Send kopi</h2>
 <form method="post" action="{% url 'regnskab:newsletter_email_send' pk=newsletter.pk profile=profile.pk %}">{% csrf_token %}
     <p><label>Modtager: <input name="override_recipient" value="{{ user.email }}"></label></p>
