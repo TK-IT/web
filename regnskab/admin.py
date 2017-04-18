@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.utils.html import format_html
 from regnskab.models import (
     Alias, Transaction, Sheet, EmailTemplate, Session,
-    SheetImage,
+    SheetImage, Newsletter,
 )
 
 
@@ -83,9 +83,26 @@ class SheetImageAdmin(admin.ModelAdmin):
     pass
 
 
+class NewsletterAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'send_time', 'period',
+                    'created_by')
+
+    def subject(self, obj):
+        return obj.email_template.subject
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if obj and obj.sent:
+            return False
+        return True
+
+
 admin.site.register(Alias, AliasAdmin)
 admin.site.register(Transaction, TransactionAdmin)
 admin.site.register(Sheet, SheetAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(Session, SessionAdmin)
 admin.site.register(SheetImage, SheetImageAdmin)
+admin.site.register(Newsletter, NewsletterAdmin)
