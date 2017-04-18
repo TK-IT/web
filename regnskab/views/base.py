@@ -586,11 +586,13 @@ class SessionUpdate(FormView):
                 qs = Session.objects.exclude(pk=self.object.pk)
                 qs = qs.filter(email_template=self.object.email_template)
                 if self.object.email_template.name or qs.exists():
+                    assert self.object.email_template.refcount() > 1
                     self.object.email_template = EmailTemplate()
                 save_it = True
             else:
                 save_it = False
 
+        assert save_it is False or self.object.email_template.name == ''
         self.object.email_template.name = ''
         self.object.email_template.subject = form.cleaned_data['subject']
         self.object.email_template.body = form.cleaned_data['body']
@@ -610,6 +612,10 @@ class SessionUpdate(FormView):
             logger.info("%s: Ret emailskabelon %s for opgørelse %s",
                         self.request.user,
                         self.object.email_template_id, self.object.pk)
+
+        # Redisplay an unbound form without redirecting
+        # so we can display a success message.
+        # TODO: Use django.contrib.messages instead?
         fresh_form = self.get_form()
         fresh_form.is_bound = False  # As if a GET request
         fresh_form.data = {}  # As if a GET request

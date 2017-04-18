@@ -49,17 +49,7 @@ class EmailTemplateUpdate(UpdateView):
     form_class = EmailTemplateForm
 
     def form_valid(self, form):
-        qs = Session.objects.filter(email_template_id=self.kwargs['pk'])
-        if qs.exists():
-            backup = EmailTemplate(
-                name='',
-                subject=self.object.subject,
-                body=self.object.body,
-                format=self.object.format,
-                markup=self.object.markup,
-                created_by=self.request.user)
-            backup.save()
-            qs.update(email_template=backup)
+        self.object.make_template_editable()
         form.save()
         logger.info("%s: Ret emailskabelon %s",
                     self.request.user, self.kwargs['pk'])

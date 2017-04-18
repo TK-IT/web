@@ -563,6 +563,36 @@ class EmailTemplate(models.Model):
                                    null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
 
+    def refcount(self):
+        '''
+        Return the number of COW-references to this EmailTemplate.
+        If refcount() == 0, the object is not visible on the site.
+        If refcount() > 1, then the object should be forked before
+        being updated.
+        '''
+        count = Session.objects.filter(email_template_id=self.id).count()
+        if self.name:
+            # EmailTemplateList refers to this
+            count += 1
+        return count
+
+    def make_template_editable(self):
+        if self.name == '':
+            raise AssertionError('make_template_editable: anonymous template')
+        sessions = Session.objects.filter(email_template_id=self.id)
+        if sessions.exists():
+            # Move Session objects pointing to self to a new anonymous
+            # EmailTemplate.
+            backup = EmailTemplate(
+                name='',
+                subject=self.object.subject,
+                body=self.object.body,
+                format=self.object.format,
+                markup=self.object.markup,
+                created_by=self.object.user)
+            backup.save()
+            sessions.update(email_template=backup)
+
     def clean(self):
         '''
         Replace data:-URIs with cid:-URIs of the form "regnskab-<pk>-<hash>",
