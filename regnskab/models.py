@@ -682,6 +682,13 @@ class EmailSetBase(models.Model):
             raise ValidationError(
                 "Tried to regenerate emails for session already sent")
 
+        recipients = self.get_recipient_data()
+
+        for profile_id, profile_data in recipients.items():
+            self.regenerate_email(
+                kind_price, profile_id, profile_data)
+
+    def get_recipient_data(self):
         recipients = {}
         profiles = get_profiles_title_status(period=self.period)
         for profile in profiles:
@@ -729,9 +736,7 @@ class EmailSetBase(models.Model):
         from regnskab.rules import get_max_debt
         self._max_debt = get_max_debt()
 
-        for profile_id, profile_data in recipients.items():
-            self.regenerate_email(
-                kind_price, profile_id, profile_data)
+        return recipients
 
     def regenerate_email(self, kind_price, profile_id, profile_data):
         from regnskab.emailtemplate import (
