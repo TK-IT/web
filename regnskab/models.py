@@ -570,6 +570,7 @@ class EmailTemplate(models.Model):
         being updated.
         '''
         count = Session.objects.filter(email_template_id=self.id).count()
+        count += Newsletter.objects.filter(email_template_id=self.id).count()
         if self.name:
             # EmailTemplateList refers to this
             count += 1
