@@ -18,6 +18,7 @@ from regnskab.models import (
 from regnskab.images.utils import save_png, png_data_uri
 
 from .auth import regnskab_permission_required_method
+from django.conf import settings
 
 logger = logging.getLogger('regnskab')
 
@@ -55,6 +56,7 @@ class EmailTemplateUpdate(UpdateView):
                 subject=self.object.subject,
                 body=self.object.body,
                 format=self.object.format,
+                markup=self.object.markup,
                 created_by=self.request.user)
             backup.save()
             qs.update(email_template=backup)

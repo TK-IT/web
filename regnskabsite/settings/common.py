@@ -187,3 +187,8 @@ MEDIA_ROOT = BASE_DIR
 MEDIA_URL = '/media/'
 
 LOGIN_URL = '/admin/login/'
+
+# Backport Django bug #22561 fixed in Django 1.10
+import email.charset as _charset
+from django.core.mail.message import utf8_charset as _utf8_charset
+_utf8_charset.body_encoding = _charset.QP

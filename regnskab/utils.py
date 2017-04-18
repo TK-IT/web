@@ -1,7 +1,10 @@
 import re
+from unittest.mock import patch
 from django.db.models import F, Sum
 from django.utils import html, safestring
+from django.core.mail import EmailMessage, SafeMIMEMultipart
 import html2text
+from django.conf import settings
 
 
 def sum_vector(qs, index_spec, value_spec):
@@ -74,7 +77,65 @@ def html_to_plain(body):
     h = html2text.HTML2Text()
     h.ignore_links = True
     h.unicode_snob = True
-    h.default_image_alt = '(Billede)'
     h.images_to_alt = True
     h.body_width = 0
-    return h.handle(str(body))
+    with patch('html2text.escape_md_section', (lambda t, snob=False: t)):
+        return h.handle(str(body))
+
+
+class EmailMultiRelated(EmailMessage):
+    """
+    A version of EmailMessage that makes it easy to send multipart/related
+    messages for HTML email with inline images.
+    Based on EmailMultiAlternatives in Django.
+    """
+    related_subtype = 'related'
+    alternative_subtype = 'alternative'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.alternatives = []
+        self.relateds = []
+
+    def attach_alternative(self, content, mimetype):
+        """Attach an alternative content representation."""
+        assert content is not None
+        assert mimetype is not None
+        self.alternatives.append((content, mimetype))
+
+    def attach_related(self, content, mimetype, cid):
+        """Attach an alternative content representation."""
+        assert content is not None
+        assert mimetype is not None
+        assert cid is not None
+        self.relateds.append((content, mimetype, cid))
+
+    def _create_message(self, msg):
+        return self._create_attachments(
+            self._create_relateds(self._create_alternatives(msg)))
+
+    def _create_alternatives(self, msg):
+        encoding = self.encoding or settings.DEFAULT_CHARSET
+        if self.alternatives:
+            body_msg = msg
+            msg = SafeMIMEMultipart(_subtype=self.alternative_subtype,
+                                    encoding=encoding)
+            if self.body:
+                msg.attach(body_msg)
+            for alternative in self.alternatives:
+                msg.attach(self._create_mime_attachment(*alternative))
+        return msg
+
+    def _create_relateds(self, msg):
+        encoding = self.encoding or settings.DEFAULT_CHARSET
+        if self.relateds:
+            body_msg = msg
+            msg = SafeMIMEMultipart(_subtype=self.related_subtype,
+                                    encoding=encoding)
+            msg.attach(body_msg)
+            for content, mimetype, cid in self.relateds:
+                attachment = self._create_mime_attachment(content, mimetype)
+                attachment['Content-ID'] = '<%s>' % cid
+                attachment['Content-Disposition'] = 'inline'
+                msg.attach(attachment)
+        return msg

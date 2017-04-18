@@ -526,16 +526,22 @@ class SessionUpdate(FormView):
     def get_object(self):
         return get_object_or_404(Session.objects, pk=self.kwargs['pk'])
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.object.email_template
+        return kwargs
+
     def get_initial(self):
         email_template = self.object.email_template
+        # SessionForm.__init__ sets initial body
         if email_template:
             return dict(subject=email_template.subject,
-                        body=email_template.body,
-                        format=email_template.format)
+                        format=email_template.format,
+                        markup=email_template.markup)
         else:
             return dict(subject='',
-                        body='',
-                        format=EmailTemplate.POUND)
+                        format=EmailTemplate.POUND,
+                        markup=EmailTemplate.PLAIN)
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
@@ -589,7 +595,9 @@ class SessionUpdate(FormView):
         self.object.email_template.subject = form.cleaned_data['subject']
         self.object.email_template.body = form.cleaned_data['body']
         self.object.email_template.format = form.cleaned_data['format']
+        self.object.email_template.markup = form.cleaned_data['markup']
         try:
+            self.object.email_template.clean()
             self.object.regenerate_emails()
         except ValidationError as exn:
             form.add_error(None, exn)
@@ -602,8 +610,12 @@ class SessionUpdate(FormView):
             logger.info("%s: Ret emailskabelon %s for opgørelse %s",
                         self.request.user,
                         self.object.email_template_id, self.object.pk)
+        fresh_form = self.get_form()
+        fresh_form.is_bound = False  # As if a GET request
+        fresh_form.data = {}  # As if a GET request
+        fresh_form.files = {}  # As if a GET request
         context_data = self.get_context_data(
-            form=form,
+            form=fresh_form,
             success=True,
         )
         return self.render_to_response(context_data)

@@ -1,8 +1,10 @@
 import collections
 from django import forms
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from regnskab.models import EmailTemplate, Session, config
 from regnskab.widgets import RichTextarea
+from regnskab.utils import plain_to_html, html_to_plain
 import tktitler as tk
 
 
@@ -53,18 +55,98 @@ class SheetCreateForm(forms.Form):
 class EmailTemplateForm(forms.ModelForm):
     class Meta:
         model = EmailTemplate
-        fields = ('name', 'subject', 'body', 'format')
-        widgets = {'subject': forms.TextInput(attrs={'size': 60}),
-                   'body': RichTextarea()}
+        fields = ('name', 'subject', 'body', 'format', 'markup')
+        widgets = {'subject': forms.TextInput(attrs={'size': 60})}
 
     name = forms.CharField(required=True)
+    initial_markup = forms.ChoiceField(
+        choices=EmailTemplate.MARKUP, widget=forms.HiddenInput())
+
+    @staticmethod
+    def initial_body(instance):
+        if instance is None:
+            return ''
+        if instance.markup == EmailTemplate.HTML:
+            return instance.body_html_data_uris()
+        elif instance.markup == EmailTemplate.PLAIN:
+            return instance.body_plain()
+        else:
+            raise ValueError(instance.markup)
+
+    @staticmethod
+    def convert_body(body, in_, out):
+        if in_ == EmailTemplate.PLAIN and out == EmailTemplate.HTML:
+            return plain_to_html(body)
+        elif in_ == EmailTemplate.HTML and out == EmailTemplate.PLAIN:
+            return html_to_plain(body)
+        else:
+            assert in_ == out
+            return body
+
+    def __init__(self, **kwargs):
+        instance = kwargs.get('instance')
+        initial = kwargs.setdefault('initial', {})
+        initial.setdefault('body', EmailTemplateForm.initial_body(instance))
+        super().__init__(**kwargs)
+        if instance and instance.markup == EmailTemplate.HTML:
+            self.fields['body'].widget = RichTextarea()
+            self.fields['initial_markup'].initial = EmailTemplate.HTML
+        else:
+            self.fields['initial_markup'].initial = EmailTemplate.PLAIN
+
+    def clean(self):
+        cleaned_data = super().clean()
+        try:
+            body = cleaned_data['body']
+            in_ = cleaned_data['initial_markup']
+            out = cleaned_data['markup']
+        except KeyError:
+            pass
+        else:
+            cleaned_data['body'] = EmailTemplateForm.convert_body(
+                body, in_, out)
+        return cleaned_data
+
+    def save(self):
+        instance = super().save(commit=False)
+        instance.clean()
+        instance.save()
+        self.save_m2m()
+        return instance
 
 
 class SessionForm(forms.Form):
     subject = forms.CharField(max_length=200,
                               widget=forms.TextInput(attrs={'size': 60}))
-    body = forms.CharField(widget=RichTextarea(attrs={'cols': 70, 'rows': 20}))
+    body = forms.CharField(widget=forms.Textarea(attrs={'cols': 70, 'rows': 20}))
     format = forms.ChoiceField(choices=EmailTemplate.FORMAT)
+    markup = forms.ChoiceField(choices=EmailTemplate.MARKUP)
+    initial_markup = forms.ChoiceField(
+        choices=EmailTemplate.MARKUP, widget=forms.HiddenInput())
+
+    def __init__(self, **kwargs):
+        instance = kwargs.pop('instance')
+        initial = kwargs['initial']  # From SessionUpdate.get_initial
+        initial.setdefault('body', EmailTemplateForm.initial_body(instance))
+        super().__init__(**kwargs)
+        if instance and instance.markup == EmailTemplate.HTML:
+            self.fields['body'].widget = RichTextarea()
+            self.fields['initial_markup'].initial = EmailTemplate.HTML
+        else:
+            self.fields['initial_markup'].initial = EmailTemplate.PLAIN
+
+    def clean(self):
+        cleaned_data = super().clean()
+        try:
+            body = cleaned_data['body']
+            in_ = cleaned_data['initial_markup']
+            out = cleaned_data['markup']
+        except KeyError:
+            pass
+        else:
+            cleaned_data['body'] = EmailTemplateForm.convert_body(
+                body, in_, out)
+        return cleaned_data
 
 
 class TransactionBatchForm(forms.Form):

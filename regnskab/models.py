@@ -1,5 +1,8 @@
 import os
+import re
 import heapq
+import base64
+import hashlib
 import logging
 import datetime
 import tempfile
@@ -18,6 +21,7 @@ from django.core.mail import EmailMessage
 from django.utils import timezone
 from django.utils.text import slugify as dslugify
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.template.defaultfilters import floatformat
 
 from unidecode import unidecode
@@ -25,7 +29,9 @@ from jsonfield import JSONField
 import tktitler as tk
 
 from regnskab.rules import get_default_prices
-from regnskab.utils import sum_vector, sum_matrix
+from regnskab.utils import (
+    sum_vector, sum_matrix, plain_to_html, html_to_plain, EmailMultiRelated,
+)
 
 logger = logging.getLogger('regnskab')
 
@@ -480,6 +486,67 @@ def compute_balance(profile_ids=None, created_before=None, *,
         return balance
 
 
+class EmailTemplateInline(models.Model):
+    mime_type = models.CharField(max_length=255)
+    blob = models.BinaryField()
+    hash = models.CharField(max_length=255)
+
+    def compute_hash(self):
+        algo = 'sha256'
+        hexdigest = getattr(hashlib, algo)(self.blob).hexdigest()
+        self.hash = '%s-%s' % (algo, hexdigest)
+        return self.hash
+
+    @classmethod
+    def get_or_create(cls, mime_type, blob):
+        o = cls(mime_type=mime_type, blob=blob)
+        o.compute_hash()
+        try:
+            return cls.objects.get(hash=o.hash)
+        except cls.DoesNotExist:
+            o.save()
+            return o
+
+
+def _process_inlines(body_html, cb):
+    '''
+    Internal helper used by body_html_data_uris and body_html_inlines.
+    '''
+    def repl(mo):
+        q1, inline_pk, hash, q2 = mo.groups()
+        try:
+            inline = EmailTemplateInline.objects.get(
+                pk=inline_pk, hash=hash)
+        except EmailTemplateInline.DoesNotExist:
+            res = cb(None)
+            return mo.group() if res is None else q1 + res + q2
+        else:
+            return q1 + cb(inline) + q2
+
+    pattern = r'([\'"])cid:regnskab-(\d+)-([a-zA-Z0-9-]+)([\'"])'
+    return mark_safe(re.sub(pattern, repl, body_html))
+
+
+def body_html_inlines(body_html):
+    '''
+    Returns (html, inlines), where `html` is the HTML body including
+    images with cid:-URIs and `inlines` is a dictionary mapping each
+    "cid:foobar"-URI to 'foobar': <EmailTemplateInline object>.
+    '''
+    # Invisible GIF, https://stackoverflow.com/a/15960901/1570972
+    invis = ('data:image/gif;base64,' +
+             'R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAAAI=')
+    inlines = {}
+
+    def cb(inline):
+        if inline is not None:
+            inlines[inline.hash] = inline
+            return 'cid:%s' % inline.hash
+        return invis
+
+    return _process_inlines(body_html, cb), inlines
+
+
 class EmailTemplate(models.Model):
     POUND = 'pound'
     FORMAT = [(POUND, 'pound')]
@@ -495,6 +562,62 @@ class EmailTemplate(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
                                    null=True, blank=False)
     created_time = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        '''
+        Replace data:-URIs with cid:-URIs of the form "regnskab-<pk>-<hash>",
+        where <pk> is the ID of an EmailTemplateInline object with the
+        appropriate <hash>.
+        '''
+        if self.markup == EmailTemplate.HTML:
+            def repl(mo):
+                q1, mime_type, base64_data, q2 = mo.groups()
+                # We don't care to assert that q1 == q2 (GIGO).
+                blob = base64.b64decode(base64_data)
+                o = EmailTemplateInline.get_or_create(mime_type, blob)
+                return '%scid:regnskab-%s-%s%s' % (q1, o.pk, o.hash, q2)
+
+            # Require the data:-URI to be quoted to allow whitespace.
+            # Note that we don't permit non-base64-URIs or MIME parameters.
+            pattern = (
+                r'([\'"])data:([a-z]+/[a-z0-9-]+);base64,' +
+                r'([a-zA-Z0-9+/= \t\n\r]*)([\'"])')
+            self.body = re.sub(pattern, repl, self.body)
+            if 'data:' in self.body and settings.DEBUG:
+                raise ValueError(self.body)
+
+    def body_html_data_uris(self):
+        '''
+        Returns HTML with valid cid:-URIs replaced by data:-URIs.
+        '''
+        def cb(inline):
+            if inline is not None:
+                return 'data:%s;base64,%s' % (
+                    inline.mime_type, base64.b64encode(inline.blob).decode())
+
+        return _process_inlines(self.body_html(), cb)
+
+    def body_html(self):
+        '''
+        Return body text as HTML, converting from plain text if necessary.
+        '''
+        if self.markup == EmailTemplate.HTML:
+            return self.body
+        elif self.markup == EmailTemplate.PLAIN:
+            return plain_to_html(self.body)
+        else:
+            raise ValueError(self.markup)
+
+    def body_plain(self):
+        '''
+        Return body text as plain text, converting from HTML if necessary.
+        '''
+        if self.markup == EmailTemplate.HTML:
+            return html_to_plain(self.body)
+        elif self.markup == EmailTemplate.PLAIN:
+            return self.body
+        else:
+            raise ValueError(self.markup)
 
     def __str__(self):
         return self.name or str(self.created_time)
@@ -665,16 +788,20 @@ class Session(models.Model):
             'INKA': self._inka.name,
         }
 
-        email_fields = ('subject', 'body', 'recipient_name', 'recipient_email')
+        email_fields = ('subject', 'body_plain', 'body_html',
+                        'recipient_name', 'recipient_email')
         try:
             email = Email(
                 session=self,
                 profile=profile,
                 subject=format(self.email_template.subject, context),
-                body=format(self.email_template.body, context),
+                body_plain=format(self.email_template.body_plain(), context),
                 recipient_name=profile.name,
                 recipient_email=profile.email,
             )
+            if self.email_template.markup == EmailTemplate.HTML:
+                email.body_html = format(
+                    self.email_template.body_html(), context)
         except KeyError as exn:
             raise ValidationError("Emailskabelon har en ukendt variabel %r" %
                                   exn.args[0])
@@ -693,7 +820,8 @@ class Email(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL,
                                 null=True, blank=False, related_name='+')
     subject = models.TextField(blank=False)
-    body = models.TextField(blank=False)
+    body_plain = models.TextField(blank=False)
+    body_html = models.TextField(blank=True, null=True)
     recipient_name = models.CharField(max_length=255)
     recipient_email = models.CharField(max_length=255)
 
@@ -723,13 +851,43 @@ class Email(models.Model):
             ('Organization', 'TÅGEKAMMERET'),
         ])
 
+        reply_to = ['INKA@TAAGEKAMMERET.dk']
+        to = ['%s <%s>' % (self.recipient_name, self.recipient_email)]
+        if self.body_html is not None:
+            msg = EmailMultiRelated(
+                subject=self.subject,
+                body=self.body_plain,
+                from_email=sender,
+                reply_to=reply_to,
+                to=to,
+                headers=headers)
+            html, relateds = body_html_inlines(self.body_html)
+            msg.attach_alternative(html, 'text/html')
+            for cid, r in relateds.items():
+                msg.attach_related(r.blob, r.mime_type, cid)
+            return msg
+
         return EmailMessage(
             subject=self.subject,
-            body=self.body,
+            body=self.body_plain,
             from_email=sender,
-            reply_to=['INKA@TAAGEKAMMERET.dk'],
-            to=['%s <%s>' % (self.recipient_name, self.recipient_email)],
+            reply_to=reply_to,
+            to=to,
             headers=headers)
+
+    def body_html_data_uris(self):
+        '''
+        Returns HTML with valid cid:-URIs replaced by data:-URIs.
+        '''
+        if self.body_html is None:
+            return format_html('<pre style="white-space: pre-wrap">{}</pre>',
+                               self.body_plain)
+        def cb(inline):
+            if inline is not None:
+                return 'data:%s;base64,%s' % (
+                    inline.mime_type, base64.b64encode(inline.blob).decode())
+
+        return _process_inlines(self.body_html, cb)
 
 
 def get_profiles_title_status(period=None, time=None):
