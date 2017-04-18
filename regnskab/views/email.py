@@ -88,22 +88,14 @@ class EmailTemplateCreate(CreateView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class EmailList(TemplateView):
-    template_name = 'regnskab/email_list.html'
-
-    @regnskab_permission_required_method
-    def dispatch(self, request, *args, **kwargs):
-        self.regnskab_session = get_object_or_404(
-            Session.objects, pk=kwargs['pk'])
-        return super().dispatch(request, *args, **kwargs)
-
+class EmailListBase(TemplateView):
     def get_emails(self):
-        period = self.regnskab_session.period
-        time = self.regnskab_session.send_time
+        period = self.object.period
+        time = self.object.send_time
         profile_list = get_profiles_title_status(period=period, time=time)
         order = {p.id: i for i, p in enumerate(profile_list)}
         profiles = {p.id: p for p in profile_list}
-        emails = list(Email.objects.filter(session_id=self.kwargs['pk']))
+        emails = list(self.object.email_set.all())
         emails.sort(key=lambda o: order.get(o.profile_id, 0))
         for o in emails:
             o.profile = profiles.get(o.profile_id, o.profile)
@@ -113,6 +105,20 @@ class EmailList(TemplateView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         context_data['object_list'] = self.get_emails()
+        return context_data
+
+
+class EmailList(EmailListBase):
+    template_name = 'regnskab/email_list.html'
+
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        self.regnskab_session = self.object = get_object_or_404(
+            Session.objects, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
         context_data['session'] = self.regnskab_session
         return context_data
 
