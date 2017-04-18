@@ -698,32 +698,6 @@ class EmailSetBase(models.Model):
         for p_id, balance in compute_balance().items():
             recipients[p_id]['balance'] = balance
 
-        transactions = self.transaction_set.all().order_by('profile_id')
-        transaction_sums = sum_vector(transactions, 'profile_id', 'amount')
-        payment_sums = sum_vector(
-            transactions.filter(kind=Transaction.PAYMENT),
-            'profile_id', 'amount')
-        for p_id, transaction_sum in transaction_sums.items():
-            recipients[p_id]['transaction_sum'] = transaction_sum
-        for p_id, payment_sum in payment_sums.items():
-            recipients[p_id]['payment_sum'] = payment_sum
-
-        kind_qs = PurchaseKind.objects.filter(sheets__session=self)
-        kind_qs = kind_qs.order_by('name', 'unit_price')
-        kind_groups = itertools.groupby(kind_qs, key=lambda k: k.name)
-        self._kind_price = {n: set(k.unit_price for k in g)
-                            for n, g in kind_groups}
-        if not self._kind_price:
-            self._kind_price = {n: {p} for n, p in get_default_prices()}
-
-        purchases = Purchase.objects.filter(
-            row__sheet__session=self)
-        purchases = purchases.exclude(row__profile=None)
-        pmatrix = sum_matrix(purchases, 'row__profile_id', 'kind__name',
-                             F('count')*F('kind__unit_price'))
-        for p_id, purchase_count in pmatrix.items():
-            recipients[p_id]['purchase_count'] = purchase_count
-
         emails = self.email_set.all()
         emails = emails.order_by('profile_id')
         for email in emails:
@@ -738,39 +712,12 @@ class EmailSetBase(models.Model):
         return recipients
 
     def get_email_context(self, profile_data):
-        from regnskab.emailtemplate import (
-            format_price, format_price_set, format_count,
-        )
+        from regnskab.emailtemplate import format_price
 
-        kind_price = self._kind_price
-
-        payment_sum = profile_data.get('payment_sum', 0)
-        transaction_sum = profile_data.get('transaction_sum', 0)
-        other_sum = transaction_sum - payment_sum
-        purchase_count = profile_data.get('purchase_count') or {}
         primary_title = profile_data.get('title')
         balance = profile_data.get('balance', Decimal())
         profile = profile_data['profile']
         initial_balance = profile_data.get('initial_balance', Decimal())
-
-        any_debt = balance > 0
-        any_crosses = any(purchase_count.values())
-        any_payments = payment_sum != 0
-        any_others = other_sum != 0
-        send_email = any_debt or any_crosses or any_payments or any_others
-        if not send_email or not profile.email:
-            return
-
-        # kasse_count is legacy
-        kasse_count = purchase_count.get('ølkasse', Decimal())
-        if 'guldølkasse' in purchase_count:
-            guld_ratio = (next(iter(kind_price['guldølkasse'])) /
-                          next(iter(kind_price['ølkasse'])))
-            kasse_count += guld_ratio * purchase_count['guldølkasse']
-        if 'sodavandkasse' in purchase_count:
-            vand_ratio = (next(iter(kind_price['sodavandkasse'])) /
-                          next(iter(kind_price['ølkasse'])))
-            kasse_count += vand_ratio * purchase_count['sodavandkasse']
 
         if primary_title:
             title = (tk.prefix(primary_title, self.period, type='unicode')
@@ -781,25 +728,9 @@ class EmailSetBase(models.Model):
         context = {
             'TITEL ': title + ' ' if title else '',
             'NAVN': profile.name,
-            'BETALT': format_price(-payment_sum),
-            'ANDET': format_price(other_sum),
-            'POEL': format_price_set(kind_price.get('øl', ())),
-            'PVAND': format_price_set(kind_price.get('sodavand', ())),
-            'PGULD': format_price_set(kind_price.get('guldøl', ())),
-            'PKASSER': format_price_set(kind_price.get('ølkasse', ())),
-            'POELKS': format_price_set(kind_price.get('ølkasse', ())),
-            'PGULDKS': format_price_set(kind_price.get('guldølkasse', ())),
-            'PVANDKS': format_price_set(kind_price.get('sodavandkasse', ())),
             'GAELDFOER': format_price(initial_balance),
             'GAELD': format_price(balance),
             'MAXGAELD': format_price(self._max_debt),
-            'OEL': format_count(purchase_count.get('øl', 0)),
-            'VAND': format_count(purchase_count.get('sodavand', 0)),
-            'GULD': format_count(purchase_count.get('guldøl', 0)),
-            'OELKS': format_count(purchase_count.get('ølkasse', 0)),
-            'VANDKS': format_count(purchase_count.get('sodavandkasse', 0)),
-            'GULDKS': format_count(purchase_count.get('guldølkasse', 0)),
-            'KASSER': format_count(kasse_count),  # Legacy
             'INKA': self._inka.name,
         }
         return context
@@ -842,7 +773,89 @@ class EmailSetBase(models.Model):
 
 
 class Session(EmailSetBase):
-    pass
+    def get_recipient_data(self):
+        recipients = super().get_recipient_data()
+
+        transactions = self.transaction_set.all().order_by('profile_id')
+        transaction_sums = sum_vector(transactions, 'profile_id', 'amount')
+        payment_sums = sum_vector(
+            transactions.filter(kind=Transaction.PAYMENT),
+            'profile_id', 'amount')
+        for p_id, transaction_sum in transaction_sums.items():
+            recipients[p_id]['transaction_sum'] = transaction_sum
+        for p_id, payment_sum in payment_sums.items():
+            recipients[p_id]['payment_sum'] = payment_sum
+
+        kind_qs = PurchaseKind.objects.filter(sheets__session=self)
+        kind_qs = kind_qs.order_by('name', 'unit_price')
+        kind_groups = itertools.groupby(kind_qs, key=lambda k: k.name)
+        self._kind_price = {n: set(k.unit_price for k in g)
+                            for n, g in kind_groups}
+        if not self._kind_price:
+            self._kind_price = {n: {p} for n, p in get_default_prices()}
+
+        purchases = Purchase.objects.filter(
+            row__sheet__session=self)
+        purchases = purchases.exclude(row__profile=None)
+        pmatrix = sum_matrix(purchases, 'row__profile_id', 'kind__name',
+                             F('count')*F('kind__unit_price'))
+        for p_id, purchase_count in pmatrix.items():
+            recipients[p_id]['purchase_count'] = purchase_count
+
+        return recipients
+
+    def get_email_context(self, profile_data):
+        from regnskab.emailtemplate import (
+            format_price, format_price_set, format_count,
+        )
+        context = super().get_email_context(profile_data)
+
+        kind_price = self._kind_price
+
+        payment_sum = profile_data.get('payment_sum', 0)
+        transaction_sum = profile_data.get('transaction_sum', 0)
+        other_sum = transaction_sum - payment_sum
+        purchase_count = profile_data.get('purchase_count') or {}
+        balance = profile_data.get('balance', Decimal())
+        profile = profile_data['profile']
+        any_debt = balance > 0
+        any_crosses = any(purchase_count.values())
+        any_payments = payment_sum != 0
+        any_others = other_sum != 0
+        send_email = any_debt or any_crosses or any_payments or any_others
+        if not send_email or not profile.email:
+            return
+
+        # kasse_count is legacy
+        kasse_count = purchase_count.get('ølkasse', Decimal())
+        if 'guldølkasse' in purchase_count:
+            guld_ratio = (next(iter(kind_price['guldølkasse'])) /
+                          next(iter(kind_price['ølkasse'])))
+            kasse_count += guld_ratio * purchase_count['guldølkasse']
+        if 'sodavandkasse' in purchase_count:
+            vand_ratio = (next(iter(kind_price['sodavandkasse'])) /
+                          next(iter(kind_price['ølkasse'])))
+            kasse_count += vand_ratio * purchase_count['sodavandkasse']
+
+        context.update({
+            'BETALT': format_price(-payment_sum),
+            'ANDET': format_price(other_sum),
+            'POEL': format_price_set(kind_price.get('øl', ())),
+            'PVAND': format_price_set(kind_price.get('sodavand', ())),
+            'PGULD': format_price_set(kind_price.get('guldøl', ())),
+            'PKASSER': format_price_set(kind_price.get('ølkasse', ())),
+            'POELKS': format_price_set(kind_price.get('ølkasse', ())),
+            'PGULDKS': format_price_set(kind_price.get('guldølkasse', ())),
+            'PVANDKS': format_price_set(kind_price.get('sodavandkasse', ())),
+            'OEL': format_count(purchase_count.get('øl', 0)),
+            'VAND': format_count(purchase_count.get('sodavand', 0)),
+            'GULD': format_count(purchase_count.get('guldøl', 0)),
+            'OELKS': format_count(purchase_count.get('ølkasse', 0)),
+            'VANDKS': format_count(purchase_count.get('sodavandkasse', 0)),
+            'GULDKS': format_count(purchase_count.get('guldølkasse', 0)),
+            'KASSER': format_count(kasse_count),  # Legacy
+        })
+        return context
 
 
 class EmailBase(models.Model):
