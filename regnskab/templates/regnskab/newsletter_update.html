@@ -1,0 +1,22 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Nyhedsbrev {{ object.pk }}{% endblock %}
+{% block head %}
+{{ form.media }}
+{% endblock %}
+{% block navsession %}{% endblock %}
+{% block content %}
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    {% if object.sent %}
+    <input disabled type="submit" value="Gem" />
+    {% else %}
+    <input type="submit" value="Gem" />
+    {% endif %}
+</form>
+{% if object.sent %}
+<p>Udsendt {{ object.send_time }}.
+<a href="{% url 'regnskab:newsletter_email_list' pk=object.pk %}">Vis sendte emails</a></p>
+{% else %}
+<p><a href="{% url 'regnskab:newsletter_email_list' pk=object.pk %}">Gå til udsendelse</a></p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Email til {{ object.recipient_name }}{% endblock %}
+{% block nav %}
+<a href="{% url 'regnskab:newsletter_update' pk=newsletter.pk %}"><li>Nyhedsbrev {{ newsletter.pk }}</li></a>
+<a href="{% url 'regnskab:newsletter_email_list' pk=newsletter.pk %}"><li>Emails</li></a>
+{% endblock %}
+{% block navcurrent %}<li>{{ object.recipient_name }}</li>{% endblock %}
+{% block content %}
+<h2>{{ object.recipient_name }}</h2>
+<p>Til: <tt>{{ object.recipient_email }}</tt></p>
+<p>Emne: <tt>{{ object.subject }}</tt></p>
+{{ object.body_html_data_uris }}
+<h2>Send kopi</h2>
+<form method="post" action="{% url 'regnskab:newsletter_email_send' pk=newsletter.pk profile=profile.pk %}">{% csrf_token %}
+    <p><label>Modtager: <input name="override_recipient" value="{{ user.email }}"></label></p>
+    <p><input type="submit" value="Send kopi" /></p>
+</form>
+{% if images %}
+<img src="{{ images }}" />
+{% else %}
+<p>Intet billede at vedhæfte.</p>
+{% endif %}
+{% endblock %}

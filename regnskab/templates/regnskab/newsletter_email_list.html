@@ -1,0 +1,38 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Emails{% endblock %}
+{% block nav %}
+<a href="{% url 'regnskab:newsletter_update' pk=object.pk %}"><li>Nyhedsbrev {{ object.pk }}</li></a>
+{% endblock %}
+{% block content %}
+<h2>Emails</h2>
+{% if object.sent %}
+<p>Udsendt {{ object.send_time }}</p>
+{% endif %}
+{% if object_list %}
+<table>
+    <thead>
+        <tr>
+            <th>Modtager</th>
+            <th>Emailadresse</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in object_list %}
+        <tr>
+            <td><a class="profile-link"
+                   href="{% url 'regnskab:newsletter_email_detail' pk=object.pk profile=o.profile_id %}">
+                    {{ o.title_name }}</a></td>
+            <td><a href="mailto:{{ o.recipient_email }}">{{ o.recipient_email }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% if not object.sent %}
+<form method="post" action="{% url 'regnskab:newsletter_email_send' pk=object.pk %}">{% csrf_token %}
+    <input type="submit" value="Send alle" />
+</form>
+{% endif %}
+{% else %}
+<p>Ingen emails</p>
+{% endif %}
+{% endblock %}

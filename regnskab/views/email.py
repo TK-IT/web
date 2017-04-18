@@ -2,18 +2,20 @@ import logging
 import itertools
 
 import django.core.mail
+from django.core.exceptions import ValidationError
 from django.http import Http404
 from django.utils import timezone
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
-    View, TemplateView, ListView, CreateView, UpdateView, DetailView,
+    View, TemplateView, ListView, CreateView, UpdateView, DetailView, FormView,
 )
 
-from regnskab.forms import EmailTemplateForm
+from regnskab.forms import EmailTemplateForm, AnonymousEmailTemplateForm
 from regnskab.models import (
     EmailTemplate, Email,
     Profile, Session,
-    get_profiles_title_status,
+    get_profiles_title_status, config,
+    Newsletter, NewsletterEmail,
 )
 from regnskab.images.utils import save_png, png_data_uri
 
@@ -88,6 +90,88 @@ class EmailTemplateCreate(CreateView):
         return super().dispatch(request, *args, **kwargs)
 
 
+class NewsletterList(ListView):
+    model = Newsletter
+    template_name = 'regnskab/newsletter_list.html'
+
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+
+class NewsletterCreate(FormView):
+    form_class = AnonymousEmailTemplateForm
+    template_name = 'regnskab/newsletter_create.html'
+
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        template = EmailTemplate(
+            name='',
+            subject=form.cleaned_data['subject'],
+            body=form.cleaned_data['body'],
+            format=form.cleaned_data['format'],
+            markup=form.cleaned_data['markup'],
+            created_by=self.request.user)
+        template.save()
+        newsletter = Newsletter(
+            email_template=template,
+            period=config.GFYEAR,
+            created_by=self.request.user)
+        newsletter.save()
+        try:
+            newsletter.regenerate_emails()
+        except ValidationError as exn:
+            newsletter.delete()
+            template.delete()
+            form.add_error(None, exn)
+            return self.form_invalid(form)
+        return redirect('regnskab:newsletter_update', pk=newsletter.pk)
+
+
+class NewsletterUpdate(FormView):
+    form_class = AnonymousEmailTemplateForm
+    template_name = 'regnskab/newsletter_update.html'
+
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        self.object = get_object_or_404(Newsletter, pk=kwargs['pk'])
+        self.email_template = self.object.email_template
+        refs = self.email_template.refcount()
+        if refs != 1:
+            raise ValueError(
+                "Newsletter %s's EmailTemplate %s has incorrect refcount %s" %
+                (self.object.id, self.email_template.id, refs))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.email_template
+        return kwargs
+
+    def form_valid(self, form):
+        self.email_template.subject = form.cleaned_data['subject']
+        self.email_template.body = form.cleaned_data['body']
+        self.email_template.format = form.cleaned_data['format']
+        self.email_template.markup = form.cleaned_data['markup']
+        self.email_template.created_by = self.request.user
+        try:
+            self.object.regenerate_emails()
+        except ValidationError as exn:
+            form.add_error(None, exn)
+            return self.form_invalid(form)
+        self.email_template.save()
+        return redirect('regnskab:newsletter_update',
+                        pk=self.object.pk)
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['object'] = self.object
+        return context_data
+
+
 class EmailListBase(TemplateView):
     def get_emails(self):
         period = self.object.period
@@ -120,6 +204,21 @@ class EmailList(EmailListBase):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         context_data['session'] = self.regnskab_session
+        return context_data
+
+
+class NewsletterEmailList(EmailListBase):
+    template_name = 'regnskab/newsletter_email_list.html'
+
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        self.object = get_object_or_404(
+            Newsletter.objects, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['object'] = self.object
         return context_data
 
 
@@ -199,6 +298,29 @@ class EmailDetail(DetailView):
             profile_id=self.kwargs['profile'])
 
 
+class NewsletterEmailDetail(DetailView):
+    template_name = 'regnskab/newsletter_email_detail.html'
+
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        self.newsletter = get_object_or_404(Newsletter, pk=self.kwargs['pk'])
+        self.profile = get_object_or_404(
+            Profile.objects, pk=self.kwargs['profile'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['newsletter'] = self.newsletter
+        context_data['profile'] = self.profile
+        return context_data
+
+    def get_object(self):
+        return get_object_or_404(
+            NewsletterEmail,
+            newsletter_id=self.kwargs['pk'],
+            profile_id=self.kwargs['profile'])
+
+
 class EmailSend(View):
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
@@ -241,3 +363,42 @@ class EmailSend(View):
             regnskab_session.send_time = timezone.now()
             regnskab_session.save()
             return redirect('regnskab:home')
+
+
+class NewsletterEmailSend(View):
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, pk, profile=None):
+        newsletter = get_object_or_404(Newsletter, pk=pk)
+        if profile is None:
+            qs = NewsletterEmail.objects.filter(newsletter=newsletter)
+        else:
+            p = get_object_or_404(Profile.objects, pk=profile)
+            qs = NewsletterEmail.objects.filter(newsletter=newsletter,
+                                                profile=p)
+
+        emails = list(qs)
+        if not emails:
+            raise Http404()
+
+        messages = [e.to_message() for e in emails]
+        override_recipient = (len(messages) == 1 and
+                              self.request.POST.get('override_recipient'))
+        if override_recipient:
+            for m in messages:
+                m.to = [override_recipient]
+        email_backend = django.core.mail.get_connection()
+        if profile:
+            logger.info("%s: Send email for %s i nyhedsbrev %s til %s",
+                        self.request.user, p, newsletter.pk,
+                        override_recipient)
+        else:
+            logger.info("%s: Send emails i nyhedsbrev %s",
+                        self.request.user, newsletter.pk)
+        email_backend.send_messages(messages)
+        if not override_recipient:
+            newsletter.send_time = timezone.now()
+            newsletter.save()
+        return redirect('regnskab:newsletter_email_list', pk=pk)

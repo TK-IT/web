@@ -5,7 +5,7 @@ class RegnskabSite(object):
         from django.conf import settings
         from django.conf.urls import url
         from regnskab import views
-        from regnskab.views import images
+        from regnskab.views import images, email
 
         urls = [
             url(r'^$', views.Home.as_view(), name='home'),
@@ -72,6 +72,27 @@ class RegnskabSite(object):
             url(r'^images/$',
                 images.SheetImageList.as_view(),
                 name='sheet_image_list'),
+            url(r'^news/$',
+                email.NewsletterList.as_view(),
+                name='newsletter_list'),
+            url(r'^news/create/$',
+                email.NewsletterCreate.as_view(),
+                name='newsletter_create'),
+            url(r'^news/(?P<pk>\d+)/$',
+                email.NewsletterUpdate.as_view(),
+                name='newsletter_update'),
+            url(r'^news/(?P<pk>\d+)/email/$',
+                email.NewsletterEmailList.as_view(),
+                name='newsletter_email_list'),
+            url(r'^news/(?P<pk>\d+)/email/(?P<profile>\d+)/$',
+                email.NewsletterEmailDetail.as_view(),
+                name='newsletter_email_detail'),
+            url(r'^news/(?P<pk>\d+)/send/$',
+                email.NewsletterEmailSend.as_view(),
+                name='newsletter_email_send'),
+            url(r'^news/(?P<pk>\d+)/email/(?P<profile>\d+)/send/$',
+                email.NewsletterEmailSend.as_view(),
+                name='newsletter_email_send'),
         ]
         if settings.DEBUG:
             urls += [
