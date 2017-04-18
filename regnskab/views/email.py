@@ -114,7 +114,6 @@ class EmailList(TemplateView):
         context_data = super().get_context_data(**kwargs)
         context_data['object_list'] = self.get_emails()
         context_data['session'] = self.regnskab_session
-        context_data['editable'] = not self.regnskab_session.sent
         return context_data
 
 
