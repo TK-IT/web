@@ -54,7 +54,8 @@ class EmailTemplateUpdate(UpdateView):
                 name='',
                 subject=self.object.subject,
                 body=self.object.body,
-                format=self.object.format)
+                format=self.object.format,
+                created_by=self.request.user)
             backup.save()
             qs.update(email_template=backup)
         form.save()
