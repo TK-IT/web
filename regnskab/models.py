@@ -859,6 +859,13 @@ class Session(EmailSetBase):
         return context
 
 
+class Newsletter(EmailSetBase):
+    def get_email_context(self, profile_data):
+        if not profile_data['profile'].in_current:
+            return
+        return super().get_email_context(profile_data)
+
+
 class EmailBase(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL,
                                 null=True, blank=False, related_name='+')
@@ -939,6 +946,11 @@ class EmailBase(models.Model):
 class Email(EmailBase):
     session = models.ForeignKey(Session, on_delete=models.CASCADE,
                                 related_name='email_set')
+
+
+class NewsletterEmail(EmailBase):
+    newsletter = models.ForeignKey(Newsletter, on_delete=models.CASCADE,
+                                   related_name='email_set')
 
 
 def get_profiles_title_status(period=None, time=None):
