@@ -655,7 +655,7 @@ class EmailTemplate(models.Model):
 Balance = namedtuple('Balance', 'profile_id amount'.split())
 
 
-class Session(models.Model):
+class EmailSetBase(models.Model):
     email_template = models.ForeignKey(EmailTemplate,
                                        on_delete=models.SET_NULL,
                                        null=True, blank=False,
@@ -667,6 +667,7 @@ class Session(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        abstract = True
         get_latest_by = 'created_time'
 
     @property
@@ -824,6 +825,10 @@ class Session(models.Model):
             else:
                 return
         email.save()
+
+
+class Session(EmailSetBase):
+    pass
 
 
 class EmailBase(models.Model):
