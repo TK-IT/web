@@ -18,7 +18,7 @@ from django.views.generic import (
 )
 from django.template.response import TemplateResponse
 from regnskab.forms import (
-    SheetCreateForm, SessionForm, SheetRowForm,
+    SheetCreateForm, AnonymousEmailTemplateForm, SheetRowForm,
     TransactionBatchForm, BalancePrintForm,
     ProfileListForm,
 )
@@ -521,7 +521,7 @@ class SessionList(TemplateView):
 
 class SessionUpdate(FormView):
     template_name = 'regnskab/session_form.html'
-    form_class = SessionForm
+    form_class = AnonymousEmailTemplateForm
 
     def get_object(self):
         return get_object_or_404(Session.objects, pk=self.kwargs['pk'])
@@ -533,7 +533,7 @@ class SessionUpdate(FormView):
 
     def get_initial(self):
         email_template = self.object.email_template
-        # SessionForm.__init__ sets initial body
+        # AnonymousEmailTemplateForm.__init__ sets initial body
         if email_template:
             return dict(subject=email_template.subject,
                         format=email_template.format,

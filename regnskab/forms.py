@@ -115,20 +115,25 @@ class EmailTemplateForm(forms.ModelForm):
         return instance
 
 
-class SessionForm(forms.Form):
-    subject = forms.CharField(max_length=200,
+class AnonymousEmailTemplateForm(forms.Form):
+    subject = forms.CharField(max_length=200, initial='[TK] ',
                               widget=forms.TextInput(attrs={'size': 60}))
     body = forms.CharField(widget=forms.Textarea(attrs={'cols': 70, 'rows': 20}))
-    format = forms.ChoiceField(choices=EmailTemplate.FORMAT)
-    markup = forms.ChoiceField(choices=EmailTemplate.MARKUP)
+    format = forms.ChoiceField(choices=EmailTemplate.FORMAT, initial=EmailTemplate.POUND)
+    markup = forms.ChoiceField(choices=EmailTemplate.MARKUP, initial=EmailTemplate.PLAIN)
     initial_markup = forms.ChoiceField(
         choices=EmailTemplate.MARKUP, widget=forms.HiddenInput())
 
     def __init__(self, **kwargs):
-        instance = kwargs.pop('instance')
-        initial = kwargs['initial']  # From SessionUpdate.get_initial
+        instance = kwargs.pop('instance', None)
+        initial = kwargs.setdefault('initial', {})
         initial.setdefault('body', EmailTemplateForm.initial_body(instance))
+        if instance:
+            initial.setdefault('subject', instance.subject)
+            initial.setdefault('format', instance.format)
+            initial.setdefault('markup', instance.markup)
         super().__init__(**kwargs)
+
         if instance and instance.markup == EmailTemplate.HTML:
             self.fields['body'].widget = RichTextarea()
             self.fields['initial_markup'].initial = EmailTemplate.HTML
