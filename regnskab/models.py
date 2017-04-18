@@ -737,9 +737,9 @@ class EmailSetBase(models.Model):
 
         return recipients
 
-    def regenerate_email(self, profile_data):
+    def get_email_context(self, profile_data):
         from regnskab.emailtemplate import (
-            format, format_price, format_price_set, format_count,
+            format_price, format_price_set, format_count,
         )
 
         kind_price = self._kind_price
@@ -748,7 +748,6 @@ class EmailSetBase(models.Model):
         transaction_sum = profile_data.get('transaction_sum', 0)
         other_sum = transaction_sum - payment_sum
         purchase_count = profile_data.get('purchase_count') or {}
-        existing_email = profile_data.get('email')
         primary_title = profile_data.get('title')
         balance = profile_data.get('balance', Decimal())
         profile = profile_data['profile']
@@ -760,8 +759,6 @@ class EmailSetBase(models.Model):
         any_others = other_sum != 0
         send_email = any_debt or any_crosses or any_payments or any_others
         if not send_email or not profile.email:
-            if existing_email:
-                existing_email.delete()
             return
 
         # kasse_count is legacy
@@ -805,6 +802,17 @@ class EmailSetBase(models.Model):
             'KASSER': format_count(kasse_count),  # Legacy
             'INKA': self._inka.name,
         }
+        return context
+
+    def regenerate_email(self, profile_data):
+        from regnskab.emailtemplate import format
+        context = self.get_email_context(profile_data)
+        existing_email = profile_data.get('email')
+        if context is None:
+            if existing_email:
+                existing_email.delete()
+            return
+        profile = profile_data['profile']
 
         email_fields = ('subject', 'body_plain', 'body_html',
                         'recipient_name', 'recipient_email')
