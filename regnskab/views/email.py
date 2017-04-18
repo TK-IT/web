@@ -122,6 +122,7 @@ class NewsletterCreate(FormView):
             created_by=self.request.user)
         newsletter.save()
         try:
+            template.clean()
             newsletter.regenerate_emails()
         except ValidationError as exn:
             newsletter.delete()
@@ -158,6 +159,7 @@ class NewsletterUpdate(FormView):
         self.email_template.markup = form.cleaned_data['markup']
         self.email_template.created_by = self.request.user
         try:
+            self.email_template.clean()
             self.object.regenerate_emails()
         except ValidationError as exn:
             form.add_error(None, exn)
