@@ -845,8 +845,7 @@ class Session(models.Model):
         email.save()
 
 
-class Email(models.Model):
-    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+class EmailBase(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL,
                                 null=True, blank=False, related_name='+')
     subject = models.TextField(blank=False)
@@ -854,6 +853,9 @@ class Email(models.Model):
     body_html = models.TextField(blank=True, null=True)
     recipient_name = models.CharField(max_length=255)
     recipient_email = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return '%s <%s>' % (self.recipient_name, self.recipient_email)
@@ -918,6 +920,10 @@ class Email(models.Model):
                     inline.mime_type, base64.b64encode(inline.blob).decode())
 
         return _process_inlines(self.body_html, cb)
+
+
+class Email(EmailBase):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
 
 
 def get_profiles_title_status(period=None, time=None):
