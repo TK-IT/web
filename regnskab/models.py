@@ -717,7 +717,7 @@ class Session(models.Model):
         for p_id, purchase_count in pmatrix.items():
             recipients[p_id]['purchase_count'] = purchase_count
 
-        emails = Email.objects.filter(session=self)
+        emails = self.email_set.all()
         emails = emails.order_by('profile_id')
         for email in emails:
             recipients[email.profile_id]['email'] = email
@@ -904,7 +904,8 @@ class EmailBase(models.Model):
 
 
 class Email(EmailBase):
-    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE,
+                                related_name='email_set')
 
 
 def get_profiles_title_status(period=None, time=None):
