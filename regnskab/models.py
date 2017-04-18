@@ -685,8 +685,7 @@ class EmailSetBase(models.Model):
         recipients = self.get_recipient_data()
 
         for profile_id, profile_data in recipients.items():
-            self.regenerate_email(
-                kind_price, profile_id, profile_data)
+            self.regenerate_email(profile_data)
 
     def get_recipient_data(self):
         recipients = {}
@@ -712,10 +711,10 @@ class EmailSetBase(models.Model):
         kind_qs = PurchaseKind.objects.filter(sheets__session=self)
         kind_qs = kind_qs.order_by('name', 'unit_price')
         kind_groups = itertools.groupby(kind_qs, key=lambda k: k.name)
-        kind_price = {n: set(k.unit_price for k in g)
-                      for n, g in kind_groups}
-        if not kind_price:
-            kind_price = {n: {p} for n, p in get_default_prices()}
+        self._kind_price = {n: set(k.unit_price for k in g)
+                            for n, g in kind_groups}
+        if not self._kind_price:
+            self._kind_price = {n: {p} for n, p in get_default_prices()}
 
         purchases = Purchase.objects.filter(
             row__sheet__session=self)
@@ -738,10 +737,12 @@ class EmailSetBase(models.Model):
 
         return recipients
 
-    def regenerate_email(self, kind_price, profile_id, profile_data):
+    def regenerate_email(self, profile_data):
         from regnskab.emailtemplate import (
             format, format_price, format_price_set, format_count,
         )
+
+        kind_price = self._kind_price
 
         payment_sum = profile_data.get('payment_sum', 0)
         transaction_sum = profile_data.get('transaction_sum', 0)
