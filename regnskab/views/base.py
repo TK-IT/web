@@ -583,10 +583,9 @@ class SessionUpdate(FormView):
             save_it = True
         else:
             if form.has_changed():
-                qs = Session.objects.exclude(pk=self.object.pk)
-                qs = qs.filter(email_template=self.object.email_template)
-                if self.object.email_template.name or qs.exists():
-                    assert self.object.email_template.refcount() > 1
+                if self.object.email_template.refcount() > 1:
+                    # Don't modify the current EmailTemplate,
+                    # but create a new one instead.
                     self.object.email_template = EmailTemplate()
                 save_it = True
             else:
