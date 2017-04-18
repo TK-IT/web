@@ -1,6 +1,5 @@
 import os
 import re
-import heapq
 import base64
 import hashlib
 import logging
@@ -9,7 +8,7 @@ import tempfile
 import functools
 import itertools
 import contextlib
-from collections import namedtuple, defaultdict, OrderedDict
+from collections import namedtuple, OrderedDict
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
@@ -682,18 +681,25 @@ class Session(models.Model):
             raise ValidationError(
                 "Tried to regenerate emails for session already sent")
 
-        profiles = Profile.objects.all().annotate(profile_id=F('id'))
-        profiles = profiles.order_by('profile_id')
+        recipients = {}
+        profiles = get_profiles_title_status(period=self.period)
+        for profile in profiles:
+            recipients[profile.id] = dict(profile=profile, title=profile.title)
         initial_balances = compute_balance(created_before=self.created_time)
-        balances = compute_balance()
-        balances = [Balance(profile_id=i, amount=a)
-                    for i, a in balances.items()]
-        balances.sort(key=lambda o: o.profile_id)
-        titles = get_primary_titles(period=self.period)
-        titles = sorted(titles.values(), key=lambda o: o.profile_id)
+        for p_id, initial_balance in initial_balances.items():
+            recipients[p_id]['initial_balance'] = initial_balance
+        for p_id, balance in compute_balance().items():
+            recipients[p_id]['balance'] = balance
 
-        transactions = self.transaction_set.all()
-        transactions = transactions.order_by('profile_id')
+        transactions = self.transaction_set.all().order_by('profile_id')
+        transaction_sums = sum_vector(transactions, 'profile_id', 'amount')
+        payment_sums = sum_vector(
+            transactions.filter(kind=Transaction.PAYMENT),
+            'profile_id', 'amount')
+        for p_id, transaction_sum in transaction_sums.items():
+            recipients[p_id]['transaction_sum'] = transaction_sum
+        for p_id, payment_sum in payment_sums.items():
+            recipients[p_id]['payment_sum'] = payment_sum
 
         kind_qs = PurchaseKind.objects.filter(sheets__session=self)
         kind_qs = kind_qs.order_by('name', 'unit_price')
@@ -706,19 +712,15 @@ class Session(models.Model):
         purchases = Purchase.objects.filter(
             row__sheet__session=self)
         purchases = purchases.exclude(row__profile=None)
-        purchases = purchases.annotate(
-            profile_id=F('row__profile_id'),
-            amount=F('count')*F('kind__unit_price'),
-            name=F('kind__name'),
-            unit_price=F('kind__unit_price'))
-        purchases = purchases.order_by('profile_id', 'name')
+        pmatrix = sum_matrix(purchases, 'row__profile_id', 'kind__name',
+                             F('count')*F('kind__unit_price'))
+        for p_id, purchase_count in pmatrix.items():
+            recipients[p_id]['purchase_count'] = purchase_count
 
         emails = Email.objects.filter(session=self)
         emails = emails.order_by('profile_id')
-
-        data = heapq.merge(profiles, transactions, purchases, emails, balances,
-                           titles, key=lambda o: o.profile_id)
-        data_by_profile = itertools.groupby(data, key=lambda o: o.profile_id)
+        for email in emails:
+            recipients[email.profile_id]['email'] = email
 
         # Cache call to get_inka
         self._inka = get_inka()
@@ -726,45 +728,24 @@ class Session(models.Model):
         from regnskab.rules import get_max_debt
         self._max_debt = get_max_debt()
 
-        for profile_id, profile_data in data_by_profile:
+        for profile_id, profile_data in recipients.items():
             self.regenerate_email(
-                kind_price, profile_data, initial_balances)
+                kind_price, profile_id, profile_data)
 
-    def regenerate_email(self, kind_price, data_iterable, initial_balances):
+    def regenerate_email(self, kind_price, profile_id, profile_data):
         from regnskab.emailtemplate import (
             format, format_price, format_price_set, format_count,
         )
 
-        payment_sum = 0
-        other_sum = 0
-        purchase_count = defaultdict(Decimal)
-        existing_email = None
-        primary_title = None
-        balance = 0
-        profile = None
-
-        for o in data_iterable:
-            if isinstance(o, Transaction):
-                if o.kind == Transaction.PAYMENT:
-                    payment_sum -= o.amount
-                else:
-                    other_sum += o.amount
-            elif isinstance(o, Email):
-                assert existing_email is None
-                existing_email = o
-            elif isinstance(o, Purchase):
-                purchase_count[o.name] += o.count
-            elif isinstance(o, (Title, Alias)):
-                assert primary_title is None
-                primary_title = o
-            elif isinstance(o, Balance):
-                balance = o.amount
-            elif isinstance(o, Profile):
-                profile = o
-            else:
-                raise TypeError(type(o))
-
-        initial_balance = initial_balances.get(profile.id, Decimal())
+        payment_sum = profile_data.get('payment_sum', 0)
+        transaction_sum = profile_data.get('transaction_sum', 0)
+        other_sum = transaction_sum - payment_sum
+        purchase_count = profile_data.get('purchase_count') or {}
+        existing_email = profile_data.get('email')
+        primary_title = profile_data.get('title')
+        balance = profile_data.get('balance', Decimal())
+        profile = profile_data['profile']
+        initial_balance = profile_data.get('initial_balance', Decimal())
 
         any_debt = balance > 0
         any_crosses = any(purchase_count.values())
@@ -777,7 +758,7 @@ class Session(models.Model):
             return
 
         # kasse_count is legacy
-        kasse_count = purchase_count['ølkasse']
+        kasse_count = purchase_count.get('ølkasse', Decimal())
         if 'guldølkasse' in purchase_count:
             guld_ratio = (next(iter(kind_price['guldølkasse'])) /
                           next(iter(kind_price['ølkasse'])))
@@ -796,7 +777,7 @@ class Session(models.Model):
         context = {
             'TITEL ': title + ' ' if title else '',
             'NAVN': profile.name,
-            'BETALT': format_price(payment_sum),
+            'BETALT': format_price(-payment_sum),
             'ANDET': format_price(other_sum),
             'POEL': format_price_set(kind_price.get('øl', ())),
             'PVAND': format_price_set(kind_price.get('sodavand', ())),
