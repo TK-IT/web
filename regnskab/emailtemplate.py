@@ -30,7 +30,7 @@ def format(template, context):
     ...        dict(X='1', Y='0'))
     ''
     '''
-    pattern = r'#([^#]*)#'
+    pattern = r'#([A-Z][^#]*)#'
     res = re.sub(r'\r\n|\n|\r', '\n', template)
 
     def hide_zero(s):
