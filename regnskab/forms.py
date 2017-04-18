@@ -127,6 +127,7 @@ class AnonymousEmailTemplateForm(forms.Form):
     def __init__(self, **kwargs):
         instance = kwargs.pop('instance', None)
         initial = kwargs.setdefault('initial', {})
+        data = kwargs.get('data', {})
         initial.setdefault('body', EmailTemplateForm.initial_body(instance))
         if instance:
             initial.setdefault('subject', instance.subject)
@@ -134,7 +135,23 @@ class AnonymousEmailTemplateForm(forms.Form):
             initial.setdefault('markup', instance.markup)
         super().__init__(**kwargs)
 
-        if instance and instance.markup == EmailTemplate.HTML:
+        if instance:
+            initial_markup = instance.markup
+        elif data and data.get('body'):
+            initial_markup = data.get('initial_markup', EmailTemplate.PLAIN)
+        else:
+            # Consider the following scenario.
+            # The user wants to create a Newsletter in HTML markup.
+            # The user goes to NewsletterCreate, changes Markup to HTML
+            # from the default PLAIN, and presses submit.  In this case,
+            # the form is invalid since body is required but empty.
+            # We want to redisplay the erroneous form with the HTML widget
+            # instead of the PLAIN widget. This is only safe to do when
+            # body is empty; otherwise, we would need to convert between
+            # PLAIN and HTML, which we shouldn't do at this point.
+            initial_markup = data.get('markup', EmailTemplate.PLAIN)
+
+        if initial_markup == EmailTemplate.HTML:
             self.fields['body'].widget = RichTextarea()
             self.fields['initial_markup'].initial = EmailTemplate.HTML
         else:
