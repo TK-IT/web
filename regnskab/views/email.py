@@ -184,7 +184,10 @@ class EmailListBase(TemplateView):
         emails = list(self.object.email_set.all())
         emails.sort(key=lambda o: order.get(o.profile_id, 0))
         for o in emails:
-            o.profile = profiles.get(o.profile_id, o.profile)
+            try:
+                o.profile = profiles[o.profile_id]
+            except KeyError:
+                pass
             o.title_name = getattr(o.profile, 'title_name', o.profile.name)
         return emails
 
