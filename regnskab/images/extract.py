@@ -136,10 +136,11 @@ def find_peaks(xs, cutoff, skip_start=True, skip_end=True, full=False):
         peaks.append(i + np.argmax(xs[i:j+1]))
     peaks = np.array(peaks, dtype=np.intp)
     m = np.median(np.diff(peaks))
+    # TODO Make 1/3 configurable
     if skip_start:
-        peaks = peaks[peaks > m/2]
+        peaks = peaks[peaks > m/3]
     if skip_end:
-        peaks = peaks[peaks < n - m/2]
+        peaks = peaks[peaks < n - m/3]
     if not full:
         return peaks
     maxima = scipy.signal.argrelmax(xs)[0]
