@@ -8,9 +8,9 @@
 <form method="post">{% csrf_token %}
     {{ form.as_p }}
     {% if object.sent %}
-    <input disabled type="submit" value="Gem" />
+    <input disabled type="submit" value="Gem kladde" />
     {% else %}
-    <input type="submit" value="Gem" />
+    <input type="submit" value="Gem kladde" />
     {% endif %}
 </form>
 {% if object.sent %}
