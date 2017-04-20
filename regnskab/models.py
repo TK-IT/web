@@ -529,18 +529,19 @@ def _process_inlines(body_html, cb):
 def body_html_inlines(body_html):
     '''
     Returns (html, inlines), where `html` is the HTML body including
-    images with cid:-URIs and `inlines` is a dictionary mapping each
-    "cid:foobar"-URI to 'foobar': <EmailTemplateInline object>.
+    images with cid:-URIs and `inlines` is a list mapping each
+    "cid:foobar"-URI to ('foobar', <EmailTemplateInline object>).
     '''
     # Invisible GIF, https://stackoverflow.com/a/15960901/1570972
     invis = ('data:image/gif;base64,' +
              'R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAAAI=')
-    inlines = {}
+    inlines = []
 
     def cb(inline):
         if inline is not None:
-            inlines[inline.hash] = inline
-            return 'cid:%s' % inline.hash
+            cid = inline.hash
+            inlines.append((cid, inline))
+            return 'cid:%s' % cid
         return invis
 
     return _process_inlines(body_html, cb), inlines
@@ -917,7 +918,7 @@ class EmailBase(models.Model):
                 headers=headers)
             html, relateds = body_html_inlines(self.body_html)
             msg.attach_alternative(html, 'text/html')
-            for cid, r in relateds.items():
+            for cid, r in relateds:
                 msg.attach_related(r.blob, r.mime_type, cid)
             return msg
 
