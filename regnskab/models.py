@@ -654,9 +654,6 @@ class EmailTemplate(models.Model):
         return self.name or str(self.created_time)
 
 
-Balance = namedtuple('Balance', 'profile_id amount'.split())
-
-
 class EmailSetBase(models.Model):
     email_template = models.ForeignKey(EmailTemplate,
                                        on_delete=models.SET_NULL,
