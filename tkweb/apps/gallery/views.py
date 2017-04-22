@@ -17,7 +17,12 @@ import os
 
 
 def gallery(request, **kwargs):
-    allalbums = Album.objects.filter(basemedia__visibility=BaseMedia.PUBLIC)
+    allalbums = Album.objects.all()
+    edit_visibility = request.user.has_perms('gallery.change_image')
+    if not edit_visibility:
+        # Hide albums with no public images
+        allalbums = allalbums.filter(basemedia__visibility=BaseMedia.PUBLIC)
+    # Hide albums with no images
     allalbums = allalbums.exclude(basemedia__isnull=True)
     # Without order_by(), distinct() still returns duplicate gfyears.
     years = allalbums.order_by().values_list('gfyear', flat=True).distinct()
