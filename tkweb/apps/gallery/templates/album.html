@@ -21,6 +21,10 @@
 og {{ hidden_count }} skjult{{ hidden_count|pluralize:'e' }}
 hvoraf {{ new_count }} er ny{{ new_count|pluralize:'e' }}.
 </p>
+<form onsubmit="return confirm('Er du sikker på at du vil offentliggøre alle nye billeder i albummet?')" method="post">
+    {% csrf_token %}
+    <input name="set_all_new_visible" type="submit" value="Gør alle nye billeder synlige" style="background-color: transparent" />
+</form>
 {% endif %}
 <div class="row">
   <div class="col-xs-12 col-sm-7">

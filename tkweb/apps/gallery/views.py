@@ -8,7 +8,7 @@ from django.db.models import Count
 from django.http import (
     Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect)
 from django.shortcuts import get_object_or_404
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 from jfu.http import upload_receive, UploadResponse, JFUResponse
 from tkweb.apps.gallery.models import Album, BaseMedia, Image, GenericFile
@@ -54,6 +54,11 @@ def album(request, gfyear, album_slug):
     edit_visibility = request.user.has_perms('gallery.change_image')
     new_file = album.basemedia.filter(visibility=BaseMedia.NEW).first()
     if edit_visibility and new_file:
+        if request.POST.get('set_all_new_visible'):
+            qs = album.basemedia.filter(visibility=BaseMedia.NEW)
+            qs.update(visibility=BaseMedia.PUBLIC)
+            return redirect('album', gfyear=gfyear, album_slug=album_slug)
+
         kwargs = dict(gfyear=album.gfyear, album_slug=album.slug,
                       image_slug=new_file.slug)
         context['edit_visibility_link'] = (
