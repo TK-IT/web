@@ -11,6 +11,13 @@
   <script src="{% static "gallery/tkgal.js" %}"></script>
   {% if edit_visibility %}
   <script src="{% static "gallery/tkgal-visibility.js" %}"></script>
+  <style>
+  .select_visibility label { font-weight: normal; }
+  .select_visibility ul { list-style-type: none; }
+  .select_visibility li:nth-child(1) label { font-weight: bold; }
+  .select_visibility li:nth-child(2) label { font-weight: bold; }
+  .select_visibility input[type=radio] { margin: 0 0.2em 0.25em -1.6em; }
+  </style>
   {% endif %}
 {% endblock js %}
 
@@ -73,7 +80,7 @@
 					<li>{{ forloop.counter }} af {{ file_count }}{% if file.type == "I" %} <span class="hidden-xs">billede{{ file_count|pluralize:"r" }}</span>{% endif %}</li>
 				</ol>
 				{% if edit_visibility %}
-				{{ file.visibility_field }}
+				<div class="select_visibility">{{ file.visibility_field }}</div>
 				<input type="submit" name="r{{ file.pk }}" value="Gem album" style="background-color: transparent"/>
 				{% endif %}
 			</div>
