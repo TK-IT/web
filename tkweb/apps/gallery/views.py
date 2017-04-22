@@ -87,9 +87,9 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
     qs = qs.select_subclasses()
     # list() will force evaluation of the QuerySet. It is now iterable.
     files = list(qs)
-    form = EditVisibilityForm(files)
     start_file = album.basemedia.filter(album=album, slug=image_slug).select_subclasses().first()
     if edit_visibility:
+        form = EditVisibilityForm(files)
         for file, (pk, key) in zip(files, form.basemedias):
             file.visibility_field = form[key]
 
