@@ -15,6 +15,13 @@
 {% for file in files %}https://{{ request.get_host }}{{ file.file.url }}
 {% endfor %}
 -->
+{% if edit_visibility_link %}
+<p><a href="{{ edit_visibility_link }}">BEST: Udvælg billeder</a></p>
+<p>{{ visible_count }} synlig{{ visible_count|pluralize:'e' }}
+og {{ hidden_count }} skjult{{ hidden_count|pluralize:'e' }}
+hvoraf {{ new_count }} er ny{{ new_count|pluralize:'e' }}.
+</p>
+{% endif %}
 <div class="row">
   <div class="col-xs-12 col-sm-7">
     <ol class="breadcrumb imagetitle">

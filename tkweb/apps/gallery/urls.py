@@ -22,6 +22,11 @@ urlpatterns = [
         tkweb.apps.gallery.views.image,
         name='image'),
 
+    # Bulk-update BaseMedia.visibility
+    url(r'^set_visibility/$',
+        tkweb.apps.gallery.views.set_visibility,
+        name='set_image_visibility'),
+
     # JFU upload
     url(r'^upload/',
         tkweb.apps.gallery.views.upload,
