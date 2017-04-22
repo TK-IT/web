@@ -31,7 +31,7 @@
 
 {% block raw_content %}
 {% if edit_visibility %}
-<form id="tkgal-form" style="height: 100%" method="post" action="{% url 'set_image_visibility' %}">{% csrf_token %}
+<form id="tkgal-form" style="height: 100%" method="post" action="{% url 'set_image_visibility' %}" onsubmit="$(window).off('beforeunload')">{% csrf_token %}
 {% endif %}
 <div id="tkgal-container" role="main">
 	{% for file, next_file, prev_file in file_orders %}
