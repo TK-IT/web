@@ -1,0 +1,90 @@
+\documentclass[11pt,a4paper]{memoir}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% Configurable:
+\newcommand{\krydstitle}{\empty {{ title }}}
+\newcommand{\leftcol}{\empty {{ left_label }}}
+\newcommand{\kindA}{\empty {{ column1 }}}
+\newcommand{\kindB}{\empty {{ column2 }}}
+\newcommand{\kindC}{\empty {{ column3 }}}
+\newcommand{\rightcol}{\empty {{ right_label }}}
+
+\usepackage{tabularx}
+\usepackage{tket}
+\usepackage{textcomp}  % \textdollaroldstyle
+\TKsetup{C=\scalebox{0.9}[0.96]{\ensuremath{\mathbb{C}}}, dollar=\textdollaroldstyle}
+
+\newcommand{\dato}{\_\_/\_\_-\_\_}
+\newcommand{\colsA}{15}
+\newcommand{\colsB}{6}
+\newcommand{\colsC}{15}
+\newcommand{\colsTotal}{\numexpr\colsA+\colsB+\colsC\relax}
+\newcommand{\feltwidth}{11pt}
+\setlength{\tabcolsep}{0pt}
+\setlength{\arrayrulewidth}{.8pt}
+\setlength{\extrarowheight}{-2.2pt}
+\setlength{\doublerulesep}{0pt}
+\newcommand{\namecell}[1]{\hspace{4pt}\vbox{\smash{\fontsize{18}{16}\selectfont\lower11pt\hbox{#1}}}}
+\newcommand{\lillenamecell}[1]{\hspace{4pt}\vbox{\smash{\lower2pt\hbox{#1}}}}
+
+% Page margins
+\setulmarginsandblock{.5cm}{.5cm}{*}
+\setlrmarginsandblock{1cm}{*}{1}
+\setlength{\headheight}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\footskip}{0pt}
+\checkandfixthelayout
+\pagestyle{empty}
+
+\newcommand{\felt}{\vrule height 1pt depth 0pt width
+0pt\vrule height 0pt width \feltwidth depth 0pt}
+
+% Define "\the\felter" to be \colsTotal*"&\felt"
+\newtoks\felter
+\count255=1
+\loop\felter\expandafter{\the\felter&\felt}
+\ifnum\count255 < \colsTotal
+\advance\count255 by 1
+\repeat
+
+\newcommand{\person}[1]{\hline\namecell{#1}
+\the\felter\\
+\cline{2-\numexpr\colsTotal+1\relax}
+\the\felter\\\hline
+}
+
+\newcommand{\lille}[1]{\hline\lillenamecell{#1}
+\the\felter\\\hline
+}
+
+\newcommand{\colspec}{| X |
+  *{\colsA}{l|}||
+  *{\colsB}{l|}||
+  *{\colsC}{l|}}
+
+\begin{document}
+
+{\centering\Large\krydstitle\par}
+\vspace{8pt}
+\noindent\begin{tabularx}{\linewidth}
+{| X | *{\colsA}{l|}|| *{\colsB}{l|}|| *{\colsC}{l|}}
+\multicolumn{1}{l}{\leftcol}
+& \multicolumn{\colsA}{l}{\kindA}
+& \multicolumn{\colsB}{l}{\kindB}
+& \multicolumn{\colsC}{l}{\kindC\hfill\rightcol}\\
+{{ front_persons }}
+\end{tabularx}
+\newpage
+{\centering\Large\krydstitle\par}
+\vspace{8pt}
+\noindent\begin{tabularx}{\linewidth}
+{| X | *{\colsA}{l|}|| *{\colsB}{l|}|| *{\colsC}{l|}}
+\multicolumn{1}{l}{}
+& \multicolumn{\colsA}{l}{\kindA}
+& \multicolumn{\colsB}{l}{\kindB}
+& \multicolumn{\colsC}{l}{\kindC}\\
+{{ back_persons }}
+\end{tabularx}
+
+\end{document}

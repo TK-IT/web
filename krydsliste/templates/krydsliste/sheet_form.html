@@ -1,0 +1,46 @@
+{% extends "regnskab/base.html" %}
+{% block nav %}<a href="{% url 'regnskab:krydsliste:sheet_list' %}"><li>Krydsliste-skabeloner</li></a>{% endblock %}
+{% block navcurrent %}<li>{% if object %}{{ object }}{% else %}Ny{% endif %}</li>{% endblock %}
+{% block title %}Krydsliste-skabelon{% endblock %}
+{% block content %}
+
+{% if object %}
+<h1>{{ object }}</h1>
+<form method="post" action="{% url 'regnskab:krydsliste:print' pk=object.pk %}">{% csrf_token %}
+    <p>
+    {{ print_form.mode }}
+    <input type="submit" value="Udskriv krydsliste" />
+    {% if print %}Krydslisten er udskrevet på A2.{% endif %}
+    </p>
+</form>
+{% else %}
+<h1>Ny krydsliste-skabelon</h1>
+<p>Når du har gemt den nye krydsliste, kan du derefter hente den som PDF eller udskrive den på A2.</p>
+{% endif %}
+
+<form method="post">{% csrf_token %}
+    <p>{{ form.name.label_tag }} {{ form.name }}<br>
+    Giv skabelonen et navn til listen over skabeloner.
+    Skabelonen med navnet "Standard" bruges som udgangspunkt for nye skabeloner.</p>
+    <p>I nedenstående felter kan du bruge LaTeX-makroerne
+    <tt>\TKET</tt>, <tt>\TKETs</tt> (o.lign. fra tket-pakken),
+    <tt>\dato</tt> (for at indsætte __/__-__).</p>
+    <p style="margin-left: 5em">{{ form.title.label_tag }} {{ form.title }}</p>
+    <p>{{ form.left_label }}
+    {{ form.column1 }}
+    {{ form.column2 }}
+    {{ form.column3 }}
+    {{ form.right_label }}</p>
+    <p>I nedenstående felter skal du bruge makroerne
+    <tt>\person{}</tt> og/eller <tt>\lille{}</tt>
+    for at lave store og små indgange,
+    og du kan fortrykke personer ved at skrive f.eks.
+    <tt>\person{\KASS}</tt> eller <tt>\lille{nf}</tt>.</p>
+    <p>{{ form.front_persons.label_tag }}</p>
+    <p>{{ form.front_persons }}</p>
+    <p>{{ form.back_persons.label_tag }}</p>
+    <p>{{ form.back_persons }}</p>
+    <input type="submit" value="{% if object %}Gem ændringer{% else %}Gem kladde{% endif %}" />
+</form>
+
+{% endblock %}

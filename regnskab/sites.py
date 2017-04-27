@@ -3,9 +3,10 @@ class RegnskabSite(object):
 
     def get_urls(self):
         from django.conf import settings
-        from django.conf.urls import url
+        from django.conf.urls import url, include
         from regnskab import views
         from regnskab.views import images, email
+        import krydsliste
 
         urls = [
             url(r'^$', views.Home.as_view(), name='home'),
@@ -93,6 +94,7 @@ class RegnskabSite(object):
             url(r'^news/(?P<pk>\d+)/email/(?P<profile>\d+)/send/$',
                 email.NewsletterEmailSend.as_view(),
                 name='newsletter_email_send'),
+            url(r'^krydsliste/', include(krydsliste.site.urls)),
         ]
         if settings.DEBUG:
             urls += [
