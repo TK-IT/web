@@ -16,7 +16,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
 setup(
     name='regnskab',
     version='0.1',
-    packages=find_packages(include=['regnskab', 'regnskab.*']),
+    packages=find_packages(include=['regnskab', 'regnskab.*', 'krydsliste', 'krydsliste.*']),
     include_package_data=True,
     license='THE BEER-WARE LICENSE',
     description='App for use by INKA in TÅGEKAMMERET',
