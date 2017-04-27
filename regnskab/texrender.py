@@ -85,4 +85,5 @@ def print_new_document(fp, filename, username, **kwargs):
     fake = kwargs.pop('fake', None)
     if kwargs:
         raise TypeError('unsupported kwargs: %s' % kwargs)
-    run_lp(fp.read(), duplex=duplex)
+    if not fake:
+        run_lp(fp.read(), duplex=duplex)
