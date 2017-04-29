@@ -19,13 +19,20 @@
 {% endif %}
 
 <form method="post">{% csrf_token %}
+    {{ form.name.errors }}
     <p>{{ form.name.label_tag }} {{ form.name }}<br>
     Giv skabelonen et navn til listen over skabeloner.
     Skabelonen med navnet "Standard" bruges som udgangspunkt for nye skabeloner.</p>
     <p>I nedenstående felter kan du bruge LaTeX-makroerne
     <tt>\TKET</tt>, <tt>\TKETs</tt> (o.lign. fra tket-pakken),
     <tt>\dato</tt> (for at indsætte __/__-__).</p>
+    {{ form.title.errors }}
     <p style="margin-left: 5em">{{ form.title.label_tag }} {{ form.title }}</p>
+    {{ form.left_label.errors }}
+    {{ form.column1.errors }}
+    {{ form.column2.errors }}
+    {{ form.column3.errors }}
+    {{ form.right_label.errors }}
     <p>{{ form.left_label }}
     {{ form.column1 }}
     {{ form.column2 }}
@@ -36,8 +43,10 @@
     for at lave store og små indgange,
     og du kan fortrykke personer ved at skrive f.eks.
     <tt>\person{\KASS}</tt> eller <tt>\lille{nf}</tt>.</p>
+    {{ form.front_persons.errors }}
     <p>{{ form.front_persons.label_tag }}</p>
     <p>{{ form.front_persons }}</p>
+    {{ form.back_persons.errors }}
     <p>{{ form.back_persons.label_tag }}</p>
     <p>{{ form.back_persons }}</p>
     <input type="submit" value="{% if object %}Gem ændringer{% else %}Gem kladde{% endif %}" />
