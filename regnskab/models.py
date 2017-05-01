@@ -681,6 +681,13 @@ class EmailSetBase(models.Model):
             raise ValidationError(
                 "Tried to regenerate emails for session already sent")
 
+        if self.email_template.markup == EmailTemplate.HTML:
+            html_template = self.email_template.body_html()
+            if '#SKJULNUL:' in html_template:
+                # TODO Handle #SKJULNUL:# in HTML emails.
+                raise ValidationError(
+                    '#SKJULNUL:# kan ikke bruges i HTML-emails')
+
         recipients = self.get_recipient_data()
 
         for profile_id, profile_data in recipients.items():
