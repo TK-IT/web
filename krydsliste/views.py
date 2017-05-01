@@ -1,16 +1,15 @@
+import io
 import logging
 from django.conf import settings
-from django.views.generic import ListView, CreateView, UpdateView, FormView
+from django.views.generic import ListView, CreateView, UpdateView
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.template.loader import get_template
-from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from krydsliste.models import Sheet
 from krydsliste.forms import SheetForm
 from regnskab.views.auth import regnskab_permission_required_method
 from regnskab.texrender import tex_to_pdf, RenderError
-import io
 
 try:
     from uniprint.api import print_new_document
