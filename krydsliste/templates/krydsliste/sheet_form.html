@@ -2,6 +2,36 @@
 {% block nav %}<a href="{% url 'regnskab:krydsliste:sheet_list' %}"><li>Krydsliste-skabeloner</li></a>{% endblock %}
 {% block navcurrent %}<li>{% if object %}{{ object }}{% else %}Ny{% endif %}</li>{% endblock %}
 {% block title %}Krydsliste-skabelon{% endblock %}
+
+{% block head %}
+<script>
+function init_sheet_form_textarea(field) {
+    var textarea = document.getElementById('id_' + field);
+    var label = document.querySelector('label[for=id_' + field + ']');
+    if (!textarea || !label) return;
+
+    var initialLabel = label.textContent;
+
+    function update() {
+        // Count occurrences of "\person" or "\lille"
+        var count = textarea.value.match(/\\(person|lille)/g).length;
+        // Write count at end of label
+        label.textContent = initialLabel + ' (' + count + ')';
+    }
+    update();
+    // Trigger update() on keypress
+    textarea.addEventListener('input', update, false);
+    // Trigger update() when focus leaves textarea
+    textarea.addEventListener('change', update, false);
+}
+function init_sheet_form() {
+    init_sheet_form_textarea('front_persons');
+    init_sheet_form_textarea('back_persons');
+}
+window.addEventListener('load', init_sheet_form, false);
+</script>
+{% endblock %}
+
 {% block content %}
 
 {% if object %}
