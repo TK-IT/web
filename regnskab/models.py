@@ -798,7 +798,7 @@ class Session(EmailSetBase):
             row__sheet__session=self)
         purchases = purchases.exclude(row__profile=None)
         pmatrix = sum_matrix(purchases, 'row__profile_id', 'kind__name',
-                             F('count')*F('kind__unit_price'))
+                             F('count'))
         for p_id, purchase_count in pmatrix.items():
             recipients[p_id]['purchase_count'] = purchase_count
 
