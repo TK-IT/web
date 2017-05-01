@@ -11,6 +11,13 @@ BACK_INITIAL = '\n'.join(24*[r'\person{}'] + 15*[r'\lille{}'])
 
 
 class SheetForm(forms.ModelForm):
+    PDF, SOURCE, PRINT = 'pdf', 'source', 'print'
+    print_choices = [
+        (PDF, 'Hent som PDF'),
+        (SOURCE, 'Hent TeX-kildekode'),
+        (PRINT, 'Print på A2'),
+    ]
+
     class Meta:
         model = Sheet
         fields = ('name', 'title', 'left_label', 'right_label', 'column1',
@@ -29,14 +36,4 @@ class SheetForm(forms.ModelForm):
     back_persons = forms.CharField(label='Indgange på bagside',
                                    initial=BACK_INITIAL,
                                    widget=forms.Textarea(attrs={'rows': 39}))
-
-
-class SheetPrintForm(forms.Form):
-    PDF, SOURCE, PRINT = 'pdf', 'source', 'print'
-    print_choices = [
-        (PDF, 'Hent som PDF'),
-        (SOURCE, 'Hent TeX-kildekode'),
-        (PRINT, 'Print på A2'),
-    ]
-
-    mode = forms.ChoiceField(choices=print_choices, initial='pdf')
+    print_mode = forms.ChoiceField(choices=print_choices, initial='pdf')

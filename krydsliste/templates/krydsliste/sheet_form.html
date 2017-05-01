@@ -6,13 +6,6 @@
 
 {% if object %}
 <h1>{{ object }}</h1>
-<form method="post" action="{% url 'regnskab:krydsliste:print' pk=object.pk %}">{% csrf_token %}
-    <p>
-    {{ print_form.mode }}
-    <input type="submit" value="Udskriv krydsliste" />
-    {% if print %}Krydslisten er udskrevet på A2.{% endif %}
-    </p>
-</form>
 {% else %}
 <h1>Ny krydsliste-skabelon</h1>
 <p>Når du har gemt den nye krydsliste, kan du derefter hente den som PDF eller udskrive den på A2.</p>
@@ -50,6 +43,11 @@
     <p>{{ form.back_persons.label_tag }}</p>
     <p>{{ form.back_persons }}</p>
     <input type="submit" value="{% if object %}Gem ændringer{% else %}Gem kladde{% endif %}" />
+    <p>
+    {{ form.print_mode }}
+    <input name="print" type="submit" value="Gem og udskriv krydsliste" />
+    {% if print %}Krydslisten er udskrevet på A2.{% endif %}
+    </p>
 </form>
 
 {% endblock %}
