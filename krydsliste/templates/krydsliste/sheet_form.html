@@ -66,12 +66,18 @@ window.addEventListener('load', init_sheet_form, false);
     for at lave store og små indgange,
     og du kan fortrykke personer ved at skrive f.eks.
     <tt>\person{\KASS}</tt> eller <tt>\lille{nf}</tt>.</p>
-    {{ form.front_persons.errors }}
-    <p>{{ form.front_persons.label_tag }}</p>
-    <p>{{ form.front_persons }}</p>
-    {{ form.back_persons.errors }}
-    <p>{{ form.back_persons.label_tag }}</p>
-    <p>{{ form.back_persons }}</p>
+    <div style="display:flex;flex-wrap:wrap">
+        <div>
+        {{ form.front_persons.errors }}
+        <div>{{ form.front_persons.label_tag }}</div>
+        <div>{{ form.front_persons }}</div>
+        </div>
+        <div>
+        {{ form.back_persons.errors }}
+        <div>{{ form.back_persons.label_tag }}</div>
+        <div>{{ form.back_persons }}</div>
+        </div>
+    </div>
     <input type="submit" value="{% if object %}Gem ændringer{% else %}Gem kladde{% endif %}" />
     <p>
     {{ form.print_mode }}
