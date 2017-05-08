@@ -110,6 +110,7 @@ class Printout(models.Model):
     copies = models.PositiveIntegerField(default=1)
     lp_option_string = models.TextField(blank=True)
     page_range = models.CharField(max_length=255, blank=True, default='')
+    output = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return '<Printout %s on %s>' % (self.document, self.printer)
@@ -198,4 +199,5 @@ class Printout(models.Model):
             logger.error(msg)
             raise ValidationError(msg)
         logger.info('lp output: %r', output_brief)
+        self.output = output[:100000]
         return output
