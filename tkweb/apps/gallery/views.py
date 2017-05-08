@@ -16,9 +16,12 @@ from tkweb.apps.gallery.forms import EditVisibilityForm
 import os
 
 
+GALLERY_PERMISSION = 'gallery.change_image'
+
+
 def gallery(request, **kwargs):
     allalbums = Album.objects.all()
-    edit_visibility = request.user.has_perms('gallery.change_image')
+    edit_visibility = request.user.has_perms(GALLERY_PERMISSION)
     if not edit_visibility:
         # Hide albums with no public images
         allalbums = allalbums.filter(basemedia__visibility=BaseMedia.PUBLIC)
@@ -56,7 +59,7 @@ def album(request, gfyear, album_slug):
     context = {'album': album,
                'files': files}
 
-    edit_visibility = request.user.has_perms('gallery.change_image')
+    edit_visibility = request.user.has_perms(GALLERY_PERMISSION)
     new_file = album.basemedia.filter(visibility=BaseMedia.NEW).first()
     if edit_visibility and new_file:
         if request.POST.get('set_all_new_visible'):
@@ -89,7 +92,7 @@ def image(request, gfyear, album_slug, image_slug, **kwargs):
     album = get_object_or_404(Album, gfyear=gfyear, slug=album_slug)
 
     edit_visibility = (bool(request.GET.get('v')) and
-                       request.user.has_perms('gallery.change_image'))
+                       request.user.has_perms(GALLERY_PERMISSION))
 
     qs = album.basemedia.all()
     if not edit_visibility:
@@ -185,7 +188,7 @@ def upload_delete(request, pk):
 
 
 @require_POST
-@permission_required('gallery.change_image', raise_exception=True)
+@permission_required(GALLERY_PERMISSION, raise_exception=True)
 def set_visibility(request):
     try:
         form = EditVisibilityForm.from_POST(request.POST)
