@@ -65,6 +65,10 @@ def album(request, gfyear, album_slug):
         if request.POST.get('set_all_new_visible'):
             qs = album.basemedia.filter(visibility=BaseMedia.NEW)
             qs.update(visibility=BaseMedia.PUBLIC)
+
+            # Update isCoverFile
+            album.clean()
+
             return redirect('album', gfyear=gfyear, album_slug=album_slug)
 
         kwargs = dict(gfyear=album.gfyear, album_slug=album.slug,
