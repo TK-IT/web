@@ -14,9 +14,11 @@ function init_sheet_form_textarea(field) {
 
     function update() {
         // Count occurrences of "\person" or "\lille"
-        var count = textarea.value.match(/\\(person|lille)/g).length;
+        var c1 = textarea.value.match(/\\person/g).length;
+        var c2 = textarea.value.match(/\\lille/g).length;
         // Write count at end of label
-        label.textContent = initialLabel + ' (' + count + ')';
+        label.textContent = (
+            initialLabel + ' (' + c1 + ' store, ' + c2 + ' små)');
     }
     update();
     // Trigger update() on keypress
