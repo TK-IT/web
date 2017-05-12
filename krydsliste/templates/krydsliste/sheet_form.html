@@ -23,7 +23,9 @@ function init_sheet_form_textarea(field) {
         var c2 = n_matches(textarea.value, /\\lille/g);
         // Write count at end of label
         label.textContent = (
-            initialLabel + ' (' + c1 + ' store, ' + c2 + ' små)');
+            initialLabel +
+            ' (' + c1 + ' stor' + (c1 === 1 ? '' : 'e') + ', ' +
+            c2 + ' ' + (c2 === 1 ? 'lille' : 'små') + ')');
     }
     update();
     // Trigger update() on keypress
