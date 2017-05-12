@@ -5,6 +5,11 @@
 
 {% block head %}
 <script>
+function n_matches(text, pattern) {
+    var matches = text.match(pattern);
+    return matches ? matches.length : 0;
+}
+
 function init_sheet_form_textarea(field) {
     var textarea = document.getElementById('id_' + field);
     var label = document.querySelector('label[for=id_' + field + ']');
@@ -14,8 +19,8 @@ function init_sheet_form_textarea(field) {
 
     function update() {
         // Count occurrences of "\person" or "\lille"
-        var c1 = textarea.value.match(/\\person/g).length;
-        var c2 = textarea.value.match(/\\lille/g).length;
+        var c1 = n_matches(textarea.value, /\\person/g);
+        var c2 = n_matches(textarea.value, /\\lille/g);
         // Write count at end of label
         label.textContent = (
             initialLabel + ' (' + c1 + ' store, ' + c2 + ' små)');
