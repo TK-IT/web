@@ -114,10 +114,7 @@ class SheetCreate(CreateView, PrintMixin):
         self.object = form.save(commit=False)
         self.object.created_by = self.request.user
         self.object.save()
-        if self.request.POST.get('print'):
-            return self.handle_print(form)
-        else:
-            return HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect(self.get_success_url())
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):

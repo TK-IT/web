@@ -82,11 +82,19 @@ window.addEventListener('load', init_sheet_form, false);
         </div>
     </div>
     <input type="submit" value="{% if object %}Gem ændringer{% else %}Gem kladde{% endif %}" />
+    {% if object %}
     <p>
     {{ form.print_mode }}
     <input name="print" type="submit" value="Gem og udskriv krydsliste" />
     {% if print %}Krydslisten er udskrevet på A2.{% endif %}
     </p>
+    {% else %}
+    <p>
+    {{ form.print_mode }}
+    <input type="button" value="Gem og udskriv krydsliste" disabled />
+    Gem krydslisten inden du udskriver den.
+    </p>
+    {% endif %}
 </form>
 
 {% endblock %}
