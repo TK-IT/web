@@ -27,6 +27,7 @@ function init_sheet_form_textarea(field) {
     textarea.addEventListener('change', update, false);
 }
 function init_sheet_form() {
+    if (!document.querySelector) return;
     init_sheet_form_textarea('front_persons');
     init_sheet_form_textarea('back_persons');
 }
