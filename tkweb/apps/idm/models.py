@@ -135,10 +135,20 @@ class Position(models.Model):
     - EFUIT
     - Quizudvalg
     '''
-    name = models.CharField(max_length=100, verbose_name='Titel')
+    name = models.CharField(max_length=100, verbose_name='Titel', unique=True)
+    current_period = models.IntegerField()
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def get_current_period(name):
+        qs = Position.objects.filter(name=name)
+        try:
+            p, = qs.values_list('current_period', flat=True)
+        except ValueError:
+            raise Position.DoesNotExist()
+        return p
 
 
 @python_2_unicode_compatible
@@ -155,9 +165,13 @@ class PositionPeriod(models.Model):
     which is used when forming relative titles with tktitler.
     '''
     position = models.ForeignKey(Position, on_delete=models.CASCADE)
+    period = models.IntegerField()
 
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = [('position', 'period')]
 
     @property
     def current(self):
@@ -165,28 +179,20 @@ class PositionPeriod(models.Model):
 
     @staticmethod
     def filter_by_age(position, age):
-        qs = PositionPeriod.objects.filter(position=position)
-        qs = qs.order_by('-start_time')
-        qs = qs[age:age+1]  # Apply SQL LIMIT
+        period = position.current_period - age
+        qs = PositionPeriod.objects.filter(position=position,
+                                           period=period)
         return qs
 
     @staticmethod
     def get_by_age(position, age):
         result = PositionPeriod.filter_by_age(position, age).get()
-        result.cached_age = age
+        assert result.position_id == position.id
+        result.position = position
         return result
 
-    def compute_age(self):
-        qs = PositionPeriod.objects.filter(position=self.position,
-                                           start_time__gt=self.start_time)
-        return qs.count()
-
     def get_age(self):
-        try:
-            return self.cached_age
-        except AttributeError:
-            self.cached_age = self.compute_age()
-            return self.cached_age
+        return self.position.current_period - self.period
 
     def __str__(self):
         return tk.prefix((str(self.position), -self.get_age()), 0)
