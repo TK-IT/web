@@ -2,6 +2,7 @@
 
 Websiden er skrevet i Django 1.8 LTS med Bootstrap 3 som frontend framework.
 Den meste funktionalitet kan findes i apps.
+
 - [`tkweb/apps/gallery`](tkweb/apps/gallery) indeholder galleriet inklusiv
   upload fuktionalitet,
 - [`tkweb/apps/calendar`](tkweb/apps/calendar) henter et icalendar feed og viser
