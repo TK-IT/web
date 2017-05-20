@@ -123,3 +123,97 @@ class Title(models.Model):
     @tk.set_gfyear(lambda: config.GFYEAR)
     def __str__(self):
         return '%s %s' % (tk.prefix(self, type='unicode'), getattr(self, 'profile', ''))
+
+
+@python_2_unicode_compatible
+class Position(models.Model):
+    '''
+    A position held by different groups of people through the time. Examples:
+
+    - BEST/FU
+    - ABEN
+    - EFUIT
+    - Quizudvalg
+    '''
+    name = models.CharField(max_length=100, verbose_name='Titel')
+
+    def __str__(self):
+        return self.name
+
+
+@python_2_unicode_compatible
+class PositionPeriod(models.Model):
+    '''
+    A group of people holding a position at a particular time. Examples:
+
+    - BEST/FU from 2014-09-21 until 2015-09-20
+    - ABEN from 2015-12-16 until 2016-12-21
+    - EFUIT from 2011-10-03 until 2013-09-23
+    - Quizudvalg from 2016-04-01 until 2016-04-15
+
+    The "age" of a PositionPeriod is the number of PositionPeriods that follow,
+    which is used when forming relative titles with tktitler.
+    '''
+    position = models.ForeignKey(Position, on_delete=models.CASCADE)
+
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def current(self):
+        return self.end_time is None
+
+    @staticmethod
+    def filter_by_age(position, age):
+        qs = PositionPeriod.objects.filter(position=position)
+        qs = qs.order_by('-start_time')
+        qs = qs[age:age+1]  # Apply SQL LIMIT
+        return qs
+
+    @staticmethod
+    def get_by_age(position, age):
+        result = PositionPeriod.filter_by_age(position, age).get()
+        result.cached_age = age
+        return result
+
+    def compute_age(self):
+        qs = PositionPeriod.objects.filter(position=self.position,
+                                           start_time__gt=self.start_time)
+        return qs.count()
+
+    def get_age(self):
+        try:
+            return self.cached_age
+        except AttributeError:
+            self.cached_age = self.compute_age()
+            return self.cached_age
+
+    def __str__(self):
+        return tk.prefix((str(self.position), -self.get_age()), 0)
+
+
+@python_2_unicode_compatible
+class Holder(models.Model):
+    '''
+    A person having a particular title in a particular position. Examples:
+
+    - 18 people in BEST/FU from 2014-09-21, all with different titles
+    - 2 people in ABEN from 2015-12-16, both with title "ABEN"
+    - 1 person in EFUIT from 2011-10-03 with title "EFUIT"
+    '''
+    title = models.ForeignKey(PositionPeriod, on_delete=models.CASCADE)
+    profile = models.ForeignKey('Profile', on_delete=models.CASCADE)
+    root = models.CharField(max_length=10, verbose_name='Titel')
+
+    @staticmethod
+    def get_by_age(position, age):
+        try:
+            position_period = PositionPeriod.get_by_age(position, age)
+        except PositionPeriod.DoesNotExist:
+            raise Holder.DoesNotExist()
+        result = list(position_period.holder_set.all())
+        if not result:
+            raise Holder.DoesNotExist()
+        for o in result:
+            # TODO Is this assignment already done by Django?
+            o.title = position_period
