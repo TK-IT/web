@@ -144,11 +144,12 @@ class Position(models.Model):
     @staticmethod
     def get_current_period(name):
         qs = Position.objects.filter(name=name)
-        try:
-            p, = qs.values_list('current_period', flat=True)
-        except ValueError:
+        result = list(qs.values_list('current_period', flat=True))
+        if not result:
             raise Position.DoesNotExist()
-        return p
+        if len(result) > 1:
+            raise Position.MultipleObjectsReturned()  # TODO: Verify this name
+        return result[0]
 
 
 @python_2_unicode_compatible
@@ -195,7 +196,8 @@ class PositionPeriod(models.Model):
         return self.position.current_period - self.period
 
     def __str__(self):
-        return tk.prefix((str(self.position), -self.get_age()), 0)
+        return tk.prefix((str(self.position), self.period),
+                         self.position.current_period)
 
 
 @python_2_unicode_compatible
@@ -223,3 +225,8 @@ class Holder(models.Model):
         for o in result:
             # TODO Is this assignment already done by Django?
             o.title = position_period
+        return result
+
+    def __str__(self):
+        return tk.prefix((self.root, self.title.period),
+                         self.title.position.current_period)
