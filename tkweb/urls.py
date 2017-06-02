@@ -33,6 +33,9 @@ urlpatterns = [
     url(r'^arrangementer/$',
         views.flatpage, {'url': '/arrangementer/'},
         name='arrangementer'),
+    url(r'^jubi/$',
+        views.flatpage, {'url': '/jubi/'},
+        name='jubi'),
     url(r'^kontakt/$',
         views.flatpage, {'url': '/kontakt/'},
         name='kontakt'),
@@ -55,8 +58,7 @@ urlpatterns = [
     # Note the missing trailing slash. This catches everything that start with
     # 'j' or 'J'.
     url(r'^(?i)J',
-        include(tkweb.apps.jubi.urls),
-        name='jubi'),
+        include(tkweb.apps.jubi.urls)),
 
     url(r'^admin/',
         include(admin.site.urls)),

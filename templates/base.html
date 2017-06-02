@@ -38,37 +38,7 @@
             <li><a href="{% url 'kalender' %}">Kalender</a></li>
             <li><a href="{% url 'arrangementer' %}">Arrangementer</a></li>
             <li><a href="{% url 'gallery_index' %}">Galleri</a></li>
-            <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                    Jubilæer<span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                    <li class="dropdown-header">J40</li>
-                    <li><a href="{% url 'J40resume' %}">Resume</a></li>
-                    <li><a href="{% url 'J40historie' %}">Historie</a></li>
-                    <li role="separator" class="divider"></li>
-                    <li class="dropdown-header">J50</li>
-                    <li><a href="{% url 'J50resume' %}">Resume</a></li>
-                    <li><a href="{% url 'J50arrangementer' %}">Arrangementer</a></li>
-                    <li><a href="{% url 'album' gfyear=2006 album_slug='j-50-reception' %}">Billeder</a></li>
-                    <li><a href="{% static "jubi/J50/J50-Jubiskrift.pdf" %}">Jubilæumsskrift</a></li>
-                    <li><a href="{% static "jubi/J50/J50-Revy.pdf" %}">Revymanuskript</a></li>
-                    <li><a href="{% static "jubi/J50/J50-Sangbog.pdf" %}">Sangbog</a></li>
-                    <li role="separator" class="divider"></li>
-                    <li class="dropdown-header">J60</li>
-                    <li><a href="{% url 'J60' %}">Arrangementer</a></li>
-                    <li><a href="{% static "jubi/J60/J60-Jubiskrift.pdf" %}">Jubilæumsskrift</a></li>
-                    <li><a href="{% static "jubi/J60/j60revy.pdf" %}">Revymanuskript</a></li>
-                    <li><a href="{% static "jubi/J60/J60-Sangbog.pdf" %}">Sangbog</a></li>
-                    <li class="dropdown-header">Billeder</li>
-                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-lovfaldstur' %}">Løvfaldstur</a></li>
-                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-foredrag' %}">Foredrag</a></li>
-                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-reception' %}">Reception</a></li>
-                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-torsdags-mode' %}">Torgsdagsmøde</a></li>
-                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-revy' %}">Revy</a></li>
-                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-gruppebilleder' %}">Gruppebilleder</a></li>
-                    <li><a href="{% url 'album' gfyear=2016 album_slug='j60-fest' %}">Fest</a></li>
-                </ul>
-            </li>
+            <li><a href="{% url 'jubi' %}">Jubilæer</a></li>
             <li><a href="{% url 'kontakt' %}">Kontakt</a></li>
           </ul>
         </div>
