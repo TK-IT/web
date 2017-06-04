@@ -60,8 +60,7 @@ urlpatterns = [
     url(r'(?i)^J',
         include(tkweb.apps.jubi.urls)),
 
-    url(r'^admin/',
-        include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
 
     # Temporary media (user uploaded static files)
     # serving from dev server
