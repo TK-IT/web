@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='GenericFile',
             fields=[
-                ('basemedia_ptr', models.OneToOneField(parent_link=True, primary_key=True, auto_created=True, to='gallery.BaseMedia', serialize=False)),
+                ('basemedia_ptr', models.OneToOneField(parent_link=True, primary_key=True, auto_created=True, to='gallery.BaseMedia', serialize=False, on_delete=models.CASCADE)),
                 ('originalFile', models.FileField(upload_to=tkweb.apps.gallery.models.file_name, blank=True)),
                 ('file', models.FileField(upload_to=tkweb.apps.gallery.models.file_name)),
             ],

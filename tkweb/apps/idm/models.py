@@ -92,7 +92,7 @@ class Title(models.Model):
     BEST, FU, EFU = 'BEST', 'FU', 'EFU'
     KIND = [(BEST, 'BEST'), (FU, 'FU'), (EFU, 'EFU')]
 
-    profile = models.ForeignKey('Profile')
+    profile = models.ForeignKey('Profile', on_delete=models.CASCADE)
     period = models.IntegerField(verbose_name='Årgang')
     root = models.CharField(max_length=10, verbose_name='Titel')
     kind = models.CharField(max_length=10, choices=KIND, verbose_name='Slags')
