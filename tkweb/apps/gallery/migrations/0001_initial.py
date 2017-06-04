@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Image',
             fields=[
-                ('basemedia_ptr', models.OneToOneField(auto_created=True, to='gallery.BaseMedia', primary_key=True, serialize=False, parent_link=True)),
+                ('basemedia_ptr', models.OneToOneField(auto_created=True, to='gallery.BaseMedia', primary_key=True, serialize=False, parent_link=True, on_delete=models.CASCADE)),
                 ('image', versatileimagefield.fields.VersatileImageField(upload_to=tkweb.apps.gallery.models.file_name)),
             ],
             bases=('gallery.basemedia',),
@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='basemedia',
             name='album',
-            field=models.ForeignKey(to='gallery.Album', related_name='basemedia'),
+            field=models.ForeignKey(to='gallery.Album', related_name='basemedia', on_delete=models.CASCADE),
         ),
         migrations.AlterUniqueTogether(
             name='album',
