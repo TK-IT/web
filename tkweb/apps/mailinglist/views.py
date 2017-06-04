@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseRedirect
