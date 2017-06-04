@@ -164,7 +164,7 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
 # Middleware
 # ----------
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
