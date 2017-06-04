@@ -4,7 +4,7 @@ from django import forms
 from django.contrib import admin
 from django.db import models
 from tkweb.apps.gallery.models import Album, BaseMedia
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.html import format_html
 
 

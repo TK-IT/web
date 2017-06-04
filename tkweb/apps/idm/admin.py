@@ -1,6 +1,6 @@
 # encoding: utf8
 from django import forms
-from django.core import urlresolvers
+from django.urls import reverse
 from django.db.models import Q
 from django.contrib import admin
 from django.utils.html import format_html
@@ -215,8 +215,8 @@ class TitleAdmin(admin.ModelAdmin):
     def profile_link(self, title):
         return format_html(
             '<a href="{}">{}</a>',
-            urlresolvers.reverse('admin:idm_profile_change',
-                                 args=(title.profile_id,)),
+            reverse('admin:idm_profile_change',
+                    args=(title.profile_id,)),
             title.profile)
 
     profile_link.short_description = 'Person'
