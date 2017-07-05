@@ -20,9 +20,6 @@ urlpatterns = [
     url(r'^50/arrangementer/$',
         views.flatpage, {'url': '/J50/arrangementer/'},
         name='J50arrangementer'),
-    url(r'^50/deltagere/$',
-        views.flatpage, {'url': '/J50/deltagere/'},
-        name='J50deltagere'),
 
     # J60
     url(r'^60/$',
