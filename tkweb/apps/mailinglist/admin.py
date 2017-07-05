@@ -7,6 +7,9 @@ from django.views.generic import RedirectView
 # We don't have any models associated with Email and SharedFile,
 # but we need django to think we have
 
+# This code originally copied from django-constance. See:
+# https://github.com/jazzband/django-constance/blob/master/constance/admin.py
+
 
 class MailinglistAdmin(admin.ModelAdmin):
     def get_urls(self):
