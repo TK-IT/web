@@ -57,7 +57,7 @@ urlpatterns = [
 
     # Note the missing trailing slash. This catches everything that start with
     # 'j' or 'J'.
-    url(r'^(?i)J',
+    url(r'(?i)^J',
         include(tkweb.apps.jubi.urls)),
 
     url(r'^admin/',
