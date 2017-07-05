@@ -1,7 +1,6 @@
 # encoding: utf8
-from django.contrib import admin
-from django.db import models
 from django.conf.urls import url
+from django.contrib import admin
 from django.views.generic import RedirectView
 
 

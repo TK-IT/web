@@ -1,0 +1,46 @@
+{% load tkbrand %}
+
+<br/>
+Følgende tags kan benyttes til formatering:
+<br/><br/>
+
+<table>
+    <thead>
+        <tr>
+            <th>Tag</th>
+            <th>Resultat</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{% templatetag openblock %} TK {% templatetag closeblock %}</td><td>{% TK %}</td>
+        </tr>
+        <tr>
+            <td>{% templatetag openblock %} TKET {% templatetag closeblock %}</td><td>{% TKET %}</td>
+        </tr>
+        <tr>
+            <td>{% templatetag openblock %} TKETS {% templatetag closeblock %}</td><td>{% TKETS %}</td>
+        </tr>
+        <tr>
+            <td>{% templatetag openblock %} TKETs {% templatetag closeblock %}</td><td>{% TKETs %}</td>
+        </tr>
+        <tr>
+            <td>{% templatetag openblock %} TKAA {% templatetag closeblock %}</td><td>{% TKAA %}</td>
+        </tr>
+        <tr>
+            <td>{% templatetag openblock %} TKETAA {% templatetag closeblock %}</td><td>{% TKETAA %}</td>
+        </tr>
+        <tr>
+            <td>{% templatetag openblock %} TKETSAA {% templatetag closeblock %}</td><td>{% TKETSAA %}</td>
+        </tr>
+        <tr>
+            <td>{% templatetag openblock %} TKETsAA {% templatetag closeblock %}</td><td>{% TKETsAA %}</td>
+        </tr>
+        <tr>
+            <td>{% templatetag openvariable %} 2010 | gfyearPP {% templatetag closevariable %}</td><td>{{ 2010 | gfyearPP }}</td>
+        </tr>
+        <tr>
+            <td>{% templatetag openvariable %} 2010 | gfyearPPslash {% templatetag closevariable %}</td><td>{{ 2010 | gfyearPPslash }}</td>
+        </tr>
+    </tbody>
+</table>
