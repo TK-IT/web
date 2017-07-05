@@ -1,4 +1,4 @@
-django>=1.8,<1.8.99
+django>=1.11,<1.11.99
 pytz>=2015.2
 pillow>=2.6
 sorl-thumbnail>=12.3
