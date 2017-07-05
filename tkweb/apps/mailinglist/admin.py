@@ -3,6 +3,10 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.views.generic import RedirectView
 
+# This file is a hack to add 3 links to django admin under
+# We don't have any models associated with Email and SharedFile,
+# but we need django to think we have
+
 
 class MailinglistAdmin(admin.ModelAdmin):
     def get_urls(self):
@@ -37,6 +41,9 @@ class Email(object):
 
         def get_change_permission(self):
             return 'change_%s' % self.model_name
+
+        def app_config(self):
+            return None
 
     _meta = Meta()
 
@@ -77,6 +84,9 @@ class SharedFile(object):
 
         def get_change_permission(self):
             return 'change_%s' % self.model_name
+
+        def app_config(self):
+            return None
 
     _meta = Meta()
 
