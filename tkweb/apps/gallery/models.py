@@ -127,7 +127,7 @@ class Image(BaseMedia):
         # upstream bug https://code.djangoproject.com/ticket/21670 is closed
         select_on_save = True
 
-
+    objects = models.Manager()
     file = VersatileImageField(upload_to=file_name)
 
     def admin_thumbnail(self):
@@ -156,7 +156,7 @@ class GenericFile(BaseMedia):
         # upstream bug https://code.djangoproject.com/ticket/21670 is closed
         select_on_save = True
 
-
+    objects = models.Manager()
     originalFile = models.FileField(upload_to=file_name, blank=True)
     file = models.FileField(upload_to=file_name)
 
