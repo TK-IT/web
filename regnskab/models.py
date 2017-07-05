@@ -754,6 +754,9 @@ class EmailSetBase(models.Model):
         email_fields = ('subject', 'body_plain', 'body_html',
                         'recipient_name', 'recipient_email')
         try:
+            # self.email_set.model is
+            # * Email for Session
+            # * NewsletterEmail for Newsletter
             email = self.email_set.model(
                 profile=profile,
                 subject=format(self.email_template.subject, context),
@@ -761,7 +764,15 @@ class EmailSetBase(models.Model):
                 recipient_name=profile.name,
                 recipient_email=profile.email,
             )
-            field_name = self.__class__.email_set.related.field.name
+            # field_name is
+            # * 'session' for Email/Session
+            # * 'newsletter' for NewsletterEmail/Newsletter
+            # Unfortunately this is a private API in Django.
+            try:
+                field_name = self.__class__.email_set.field.name
+            except AttributeError:
+                # Django 1.8:
+                field_name = self.__class__.email_set.related.field.name
             setattr(email, field_name, self)
             if self.email_template.markup == EmailTemplate.HTML:
                 email.body_html = format(
