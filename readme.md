@@ -31,6 +31,9 @@ nemt ændres fra admin-interfacet.
 flere moduler der nedarver fra hindanden. Se også under
 [Udviklingsmiljø](#udviklingsmiljø).
 
+Desuden findes der også nogle apps med deres eget repository men som kører samme django instans som denne side:
+- [`regnskab`](https://github.com/TK-IT/regnskab) tager sig af krydslisteregnskabet. Den er afhængig af [`tkweb/apps/idm`](tkweb/apps/idm) og [`uniprint`](https://github.com/TK-IT/uniprint).
+- [`uniprint`](https://github.com/TK-IT/uniprint) er en webapplikation til at printe på A2 printeren gennem CUPS. 
 
 ## Udviklingsmiljø
 
