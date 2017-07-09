@@ -56,8 +56,9 @@ urlpatterns = [
         name='mailinglist'),
 
     # Note the missing trailing slash. This catches everything that start with
-    # 'j' or 'J'.
-    url(r'(?i)^J',
+    # 'J' or 'j'. Since 'J' is first in [Jj], reverse() will return URLs
+    # starting with 'J'.
+    url(r'^[Jj]',
         include(tkweb.apps.jubi.urls)),
 
     url(r'^admin/', admin.site.urls),
