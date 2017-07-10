@@ -399,6 +399,8 @@ class Sortable:
     'baz,foo,-bar'
     '''
 
+    default_sign = -1
+
     def __init__(self, sort_order_input, valid_keys):
         self.keys = []
         self.signs = []
@@ -423,7 +425,7 @@ class Sortable:
                 for k, s in zip(self.keys, self.signs)]
 
     def change_order_key(self, key):
-        new_sign = 1
+        new_sign = self.default_sign
         keys = list(self.keys)
         signs = list(self.signs)
         try:
@@ -527,7 +529,7 @@ class PurchaseStatsTable:
         if self.sorter is None:
             header = format_html_join('\n', '<th>{}</th>', zip(labels))
         else:
-            fmt = '<th><a href="?{k}={v}">{h}</a></th>'
+            fmt = '<th class="{c}"><a href="?{k}={v}">{h}</a></th>'
             header_cells = []
             for (key, places), label in zip(keys_places, labels):
                 if places is None:
@@ -539,7 +541,7 @@ class PurchaseStatsTable:
                         v = self.sorter.change_order_key(places)
                     header_cells.append(format_html(
                         fmt, k=self.sorter_key,
-                        v=v, h=label))
+                        c=key, v=v, h=label))
             header = format_html_join('\n', '{}', zip(header_cells))
 
         for r in self.rows:
@@ -553,9 +555,9 @@ class PurchaseStatsTable:
                         if key == Transaction.PAYMENT:
                             value = -value
                         value = floatformat(value, places)
-                html_row.append(value)
+                html_row.append((key, value))
             html_rows.append(format_html_join(
-                '\n', '<td>{}</td>', zip(html_row)))
+                '\n', '<td class="{}">{}</td>', html_row))
         body = format_html_join('\n', '<tr>\n{}\n</tr>', zip(html_rows))
         return format_html(
             '<table class="{html_class}">\n' +
@@ -749,18 +751,23 @@ class SessionUpdate(FormView):
         by_sheet = sum_matrix(
             purchases_by_sheet_qs,
             'kind__name', 'row__sheet_id', 'count')
-        stats, columns = SessionList.dense_rows(by_sheet, remove_empty=True)
-        sheets = list(self.object.sheet_set.all())
-        for s in sheets:
-            s.stats = stats.pop(s.id, None)
-        return sheets, columns
+        table = PurchaseStatsTable()
+        table.columns_before = (('date', 'Dato', 'pk'),)
+        table.sortable(self.request.GET)
+        sheets = {s.pk: s for s in self.object.sheet_set.all()}
+        for row in table.add_data(by_sheet, sheets):
+            pk = row['pk'] = row['key'].pk
+            if self.object.sent:
+                href = reverse('regnskab:sheet_detail', kwargs=dict(pk=pk))
+            else:
+                href = reverse('regnskab:sheet_update', kwargs=dict(pk=pk))
+            row['date'] = format_html('<a href="{}">{}</a>', href, row['key'])
+        return table
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         context_data['session'] = context_data['object'] = self.object
-        sheets, sheet_columns = self.get_sheets()
-        context_data['sheets'] = sheets
-        context_data['sheet_columns'] = sheet_columns
+        context_data['sheets'] = self.get_sheets()
         context_data['print'] = self.request.GET.get('print')
         context_data['print_form'] = BalancePrintForm()
         context_data['max_debt'] = get_max_debt()
@@ -839,15 +846,29 @@ class ProfileList(TemplateView):
         else:
             purchases_after = None
         profiles = get_profiles_title_status()
+        for i, p in enumerate(profiles):
+            p.table_position = i
+        profile_dict = {p.id: p for p in profiles}
+
         balances, purchases = compute_balance(
             output_matrix=True, purchases_after=purchases_after)
-        purchases, kind_labels = SessionList.dense_rows(
-            purchases, remove_empty=True)
-        for p in profiles:
-            p.balance = balances.get(p.id)
-            p.stats = purchases.get(p.id, ('',) * len(kind_labels))
-        context_data['object_list'] = profiles
-        context_data['columns'] = kind_labels
+        table = PurchaseStatsTable()
+        table.columns_before = (('name', 'Navn', 'position'),
+                                ('status', 'På krydslisten', None))
+        table.columns_after = (('balance', 'Balance', 2),)
+        table.sortable(self.request.GET)
+        table.sort_key = 'position'
+        for row in table.add_data(purchases, profile_dict):
+            p = row['key']
+            row['name'] = format_html(
+                '<a class="profile-link" ' +
+                'href="{}">{}</a>',
+                reverse('regnskab:profile_detail', kwargs=dict(pk=p.pk)),
+                p.title_name)
+            row['status'] = p.status.since() if p.status else ''
+            row['balance'] = balances.get(p.id)
+            row['position'] = p.table_position
+        context_data['table'] = table
         return context_data
 
 

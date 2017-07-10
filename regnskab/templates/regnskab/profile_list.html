@@ -15,30 +15,5 @@ Kun folk på krydslisten</label>
     {{ form.purchases_after }}
     <input type="submit" value="Vis forbrug" /></p>
 </form>
-<table class='tabular purchase-stats'>
-    <thead>
-        <tr>
-            <th>Navn</th>
-            <th>På krydslisten</th>
-            {% for s in columns %}
-            <th>{{ s }}</th>
-            {% endfor %}
-            <th>Balance</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for person in object_list %}
-        <tr>
-            <td class='row-key'><a class="profile-link"
-                   href="{% url 'regnskab:profile_detail' pk=person.pk %}">
-                    {{ person.title_name }}</a></td>
-            <td>{{ person.status.since }}</td>
-            {% for s in person.stats %}
-            <td>{{ s }}</td>
-            {% endfor %}
-            <td>{{ person.balance|floatformat:2 }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{{ table }}
 {% endblock %}

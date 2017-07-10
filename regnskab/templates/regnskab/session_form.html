@@ -8,33 +8,8 @@
 {% block content %}
 <p>Krydslister:</p>
 
-{% if sheets %}
-<table class='tabular purchase-stats'>
-    <thead>
-        <tr>
-            <th>Dato</th>
-            {% for c in sheet_columns %}
-            <th>{{ c }}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for o in sheets %}
-        <tr>
-            <td class='row-key'>
-                {% if object.sent %}
-                <a href="{% url 'regnskab:sheet_detail' pk=o.pk %}">{{ o }}</a>
-                {% else %}
-                <a href="{% url 'regnskab:sheet_update' pk=o.pk %}">{{ o }}</a>
-                {% endif %}
-            </td>
-            {% for n in o.stats %}
-            <td>{{ n }}</td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% if sheets.rows %}
+{{ sheets }}
 {% else %}
 <p>Ingen endnu</p>
 {% endif %}

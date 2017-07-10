@@ -64,7 +64,7 @@ nav a { text-decoration: none; }
 .purchase-stats > tbody > tr > * {
 	text-align: right;
 }
-.purchase-stats > tbody > tr > *.row-key {
+.purchase-stats > tbody > tr > *.name {
 	text-align: left;
 }
 .tabular > tbody > tr:nth-child(odd) > * {
