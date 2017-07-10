@@ -10,6 +10,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 // vim:set ft=javascript sw=4 et:
 
+var case_sensitive = false;
+
 function prefix_to_age(p) {
     // Assume p matches tk_prefix in get_query_filters.
     var base_value = { 'K': -1, 'G': 1, 'B': 2, 'O': 3, 'T': 1, '': 1 };
@@ -132,10 +134,17 @@ function get_query_filters(query) {
         })();
     }
     if (!mo_prefix) {
-        // Fallback: case sensitive search in title
-        filters.push(function (t) {
-            return t.indexOf(query) !== -1;
-        });
+        if (case_sensitive) {
+            // Fallback: case sensitive search in title
+            filters.push(function (t) {
+                return t.indexOf(query) !== -1;
+            });
+        } else {
+            // Case insensitive search
+            filters.push(function (t) {
+                return t.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+            });
+        }
     }
     return filters;
 }
