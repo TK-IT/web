@@ -1361,6 +1361,8 @@ class PurchaseBatchCreate(TransactionBatchCreateBase):
             try:
                 o = existing[p.id]
             except KeyError:
+                if not p.in_current and not self.request.GET.get('all'):
+                    continue
                 amount = initial_amount
                 selected = False
             else:
