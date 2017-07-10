@@ -654,7 +654,129 @@ class EmailTemplate(models.Model):
         return self.name or str(self.created_time)
 
 
-class EmailSetBase(models.Model):
+def regenerate_emails(email_set):
+    assert isinstance(email_set, (Session, Newsletter))
+
+    if email_set.email_template is None:
+        raise ValidationError("template required to generate emails")
+
+    if email_set.sent:
+        raise ValidationError(
+            "Tried to regenerate emails for session already sent")
+
+    if email_set.email_template.markup == EmailTemplate.HTML:
+        html_template = email_set.email_template.body_html()
+        if '#SKJULNUL:' in html_template:
+            # TODO Handle #SKJULNUL:# in HTML emails.
+            raise ValidationError(
+                '#SKJULNUL:# kan ikke bruges i HTML-emails')
+
+    recipients = email_set.get_recipient_data()
+
+    for profile_id, profile_data in recipients.items():
+        regenerate_email(email_set, profile_data)
+
+
+def get_base_recipient_data(email_set):
+    assert isinstance(email_set, (Session, Newsletter))
+    recipients = {}
+    profiles = get_profiles_title_status(period=email_set.period)
+    for profile in profiles:
+        recipients[profile.id] = dict(profile=profile, title=profile.title)
+    initial_balances = compute_balance(created_before=email_set.created_time)
+    for p_id, initial_balance in initial_balances.items():
+        recipients[p_id]['initial_balance'] = initial_balance
+    for p_id, balance in compute_balance().items():
+        recipients[p_id]['balance'] = balance
+
+    emails = email_set.email_set.all()
+    emails = emails.order_by('profile_id')
+    for email in emails:
+        recipients[email.profile_id]['email'] = email
+
+    # Cache call to get_inka
+    email_set._inka = get_inka()
+    # Cache call to get_max_debt
+    from regnskab.rules import get_max_debt
+    email_set._max_debt = get_max_debt()
+
+    return recipients
+
+
+def get_base_email_context(email_set, profile_data):
+    assert isinstance(email_set, (Session, Newsletter))
+
+    from regnskab.emailtemplate import format_price
+
+    primary_title = profile_data.get('title')
+    balance = profile_data.get('balance', Decimal())
+    profile = profile_data['profile']
+    initial_balance = profile_data.get('initial_balance', Decimal())
+
+    if primary_title:
+        title = (tk.prefix(primary_title, email_set.period, type='unicode')
+                 if primary_title.period else primary_title.root)
+    else:
+        title = None
+
+    context = {
+        'TITEL ': title + ' ' if title else '',
+        'NAVN': profile.name,
+        'GAELDFOER': format_price(initial_balance),
+        'GAELD': format_price(balance),
+        'MAXGAELD': format_price(email_set._max_debt),
+        'INKA': email_set._inka.name,
+    }
+    return context
+
+
+def regenerate_email(email_set, profile_data):
+    assert isinstance(email_set, (Session, Newsletter))
+
+    if isinstance(email_set, Session):
+        email_class = Email
+    elif isinstance(email_set, Newsletter):
+        email_class = NewsletterEmail
+    else:
+        raise TypeError(type(email_set))
+
+    from regnskab.emailtemplate import format
+    context = email_set.get_email_context(profile_data)
+    existing_email = profile_data.get('email')
+    if context is None:
+        if existing_email:
+            existing_email.delete()
+        return
+    profile = profile_data['profile']
+
+    email_fields = ('subject', 'body_plain', 'body_html',
+                    'recipient_name', 'recipient_email')
+    try:
+        email = email_class(
+            profile=profile,
+            subject=format(email_set.email_template.subject, context),
+            body_plain=format(email_set.email_template.body_plain(), context),
+            recipient_name=profile.name,
+            recipient_email=profile.email,
+        )
+        email.email_set = email_set
+        if email_set.email_template.markup == EmailTemplate.HTML:
+            email.body_html = format(
+                email_set.email_template.body_html(), context)
+    except KeyError as exn:
+        raise ValidationError("Emailskabelon har en ukendt variabel %r" %
+                              exn.args[0])
+    if existing_email:
+        changed_keys = [k for k in email_fields
+                        if getattr(email, k) != getattr(existing_email, k)]
+        if changed_keys:
+            email.pk = existing_email.pk
+        else:
+            return
+    email.save()
+
+
+class Session(models.Model):
     email_template = models.ForeignKey(EmailTemplate,
                                        on_delete=models.SET_NULL,
                                        null=True, blank=False,
@@ -666,7 +788,6 @@ class EmailSetBase(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        abstract = True
         get_latest_by = 'created_time'
 
     @property
@@ -674,125 +795,10 @@ class EmailSetBase(models.Model):
         return bool(self.send_time)
 
     def regenerate_emails(self):
-        if self.email_template is None:
-            raise ValidationError("template required to generate emails")
-
-        if self.sent:
-            raise ValidationError(
-                "Tried to regenerate emails for session already sent")
-
-        if self.email_template.markup == EmailTemplate.HTML:
-            html_template = self.email_template.body_html()
-            if '#SKJULNUL:' in html_template:
-                # TODO Handle #SKJULNUL:# in HTML emails.
-                raise ValidationError(
-                    '#SKJULNUL:# kan ikke bruges i HTML-emails')
-
-        recipients = self.get_recipient_data()
-
-        for profile_id, profile_data in recipients.items():
-            self.regenerate_email(profile_data)
+        regenerate_emails(self)
 
     def get_recipient_data(self):
-        recipients = {}
-        profiles = get_profiles_title_status(period=self.period)
-        for profile in profiles:
-            recipients[profile.id] = dict(profile=profile, title=profile.title)
-        initial_balances = compute_balance(created_before=self.created_time)
-        for p_id, initial_balance in initial_balances.items():
-            recipients[p_id]['initial_balance'] = initial_balance
-        for p_id, balance in compute_balance().items():
-            recipients[p_id]['balance'] = balance
-
-        emails = self.email_set.all()
-        emails = emails.order_by('profile_id')
-        for email in emails:
-            recipients[email.profile_id]['email'] = email
-
-        # Cache call to get_inka
-        self._inka = get_inka()
-        # Cache call to get_max_debt
-        from regnskab.rules import get_max_debt
-        self._max_debt = get_max_debt()
-
-        return recipients
-
-    def get_email_context(self, profile_data):
-        from regnskab.emailtemplate import format_price
-
-        primary_title = profile_data.get('title')
-        balance = profile_data.get('balance', Decimal())
-        profile = profile_data['profile']
-        initial_balance = profile_data.get('initial_balance', Decimal())
-
-        if primary_title:
-            title = (tk.prefix(primary_title, self.period, type='unicode')
-                     if primary_title.period else primary_title.root)
-        else:
-            title = None
-
-        context = {
-            'TITEL ': title + ' ' if title else '',
-            'NAVN': profile.name,
-            'GAELDFOER': format_price(initial_balance),
-            'GAELD': format_price(balance),
-            'MAXGAELD': format_price(self._max_debt),
-            'INKA': self._inka.name,
-        }
-        return context
-
-    def regenerate_email(self, profile_data):
-        from regnskab.emailtemplate import format
-        context = self.get_email_context(profile_data)
-        existing_email = profile_data.get('email')
-        if context is None:
-            if existing_email:
-                existing_email.delete()
-            return
-        profile = profile_data['profile']
-
-        email_fields = ('subject', 'body_plain', 'body_html',
-                        'recipient_name', 'recipient_email')
-        try:
-            # self.email_set.model is
-            # * Email for Session
-            # * NewsletterEmail for Newsletter
-            email = self.email_set.model(
-                profile=profile,
-                subject=format(self.email_template.subject, context),
-                body_plain=format(self.email_template.body_plain(), context),
-                recipient_name=profile.name,
-                recipient_email=profile.email,
-            )
-            # field_name is
-            # * 'session' for Email/Session
-            # * 'newsletter' for NewsletterEmail/Newsletter
-            # Unfortunately this is a private API in Django.
-            try:
-                field_name = self.__class__.email_set.field.name
-            except AttributeError:
-                # Django 1.8:
-                field_name = self.__class__.email_set.related.field.name
-            setattr(email, field_name, self)
-            if self.email_template.markup == EmailTemplate.HTML:
-                email.body_html = format(
-                    self.email_template.body_html(), context)
-        except KeyError as exn:
-            raise ValidationError("Emailskabelon har en ukendt variabel %r" %
-                                  exn.args[0])
-        if existing_email:
-            changed_keys = [k for k in email_fields
-                            if getattr(email, k) != getattr(existing_email, k)]
-            if changed_keys:
-                email.pk = existing_email.pk
-            else:
-                return
-        email.save()
-
-
-class Session(EmailSetBase):
-    def get_recipient_data(self):
-        recipients = super().get_recipient_data()
+        recipients = get_base_recipient_data(self)
 
         transactions = self.transaction_set.all().order_by('profile_id')
         transaction_sums = sum_vector(transactions, 'profile_id', 'amount')
@@ -826,7 +832,7 @@ class Session(EmailSetBase):
         from regnskab.emailtemplate import (
             format_price, format_price_set, format_count,
         )
-        context = super().get_email_context(profile_data)
+        context = get_base_email_context(self, profile_data)
 
         kind_price = self._kind_price
 
@@ -876,14 +882,105 @@ class Session(EmailSetBase):
         return context
 
 
-class Newsletter(EmailSetBase):
+class Newsletter(models.Model):
+    email_template = models.ForeignKey(EmailTemplate,
+                                       on_delete=models.SET_NULL,
+                                       null=True, blank=False,
+                                       verbose_name='Emailskabelon')
+    period = models.IntegerField(verbose_name='Årgang')
+    send_time = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                   null=True, blank=False)
+    created_time = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        get_latest_by = 'created_time'
+
+    @property
+    def sent(self):
+        return bool(self.send_time)
+
+    def regenerate_emails(self):
+        regenerate_emails(self)
+
     def get_email_context(self, profile_data):
         if not profile_data['profile'].in_current:
             return
-        return super().get_email_context(profile_data)
+        return get_base_email_context(self, profile_data)
+
+    def get_recipient_data(self):
+        return get_base_recipient_data(self)
 
 
-class EmailBase(models.Model):
+def to_message(email):
+    assert isinstance(email, (Email, NewsletterEmail))
+
+    sender = 'admin@TAAGEKAMMERET.dk'
+    list_name = 'krydsliste'
+    list_id = '%s.TAAGEKAMMERET.dk' % list_name
+    unsub = '<mailto:%s?subject=unsubscribe%%20%s>' % (sender, list_name)
+    help = '<mailto:%s?subject=list-help>' % (sender,)
+    sub = '<mailto:%s?subject=subscribe%%20%s>' % (sender, list_name)
+
+    headers = OrderedDict([
+        ('From', 'INKA@TAAGEKAMMERET.dk'),
+        ('X-TK-Sender', 'INKAs regnskab'),
+        ('X-TK-Recipient', email.recipient_email),
+        ('Sender', sender),
+        ('List-Name', list_name),
+        ('List-Id', list_id),
+        ('List-Unsubscribe', unsub),
+        ('List-Help', help),
+        ('List-Subscribe', sub),
+        ('Precedence', 'bulk'),
+        ('X-Auto-Response-Suppress', 'OOF'),
+        ('Organization', 'TÅGEKAMMERET'),
+    ])
+
+    reply_to = ['INKA@TAAGEKAMMERET.dk']
+    to = ['%s <%s>' % (email.recipient_name, email.recipient_email)]
+    if email.body_html is not None:
+        msg = EmailMultiRelated(
+            subject=email.subject,
+            body=email.body_plain,
+            from_email=sender,
+            reply_to=reply_to,
+            to=to,
+            headers=headers)
+        html, relateds = body_html_inlines(email.body_html)
+        msg.attach_alternative(html, 'text/html')
+        for cid, r in relateds:
+            msg.attach_related(r.blob, r.mime_type, cid)
+        return msg
+
+    return EmailMessage(
+        subject=email.subject,
+        body=email.body_plain,
+        from_email=sender,
+        reply_to=reply_to,
+        to=to,
+        headers=headers)
+
+
+def email_body_html_data_uris(email):
+    '''
+    Returns HTML with valid cid:-URIs replaced by data:-URIs.
+    '''
+    assert isinstance(email, (Email, NewsletterEmail))
+    if email.body_html is None:
+        return format_html('<pre style="white-space: pre-wrap">{}</pre>',
+                           email.body_plain)
+    def cb(inline):
+        if inline is not None:
+            return 'data:%s;base64,%s' % (
+                inline.mime_type, base64.b64encode(inline.blob).decode())
+
+    return _process_inlines(email.body_html, cb)
+
+
+class Email(models.Model):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE,
+                                related_name='email_set')
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL,
                                 null=True, blank=False, related_name='+')
     subject = models.TextField(blank=False)
@@ -892,82 +989,51 @@ class EmailBase(models.Model):
     recipient_name = models.CharField(max_length=255)
     recipient_email = models.CharField(max_length=255)
 
-    class Meta:
-        abstract = True
+    @property
+    def email_set(self):
+        return self.session
+
+    @email_set.setter
+    def email_set(self, v):
+        self.session = v
+
+    def to_message(self):
+        return to_message(self)
+
+    def body_html_data_uris(self):
+        return email_body_html_data_uris(self)
 
     def __str__(self):
         return '%s <%s>' % (self.recipient_name, self.recipient_email)
 
-    def to_message(self):
-        sender = 'admin@TAAGEKAMMERET.dk'
-        list_name = 'krydsliste'
-        list_id = '%s.TAAGEKAMMERET.dk' % list_name
-        unsub = '<mailto:%s?subject=unsubscribe%%20%s>' % (sender, list_name)
-        help = '<mailto:%s?subject=list-help>' % (sender,)
-        sub = '<mailto:%s?subject=subscribe%%20%s>' % (sender, list_name)
 
-        headers = OrderedDict([
-            ('From', 'INKA@TAAGEKAMMERET.dk'),
-            ('X-TK-Sender', 'INKAs regnskab'),
-            ('X-TK-Recipient', self.recipient_email),
-            ('Sender', sender),
-            ('List-Name', list_name),
-            ('List-Id', list_id),
-            ('List-Unsubscribe', unsub),
-            ('List-Help', help),
-            ('List-Subscribe', sub),
-            ('Precedence', 'bulk'),
-            ('X-Auto-Response-Suppress', 'OOF'),
-            ('Organization', 'TÅGEKAMMERET'),
-        ])
-
-        reply_to = ['INKA@TAAGEKAMMERET.dk']
-        to = ['%s <%s>' % (self.recipient_name, self.recipient_email)]
-        if self.body_html is not None:
-            msg = EmailMultiRelated(
-                subject=self.subject,
-                body=self.body_plain,
-                from_email=sender,
-                reply_to=reply_to,
-                to=to,
-                headers=headers)
-            html, relateds = body_html_inlines(self.body_html)
-            msg.attach_alternative(html, 'text/html')
-            for cid, r in relateds:
-                msg.attach_related(r.blob, r.mime_type, cid)
-            return msg
-
-        return EmailMessage(
-            subject=self.subject,
-            body=self.body_plain,
-            from_email=sender,
-            reply_to=reply_to,
-            to=to,
-            headers=headers)
-
-    def body_html_data_uris(self):
-        '''
-        Returns HTML with valid cid:-URIs replaced by data:-URIs.
-        '''
-        if self.body_html is None:
-            return format_html('<pre style="white-space: pre-wrap">{}</pre>',
-                               self.body_plain)
-        def cb(inline):
-            if inline is not None:
-                return 'data:%s;base64,%s' % (
-                    inline.mime_type, base64.b64encode(inline.blob).decode())
-
-        return _process_inlines(self.body_html, cb)
-
-
-class Email(EmailBase):
-    session = models.ForeignKey(Session, on_delete=models.CASCADE,
-                                related_name='email_set')
-
-
-class NewsletterEmail(EmailBase):
+class NewsletterEmail(models.Model):
     newsletter = models.ForeignKey(Newsletter, on_delete=models.CASCADE,
                                    related_name='email_set')
+    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL,
+                                null=True, blank=False, related_name='+')
+    subject = models.TextField(blank=False)
+    body_plain = models.TextField(blank=False)
+    body_html = models.TextField(blank=True, null=True)
+    recipient_name = models.CharField(max_length=255)
+    recipient_email = models.CharField(max_length=255)
+
+    @property
+    def email_set(self):
+        return self.newsletter
+
+    @email_set.setter
+    def email_set(self, v):
+        self.newsletter = v
+
+    def to_message(self):
+        return to_message(self)
+
+    def body_html_data_uris(self):
+        return email_body_html_data_uris(self)
+
+    def __str__(self):
+        return '%s <%s>' % (self.recipient_name, self.recipient_email)
 
 
 def get_profiles_title_status(period=None, time=None):
