@@ -83,6 +83,9 @@ def print_new_document(fp, filename, username, **kwargs):
     duplex = kwargs.pop('duplex', True)
     printer = kwargs.pop('printer')
     fake = kwargs.pop('fake', None)
+    copies = kwargs.pop('copies', 1)
+    if copies != 1:
+        raise ValueError('can only print 1 copy at a time')
     if kwargs:
         raise TypeError('unsupported kwargs: %s' % kwargs)
     if not fake:

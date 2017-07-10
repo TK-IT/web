@@ -37,3 +37,4 @@ class SheetForm(forms.ModelForm):
                                    initial=BACK_INITIAL,
                                    widget=forms.Textarea(attrs={'rows': 39}))
     print_mode = forms.ChoiceField(choices=print_choices, initial='pdf')
+    copies = forms.IntegerField(min_value=1, initial=1)

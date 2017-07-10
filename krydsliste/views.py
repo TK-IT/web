@@ -65,11 +65,13 @@ class PrintMixin:
         filename = 'krydsliste_%s.pdf' % self.object.pk
         username = self.request.user.username
         fake = settings.DEBUG
+        copies = form.cleaned_data['copies']
         try:
             output = print_new_document(io.BytesIO(pdf),
                                         filename=filename,
                                         username=username,
                                         printer='A2',
+                                        copies=copies,
                                         duplex=False, fake=fake)
         except Exception as exn:
             if settings.DEBUG and not isinstance(exn, ValidationError):
@@ -77,8 +79,8 @@ class PrintMixin:
             form.add_error(None, str(exn))
             return self.form_invalid(form)
 
-        logger.info("%s: Udskriv krydsliste id=%s på A2",
-                    self.request.user, self.object.pk)
+        logger.info("%s: Udskriv %s× krydsliste id=%s på A2",
+                    self.request.user, copies, self.object.pk)
 
         url = reverse('regnskab:krydsliste:sheet_update',
                       kwargs=dict(pk=self.object.id),
