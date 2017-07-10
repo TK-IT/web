@@ -45,8 +45,8 @@ BALANCE_PRINT_TEX = r"""
 \usepackage{xcolor}
 \usepackage{colortbl}
 \sisetup{output-decimal-marker={,}}
-\setulmarginsandblock{.8cm}{*}{1}
-\setlrmarginsandblock{.7cm}{*}{1}
+\setulmarginsandblock{8mm}{8mm}{*}
+\setlrmarginsandblock{9mm}{5mm}{*}
 \setlength{\headheight}{0pt}
 \setlength{\headsep}{0pt}
 \setlength{\footskip}{0pt}
