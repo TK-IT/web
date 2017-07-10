@@ -7,54 +7,9 @@
     <input id="id_create_session" type="submit" value="Begynd ny opgørelse" />
 </form>
 
-<table class='tabular purchase-stats'>
-    <thead>
-        <tr>
-            <th>Dato</th>
-            {% for c in sessions_columns %}
-            <th>{{ c }}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for o in sessions %}
-        <tr>
-            <td class='row-key'>
-                <a href="{{ o.href }}">
-                    {% if o.sent %}
-                    Udsendt {{ o.send_date }}
-                    {% else %}
-                    Oprettet {{ o.created_date }}
-                    {% endif %}</a>
-            </td>
-            {% for n in o.stats %}
-            <td>{{ n }}</td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{{ session_table }}
 
 <h2>Alle årgange</h2>
 
-<table class='tabular purchase-stats'>
-    <thead>
-        <tr>
-            <th>Årgang</th>
-            {% for c in years_columns %}
-            <th>{{ c }}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for year, stats in years %}
-        <tr>
-            <td class='row-key'><a href="?year={{ year }}">{{ year }}</a></td>
-            {% for n in stats %}
-            <td>{{ n }}</td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{{ period_table }}
 {% endblock %}

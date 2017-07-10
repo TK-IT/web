@@ -1,5 +1,6 @@
 import difflib
 import logging
+import operator
 import itertools
 from decimal import Decimal
 from collections import Counter
@@ -11,6 +12,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.db.models import F, Sum
 from django.utils import timezone
+from django.utils.html import format_html, format_html_join
 from django.template.defaultfilters import floatformat
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (
@@ -384,6 +386,185 @@ class SheetRowUpdate(FormView):
             self.get_context_data(form=form, saved=True))
 
 
+class Sortable:
+    '''
+    >>> s = Sortable('foo,-bar', {'foo', 'bar', 'baz'})
+    >>> s.key_func({'foo': 1, 'bar': 2, 'baz': 3})
+    [1, -2]
+    >>> s.change_order_key('foo')
+    '-foo,-bar'
+    >>> s.change_order_key('bar')
+    'bar,foo'
+    >>> s.change_order_key('baz')
+    'baz,foo,-bar'
+    '''
+
+    def __init__(self, sort_order_input, valid_keys):
+        self.keys = []
+        self.signs = []
+        sort_order_list = (
+            sort_order_input.split(',') if sort_order_input else ())
+        for v in sort_order_list:
+            if v.startswith('-'):
+                v = v[1:]
+                self.signs.append(-1)
+            else:
+                self.signs.append(1)
+            self.keys.append(v)
+
+        chosen_keys = set(self.keys)
+        if len(chosen_keys) != len(self.keys):
+            raise ValueError('duplicate keys')
+        if not chosen_keys.issubset(valid_keys):
+            raise ValueError('invalid keys')
+
+    def key_func(self, value):
+        return [s * (value.get(k) or 0)
+                for k, s in zip(self.keys, self.signs)]
+
+    def change_order_key(self, key):
+        new_sign = 1
+        keys = list(self.keys)
+        signs = list(self.signs)
+        try:
+            i = keys.index(key)
+        except ValueError:
+            pass
+        else:
+            keys.pop(i)
+            old_sign = signs.pop(i)
+            if i == 0:
+                new_sign = -old_sign
+        keys.insert(0, key)
+        signs.insert(0, new_sign)
+        return ','.join(('-' if s == -1 else '') + k
+                        for k, s in zip(keys, signs))
+
+
+class PurchaseStatsTable:
+    purchase_columns = (
+        ('ølkasser', 'kasser', 1),
+        ('øl', 'Øl', 0),
+        ('ølkasse', 'ks', 1),
+        ('guldøl', 'Guld', 0),
+        ('guldølkasse', 'ks', 1),
+        ('sodavand', 'Vand', 0),
+        ('sodavandkasse', 'ks', 1),
+        (Transaction.PURCHASE, 'Diverse', 2),
+        (Transaction.PAYMENT, 'Betalt', 2),
+    )
+    columns_before = ()
+    columns_after = ()
+
+    hide_empty_columns = True
+    html_class = 'tabular purchase-stats'
+    sort_key = None
+    sorter = None
+
+    def __init__(self):
+        self.empty_columns = set(c for c, l, n in self.purchase_columns)
+        self.rows = []
+
+    @staticmethod
+    def transpose_sparse(matrix):
+        transpose = {}
+        for k1, kvs in matrix.items():
+            for k2, v in kvs.items():
+                transpose.setdefault(k2, {})[k1] = v
+        return transpose
+
+    def add_data(self, matrix_columns, row_keys=None):
+        matrix_rows = self.transpose_sparse(matrix_columns)
+        if row_keys is None:
+            row_keys = {k: k for k in matrix_rows}
+        self.empty_columns -= matrix_columns.keys()
+        rows = []
+        for dict_key, row_key in sorted(row_keys.items()):
+            row = matrix_rows.get(dict_key, {})
+            row['key'] = row_key
+            rows.append(row)
+        self.rows.extend(rows)
+        return rows
+
+    def all_columns(self):
+        return itertools.chain(self.columns_before,
+                               self.purchase_columns,
+                               self.columns_after)
+
+    def get_header(self):
+        keys_places = []
+        labels = []
+        for key, label, places in self.all_columns():
+            if self.hide_empty_columns and key in self.empty_columns:
+                continue
+            keys_places.append((key, places))
+            labels.append(label)
+        return keys_places, labels
+
+    def sortable(self, request_params, key='o'):
+        sort_order_input = request_params.get(key) or ''
+        valid_keys = set(k if isinstance(n, int) else n
+                         for k, l, n in self.all_columns()
+                         if n is not None)
+        try:
+            self.sorter = Sortable(sort_order_input, valid_keys)
+        except ValueError:
+            self.sorter = Sortable('', valid_keys)
+        self.sorter_key = key
+
+    def __str__(self):
+        keys_places, labels = self.get_header()
+        html_rows = []
+        if self.sorter and self.sorter.keys:
+            self.rows.sort(key=self.sorter.key_func)
+        elif self.sort_key:
+            if isinstance(self.sort_key, str):
+                sort_key = [self.sort_key]
+            else:
+                sort_key = self.sort_key
+            self.rows.sort(key=operator.itemgetter(*sort_key))
+
+        if self.sorter is None:
+            header = format_html_join('\n', '<th>{}</th>', zip(labels))
+        else:
+            fmt = '<th><a href="?{k}={v}">{h}</a></th>'
+            header_cells = []
+            for (key, places), label in zip(keys_places, labels):
+                if places is None:
+                    header_cells.append(format_html('<th>{}</th>', label))
+                else:
+                    if isinstance(places, int):
+                        v = self.sorter.change_order_key(key)
+                    else:
+                        v = self.sorter.change_order_key(places)
+                    header_cells.append(format_html(
+                        fmt, k=self.sorter_key,
+                        v=v, h=label))
+            header = format_html_join('\n', '{}', zip(header_cells))
+
+        for r in self.rows:
+            html_row = []
+            for key, places in keys_places:
+                value = r.get(key)
+                if isinstance(places, int):
+                    if value is None:
+                        value = '\N{EM DASH}'
+                    else:
+                        if key == Transaction.PAYMENT:
+                            value = -value
+                        value = floatformat(value, places)
+                html_row.append(value)
+            html_rows.append(format_html_join(
+                '\n', '<td>{}</td>', zip(html_row)))
+        body = format_html_join('\n', '<tr>\n{}\n</tr>', zip(html_rows))
+        return format_html(
+            '<table class="{html_class}">\n' +
+            '<thead>\n<tr>\n{header}\n</tr>\n</thead>\n' +
+            '<tbody>\n{body}\n</tbody>\n</table>',
+            html_class=self.html_class,
+            header=header, body=body)
+
+
 class SessionList(TemplateView):
     template_name = 'regnskab/session_list.html'
 
@@ -464,6 +645,15 @@ class SessionList(TemplateView):
         by_year = sum_matrix(
             Purchase.objects.all(),
             'kind__name', 'row__sheet__period', 'count')
+        by_year.update(sum_matrix(
+            Transaction.objects.all(), 'kind', 'period', 'amount'))
+        period_table = PurchaseStatsTable()
+        period_table.columns_before = (('period', 'Årgang', 'key'),)
+        period_table.sortable(self.request.GET, 'y')
+        for r in period_table.add_data(by_year):
+            r['period'] = format_html(
+                '<a href="?year={0}">{0}</a>', r['key'])
+
         purchases_by_session_qs = Purchase.objects.filter(
             row__sheet__session__period=period)
         by_session = sum_matrix(
@@ -476,8 +666,6 @@ class SessionList(TemplateView):
             purchases_by_sheet_qs,
             'kind__name', 'row__sheet_id', 'count')
 
-        by_year.update(sum_matrix(
-            Transaction.objects.all(), 'kind', 'period', 'amount'))
         transactions_by_session_qs = Transaction.objects.filter(
             session__period=period)
         by_session.update(sum_matrix(
@@ -488,32 +676,39 @@ class SessionList(TemplateView):
             transactions_by_sheet_qs, 'kind', 'time', 'amount')
         self.merge_legacy_data(by_sheet_time, by_sheet, period)
 
-        by_year, by_year_columns = self.dense_rows(by_year)
+        session_table = PurchaseStatsTable()
+        session_table.columns_before = (('date', 'Dato', 'raw_date'),)
+        session_table.sort_key = 'raw_date'
+        session_table.sortable(self.request.GET)
+        sheets = {s.pk: s for s in
+                  Sheet.objects.filter(session=None, period=period)}
+        for row in session_table.add_data(by_sheet, sheets):
+            sheet = row['key']
+            href = reverse('regnskab:sheet_detail',
+                           kwargs=dict(pk=sheet.id))
+            row['raw_date'] = sheet.end_date.toordinal()
+            row['date'] = format_html(
+                '<a href="{}">Udsendt {}</a>',
+                href, sheet.end_date)
 
-        # If we have both new and old data, then we cannot
-        # remove empty columns.
-        (by_session, by_sheet), by_session_columns = self.dense_rows(
-            by_session, by_sheet, remove_empty=True)
+        sessions = {s.pk: s for s in Session.objects.filter(period=period)}
+        for row in session_table.add_data(by_session, sessions):
+            session = row['key']
+            href = reverse('regnskab:session_update',
+                           kwargs=dict(pk=session.id))
+            if session.sent:
+                s = 'Udsendt'
+                date = session.send_time.date()
+            else:
+                s = 'Oprettet'
+                date = session.created_time.date()
+            row['raw_date'] = date.toordinal()
+            row['date'] = format_html(
+                '<a href="{}">{} {}</a>',
+                href, s, date)
 
-        sheets = list(Sheet.objects.filter(session=None, period=period))
-        for s in sheets:
-            s.stats = by_sheet.pop(s.id, None)
-            s.href = reverse('regnskab:sheet_detail', kwargs=dict(pk=s.id))
-            s.sent = True
-            s.send_time = s.send_date = s.end_date
-        sessions = list(Session.objects.filter(period=period))
-        for s in sessions:
-            s.send_date = s.send_time and s.send_time.date()
-            s.created_date = s.created_time.date()
-            s.stats = by_session.pop(s.id, None)
-            s.href = reverse('regnskab:session_update', kwargs=dict(pk=s.id))
-        years = sorted(by_year.items())
-
-        context_data['sessions'] = sheets + sessions
-        context_data['sessions_columns'] = (
-            by_session_columns or by_sheet_columns)
-        context_data['years'] = years
-        context_data['years_columns'] = by_year_columns
+        context_data['session_table'] = session_table
+        context_data['period_table'] = period_table
         context_data['period'] = period
 
         return context_data
