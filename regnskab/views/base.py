@@ -394,7 +394,10 @@ class Sortable:
     >>> s.change_order_key('foo')
     '-foo,-bar'
     >>> s.change_order_key('bar')
-    'bar,foo'
+    '-bar,foo'
+    >>> s.change_order_key('baz')
+    '-baz,foo,-bar'
+    >>> s.default_sign = 1
     >>> s.change_order_key('baz')
     'baz,foo,-bar'
     '''
