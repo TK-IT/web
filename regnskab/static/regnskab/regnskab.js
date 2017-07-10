@@ -158,7 +158,8 @@ function utility_of_filter(filter, person) {
         for (var _iterator2 = person.titles[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
             var title = _step2.value;
 
-            if (filter(title)) {
+            // Remove '^' from title before matching
+            if (filter(title.replace(/[\^]/g, ''))) {
                 return title;
             }
         }

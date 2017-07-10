@@ -98,7 +98,8 @@ function get_query_filters(query) {
 
 function utility_of_filter(filter, person) {
     for (let title of person.titles) {
-        if (filter(title)) {
+        // Remove '^' from title before matching
+        if (filter(title.replace(/[\^]/g, ''))) {
             return title;
         }
     }
