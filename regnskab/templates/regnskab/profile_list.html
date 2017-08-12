@@ -11,6 +11,7 @@ Kun folk på krydslisten</label>
 </p>
 </form>
 <form method="get">
+    {% for f in form.other_fields %}{{ f }}{% endfor %}
     <p>{{ form.purchases_after.label_tag }}
     {{ form.purchases_after }}
     <input type="submit" value="Vis forbrug" /></p>

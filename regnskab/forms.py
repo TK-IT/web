@@ -239,3 +239,15 @@ class SheetRowForm(forms.Form):
 class ProfileListForm(forms.Form):
     purchases_after = forms.DateField(label='Forbrug siden', required=False,
                                       help_text='Format DD.MM.YYYY')
+
+    def __init__(self, **kwargs):
+        data = kwargs.get('data') or {}
+        super().__init__(**kwargs)
+
+        # Insert other data as hidden fields
+        self.other_fields = []
+        for k, v in data.items():
+            if k not in self.fields:
+                self.fields[k] = forms.CharField(
+                    initial=v, widget=forms.HiddenInput())
+                self.other_fields.append(self[k])
