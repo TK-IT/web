@@ -466,7 +466,8 @@ class PurchaseStatsTable:
     sort_key = None
     sorter = None
 
-    def __init__(self):
+    def __init__(self, request):
+        self.request = request
         self.empty_columns = set(c for c, l, n in self.purchase_columns)
         self.rows = []
 
@@ -611,7 +612,7 @@ class SessionList(TemplateView):
             'kind__name', 'row__sheet__period', 'count')
         by_year.update(sum_matrix(
             Transaction.objects.all(), 'kind', 'period', 'amount'))
-        period_table = PurchaseStatsTable()
+        period_table = PurchaseStatsTable(self.request)
         period_table.columns_before = (('period', 'Årgang', 'key'),)
         period_table.sortable(self.request.GET, 'y')
         for r in period_table.add_data(by_year):
@@ -640,7 +641,7 @@ class SessionList(TemplateView):
             transactions_by_sheet_qs, 'kind', 'time', 'amount')
         self.merge_legacy_data(by_sheet_time, by_sheet, period)
 
-        session_table = PurchaseStatsTable()
+        session_table = PurchaseStatsTable(self.request)
         session_table.columns_before = (('date', 'Dato', 'raw_date'),)
         session_table.sort_key = 'raw_date'
         session_table.sortable(self.request.GET)
@@ -713,7 +714,7 @@ class SessionUpdate(FormView):
         by_sheet = sum_matrix(
             purchases_by_sheet_qs,
             'kind__name', 'row__sheet_id', 'count')
-        table = PurchaseStatsTable()
+        table = PurchaseStatsTable(self.request)
         table.columns_before = (('date', 'Dato', 'pk'),)
         table.sortable(self.request.GET)
         sheets = {s.pk: s for s in self.object.sheet_set.all()}
@@ -814,7 +815,7 @@ class ProfileList(TemplateView):
 
         balances, purchases = compute_balance(
             output_matrix=True, purchases_after=purchases_after)
-        table = PurchaseStatsTable()
+        table = PurchaseStatsTable(self.request)
         table.columns_before = (('name', 'Navn', 'position'),
                                 ('status', 'På krydslisten', None))
         table.columns_after = (('balance', 'Balance', 2),)
