@@ -533,7 +533,7 @@ class PurchaseStatsTable:
         if self.sorter is None:
             header = format_html_join('\n', '<th>{}</th>', zip(labels))
         else:
-            fmt = '<th class="{c}"><a href="?{k}={v}">{h}</a></th>'
+            fmt = '<th class="{c}"><a href="?{qs}">{h}</a></th>'
             header_cells = []
             for (key, places), label in zip(keys_places, labels):
                 if places is None:
@@ -543,9 +543,11 @@ class PurchaseStatsTable:
                         v = self.sorter.change_order_key(key)
                     else:
                         v = self.sorter.change_order_key(places)
+                    qs = self.request.GET.copy()
+                    qs[self.sorter_key] = v
                     header_cells.append(format_html(
-                        fmt, k=self.sorter_key,
-                        c=key, v=v, h=label))
+                        fmt, qs=qs.urlencode(),
+                        c=key, h=label))
             header = format_html_join('\n', '{}', zip(header_cells))
 
         for r in self.rows:
