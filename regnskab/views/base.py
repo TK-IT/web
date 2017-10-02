@@ -1284,7 +1284,7 @@ class PaymentBatchCreate(TransactionBatchCreateBase):
             created_before=self.regnskab_session.created_time)
         existing_qs = self.get_existing()
         existing = {o.profile_id: o for o in existing_qs}
-        for p in get_profiles_title_status():
+        for p in get_profiles_title_status(period=config.GFYEAR - 1, time=self.regnskab_session.created_time):
             try:
                 o = existing[p.id]
             except KeyError:
