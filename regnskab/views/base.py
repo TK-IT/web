@@ -1211,6 +1211,7 @@ class TransactionBatchCreateBase(FormView):
     def get_form_kwargs(self, **kwargs):
         r = super().get_form_kwargs(**kwargs)
         r['profiles'] = self.get_profile_data()
+        r['period'] = self.get_period()
         return r
 
     def get_note(self):
@@ -1260,6 +1261,9 @@ class TransactionBatchCreateBase(FormView):
             self.regnskab_session.regenerate_emails()
         return self.get_success_view()
 
+    def get_period(self):
+        return config.GFYEAR
+
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         context_data['session'] = self.regnskab_session
@@ -1279,12 +1283,31 @@ class PaymentBatchCreate(TransactionBatchCreateBase):
             session=self.regnskab_session, kind=self.get_transaction_kind())
         return existing_qs
 
+    def get_period(self):
+        try:
+            return int(self.request.GET['y'])
+        except (KeyError, ValueError):
+            pass
+        time = self.regnskab_session.created_time
+        qs = Session.objects.filter(created_time__lt=time)
+        qs = qs.order_by('-created_time')
+        try:
+            previous_session = qs[0]
+        except IndexError:
+            previous_session = None
+            previous_period = config.GFYEAR
+        else:
+            previous_period = previous_session.period
+        return previous_period
+
     def get_profile_data(self):
-        amounts = compute_balance(
-            created_before=self.regnskab_session.created_time)
+        period = self.get_period()
+        time = self.regnskab_session.created_time
+
+        amounts = compute_balance(created_before=time)
         existing_qs = self.get_existing()
         existing = {o.profile_id: o for o in existing_qs}
-        for p in get_profiles_title_status(period=config.GFYEAR - 1, time=self.regnskab_session.created_time):
+        for p in get_profiles_title_status(period=period, time=time):
             try:
                 o = existing[p.id]
             except KeyError:

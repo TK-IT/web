@@ -172,10 +172,17 @@ class AnonymousEmailTemplateForm(forms.Form):
 
 
 class TransactionBatchForm(forms.Form):
-    @tk.set_gfyear(lambda: config.GFYEAR)
     def __init__(self, **kwargs):
         profiles = kwargs.pop('profiles')
+        try:
+            period = kwargs.pop('period')
+        except KeyError:
+            period = config.GFYEAR
         super().__init__(**kwargs)
+        with tk.set_gfyear(period):
+            self._init(profiles)
+
+    def _init(self, profiles):
         self._profiles = []
         for profile, amount, selected in profiles:
             p = 'profile%d_' % profile.id
