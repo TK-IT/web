@@ -328,6 +328,40 @@ class Sheet(models.Model):
 
     @contextlib.contextmanager
     def image_file_name(self):
+        '''
+        Open the image file, regardless of whether the model has been saved
+        to the database or not.
+
+        When the Sheet is being uploaded and saved, self.image_file.path
+        is blank even though the image file exists somewhere on the host.
+
+        This context manager yields the filename of a file containing the
+        image associated with the Sheet.
+
+        The context manager is partially re-entrant: The first opening of
+        image_file_name() instantiates a filename, and when the first
+        context is closed, the filename is invalidated. Any additional
+        openings in between return the same filename.
+
+        That is, this is valid::
+
+            with sheet.image_file_name() as f1:
+                with sheet.image_file_name() as f2:
+                    assert f1 == f2
+                    # f2 is valid
+                # f2 is still valid
+            # f2 is now invalid
+
+        But the following is not valid::
+
+            c1 = sheet.image_file_name()
+            f1 = c1.__enter__()
+            with sheet.image_file_name() as f2:
+                # f2 is valid
+                assert f1 == f2
+                c1.__exit__(None, None, None)
+                # c2 is not closed, but f2 is now invalid
+        '''
         try:
             yield self._image_file_name
         except AttributeError:
