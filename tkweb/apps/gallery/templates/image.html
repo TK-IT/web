@@ -97,7 +97,7 @@
 							href="{{ next_file.slug }}">Næste</a>
 					{% endif %}
 					</div>
-				  <div class="col-sm-4 hidden-xs text-right"><a href="{{ file.file.url }}">{% bootstrap_icon "download-alt" %} ({{ file.file.size|filesizeformat }})</a></div>
+				  <div class="col-sm-4 hidden-xs text-right"><a href="{{ file.file.url }}" download>{% bootstrap_icon "download-alt" %} ({{ file.file.size|filesizeformat }})</a></div>
 				</div>
 			</div>
 		</div>
