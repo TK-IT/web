@@ -227,7 +227,7 @@ class TitleAdmin(admin.ModelAdmin):
     get_email.admin_order_field = 'profile__email'
 
     def get_display_title(self, title):
-        return tk.prepostfix(title, config.GFYEAR)
+        return tk.prepostfix(title, config.GFYEAR, prefixtype='unicode')
 
     get_display_title.short_description = 'Titel'
 
