@@ -35,6 +35,11 @@ class Group(models.Model):
     matchtest = models.TextField(verbose_name="Eksempler", blank=True)
 
     def clean(self):
+        try:
+            validate_regex_pattern(self.regexp)
+        except ValidationError:
+            # Already reported in clean_fields().
+            return
         if self.matchtest and self.regexp:
             not_accepted = []
             for example in self.matchtest.split(','):
