@@ -14,7 +14,9 @@ from jfu.http import upload_receive, UploadResponse, JFUResponse
 from tkweb.apps.gallery.models import Album, BaseMedia, Image, GenericFile
 from tkweb.apps.gallery.forms import EditVisibilityForm
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 
 GALLERY_PERMISSION = 'gallery.change_image'
 
@@ -89,7 +91,15 @@ def album(request, gfyear, album_slug):
         context['visible_count'] = c_public
         context['hidden_count'] = c_discarded + c_sensitive + c_delete + c_new
         context['new_count'] = c_new
-    return render(request, 'album.html', context)
+    try:
+        r = render(request, 'album.html', context)
+    except OSError as exn:
+        logger.error('OSError: %s at %s' % (exn, request.path))
+        context = {'status': '500 Internal Server Error',
+                   'explanation': 'Dette album kan ikke vises, da en eller flere af de tilføjede filer er beskadiget.'}
+        r = render(request, '404.html', context)
+        r.status_code = 500
+    return r
 
 
 def image(request, gfyear, album_slug, image_slug, **kwargs):
