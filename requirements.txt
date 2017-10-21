@@ -22,6 +22,7 @@ html2text
 numpy
 scipy
 matplotlib
+dj-database-url>=0.4.2
 
 # For tests only
 #freezegun>=0.3.10

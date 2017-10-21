@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  db:
+    image: mysql
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_ONETIME_PASSWORD: "yes"
+      MYSQL_DATABASE: tkweb
+      MYSQL_USER: tkweb
+      MYSQL_PASSWORD: shoo2jo1jeexeevee3YeepeichooshopuSoot7vomaip8ko5yu
+    restart: always
+  tkweb:
+    environment:
+      DATABASE_URL: mysql://tkweb:shoo2jo1jeexeevee3YeepeichooshopuSoot7vomaip8ko5yu@db:3306/tkweb
+      DJANGO_MANAGEPY_MIGRATE: "on"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    links:
+      - db:db
+    ports:
+      - "8000:8000"
