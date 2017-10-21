@@ -71,7 +71,8 @@ urlpatterns = [
 
     # 404 page for debugging
     url(r'^404/$',
-        django.views.defaults.page_not_found, ),
+        django.views.defaults.page_not_found,
+        kwargs = {'exception': Exception("Intentional 404")}),
 
     # Send the rest to the redirect app
     url('',
