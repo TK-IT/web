@@ -101,13 +101,6 @@ class TitleRootFilter(admin.SimpleListFilter):
             return queryset.filter(root=self.value())
 
 
-def period_display_prefix(period, name, gfyear=None):
-    if gfyear is None:
-        gfyear = config.GFYEAR
-    return tk.prepostfix((name, period), gfyear,
-                         prefixtype='unicode')
-
-
 class TitlePeriodFilter(admin.AllValuesFieldListFilter):
     def choices(self, cl):
         gfyear = config.GFYEAR
@@ -119,8 +112,9 @@ class TitlePeriodFilter(admin.AllValuesFieldListFilter):
             except TypeError:
                 pass
             else:
-                choice['display'] = period_display_prefix(
-                    period, 'BEST/FU', gfyear=gfyear)
+                choice['display'] = tk.prepostfix(
+                    ('BEST/FU', period), gfyear=gfyear,
+                    prefixtype='unicode')
             yield choice
 
 
@@ -237,7 +231,10 @@ class TitleAdmin(admin.ModelAdmin):
     get_display_title.short_description = 'Titel'
 
     def get_period(self, title):
-        return period_display_prefix(title.period, title.get_kind_display())
+        return tk.prepostfix(
+            (title.get_kind_display(), title.period),
+            config.GFYEAR,
+            prefixtype='unicode')
 
     get_period.short_description = 'Årgang'
     get_period.admin_order_field = 'period'
