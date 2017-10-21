@@ -17,9 +17,6 @@ EXPOSE 8000
 
 ENV DJANGO_SETTINGS_MODULE=tkweb.settings.docker
 
-# Call collectstatic (customize the following line with the minimal environment variables needed for manage.py to run):
-#RUN python3 manage.py collectstatic --noinput
-
 ENTRYPOINT ["/code/docker-entrypoint.sh"]
 
 CMD python3 manage.py runserver 0.0.0.0:8000
