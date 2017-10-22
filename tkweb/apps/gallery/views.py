@@ -25,6 +25,11 @@ def gallery(request, **kwargs):
     allalbums_allmedia = Album.objects.all()
     allalbums_public = allalbums_allmedia.filter(
         basemedia__visibility=BaseMedia.PUBLIC)
+
+    public_count = dict(
+        allalbums_public.annotate(count=Count('basemedia'))
+        .values_list('id', 'count'))
+
     edit_visibility = request.user.has_perm(GALLERY_PERMISSION)
     if edit_visibility:
         allalbums = allalbums_allmedia
@@ -44,7 +49,10 @@ def gallery(request, **kwargs):
     show_year = int(show_year) if show_year else None
 
     albums = allalbums.filter(gfyear__exact=show_year)
-    albums = albums.annotate(count=Count('basemedia'))
+
+    albums = list(albums)
+    for album in albums:
+        album.count = public_count.get(album.id, 0)
 
     firstImages = BaseMedia.objects.filter(album__in=albums, isCoverFile=True)
     firstImages = firstImages.select_subclasses()
