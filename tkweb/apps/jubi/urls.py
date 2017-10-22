@@ -25,4 +25,7 @@ urlpatterns = [
     url(r'^60/$',
         views.flatpage, {'url': '/J60/'},
         name='J60'),
+    url(r'^60/invitation/$',
+        views.flatpage, {'url': '/J60/invitation/'},
+        name='J60invitation'),
 ]
