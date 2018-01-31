@@ -1,6 +1,7 @@
 # encoding: utf8
 from __future__ import absolute_import, unicode_literals, division
 
+from django.contrib.syndication.views import Feed
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -15,6 +16,7 @@ from tkweb.apps.gallery.models import Album, BaseMedia, Image, GenericFile
 from tkweb.apps.gallery.forms import EditVisibilityForm
 import os
 import logging
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -228,3 +230,24 @@ def set_visibility(request):
         return HttpResponseRedirect(reverse('album', kwargs=kwargs))
     else:
         return HttpResponse('Synlighed på givne billeder er blevet opdateret')
+
+
+class AlbumFeed(Feed):
+    title = 'TÅGEKAMMERETs billedalbummer'
+    link = '/galleri/'
+    description = 'Feed med nye billedalbummer fra TÅGEKAMMERETs begivenheder.'
+
+    def items(self):
+        return Album.objects.order_by('-publish_date')
+
+    def item_title(self, item):
+        return item.title
+
+    def item_description(self, item):
+        return item.description
+
+    def item_pubdate(self, item):
+        return datetime.datetime.combine(item.publish_date, datetime.time.min)
+
+    def item_link(self, item):
+        return 'https://TAAGEKAMMERET.dk' + reverse('album', kwargs={'gfyear': item.gfyear, 'album_slug': item.slug})
