@@ -19,9 +19,13 @@ DEFAULT_APPS = [
     'django.contrib.messages',
     'django.contrib.sites',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
 ]
 
 THIRD_PARTY_APPS = [
+    'django_nyt',
+    'mptt',
+    'sekizai',
     'bootstrap3',
     'constance',
     'constance.backends.database',
@@ -30,6 +34,11 @@ THIRD_PARTY_APPS = [
     'versatileimagefield',
     'django_cleanup',
     'macros',
+    'wiki.apps.WikiConfig',
+    'wiki.plugins.attachments.apps.AttachmentsConfig',
+    'wiki.plugins.notifications.apps.NotificationsConfig',
+    'wiki.plugins.images.apps.ImagesConfig',
+    'wiki.plugins.macros.apps.MacrosConfig',
 ]
 
 LOCAL_APPS = [
@@ -168,6 +177,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.request',
                 'django.template.context_processors.static',
+                'django.template.context_processors.debug',
+                'sekizai.context_processors.sekizai',
             ],
             'debug': False,
         },

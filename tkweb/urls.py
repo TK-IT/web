@@ -14,6 +14,8 @@ import tkweb.apps.mailinglist.urls
 import django.views.static
 import django.views.defaults
 import tkweb.views
+from wiki.urls import get_pattern as get_wiki_pattern
+from django_nyt.urls import get_pattern as get_nyt_pattern
 
 
 urlpatterns = [
@@ -60,6 +62,10 @@ urlpatterns = [
     # starting with 'J'.
     url(r'^[Jj]',
         include(tkweb.apps.jubi.urls)),
+
+    # wiki
+    url(r'^notifications/', get_nyt_pattern()),
+    url(r'^wiki/', get_wiki_pattern()),
 
     url(r'^admin/', admin.site.urls),
 
