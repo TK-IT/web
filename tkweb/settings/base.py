@@ -238,3 +238,8 @@ CONSTANCE_CONFIG = {
     'CAL_URL': ('//calendar.google.com/calendar/embed?src=BEST@TAAGEKAMMERET.dk&ctz=Europe/Copenhagen',
                 'URLen til \'Tilføj til din egen kalender\'-linket på kalendersiden.'),
 }
+
+# Wiki
+# ----
+
+WIKI_MARKDOWN_HTML_ATTRIBUTES = {'a': ['href', 'title', 'class', 'id', 'role', 'data-toggle', 'aria-expanded', 'aria-controls',]}
