@@ -19,7 +19,7 @@ class EvalMacroPreprocessor(MacroPreprocessor):
 
     def hide_section(self, title='BEST', message=''):
         html = render_to_string(
-            "evalwiki-macros/hide_section.html",
+            "evalmacros/hide_section.html",
             context={
                 'title': title,
                 'message': message,
@@ -37,7 +37,7 @@ class EvalMacroPreprocessor(MacroPreprocessor):
 
 class EvalMacroPlugin(BasePlugin):
 
-    slug = "evalwiki-macros" #settings.SLUG
+    slug = "evalmacros" #settings.SLUG
 
     sidebar = {'headline': 'Kammer macros',
                'icon_class': 'fa-play',
