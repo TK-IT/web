@@ -1,4 +1,5 @@
 import markdown
+import random
 from django.template.loader import render_to_string
 from wiki.core.plugins import registry
 from wiki.core.plugins.base import BasePlugin
@@ -16,11 +17,14 @@ class EvalMacroExtension(markdown.Extension):
 
 class EvalMacroPreprocessor(MacroPreprocessor):
 
-    def hide_section(self):
+    def hide_section(self, title='BEST', message=''):
         html = render_to_string(
             "evalwiki-macros/hide_section.html",
             context={
-                'title': "KASS",
+                'title': title,
+                'message': message,
+                'id': title+'-'+str(random.randrange(9999)),
+                'expanded': self.markdown.user.groups.filter(name__iexact=title).exists()
             })
         return self.markdown.htmlStash.store(html, safe=False)
 
