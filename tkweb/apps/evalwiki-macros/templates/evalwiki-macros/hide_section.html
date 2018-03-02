@@ -1,9 +1,8 @@
-<a class="btn btn-info btn-xs" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-    fra template
+<a class="btn btn-default btn-xs" role="button" data-toggle="collapse" href="#{{ id }}" aria-expanded="{{ expanded }}" aria-controls="{{ id }}">
+    {{ title }}
 </a>
-
-<div class="collapse" id="collapseExample">
+<div class="collapse {% if expanded %}in{% endif %}" id="{{ id }}">
     <div class="well">
-Fra Template
+        {{ message }}
     </div>
 </div>
