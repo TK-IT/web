@@ -50,6 +50,7 @@ LOCAL_APPS = [
     'tkweb.apps.idm',
     'tkweb.apps.mailinglist',
     'tkweb.apps.scripts',
+    'tkweb.apps.evalwiki-macros',
 ]
 
 try:
@@ -243,3 +244,5 @@ CONSTANCE_CONFIG = {
 # ----
 
 WIKI_MARKDOWN_HTML_ATTRIBUTES = {'a': ['href', 'title', 'class', 'id', 'role', 'data-toggle', 'aria-expanded', 'aria-controls',]}
+
+WIKI_PLUGINS_METHODS = ['article_list', 'toc', 'hide_section']
