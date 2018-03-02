@@ -28,12 +28,20 @@ class EvalMacroPreprocessor(MacroPreprocessor):
             })
         return self.markdown.htmlStash.store(html, safe=False)
 
-    hide_section.meta = dict(
-        short_description= 'Skjul en sektion.',
-        help_text= 'Insert a list of articles in this level.',
-        example_code='[hide_section title:KASS]',
-        args={'title': ''}
-    )
+    hide_section.meta = {
+        'short_description': 'Skjul en sektion',
+        'help_text': ('Skjuler en sektion der kun er relevant for nogle '\
+                      'grupper eller personer. Andre kan stadig se sektionen '\
+                      'ved at trykke på en knap.'),
+        'example_code': ('[hide_section message:\'Noget der er '\
+                         'skjult for alle andre end BEST.]\n'
+                         '[hide_section title:\'KASS\' message:\'Noget der er '\
+                         'skjult for alle andre end KASS.]'),
+        'args': {'title': ('Personen eller gruppen indholdet ikke er skjult '\
+                           'for. Standard: BEST'),
+                 'message': 'Teksten der skal skjules.',
+        },
+    }
 
 class EvalMacroPlugin(BasePlugin):
 
