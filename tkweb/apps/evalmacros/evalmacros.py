@@ -39,12 +39,6 @@ class EvalMacroPlugin(BasePlugin):
 
     slug = "evalmacros" #settings.SLUG
 
-    sidebar = {'headline': 'Kammer macros',
-               'icon_class': 'fa-play',
-               #'template': 'wiki/plugins/macros/sidebar.html',
-               'form_class': None,
-               'get_form_kwargs': (lambda a: {})}
-
     markdown_extensions = [
         EvalMacroExtension()]
 
