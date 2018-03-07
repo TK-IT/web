@@ -4,6 +4,7 @@ from django.template.loader import render_to_string
 from wiki.core.plugins import registry
 from wiki.core.plugins.base import BasePlugin
 from wiki.plugins.macros.mdx.macro import MacroPreprocessor
+import tkweb.apps.tkbrand.templatetags.tkbrand as tkbrand
 
 
 class EvalMacroExtension(markdown.Extension):
@@ -43,6 +44,44 @@ class EvalMacroPreprocessor(MacroPreprocessor):
         },
     }
 
+    _TKBRANDFUNCS = [tkbrand.TK, tkbrand.TKAA, tkbrand.TKET, tkbrand.TKETAA,
+                     tkbrand.TKETs, tkbrand.TKETsAA, tkbrand.TKETS,
+                     tkbrand.TKETSAA]
+
+    def TK(self):
+        return tkbrand.TK()
+
+    def TKAA(self):
+        return tkbrand.TKAA()
+
+    def TKET(self):
+        return tkbrand.TKET()
+
+    def TKETAA(self):
+        return tkbrand.TKETAA()
+
+    def TKETs(self):
+        return tkbrand.TKETs()
+
+    def TKETsAA(self):
+        return tkbrand.TKETsAA()
+
+    def TKETS(self):
+        return tkbrand.TKETS()
+
+    def TKETSAA(self):
+        return tkbrand.TKETSAA()
+
+    TK.meta = {
+        'short_description': '%s og venner' % tkbrand.TKET(),
+        'help_text': (
+            ('Brug følgende makroer til at skrive %s og ligendene med ' +
+             'hoppe-danseskrift.') % tkbrand.TKET() +
+            '<table class="table table-condensed">' +
+            ''.join(['<tr><td>[%s]</td><td>%s</td></tr>'
+                     % (f.__name__, f()) for f in _TKBRANDFUNCS]) +
+            '</table>'),
+    }
 class EvalMacroPlugin(BasePlugin):
 
     slug = "evalmacros" #settings.SLUG
