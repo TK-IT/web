@@ -243,6 +243,15 @@ CONSTANCE_CONFIG = {
 # Wiki
 # ----
 
-WIKI_MARKDOWN_HTML_ATTRIBUTES = {'a': ['href', 'title', 'class', 'id', 'role', 'data-toggle', 'aria-expanded', 'aria-controls',]}
+WIKI_MARKDOWN_HTML_ATTRIBUTES = {'a': ['href', 'title', 'class', 'id', 'role',
+                                       'data-toggle', 'aria-expanded',
+                                       'aria-controls',],
+                                 'span': ['class', 'id', 'style'], }
 
-WIKI_PLUGINS_METHODS = ['article_list', 'toc', 'hide_section']
+WIKI_MARKDOWN_HTML_STYLES = ['vertical-align', 'font-weight', 'margin-left',
+                             'display', 'transform']
+
+WIKI_PLUGINS_METHODS = ['article_list', 'toc', 'hide_section',
+                        'TK', 'TKAA', 'TKET', 'TKETAA', 'TKETs', 'TKETsAA',
+                        'TKETS', 'TKETSAA']
+
