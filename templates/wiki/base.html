@@ -1,0 +1,31 @@
+{% extends "wiki/base_site.html" %}
+{% load sekizai_tags static tkbrand %}
+
+
+{% block wiki_site_title %} | TÅGEKAMMERET{% endblock %}
+
+{% block wiki_header_branding %}
+<a class="navbar-brand" href="/">{% TKET %}</a>
+{% addtoblock "css" %}
+<style type="text/css">
+ .tk-brand {
+     font-family: 'Computer Modern Typewriter', 'Courier New', Courier, monospace;
+     font-size: 118%;
+     line-height: 0;
+     vertical-align: -0.005em;
+     white-space: nowrap;
+ }
+</style>
+<link rel="stylesheet" media="all" href="{% static "cmun-typewriter.css" %}" />
+{% endaddtoblock %}
+{% endblock %}
+
+{% block wiki_header_navlinks %}
+<ul class="nav navbar-nav">
+    <li class="active"><a href="{% url 'wiki:root' %}">Evalwiki</a></li>
+    <li class="active"><a href="{% url 'admin:index' %}">Admin</a></li>
+</ul>
+{% endblock %}
+
+{% block wiki_footer_logo %}
+{% endblock %}
