@@ -120,7 +120,7 @@ def tk_kprefix(title, arg='unicode'):
 
 @register.filter
 def tk_postfix(title, arg='single'):
-    return tk.postfix(title, gfyear=config.GFYEAR, type=arg)
+    return tk.postfix(title, type=arg)
 
 
 @register.filter
