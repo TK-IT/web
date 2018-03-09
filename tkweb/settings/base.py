@@ -251,7 +251,3 @@ WIKI_MARKDOWN_HTML_ATTRIBUTES = {'a': ['href', 'title', 'class', 'id', 'role',
 WIKI_MARKDOWN_HTML_STYLES = ['vertical-align', 'font-weight', 'margin-left',
                              'display', 'transform']
 
-WIKI_PLUGINS_METHODS = ['article_list', 'toc', 'hide_section',
-                        'TK', 'TKAA', 'TKET', 'TKETAA', 'TKETs', 'TKETsAA',
-                        'TKETS', 'TKETSAA']
-
