@@ -1,10 +1,16 @@
 import markdown
 import random
+import re
 from django.template.loader import render_to_string
 from wiki.core.plugins import registry
 from wiki.core.plugins.base import BasePlugin
-from wiki.plugins.macros.mdx.macro import MacroPreprocessor
+from wiki.plugins.macros.mdx.macro import KWARG_RE
 import tkweb.apps.tkbrand.templatetags.tkbrand as tkbrand
+from constance import config
+from django.conf import settings as django_settings
+
+METHODS = ['hide_section', 'TK', 'TKAA', 'TKET', 'TKETAA', 'TKETs', 'TKETsAA',
+           'TKETS', 'TKETSAA']
 
 
 class EvalMacroExtension(markdown.Extension):
@@ -16,7 +22,49 @@ class EvalMacroExtension(markdown.Extension):
         md.preprocessors.add('dw-macros', EvalMacroPreprocessor(md), '>html_block')
 
 
-class EvalMacroPreprocessor(MacroPreprocessor):
+class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
+
+
+    def run(self, lines):
+
+        """
+        Modified from
+        https://github.com/django-wiki/django-wiki/blob/master/src/wiki/plugins/macros/mdx/macro.py
+        This also replaces inline macros.
+        """
+
+        _MACRO_RE = re.compile(
+            r'(\[(?P<macro>\w+)(?P<kwargs>\s\w+\:.+)*\])',
+            re.IGNORECASE)
+
+        def _replace(m):
+            macro = m.group('macro').strip()
+            if macro in METHODS and hasattr(self, macro):
+                kwargs = m.group('kwargs')
+                if kwargs:
+                    kwargs_dict = {}
+                    for kwarg in KWARG_RE.finditer(kwargs):
+                        arg = kwarg.group('arg')
+                        value = kwarg.group('value')
+                        if value is None:
+                            value = True
+                        if isinstance(value, str):
+                            # If value is enclosed with ': Remove and
+                            # remove escape sequences
+                            if value.startswith("'") and len(value) > 2:
+                                value = value[1:-1]
+                                value = value.replace("\\\\", "¤KEEPME¤")
+                                value = value.replace("\\", "")
+                                value = value.replace("¤KEEPME¤", "\\")
+                        kwargs_dict[str(arg)] = value
+                    return getattr(self, macro)(**kwargs_dict)
+                else:
+                    return getattr(self, macro)()
+            else:
+                return m.string
+
+        return [_MACRO_RE.sub(_replace, line) for line in lines]
+
 
     def hide_section(self, title='BEST', message=''):
         html = render_to_string(
