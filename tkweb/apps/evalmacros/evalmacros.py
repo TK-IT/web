@@ -10,7 +10,8 @@ from constance import config
 from django.conf import settings as django_settings
 
 METHODS = ['hide_section', 'TK', 'TKAA', 'TKET', 'TKETAA', 'TKETs', 'TKETsAA',
-           'TKETS', 'TKETSAA']
+           'TKETS', 'TKETSAA', 'tk_prefix', 'tk_kprefix', 'tk_postfix',
+           'tk_prepostfix', 'tk_email']
 
 
 class EvalMacroExtension(markdown.Extension):
@@ -34,7 +35,7 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
         """
 
         _MACRO_RE = re.compile(
-            r'(\[(?P<macro>\w+)(?P<kwargs>\s\w+\:.+)*\])',
+            r"(\[(?P<macro>\w+)(?P<kwargs>\s'?\w+\:.+)*\])",
             re.IGNORECASE)
 
         def _replace(m):
@@ -130,6 +131,22 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
                      % (f.__name__, f()) for f in _TKBRANDFUNCS]) +
             '</table>'),
     }
+
+    def tk_prefix(self, title='', year=config.GFYEAR):
+        return tkbrand.tk_prefix((title, int(year)))
+
+    def tk_kprefix(self, title='', year=config.GFYEAR):
+        return tkbrand.tk_kprefix((title, int(year)))
+
+    def tk_postfix(self, title='', year=config.GFYEAR):
+        return tkbrand.tk_postfix((title, int(year)))
+
+    def tk_prepostfix(self, title, year=config.GFYEAR):
+        return tkbrand.tk_prepostfix((title, int(year)))
+
+    def tk_email(self, title, year=config.GFYEAR):
+        return tkbrand.tk_email((title, int(year)))
+
 class EvalMacroPlugin(BasePlugin):
 
     slug = "evalmacros" #settings.SLUG
