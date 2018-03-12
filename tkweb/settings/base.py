@@ -109,7 +109,8 @@ MEDIA_URL = '/media/'
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
 
-LOGIN_URL = '/admin/login'
+LOGIN_URL = '/admin/login/'
+LOGOUT_URL = '/admin/logout/'
 
 # Media files
 # -----------
@@ -251,3 +252,6 @@ WIKI_MARKDOWN_HTML_ATTRIBUTES = {'a': ['href', 'title', 'class', 'id', 'role',
 WIKI_MARKDOWN_HTML_STYLES = ['vertical-align', 'font-weight', 'margin-left',
                              'display', 'transform']
 
+WIKI_URL_CASE_SENSITIVE = True
+WIKI_ANONYMOUS = False
+WIKI_ACCOUNT_HANDLING = False
