@@ -255,3 +255,17 @@ WIKI_MARKDOWN_HTML_STYLES = ['vertical-align', 'font-weight', 'margin-left',
 WIKI_URL_CASE_SENSITIVE = True
 WIKI_ANONYMOUS = False
 WIKI_ACCOUNT_HANDLING = False
+WIKI_MARKDOWN_KWARGS = {
+    'extensions': [
+        'markdown.extensions.footnotes',
+        'markdown.extensions.attr_list',
+        'markdown.extensions.smart_strong',
+        'markdown.extensions.footnotes',
+        'markdown.extensions.attr_list',
+        'markdown.extensions.def_list',
+        'markdown.extensions.tables',
+        'markdown.extensions.abbr',
+        'markdown.extensions.sane_lists',
+        'markdown.extensions.admonition',
+    ],
+}
