@@ -1,12 +1,11 @@
 from django import template
-from wiki.plugins.macros import settings
-from tkweb.apps.evalmacros.evalmacros import EvalMacroPreprocessor
+from tkweb.apps.evalmacros.evalmacros import EvalMacroPreprocessor, METHODS
 
 register = template.Library()
 
 @register.simple_tag
 def allowed_evalmacros():
-    for method in settings.METHODS:
+    for method in METHODS:
         try:
             yield getattr(EvalMacroPreprocessor, method).meta
         except AttributeError:
