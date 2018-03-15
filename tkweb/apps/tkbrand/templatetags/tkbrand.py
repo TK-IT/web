@@ -124,7 +124,7 @@ def tk_postfix(title, arg='single'):
 
 
 @register.filter
-def tk_prepostfix(title, arg='single'):
+def tk_prepostfix(title, arg='longslash'):
     """
     :param str arg: postfixtype til :func:`tktitler.prepostfix`.
     Det er ikke muligt at ændre prefixtype.
