@@ -118,6 +118,7 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
             ('Brug følgende makroer til at skrive %s og ligendene med ' +
              'hoppe-danseskrift.') % tkbrand.TKET() +
             '<table class="table table-condensed">' +
+            '<tr><th>Makro</th><th>Output</th></tr>' +
             ''.join(['<tr><td>[%s]</td><td>%s</td></tr>'
                      % (f.__name__, f()) for f in _TKBRANDFUNCS]) +
             '</table>'),
@@ -148,6 +149,23 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
     def tk_email(self, title, year=None):
         return tkbrand.tk_email((title, self._get_year(year)))
 
+    tk_prefix.meta = {
+        'short_description': 'Anciennitet',
+        'help_text': ('Følgene makroer giver et titel-prefix eller -postfix ' +
+                      'relativt til det nuværende år. Eksempel vis bliver ' +
+                      '<code>[tk_prefix 2010 VC]</code> til T²OVC. Prefixet ' +
+                      'bliver automatisk opdateret ved hver GF.' +
+                      '<table class="table table-condensed">' +
+                      '<tr><th>Makro</th><th>Output</th></tr>' +
+                      ('<tr><td>[tk_prefix 2010]VC</td><td>%sVC</td></tr>' % tkbrand.tk_prefix(('', 2010))) +
+                      ('<tr><td>[tk_prefix 2010 VC]</td><td>%s</td></tr>' % tkbrand.tk_prefix(('VC', 2010))) +
+                      ('<tr><td>[tk_kprefix 2016]BEST</td><td>%sBEST</td></tr>' % tkbrand.tk_kprefix(('', 2016))) +
+                      ('<tr><td>[tk_kprefix 2016 BEST]</td><td>%s</td></tr>' % tkbrand.tk_kprefix(('BEST', 2016))) +
+                      ('<tr><td>KA$$[tk_postfix 2017]</td><td>KA$$%s</td></tr>' % tkbrand.tk_postfix(('', 2017))) +
+                      ('<tr><td>[tk_postfix 2017 KASS]</td><td>%s</td></tr>' % tkbrand.tk_postfix(('KASS', 2017))) +
+                      ('<tr><td>[tk_prepostfix SEKR 2015]</td><td>%s</td></tr>' % tkbrand.tk_prepostfix(('SEKR', 2015))) +
+                      '</table>'),
+    }
 
 class EvalMacroPlugin(BasePlugin):
     # TODO: settings.SLUG
