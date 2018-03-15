@@ -3,6 +3,8 @@ import random
 import re
 import shlex
 from django.template.loader import render_to_string
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from wiki.core.plugins import registry
 from wiki.core.plugins.base import BasePlugin
 import tkweb.apps.tkbrand.templatetags.tkbrand as tkbrand
@@ -150,6 +152,12 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
 class EvalMacroPlugin(BasePlugin):
     # TODO: settings.SLUG
     slug = "evalmacros"
+
+    sidebar = {'headline': format_html('{}-makroer', mark_safe(tkbrand.TK())),
+               'icon_class': 'fa-beer',
+               'template': 'evalmacros/sidebar.html',
+               'form_class': None,
+               'get_form_kwargs': (lambda a: {})}
 
     markdown_extensions = [EvalMacroExtension()]
 
