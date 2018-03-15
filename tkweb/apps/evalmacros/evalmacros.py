@@ -147,7 +147,8 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
         return tkbrand.tk_prepostfix((title, self._get_year(year)))
 
     def tk_email(self, title, year=None):
-        return tkbrand.tk_email((title, self._get_year(year)))
+        return ('<' + tkbrand.tk_email((title, self._get_year(year))) +
+                '@TAAGEKAMMERET.dk>')
 
     tk_prefix.meta = {
         'short_description': 'Anciennitet',
@@ -164,6 +165,7 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
                       ('<tr><td>KA$$[tk_postfix 2017]</td><td>KA$$%s</td></tr>' % tkbrand.tk_postfix(('', 2017))) +
                       ('<tr><td>[tk_postfix 2017 KASS]</td><td>%s</td></tr>' % tkbrand.tk_postfix(('KASS', 2017))) +
                       ('<tr><td>[tk_prepostfix SEKR 2015]</td><td>%s</td></tr>' % tkbrand.tk_prepostfix(('SEKR', 2015))) +
+                      ('<tr><td>[tk_email FUHØ 2010]</td><td><a href="mailto:%(e)s@TAAGEKAMMERET.dk">%(e)s@TAAGEKAMMERET.dk</a></td></tr>' % { 'e': tkbrand.tk_email(('FUHØ', 2010))}) +
                       '</table>'),
     }
 
