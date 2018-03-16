@@ -138,9 +138,6 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
     }
 
     def _get_year(self, year):
-        if year in (None, ''):
-            return config.GFYEAR
-
         try:
             year = int(year)
         except:
