@@ -16,6 +16,14 @@ METHODS = [
     'tk_prefix', 'tk_kprefix', 'tk_postfix', 'tk_prepostfix', 'tk_email',
 ]
 
+def _inline_error(method, error):
+    html = (
+        '<span class="tk-error">' +
+        '<span class="btn btn-danger">%s</span>' +
+        '<span class="btn btn-default">%s</span>' +
+        '</span>') % (method, error)
+    return html
+
 
 class EvalMacroExtension(markdown.Extension):
     def extendMarkdown(self, md, md_globals):
@@ -41,14 +49,9 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
                 method = getattr(self, macro)
                 args_str = mo.group('args')
                 args = shlex.split(args_str) if args_str else ()
-                return method(*args)
+                return method(*args, full=mo.group(0))
             except Exception as exn:
-                html = (
-                    '<span class="tk-error">' +
-                    '<span class="btn btn-danger">%s</span>' +
-                    '<span class="btn btn-default">%s</span>' +
-                    '</span>') % (mo.group(0), exn)
-                return html
+                return _inline_error(mo.group(0), exn)
 
         return [re.sub(pattern, repl, line) for line in lines]
 
@@ -60,7 +63,7 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
                 self.markdown.user.groups.values_list('name', flat=True))
             return self._cached_user_groups
 
-    def begin_hide(self, title='BEST'):
+    def begin_hide(self, title='BEST', full=''):
         expanded = any(t.lower() == title.lower()
                        for t in self.get_user_groups())
         html = render_to_string(
@@ -72,7 +75,7 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
             })
         return self.markdown.htmlStash.store(html, safe=False)
 
-    def end_hide(self):
+    def end_hide(self, full=''):
         html = render_to_string("evalmacros/end_hide.html")
         return self.markdown.htmlStash.store(html, safe=False)
 
@@ -88,7 +91,7 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
         },
     }
 
-    def updated(self, year):
+    def updated(self, year, full=''):
         html = render_to_string(
             "evalmacros/updated.html",
             context = {
@@ -101,28 +104,28 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
                      tkbrand.TKETs, tkbrand.TKETsAA, tkbrand.TKETS,
                      tkbrand.TKETSAA]
 
-    def TK(self):
+    def TK(self, full=''):
         return tkbrand.TK()
 
-    def TKAA(self):
+    def TKAA(self, full=''):
         return tkbrand.TKAA()
 
-    def TKET(self):
+    def TKET(self, full=''):
         return tkbrand.TKET()
 
-    def TKETAA(self):
+    def TKETAA(self, full=''):
         return tkbrand.TKETAA()
 
-    def TKETs(self):
+    def TKETs(self, full=''):
         return tkbrand.TKETs()
 
-    def TKETsAA(self):
+    def TKETsAA(self, full=''):
         return tkbrand.TKETsAA()
 
-    def TKETS(self):
+    def TKETS(self, full=''):
         return tkbrand.TKETS()
 
-    def TKETSAA(self):
+    def TKETSAA(self, full=''):
         return tkbrand.TKETSAA()
 
     TK.meta = {
@@ -149,19 +152,23 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
             year += 1900
         return year
 
-    def tk_prefix(self, year=None, title=''):
+    def tk_prefix(self, year=None, title='', full=''):
         return tkbrand.tk_prefix((title, self._get_year(year)))
 
-    def tk_kprefix(self, year=None, title=''):
+    def tk_kprefix(self, year=None, title='', full=''):
         return tkbrand.tk_kprefix((title, self._get_year(year)))
 
-    def tk_postfix(self, year=None, title=''):
+    def tk_postfix(self, year=None, title='', full=''):
         return tkbrand.tk_postfix((title, self._get_year(year)))
 
-    def tk_prepostfix(self, title, year=None):
+    def tk_prepostfix(self, year=None, title='', full=''):
+        if title in (None, ''):
+            return _inline_error(full, '\'\' is not a valid title')
         return tkbrand.tk_prepostfix((title, self._get_year(year)))
 
-    def tk_email(self, title, year=None):
+    def tk_email(self, year=None, title='', full=''):
+        if title in (None, ''):
+            return _inline_error(full, '\'\' is not a valid title')
         return ('<' + tkbrand.tk_email((title, self._get_year(year))) +
                 '@TAAGEKAMMERET.dk>')
 
