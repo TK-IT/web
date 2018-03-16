@@ -18,11 +18,10 @@ METHODS = [
 
 
 class EvalMacroExtension(markdown.Extension):
-    """Macro plugin markdown extension for django-wiki."""
     def extendMarkdown(self, md, md_globals):
-        """ Insert MacroPreprocessor before ReferencePreprocessor. """
+        """ Insert EvalMacroPreprocessor before ReferencePreprocessor. """
         md.preprocessors.add(
-            'dw-macros', EvalMacroPreprocessor(md), '>html_block')
+            'tk-macros', EvalMacroPreprocessor(md), '>html_block')
 
 
 class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
