@@ -43,7 +43,12 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
                 args = shlex.split(args_str) if args_str else ()
                 return method(*args)
             except Exception as exn:
-                return '(%s.%s %r)' % (self.__class__.__name__, macro, exn)
+                html = (
+                    '<span class="tk-error">' +
+                    '<span class="btn btn-danger">%s</span>' +
+                    '<span class="btn btn-default">%s</span>' +
+                    '</span>') % (mo.group(0), exn)
+                return html
 
         return [re.sub(pattern, repl, line) for line in lines]
 
@@ -126,7 +131,12 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
     def _get_year(self, year):
         if year in (None, ''):
             return config.GFYEAR
-        year = int(year)
+
+        try:
+            year = int(year)
+        except:
+            raise ValueError("\'%s\' is not a valid period" % year)
+
         if year < 56:
             year += 2000
         elif year < 100:
