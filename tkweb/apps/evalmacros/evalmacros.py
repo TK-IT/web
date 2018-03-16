@@ -11,7 +11,7 @@ import tkweb.apps.tkbrand.templatetags.tkbrand as tkbrand
 from constance import config
 
 METHODS = [
-    'begin_hide', 'end_hide',
+    'begin_hide', 'end_hide', 'updated',
     'TK', 'TKAA', 'TKET', 'TKETAA', 'TKETs', 'TKETsAA', 'TKETS', 'TKETSAA',
     'tk_prefix', 'tk_kprefix', 'tk_postfix', 'tk_prepostfix', 'tk_email',
 ]
@@ -87,6 +87,15 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
             'title': 'Personen eller gruppen indholdet ikke er skjult for.',
         },
     }
+
+    def updated(self, year):
+        html = render_to_string(
+            "evalmacros/updated.html",
+            context = {
+                'year': year,
+                'color': 'danger'
+            })
+        return self.markdown.htmlStash.store(html, safe=False)
 
     _TKBRANDFUNCS = [tkbrand.TK, tkbrand.TKAA, tkbrand.TKET, tkbrand.TKETAA,
                      tkbrand.TKETs, tkbrand.TKETsAA, tkbrand.TKETS,
