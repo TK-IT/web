@@ -244,13 +244,15 @@ CONSTANCE_CONFIG = {
 # Wiki
 # ----
 
-WIKI_MARKDOWN_HTML_ATTRIBUTES = {'a': ['href', 'title', 'class', 'id', 'role',
-                                       'data-toggle', 'aria-expanded',
-                                       'aria-controls',],
-                                 'span': ['class', 'id', 'style'], }
+WIKI_MARKDOWN_HTML_ATTRIBUTES = {
+    'a': ['href', 'title', 'class', 'id', 'role', 'data-toggle',
+          'aria-expanded', 'aria-controls',],
+    'p': ['class', 'id', 'style',],
+    'span': ['class', 'id', 'style',],
+}
 
 WIKI_MARKDOWN_HTML_STYLES = ['vertical-align', 'font-weight', 'margin-left',
-                             'display', 'transform']
+                             'display', 'transform', 'margin-top']
 
 WIKI_URL_CASE_SENSITIVE = True
 WIKI_ANONYMOUS = False
