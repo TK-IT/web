@@ -11,7 +11,7 @@ import tkweb.apps.tkbrand.templatetags.tkbrand as tkbrand
 from constance import config
 
 METHODS = [
-    'begin_hide', 'end_hide', 'updated',
+    'begin_hide', 'end_hide', 'fixme', 'updated',
     'TK', 'TKAA', 'TKET', 'TKETAA', 'TKETs', 'TKETsAA', 'TKETS', 'TKETSAA',
     'tk_prefix', 'tk_kprefix', 'tk_postfix', 'tk_prepostfix', 'tk_email',
 ]
@@ -88,6 +88,26 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
                          'skjult for alle andre end KASS.\n[end_hide]'),
         'args': {
             'title': 'Personen eller gruppen indholdet ikke er skjult for.',
+        },
+    }
+
+    def fixme(self, *args, full=''):
+        title = 'FIXME'
+        html = render_to_string(
+            "evalmacros/fixme.html",
+            context={
+                'title': title,
+                'id': title+'-'+str(random.randrange(9999)),
+                'message': ' '.join(args),
+            })
+        return self.markdown.htmlStash.store(html, safe=False)
+
+    fixme.meta = {
+        'short_description': 'Fixme',
+        'help_text': ('Tilføjer en fixme note.'),
+        'example_code': ('[fixme Her mangler at blive læst korrektur.]'),
+        'args': {
+            'message': 'Teksten til fixme noten',
         },
     }
 
