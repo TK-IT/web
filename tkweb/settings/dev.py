@@ -45,3 +45,5 @@ LOGGING = {
         },
     },
 }
+
+WIKI_CACHE_TIMEOUT = 0
