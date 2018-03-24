@@ -8,7 +8,7 @@ import tempfile
 import functools
 import itertools
 import contextlib
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
@@ -20,15 +20,14 @@ from django.core.mail import EmailMessage
 from django.utils import timezone
 from django.utils.text import slugify as dslugify
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
 from django.template.defaultfilters import floatformat
 
 from unidecode import unidecode
 from jsonfield import JSONField
 import tktitler as tk
 
-from regnskab.rules import get_default_prices
-from regnskab.utils import (
+from tkweb.apps.regnskab.rules import get_default_prices
+from tkweb.apps.regnskab.utils import (
     sum_vector, sum_matrix, plain_to_html, html_to_plain, EmailMultiRelated,
 )
 
@@ -731,7 +730,7 @@ def get_base_recipient_data(email_set):
     # Cache call to get_inka
     email_set._inka = get_inka()
     # Cache call to get_max_debt
-    from regnskab.rules import get_max_debt
+    from tkweb.apps.regnskab.rules import get_max_debt
     email_set._max_debt = get_max_debt()
 
     return recipients
@@ -740,7 +739,7 @@ def get_base_recipient_data(email_set):
 def get_base_email_context(email_set, profile_data):
     assert isinstance(email_set, (Session, Newsletter))
 
-    from regnskab.emailtemplate import format_price
+    from tkweb.apps.regnskab.emailtemplate import format_price
 
     primary_title = profile_data.get('title')
     balance = profile_data.get('balance', Decimal())
@@ -774,7 +773,7 @@ def regenerate_email(email_set, profile_data):
     else:
         raise TypeError(type(email_set))
 
-    from regnskab.emailtemplate import format
+    from tkweb.apps.regnskab.emailtemplate import format
     context = email_set.get_email_context(profile_data)
     existing_email = profile_data.get('email')
     if context is None:
@@ -863,7 +862,7 @@ class Session(models.Model):
         return recipients
 
     def get_email_context(self, profile_data):
-        from regnskab.emailtemplate import (
+        from tkweb.apps.regnskab.emailtemplate import (
             format_price, format_price_set, format_count,
         )
         context = get_base_email_context(self, profile_data)
@@ -1146,7 +1145,7 @@ class SheetImage(models.Model):
         except AttributeError:
             pass
 
-        from regnskab.images.utils import load_pdf_page
+        from tkweb.apps.regnskab.images.utils import load_pdf_page
 
         with self.sheet.image_file_name() as filename:
             self._image = load_pdf_page(filename, self.page - 1)

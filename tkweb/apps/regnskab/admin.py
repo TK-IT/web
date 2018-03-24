@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.utils.html import format_html
-from regnskab.models import (
+from tkweb.apps.regnskab.models import (
     Alias, Transaction, Sheet, EmailTemplate, Session,
     SheetImage, Newsletter,
 )

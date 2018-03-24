@@ -11,13 +11,12 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import permission_required
 from django.db.models import Max
 
-from uniprint.models import Document, Printer, Printout
-from uniprint.document import (
-    extract_plain_text, get_pdfinfo, pages_from_pdfinfo,
+from tkweb.apps.uniprint.models import Document, Printer, Printout
+from tkweb.apps.uniprint.document import (
     FileTypeError,
 )
-from uniprint.api import create_document, print_document
-from uniprint.forms import PrintoutForm
+from tkweb.apps.uniprint.api import create_document, print_document
+from tkweb.apps.uniprint.forms import PrintoutForm
 
 
 printout_permission_required = permission_required('uniprint.add_printout')

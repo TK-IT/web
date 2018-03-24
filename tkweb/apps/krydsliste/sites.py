@@ -4,7 +4,7 @@ class KrydslisteSite(object):
     def get_urls(self):
         from django.conf import settings
         from django.conf.urls import url
-        from krydsliste.views import (
+        from tkweb.apps.krydsliste.views import (
             SheetList, SheetCreate, SheetUpdate,
         )
 

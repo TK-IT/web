@@ -1,5 +1,5 @@
 from django import forms
-from krydsliste.models import Sheet
+from tkweb.apps.krydsliste.models import Sheet
 
 
 FRONT_INITIAL = '\n'.join(

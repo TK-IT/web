@@ -10,7 +10,7 @@ import itertools
 import subprocess
 import collections
 
-from regnskab.legacy.base import (
+from tkweb.apps.regnskab.legacy.base import (
     Regnskab, read_regnskab, Person, get_amount, Forbrug, alder,
 )
 

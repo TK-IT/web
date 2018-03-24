@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify as dslugify
 from unidecode import unidecode
 
-from uniprint.options import Options
+from tkweb.apps.uniprint.options import Options
 
 
 def slugify(string):

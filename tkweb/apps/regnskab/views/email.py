@@ -10,17 +10,16 @@ from django.views.generic import (
     View, TemplateView, ListView, CreateView, UpdateView, DetailView, FormView,
 )
 
-from regnskab.forms import EmailTemplateForm, AnonymousEmailTemplateForm
-from regnskab.models import (
+from tkweb.apps.regnskab.forms import EmailTemplateForm, AnonymousEmailTemplateForm
+from tkweb.apps.regnskab.models import (
     EmailTemplate, Email,
     Profile, Session,
     get_profiles_title_status, config,
     Newsletter, NewsletterEmail,
 )
-from regnskab.images.utils import save_png, png_data_uri
+from tkweb.apps.regnskab.images.utils import save_png, png_data_uri
 
 from .auth import regnskab_permission_required_method
-from django.conf import settings
 
 logger = logging.getLogger('regnskab')
 

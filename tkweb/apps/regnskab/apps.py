@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class RegnskabConfig(AppConfig):
-    name = 'regnskab'
+    name = 'tkweb.apps.regnskab'
     verbose_name = 'Regnskab'

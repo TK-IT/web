@@ -6,7 +6,7 @@ import datetime
 
 
 def get_profiles_without_data():
-    from regnskab.models import Profile
+    from tkweb.apps.regnskab.models import Profile
     return {p.name: p for p in Profile.objects.filter(sheetstatus=None)}
 
 
@@ -30,7 +30,7 @@ def main():
 
 
 def import_statuses(data, fp):
-    from regnskab.models import SheetStatus
+    from tkweb.apps.regnskab.models import SheetStatus
     profiles = get_profiles_without_data()
     objects = []
     for o in data:

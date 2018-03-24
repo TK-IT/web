@@ -1,7 +1,6 @@
-from django.core.management.base import CommandError, BaseCommand
+from django.core.management.base import BaseCommand
 
-from regnskab.models import Alias, Title, config
-from regnskab.legacy.export import is_title
+from tkweb.apps.regnskab.models import Title, config
 
 
 class Command(BaseCommand):

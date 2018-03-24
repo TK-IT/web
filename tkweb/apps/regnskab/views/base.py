@@ -19,23 +19,23 @@ from django.views.generic import (
     TemplateView, FormView, View,
 )
 from django.template.response import TemplateResponse
-from regnskab.forms import (
+from tkweb.apps.regnskab.forms import (
     SheetCreateForm, AnonymousEmailTemplateForm, SheetRowForm,
     TransactionBatchForm, BalancePrintForm,
     ProfileListForm,
 )
-from regnskab.models import (
+from tkweb.apps.regnskab.models import (
     Sheet, SheetRow, SheetStatus, Profile, Alias, Title, Email,
     EmailTemplate, Session, PurchaseKind,
     Transaction, Purchase,
     compute_balance, get_inka,
     config, get_profiles_title_status,
 )
-from regnskab.rules import (
+from tkweb.apps.regnskab.rules import (
     get_max_debt, get_max_debt_after_payment, get_default_prices,
 )
 from .auth import regnskab_permission_required_method
-from regnskab.utils import sum_matrix
+from tkweb.apps.regnskab.utils import sum_matrix
 
 import tktitler as tk
 
@@ -127,7 +127,7 @@ class SheetCreate(FormView):
                     period=config.GFYEAR)
 
     def form_valid(self, form):
-        from regnskab.images.extract import extract_images
+        from tkweb.apps.regnskab.images.extract import extract_images
 
         data = form.cleaned_data
         sheet = Sheet(name=data['name'],

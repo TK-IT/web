@@ -41,34 +41,21 @@ LOCAL_APPS = [
     'tkweb.apps.idm',
     'tkweb.apps.mailinglist',
     'tkweb.apps.scripts',
+    'tkweb.apps.regnskab',
+    'tkweb.apps.krydsliste',
+    'tkweb.apps.uniprint',
 ]
 
-try:
-    # Is git+https://github.com/TK-IT/regnskab.git installed?
-    import regnskab
-except ImportError:
-    pass
-else:
-    LOCAL_APPS.append('regnskab')
-    LOCAL_APPS.append('krydsliste')
-    TKWEB_IDM_MODULE = 'tkweb.apps.idm'
-
-    try:
-        # Is django-mediumeditor installed?
-        import mediumeditor
-    except ImportError:
-        USE_MEDIUM_EDITOR = False
-    else:
-        USE_MEDIUM_EDITOR = True
-        THIRD_PARTY_APPS.append('mediumeditor')
+TKWEB_IDM_MODULE = 'tkweb.apps.idm'
 
 try:
-    # Is git+https://github.com/TK-IT/uniprint.git installed?
-    import uniprint
+    # Is django-mediumeditor installed?
+    import mediumeditor
 except ImportError:
-    pass
+    USE_MEDIUM_EDITOR = False
 else:
-    LOCAL_APPS.append('uniprint')
+    USE_MEDIUM_EDITOR = True
+    THIRD_PARTY_APPS.append('mediumeditor')
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 

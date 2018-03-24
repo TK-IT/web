@@ -25,7 +25,7 @@ def main():
 
 
 def import_primary_aliases(data, fp):
-    from regnskab.models import Alias, Title, Profile
+    from tkweb.apps.regnskab.models import Alias, Profile
     profiles = {p.name: p for p in Profile.objects.all()}
 
     primary_ids = []

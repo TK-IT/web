@@ -6,15 +6,15 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.template.loader import get_template
 from django.http import HttpResponse, HttpResponseRedirect
-from krydsliste.models import Sheet
-from krydsliste.forms import SheetForm
-from regnskab.views.auth import regnskab_permission_required_method
-from regnskab.texrender import tex_to_pdf, RenderError
+from tkweb.apps.krydsliste.models import Sheet
+from tkweb.apps.krydsliste.forms import SheetForm
+from tkweb.apps.regnskab.views.auth import regnskab_permission_required_method
+from tkweb.apps.regnskab.texrender import tex_to_pdf, RenderError
 
 try:
-    from uniprint.api import print_new_document
+    from tkweb.apps.uniprint.api import print_new_document
 except ImportError:
-    from regnskab.texrender import print_new_document
+    from tkweb.apps.regnskab.texrender import print_new_document
 
 logger = logging.getLogger('regnskab')
 

@@ -4,9 +4,9 @@ class RegnskabSite(object):
     def get_urls(self):
         from django.conf import settings
         from django.conf.urls import url, include
-        from regnskab import views
-        from regnskab.views import images, email
-        import krydsliste
+        from tkweb.apps.regnskab import views
+        from tkweb.apps.regnskab.views import images, email
+        from tkweb.apps import krydsliste
 
         urls = [
             url(r'^$', views.Home.as_view(), name='home'),

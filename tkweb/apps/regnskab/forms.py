@@ -1,10 +1,9 @@
 import collections
 from django import forms
-from django.conf import settings
 from django.core.exceptions import ValidationError
-from regnskab.models import EmailTemplate, Session, config
-from regnskab.widgets import RichTextarea
-from regnskab.utils import plain_to_html, html_to_plain
+from tkweb.apps.regnskab.models import EmailTemplate, config
+from tkweb.apps.regnskab.widgets import RichTextarea
+from tkweb.apps.regnskab.utils import plain_to_html, html_to_plain
 import tktitler as tk
 
 

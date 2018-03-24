@@ -96,10 +96,10 @@ def base(model):
     '''
 
     if isinstance(model, str):
-        import regnskab.models
+        import tkweb.apps.regnskab.models
         # Use operator.attrgetter instead of getattr to allow specifying
         # e.g. 'PurchaseKind.sheets.through'
-        model = operator.attrgetter(model)(regnskab.models)
+        model = operator.attrgetter(model)(tkweb.apps.regnskab.models)
 
     members = {}
     for field in model._meta.fields:

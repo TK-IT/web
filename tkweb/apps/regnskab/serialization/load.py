@@ -25,11 +25,11 @@ def main():
             raise Exception("You need to add %r to ALLOW_NUKE_HOSTS." %
                             hostname)
 
-        import regnskab.models
+        import tkweb.apps.regnskab.models
         models = '''Transaction Purchase PurchaseKind Sheet Session Title Alias
         SheetStatus Profile Email EmailTemplate'''.split()
         # Ensure all models actually exist before deleting anything
-        model_types = [getattr(regnskab.models, n) for n in models]
+        model_types = [getattr(tkweb.apps.regnskab.models, n) for n in models]
 
         for model in model_types:
             print(model.__name__, model.objects.all().delete())

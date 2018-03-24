@@ -2,7 +2,7 @@ import re
 
 from django.contrib import admin
 
-from krydsliste.models import Sheet
+from tkweb.apps.krydsliste.models import Sheet
 
 
 class SheetAdmin(admin.ModelAdmin):

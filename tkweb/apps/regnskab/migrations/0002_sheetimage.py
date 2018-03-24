@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import jsonfield.fields
-import regnskab.models
+import tkweb.apps.regnskab.models
 
 
 class Migration(migrations.Migration):
@@ -29,12 +29,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sheet',
             name='image_file',
-            field=models.FileField(upload_to=regnskab.models.sheet_upload_to, blank=True, null=True),
+            field=models.FileField(upload_to=tkweb.apps.regnskab.models.sheet_upload_to, blank=True, null=True),
         ),
         migrations.AddField(
             model_name='sheet',
             name='row_image',
-            field=models.FileField(upload_to=regnskab.models.sheet_upload_to, blank=True, null=True),
+            field=models.FileField(upload_to=tkweb.apps.regnskab.models.sheet_upload_to, blank=True, null=True),
         ),
         migrations.AddField(
             model_name='sheet',

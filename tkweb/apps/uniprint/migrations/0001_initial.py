@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 import django.db.models.deletion
 from django.conf import settings
-from uniprint.models import document_path
+from tkweb.apps.uniprint.models import document_path
 
 
 class Migration(migrations.Migration):

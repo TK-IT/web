@@ -21,11 +21,11 @@ import logging
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
-from uniprint.models import Document, Printout, Printer
-from uniprint.document import (
+from tkweb.apps.uniprint.models import Document, Printout, Printer
+from tkweb.apps.uniprint.document import (
     extract_plain_text, get_pdfinfo, pages_from_pdfinfo,
 )
-from uniprint.options import Options, Option
+from tkweb.apps.uniprint.options import Options, Option
 
 
 logger = logging.getLogger('uniprint')

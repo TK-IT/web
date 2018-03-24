@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from uniprint.views import (
+from tkweb.apps.uniprint.views import (
     Home, DocumentCreate, PrintoutCreate,
     DocumentList, PrintoutList,
 )

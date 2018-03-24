@@ -2,10 +2,10 @@ from django.core.management.base import CommandError
 from ._private import RegnskabCommand
 
 import json
-from regnskab.legacy.export import export_data
-from regnskab.legacy.import_sheets import import_sheets, import_profiles
-from regnskab.legacy.import_aliases import import_aliases
-from regnskab.legacy.import_statuses import import_statuses
+from tkweb.apps.regnskab.legacy.export import export_data
+from tkweb.apps.regnskab.legacy.import_sheets import import_sheets, import_profiles
+from tkweb.apps.regnskab.legacy.import_aliases import import_aliases
+from tkweb.apps.regnskab.legacy.import_statuses import import_statuses
 
 
 class Command(RegnskabCommand):

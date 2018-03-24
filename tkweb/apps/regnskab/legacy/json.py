@@ -1,7 +1,7 @@
 import json
 import argparse
 
-from regnskab.legacy.base import Regnskab, read_regnskab, Person
+from tkweb.apps.regnskab.legacy.base import read_regnskab
 
 
 def main():

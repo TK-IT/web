@@ -17,19 +17,19 @@ from django.views.generic import FormView
 
 import tktitler as tk
 
-from regnskab.models import (
+from tkweb.apps.regnskab.models import (
     Session, Purchase, Transaction, Sheet, PurchaseKind,
     compute_balance, get_profiles_title_status,
 )
-from regnskab.rules import get_max_debt, get_default_prices
-from regnskab.forms import BalancePrintForm
-from regnskab.texrender import tex_to_pdf, RenderError, pdfnup
+from tkweb.apps.regnskab.rules import get_max_debt, get_default_prices
+from tkweb.apps.regnskab.forms import BalancePrintForm
+from tkweb.apps.regnskab.texrender import tex_to_pdf, RenderError, pdfnup
 from .auth import regnskab_permission_required_method
 
 try:
-    from uniprint.api import print_new_document
+    from tkweb.apps.uniprint.api import print_new_document
 except ImportError:
-    from regnskab.texrender import print_new_document
+    from tkweb.apps.regnskab.texrender import print_new_document
 
 logger = logging.getLogger('regnskab')
 

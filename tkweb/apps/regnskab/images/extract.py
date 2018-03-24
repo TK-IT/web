@@ -309,7 +309,7 @@ def extract_crosses(sheet_image, lo=0.030, hi=0.045):
 
 
 def get_sheet_rows(sheet_image):
-    from regnskab.models import SheetImage, SheetRow
+    from tkweb.apps.regnskab.models import SheetImage, SheetRow
     prev_pages = SheetImage.objects.filter(sheet=sheet_image.sheet,
                                            page__lt=sheet_image.page)
     prev_person_count = sum(len(o.person_rows) for o in prev_pages)
@@ -324,7 +324,7 @@ def get_sheet_rows(sheet_image):
 
 
 def get_cross_counts(sheet_image, kinds):
-    from regnskab.models import Purchase
+    from tkweb.apps.regnskab.models import Purchase
     sheet_rows = get_sheet_rows(sheet_image)
     purchase_kinds = list(sheet_image.sheet.purchasekind_set.all())
     purchases = {
@@ -469,7 +469,7 @@ def get_person_crosses(person_rows, øl=15, guldøl=6, sodavand=15):
 
 
 def get_images(sheet):
-    from regnskab.models import SheetImage
+    from tkweb.apps.regnskab.models import SheetImage
     if sheet.pk:
         existing = list(SheetImage.objects.filter(sheet=sheet))
         if existing:
@@ -518,7 +518,7 @@ def rerun_extract_images(sheet):
 
 
 def extract_row_image(sheet, kinds, images):
-    from regnskab.models import SheetRow, Purchase
+    from tkweb.apps.regnskab.models import SheetRow, Purchase
     rows = []
     purchases = []
 

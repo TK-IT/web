@@ -78,7 +78,7 @@ class Helper:
 
 
 def get_profiles(data):
-    from regnskab.models import Profile
+    from tkweb.apps.regnskab.models import Profile
     emails = {}
     for o in data:
         emails.update(o['emails'])
@@ -93,7 +93,7 @@ def make_profiles(data, save_all):
 
 
 def get_existing_profiles(data, helper):
-    from regnskab.models import Profile
+    from tkweb.apps.regnskab.models import Profile
     profiles = get_profiles(data)
     existing = {p.name: p for p in Profile.objects.all()}
     existing_email = [(p.name, p.email, existing.get(p.name, Profile(email=None)).email)
@@ -122,7 +122,6 @@ def strptime(s):
 
 
 def get_transactions(data, profiles):
-    from regnskab.models import Transaction
     transactions = []
 
     for o in data:
@@ -154,7 +153,7 @@ purchase_kind_names = dict(oel='øl', xmas='guldøl', vand='sodavand',
 
 
 def get_sheets(data, profiles):
-    from regnskab.models import Sheet, SheetRow, PurchaseKind, Purchase
+    from tkweb.apps.regnskab.models import Sheet, SheetRow, Purchase
     sheets = []
     purchase_kinds = []
     rows = []
@@ -201,7 +200,6 @@ def import_profiles(data, helper):
 
 
 def import_sheets(data, helper):
-    from regnskab.models import Purchase
     save_all = helper.save_all
     filter_related = helper.filter_related
 

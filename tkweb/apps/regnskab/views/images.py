@@ -12,18 +12,18 @@ from django.shortcuts import get_object_or_404
 from django.utils.html import format_html, format_html_join
 from django.http import HttpResponse
 
-from regnskab.models import SheetImage, Purchase
+from tkweb.apps.regnskab.models import SheetImage, Purchase
 from .auth import regnskab_permission_required_method
-from regnskab.images.quadrilateral import (
+from tkweb.apps.regnskab.images.quadrilateral import (
     Quadrilateral, extract_quadrilateral,
 )
-from regnskab.images.forms import (
+from tkweb.apps.regnskab.images.forms import (
     SheetImageCrossesForm, SheetImageParametersForm,
 )
-from regnskab.images.extract import (
+from tkweb.apps.regnskab.images.extract import (
     extract_images, plot_extract_rows_cols,
 )
-from regnskab.images.utils import png_data_uri
+from tkweb.apps.regnskab.images.utils import png_data_uri
 
 import numpy as np
 
@@ -174,7 +174,7 @@ class SheetImageParameters(FormView, SheetImageMixin):
 
 
 def get_sheetimage_cross_classes(qs):
-    from regnskab.images.extract import get_crosses_from_counts
+    from tkweb.apps.regnskab.images.extract import get_crosses_from_counts
 
     pos = []
     neg = []
@@ -194,7 +194,7 @@ def get_sheetimage_cross_classes(qs):
 
 
 def img_tag(im_data, **kwargs):
-    from regnskab.images.utils import save_png, png_data_uri
+    from tkweb.apps.regnskab.images.utils import save_png, png_data_uri
 
     png_data = save_png(im_data.reshape((24, 24, 3)))
     png_uri = png_data_uri(png_data)
@@ -253,7 +253,7 @@ class NaiveParam(View):
             list(SheetImage.objects.all()[0:4]) +
             list(SheetImage.objects.all()[6:8]))
 
-        from regnskab.images.extract import naive_cross_value
+        from tkweb.apps.regnskab.images.extract import naive_cross_value
         pos = sorted(((im, naive_cross_value(im)) for im in pos),
                      key=lambda x: x[1])
         neg = sorted(((im, naive_cross_value(im)) for im in neg),
