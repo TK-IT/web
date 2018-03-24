@@ -6,13 +6,10 @@ from django.conf import settings
 import django.db.models.deletion
 
 
-profile_model = settings.TKWEB_IDM_MODULE.split('.')[-1] + '.Profile'
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
-        migrations.swappable_dependency(profile_model),
+        ('idm', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -27,7 +24,7 @@ class Migration(migrations.Migration):
                 ('end_time', models.DateTimeField(blank=True, null=True)),
                 ('created_time', models.DateTimeField(auto_now_add=True)),
                 ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
-                ('profile', models.ForeignKey(to=profile_model)),
+                ('profile', models.ForeignKey(to='idm.Profile')),
             ],
             options={
                 'ordering': ['period', 'root'],
@@ -43,7 +40,7 @@ class Migration(migrations.Migration):
                 ('body', models.TextField()),
                 ('recipient_name', models.CharField(max_length=255)),
                 ('recipient_email', models.CharField(max_length=255)),
-                ('profile', models.ForeignKey(to=profile_model, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+')),
+                ('profile', models.ForeignKey(to='idm.Profile', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+')),
             ],
         ),
         migrations.CreateModel(
@@ -122,7 +119,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('position', models.PositiveIntegerField()),
                 ('name', models.CharField(max_length=200, null=True)),
-                ('profile', models.ForeignKey(null=True, to=profile_model)),
+                ('profile', models.ForeignKey(null=True, to='idm.Profile')),
                 ('sheet', models.ForeignKey(to='regnskab.Sheet')),
             ],
             options={
@@ -139,7 +136,7 @@ class Migration(migrations.Migration):
                 ('end_time', models.DateTimeField(blank=True, null=True)),
                 ('created_time', models.DateTimeField(auto_now_add=True)),
                 ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
-                ('profile', models.ForeignKey(to=profile_model)),
+                ('profile', models.ForeignKey(to='idm.Profile')),
             ],
         ),
         migrations.CreateModel(
@@ -152,7 +149,7 @@ class Migration(migrations.Migration):
                 ('note', models.CharField(blank=True, max_length=255)),
                 ('created_time', models.DateTimeField(auto_now_add=True)),
                 ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
-                ('profile', models.ForeignKey(to=profile_model)),
+                ('profile', models.ForeignKey(to='idm.Profile')),
                 ('session', models.ForeignKey(null=True, to='regnskab.Session')),
             ],
         ),

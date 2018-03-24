@@ -31,31 +31,11 @@ from tkweb.apps.regnskab.utils import (
     sum_vector, sum_matrix, plain_to_html, html_to_plain, EmailMultiRelated,
 )
 
+from constance import config
+from tkweb.apps.idm.models import Profile, Title
+
 logger = logging.getLogger('regnskab')
 
-
-def _import_profile_title():
-    try:
-        module_name = settings.TKWEB_IDM_MODULE
-    except AttributeError:
-        raise ImproperlyConfigured('settings must define TKWEB_IDM_MODULE')
-
-    models_module = module_name + '.models'
-    import importlib
-    try:
-        module = importlib.import_module(models_module)
-    except ImportError:
-        raise ImproperlyConfigured(
-            models_module + ' is not a module that can be imported')
-
-    try:
-        return (module.Profile, module.Title, module.config)
-    except AttributeError:
-        raise ImproperlyConfigured(
-            models_module + ' must define Profile, Title, config')
-
-
-Profile, Title, config = _import_profile_title()
 
 BEST_ORDER = dict(zip('FORM INKA KASS NF CERM SEKR PR VC'.split(), range(8)))
 

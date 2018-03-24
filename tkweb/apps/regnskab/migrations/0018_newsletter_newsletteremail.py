@@ -6,13 +6,9 @@ import django.db.models.deletion
 from django.conf import settings
 
 
-profile_model = settings.TKWEB_IDM_MODULE.split('.')[-1] + '.Profile'
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
-        migrations.swappable_dependency(profile_model),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('regnskab', '0017_explicit_email_set'),
     ]
@@ -43,7 +39,7 @@ class Migration(migrations.Migration):
                 ('recipient_name', models.CharField(max_length=255)),
                 ('recipient_email', models.CharField(max_length=255)),
                 ('newsletter', models.ForeignKey(related_name='email_set', to='regnskab.Newsletter')),
-                ('profile', models.ForeignKey(null=True, related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=profile_model)),
+                ('profile', models.ForeignKey(null=True, related_name='+', on_delete=django.db.models.deletion.SET_NULL, to='idm.Profile')),
             ],
             options={
                 'abstract': False,

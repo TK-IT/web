@@ -46,8 +46,6 @@ LOCAL_APPS = [
     'tkweb.apps.uniprint',
 ]
 
-TKWEB_IDM_MODULE = 'tkweb.apps.idm'
-
 try:
     # Is django-mediumeditor installed?
     import mediumeditor
