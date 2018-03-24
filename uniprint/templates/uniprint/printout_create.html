@@ -1,0 +1,11 @@
+{% extends "uniprint/base.html" %}
+{% block title %}Send dokument til printer{% endblock %}
+{% block content %}
+<h1>Send dokument til printer</h1>
+
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Send til printer" />
+</form>
+
+{% endblock %}

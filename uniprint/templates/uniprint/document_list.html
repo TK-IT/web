@@ -1,0 +1,45 @@
+{% extends "uniprint/base.html" %}
+{% block title %}Dokumenter{% endblock %}
+{% block content %}
+<h1>Dokumenter</h1>
+
+<table>
+<thead>
+    <tr>
+        <th>Navn</th>
+        <th>Ejer</th>
+        <th>Uploadet</th>
+        <th>Udskrevet</th>
+        <th>Sider</th>
+    </tr>
+</thead>
+<tbody>
+    {% for o in object_list %}
+    <tr>
+        <td><a href="{{ o.file.url }}">{{ o.original_filename }}</a></td>
+        <td>{{ o.created_by.get_full_name|default:o.created_by.username }}</td>
+        <td>{{ o.created_time }}</td>
+        <td>{{ o.latest_printout|default:"&mdash;" }}</td>
+        <td>{{ o.pages }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+
+{% if is_paginated %}
+<div class="pagination">
+<span class="page-links">
+{% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}">forrige</a>
+{% endif %}
+<span class="page-current">
+    Side {{ page_obj.number }} af {{ page_obj.paginator.num_pages }}.
+</span>
+{% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">næste</a>
+{% endif %}
+</span>
+</div>
+{% endif %}
+
+{% endblock %}
