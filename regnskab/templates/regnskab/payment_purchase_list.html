@@ -1,0 +1,51 @@
+{% extends "regnskab/base.html" %}
+{% block head %}
+<style>
+.warn { background-color: rgba(255, 0, 0, 0.4); }
+.name, .status, .prev-balance, .paid-balance { white-space: nowrap; }
+.prev-balance, .paid-balance { text-align: right; }
+</style>
+{% endblock %}
+{% block title %}Personer der har krydset{% endblock %}
+{% block content %}
+<h2>Personer der har krydset</h2>
+
+<p>Personer der har krydset uden at betale sin regning
+eller som har taget mere end én indgang på en krydsliste
+<span class="warn">markeres med rødt</span>.</p>
+
+<p>
+Hvis en regning overstiger {{ max_debt }} kr.,
+så skal den betales ned til højst {{ max_debt_paid }} kr.
+før man må bruge krydslisten igen.
+</p>
+
+<table class='tabular'>
+    <thead>
+        <tr>
+            <th>Navn</th>
+            <th>På krydslisten</th>
+            <th>Regning</th>
+            <th>Betalt ned til</th>
+            <th>Krydser</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for person in object_list %}
+        <tr class="{{ person.warn|yesno:"warn," }}">
+            <td class="name"><a class="profile-link"
+                   href="{% url 'regnskab:profile_detail' pk=person.pk %}">
+                    {{ person.title_name }}</a></td>
+            <td class="status">{{ person.status.since }}</td>
+            <td class="prev-balance">{{ person.b0|floatformat:2 }}</td>
+            <td class="paid-balance">{{ person.b1|floatformat:2 }}</td>
+            <td class="purchases">{% for sheet, purchases, n_rows, w in person.sheets %}
+                <a class="{{ w|yesno:"warn," }}" href="{% url 'regnskab:sheet_detail' pk=sheet.id %}?highlight_profile={{ person.pk }}"
+                   title="{{ sheet }}" data-rows="{{ n_rows }}">
+                {{ purchases }}</a>{% if forloop.last %}{% else %},{% endif %}
+            {% endfor %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

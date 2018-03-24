@@ -1,0 +1,50 @@
+{% extends "regnskab/base.html" %}
+{% load regnskab %}
+{% block fulltitle %}{% regnskab_site_name %}{% endblock %}
+{% block navcurrent %}{% endblock %}
+{% block content %}
+<p>Velkommen til {% regnskab_site_name %}, {{ inka.name }}.</p>
+
+<p>
+{% if latest_session %}
+{% if latest_session.sent %}
+<a href="{% url 'regnskab:session_update' pk=latest_session.pk %}">
+Vis opgørelsen der blev udsendt {{ latest_session.send_time }}</a>
+{% else %}
+<a href="{% url 'regnskab:session_update' pk=latest_session.pk %}">
+Gå til opgørelse af krydslisten</a>
+{% endif %}
+{% else %}
+Ingen opgørelser i databasen
+{% endif %}
+</p>
+
+{# Display form if there is no latest_session or latest_session.sent is true #}
+{% if not latest_session.sent %}{% else %}
+<form method="post" action="{% url 'regnskab:session_create' %}">{% csrf_token %}
+    <input type="submit" value="Begynd ny opgørelse" />
+</form>
+{% endif %}
+
+<p><a href="{% url 'regnskab:session_list' %}">Vis alle tidligere opgørelser</a></p>
+
+<p><a href="{% url 'regnskab:profile_list' %}">Vis liste af personer</a>
+</p>
+
+{% if email_template %}
+<p><a href="{% url 'regnskab:email_template_update' pk=email_template.pk %}">
+    Ret standardemail</a></p>
+{% else %}
+<p><a href="{% url 'regnskab:email_template_create' %}?name=Standard">
+    Opret standardemail</a></p>
+{% endif %}
+
+<p><a href="{% url 'regnskab:newsletter_list' %}">Send mail ud til hele krydslisten</a></p>
+
+<p><a href="{% url 'regnskab:krydsliste:sheet_list' %}">Opret og udskriv krydsliste</a></p>
+
+<p><a href="{% url 'regnskab:log' %}">Vis aktivitetslog</a>
+(dit brugernavn: {{ user.username }})</p>
+
+<p><a href="{% url 'regnskab:sheet_image_list' %}">Vis scannede krydslister</a></p>
+{% endblock %}

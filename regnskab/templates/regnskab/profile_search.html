@@ -1,0 +1,43 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Søg person{% endblock %}
+{% block nav %}
+<a href="{% url 'regnskab:profile_list' %}"><li>Personer</li></a>
+{% endblock %}
+{% block content %}
+<p>
+På denne side kan du finde en person ved at søge efter vedkommendes
+navn, titel eller alias.
+</p>
+<p>
+Søgeresultaterne er sorteret efter relevans.
+</p>
+<form method="get">
+    <p><input name="q" value="{{ q }}" size="60" autofocus /></p>
+    <p><label><input name="c" {{ c|yesno:"checked," }} type="checkbox" />
+        Kun folk på krydslisten</label></p>
+    <input type="submit" value="Søg" />
+</form>
+{% if q %}
+{% if results %}
+<table>
+    <thead>
+        <tr>
+            <th>Alias</th>
+            <th>Person</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for match, profile in results %}
+        <tr>
+            <td>{{ match }}</td>
+            <td><a href="{% url 'regnskab:profile_detail' pk=profile.pk %}">{{ profile }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Ingen resultater</p>
+{% endif %}
+{% endif %}
+
+{% endblock %}

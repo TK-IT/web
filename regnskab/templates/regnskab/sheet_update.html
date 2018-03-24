@@ -1,0 +1,25 @@
+{% extends "regnskab/base.html" %}
+{% load staticfiles %}
+{% block head %}
+<link rel="stylesheet" type="text/css"
+href="{% static 'regnskab/sheet_update.css' %}" />
+<script src="{% static 'react/react.js' %}"></script>
+<script src="{% static 'react/react-dom.js' %}"></script>
+<script src="{% static 'regnskab/regnskab.js' %}"></script>
+<script>window.TK_PROFILES = (
+{{ profiles_json|safe }});
+</script>
+{% endblock %}
+{% block title %}Opgør krydsliste{% endblock %}
+{% block content %}
+<form method="post">{% csrf_token %}
+{{ form.as_p }}
+
+{% if saved %}<p class="success-message">Krydslisten er gemt!</p>{% endif %}
+
+{% if error %}<p>Der er sket en fejl. {{ error }}</p>{% endif %}
+
+<div id="sheet-container"></div>
+<input type="submit" value="Gem" />
+</form>
+{% endblock %}

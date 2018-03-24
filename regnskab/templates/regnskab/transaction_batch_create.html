@@ -1,0 +1,81 @@
+{% extends "regnskab/base.html" %}
+{% block head %}
+<style>
+.amount input { text-align: right; width: 4em; }
+</style>
+<script>
+function above(checkbox) {
+    var row = checkbox;
+    while (row && (row.nodeType != 1 || row.tagName !== 'TR'))
+        row = row.parentNode;
+    var prev = row.previousSibling;
+    while (prev && prev.nodeType != 1) prev = prev.previousSibling;
+    return prev.querySelector('input[type=checkbox]');
+}
+function below(checkbox) {
+    var row = checkbox;
+    while (row && (row.nodeType != 1 || row.tagName !== 'TR'))
+        row = row.parentNode;
+    var next = row.nextSibling;
+    while (next && next.nodeType != 1) next = next.nextSibling;
+    return next.querySelector('input[type=checkbox]');
+}
+
+function paid_keypress(ev) {
+    if (ev.charCode === 106) { // j
+        // Go down
+        below(ev.target).focus();
+    } else if (ev.charCode === 107) { // k
+        above(ev.target).focus();
+    } else if (ev.charCode === 109) { // m
+        ev.target.checked = true;
+        below(ev.target).focus();
+    } else if (ev.charCode === 117) {
+        ev.target.checked = false;
+        below(ev.target).focus();
+    } else {
+        return;
+    }
+    ev.stopPropagation();
+    ev.preventDefault();
+}
+function init() {
+    var table = document.getElementById('transaction_form');
+    var tbody = table.tBodies[0];
+    var rows = tbody.rows;
+    for (var i = 0; i < rows.length; ++i) {
+        var paid_cell = rows[i].cells[0];
+        var amount_cell = rows[i].cells[2];
+        var paid_input = paid_cell.querySelector('input');
+        var amount_input = amount_cell.querySelector('input');
+        amount_input.addEventListener('input', function () {paid_input.checked=true}, false);
+	paid_input.addEventListener('keypress', paid_keypress);
+    }
+
+    table.querySelector('input[type=checkbox]').focus();
+}
+window.addEventListener('load', init, false);
+</script>
+{% endblock %}
+{% block title %}{{ header }}{% endblock %}
+{% block nav %}
+{% endblock %}
+{% block content %}
+<h2>{{ header }}</h2>
+
+<form method="post">{% csrf_token %}
+    <table id="transaction_form">
+        <thead><tr><th>Navn</th><th>Beløb</th><th></th></tr></thead>
+        <tbody>
+    {% for profile, amount, selected in form.profile_fields %}
+    <tr>
+        <td><label for="{{ selected.id_for_label }}">{{ profile.display_name }}</label></td>
+        <td class="amount">{{ amount }}</td>
+        <td>{{ selected }}{{ selected.errors }}</td>
+    </tr>
+    {% endfor %}
+        </tbody>
+    </table>
+    <input type="submit" value="{{ save_label }}" />
+</form>
+{% endblock %}

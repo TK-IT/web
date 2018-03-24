@@ -1,0 +1,78 @@
+{% extends "regnskab/base.html" %}
+{% load staticfiles %}
+{% block head %}
+<link rel="stylesheet" type="text/css"
+href="{% static 'regnskab/sheet_detail.css' %}" />
+<script>
+function sheet_detail_init() {
+	var linkContainer = document.getElementById('hide-empty');
+	var anyEmpty = document.getElementsByClassName('empty').length > 0;
+	if (!(linkContainer && anyEmpty)) return;
+	linkContainer.style.display = 'block';
+	var chk = linkContainer.querySelector('input');
+
+	function chkClick() {
+		console.log(chk.checked);
+		if (chk.checked) document.body.classList.add('hide-empty');
+		else document.body.classList.remove('hide-empty');
+	}
+
+	chk.addEventListener('click', chkClick, false);
+	chkClick();
+}
+</script>
+{% endblock %}
+{% block title %}Krydslisten {{ sheet }}{% endblock %}
+{% block content %}
+<h2>Krydslisten {{ sheet }}</h2>
+
+{% if sheet_images or sheet.image_file %}
+<p>Hent original:
+{% if sheet.image_file %}<a href="{{ sheet.image_file.url }}">PDF</a>{% endif %}
+{% for im in sheet_images %}
+<a href="{% url 'regnskab:sheet_image_file_projected' pk=sheet.id page=im.page %}">{{ im.page }}</a>
+{% endfor %}
+</p>
+{% endif %}
+
+<p id="hide-empty" style="display: none">
+<label><input type="checkbox" checked> Skjul tomme indgange</label>
+</p>
+
+<div class="sheet">
+<div class="sheetrow sheetrow-header">
+ <div class="name"></div>
+ {% for kind in sheet.columns %}
+ <div class="column column-{{ kind.name }}">{{ kind.short_name }}</div>
+ {% endfor %}
+</div>
+{% for row in sheet.rows %}
+<div class="sheetrow {{ row.empty|yesno:"empty,nonempty"}} {% if row.profile.id == highlight_profile %}highlight{% endif %}">
+ <div class="name">
+  <div class="chosen-person">{{ row.title_name|default:"" }}</div>
+ </div>
+ {% for kind in row.kinds %}
+  <div class="column column-{{ kind.kind.name }}">
+  <div class="crosses">
+   {% for _ in kind.counter %}<div class="cross">&times;</div>{% endfor %}
+  </div>
+  <div class="count">{% if kind.count %}{{ kind.get_count_display }}{% endif %}</div>
+  </div>
+ {% endfor %}
+</div>
+{% with row.image as img %}
+{% if img %}
+<div class="{{ row.empty|yesno:"empty,nonempty"}}"
+style="overflow: hidden; position: relative;
+width: {{ img.width }}px; height: {{ img.height }}px">
+<img src="{{ img.url }}" style="position: absolute;
+top: -{{ img.start }}px; left: 0" />
+</div>
+{% endif %}
+{% endwith %}
+{% endfor %}
+</div>
+<script>
+sheet_detail_init();
+</script>
+{% endblock %}

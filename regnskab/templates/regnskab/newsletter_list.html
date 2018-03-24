@@ -1,0 +1,31 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Nyhedsbreve{% endblock %}
+{% block content %}
+<h2>Nyhedsbreve</h2>
+<p>
+<a href="{% url 'regnskab:newsletter_create' %}">Opret nyt</a>
+</p>
+{% if object_list %}
+<table>
+    <thead>
+        <tr>
+            <th>Navn</th>
+            <th>Oprettet</th>
+            <th>Udsendt</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in object_list %}
+        <tr>
+            <td><a href="{% url 'regnskab:newsletter_update' pk=o.pk %}">
+                    {{ o.email_template.subject }}</a></td>
+            <td>{{ o.created_time }} af {{ o.created_by }}</td>
+            <td>{% if o.sent %}{{ o.send_time }}{% else %}(ikke endnu){% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Ingen nyhedsbreve.</p>
+{% endif %}
+{% endblock %}
