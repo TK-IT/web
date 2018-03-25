@@ -52,6 +52,7 @@ window.addEventListener('load', init_sheet_form, false);
 {% endif %}
 
 <form method="post">{% csrf_token %}
+    {% if form.non_field_errors %}<p>Fejl:</p>{{ form.non_field_errors }}{% endif %}
     {{ form.name.errors }}
     <p>{{ form.name.label_tag }} {{ form.name }}<br>
     Giv skabelonen et navn til listen over skabeloner.
