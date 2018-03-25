@@ -50,7 +50,7 @@ class EmailTemplateUpdate(UpdateView):
     form_class = EmailTemplateForm
 
     def form_valid(self, form):
-        self.object.make_template_editable()
+        self.object.make_template_editable(self.request.user)
         form.save()
         logger.info("%s: Ret emailskabelon %s",
                     self.request.user, self.kwargs['pk'])

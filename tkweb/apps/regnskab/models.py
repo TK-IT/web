@@ -590,7 +590,7 @@ class EmailTemplate(models.Model):
             count += 1
         return count
 
-    def make_template_editable(self):
+    def make_template_editable(self, user):
         if self.name == '':
             raise AssertionError('make_template_editable: anonymous template')
         sessions = Session.objects.filter(email_template_id=self.id)
@@ -599,11 +599,11 @@ class EmailTemplate(models.Model):
             # EmailTemplate.
             backup = EmailTemplate(
                 name='',
-                subject=self.object.subject,
-                body=self.object.body,
-                format=self.object.format,
-                markup=self.object.markup,
-                created_by=self.object.user)
+                subject=self.subject,
+                body=self.body,
+                format=self.format,
+                markup=self.markup,
+                created_by=user)
             backup.save()
             sessions.update(email_template=backup)
 
