@@ -50,6 +50,7 @@ LOCAL_APPS = [
     'tkweb.apps.idm',
     'tkweb.apps.mailinglist',
     'tkweb.apps.scripts',
+    'tkweb.apps.eval',
     'tkweb.apps.evalmacros',
 ]
 
