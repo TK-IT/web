@@ -11,11 +11,10 @@ import tkweb.apps.gallery.urls
 import tkweb.apps.jubi.urls
 import tkweb.apps.redirect.urls
 import tkweb.apps.mailinglist.urls
+import tkweb.apps.eval.urls
 import django.views.static
 import django.views.defaults
 import tkweb.views
-from wiki.urls import get_pattern as get_wiki_pattern
-from django_nyt.urls import get_pattern as get_nyt_pattern
 
 
 urlpatterns = [
@@ -63,9 +62,9 @@ urlpatterns = [
     url(r'^[Jj]',
         include(tkweb.apps.jubi.urls)),
 
-    # wiki
-    url(r'^notifications/', get_nyt_pattern()),
-    url(r'^wiki/', get_wiki_pattern()),
+    url(r'^eval/',
+        include(tkweb.apps.eval.urls),
+        name='eval'),
 
     url(r'^admin/', admin.site.urls),
 
