@@ -1,3 +1,4 @@
+from constance import config
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -16,6 +17,15 @@ class WikiArticleTimeout(models.Model):
 
     def __str__(self):
         return '%s: %s' % (self.article, self.month)
+
+    def outdated(self):
+        if self.timeoutMonth:
+            outdate = datetime.date(year=config.GFYEAR,
+                                    month=self.timeoutMonth,
+                                    day=1)
+            return self.updated < outdate
+        else:
+            return None
 
 
 @receiver(post_save, sender=Article)
