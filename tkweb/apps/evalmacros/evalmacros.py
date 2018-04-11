@@ -11,10 +11,23 @@ import tkweb.apps.tkbrand.templatetags.tkbrand as tkbrand
 from constance import config
 
 METHODS = [
-    'begin_hide', 'end_hide', 'fixme', 'updated',
+    'begin_hide', 'end_hide', 'fixme', 'timeout', 'updated',
     'TK', 'TKAA', 'TKET', 'TKETAA', 'TKETs', 'TKETsAA', 'TKETS', 'TKETSAA',
     'tk_prefix', 'tk_kprefix', 'tk_postfix', 'tk_prepostfix', 'tk_email',
 ]
+
+MONTHS = [('Jan', 'January', 'Januar'),
+          ('Feb', 'February', 'Februar'),
+          ('Mar', 'March', 'Marts'),
+          ('Apr', 'April',),
+          ('May', 'May', 'Maj'),
+          ('Jun', 'June', 'Juni'),
+          ('Jul', 'July', 'Juli'),
+          ('Aug', 'August'),
+          ('Sep', 'Sept', 'September'),
+          ('Oct', 'October', 'Okt', 'Oktober'),
+          ('Nov', 'November'),
+          ('Dec', 'December')]
 
 def _inline_error(method, error):
     html = (
@@ -23,6 +36,26 @@ def _inline_error(method, error):
         '<span class="btn btn-default">%s</span>' +
         '</span>') % (method, error)
     return html
+
+def parseTimeoutMonth(month):
+
+        pattern = (r"(?P<month>(%s))" %
+                   '|'.join(m for ml in MONTHS for m in ml))
+        mo = re.search(pattern, month, re.IGNORECASE)
+
+        if mo is None:
+            raise ValueError("\'%s\' is not a valid month" % month)
+
+        mg = mo.group('month')
+
+        def _convert(lst):
+            dct = {}
+            for i, v in enumerate(lst):
+                for v in v:
+                    dct[v.lower()] = i+1
+            return dct
+
+        return _convert(MONTHS)[mg]
 
 
 class EvalMacroExtension(markdown.Extension):
@@ -111,11 +144,15 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
         },
     }
 
-    def updated(self, year, full=''):
+    def timeout(self, month, full=''):
+        return str(parseTimeoutMonth(month))
+
+    def updated(self, title, date, full=''):
         html = render_to_string(
             "evalmacros/updated.html",
             context = {
-                'year': year,
+                'title': title,
+                'date': date,
                 'color': 'danger'
             })
         return self.markdown.htmlStash.store(html, safe=False)
