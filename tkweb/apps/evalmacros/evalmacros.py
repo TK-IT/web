@@ -145,7 +145,11 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
     }
 
     def timeout(self, month, full=''):
-        return str(parseTimeoutMonth(month))
+        try:
+            parseTimeoutMonth(month)
+        except Exception as exn:
+            return _inline_error(full, exn)
+        return ''
 
     def updated(self, title, date, full=''):
         wat = self.markdown.article.wikiArticleTimeout
