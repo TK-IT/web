@@ -148,12 +148,18 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
         return str(parseTimeoutMonth(month))
 
     def updated(self, title, date, full=''):
+        wat = self.markdown.article.wikiArticleTimeout
+        if wat.outdated():
+            color = 'danger'
+        else:
+            color = 'default'
+
         html = render_to_string(
             "evalmacros/updated.html",
-            context = {
+            context={
                 'title': title,
-                'date': date,
-                'color': 'danger'
+                'date': wat.updated,
+                'color': color,
             })
         return self.markdown.htmlStash.store(html, safe=False)
 
