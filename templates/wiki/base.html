@@ -40,8 +40,9 @@
 
 {% block wiki_header_navlinks %}
 <ul class="nav navbar-nav">
-    <li class="active"><a href="{% url 'wiki:root' %}">Evalwiki</a></li>
-    <li class="active"><a href="{% url 'admin:index' %}">Admin</a></li>
+    <li><a href="{% url 'wiki:root' %}">Evalwiki</a></li>
+    <li><a href="{% url 'eval_timeouts' %}">Forældede artikler</a></li>
+    <li><a href="{% url 'admin:index' %}">Admin</a></li>
 </ul>
 {% endblock %}
 
