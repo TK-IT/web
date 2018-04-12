@@ -1,3 +1,4 @@
+import datetime
 import markdown
 import random
 import re
@@ -153,17 +154,13 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
 
     def updated(self, title, date, full=''):
         wat = self.markdown.article.wikiArticleTimeout
-        if wat.outdated():
-            color = 'danger'
-        else:
-            color = 'default'
-
         html = render_to_string(
             "evalmacros/updated.html",
             context={
                 'title': title,
-                'date': wat.updated,
-                'color': color,
+                'updated': wat.updated,
+                'timeoutMonth': datetime.date(year=2000, month=wat.timeoutMonth, day=1).strftime('%B'),
+                'outdated': wat.outdated(),
             })
         return self.markdown.htmlStash.store(html, safe=False)
 
