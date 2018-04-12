@@ -16,6 +16,7 @@ Den meste funktionalitet kan findes i apps.
   URLer fra den gamle PHP-side.
 - [`tkweb/apps/idm`](tkweb/apps/idm) er en ikke-offentlig app til at ændre
   persondata og maillister.
+- [`tkweb/apps/eval`](tkweb/apps/eval) er en ikke-offentlig wiki til evalueringer.
 
 Under [`templates`](templates) findes Django HTML-templates som er det der
 bliver vist til brugeren.
