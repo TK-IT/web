@@ -1,5 +1,5 @@
 from django import template
-from tkweb.apps.evalmacros.evalmacros import EvalMacroPreprocessor, METHODS
+from tkweb.apps.eval.evalmacros import EvalMacroPreprocessor, METHODS
 
 register = template.Library()
 
