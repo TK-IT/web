@@ -20,12 +20,12 @@ METHODS = [
 MONTHS = [('Jan', 'January', 'Januar'),
           ('Feb', 'February', 'Februar'),
           ('Mar', 'March', 'Marts'),
-          ('Apr', 'April',),
+          ('Apr', 'April', 'KBEST'),  # NB: KBEST
           ('May', 'May', 'Maj'),
           ('Jun', 'June', 'Juni'),
           ('Jul', 'July', 'Juli'),
           ('Aug', 'August'),
-          ('Sep', 'Sept', 'September'),
+          ('Sep', 'Sept', 'September', 'GF'),  # NB: GF
           ('Oct', 'October', 'Okt', 'Oktober'),
           ('Nov', 'November'),
           ('Dec', 'December')]
