@@ -1,7 +1,9 @@
-{% extends 'base.html' %}
+{% extends "wiki/base.html" %}
 
-{% block content %}
-<h2>Gamle artikler</h2>
+{% block wiki_pagetitle %}Forældede artikler{% endblock %}
+
+{% block wiki_contents%}
+<h2>Forældede artikler</h2>
 <div class="row">
     <div class="col-sm-12">
         <table class="table table-condensed">
@@ -18,4 +20,4 @@
         </table>
     </div>
 </div>
-{% endblock content%}
+{% endblock %}
