@@ -13,6 +13,26 @@ class WikiArticleTimeoutTestOutdatedRightBeforeGF(TestCase):
     def setUp(self):
         Article.objects.create()
 
+    def test_none_both(self):
+        instance = WikiArticleTimeout.objects.all()[0]
+        instance.timeoutMonth = None
+        instance.updated = None
+        self.assertIsNone(instance.outdated())
+
+    def test_none_updated(self):
+        instance = WikiArticleTimeout.objects.all()[0]
+        instance.timeoutMonth = 1
+        instance.updated = None
+        self.assertIsNotNone(instance.outdated())
+        self.assertTrue(instance.outdated())
+
+    def test_none_timeout(self):
+        instance = WikiArticleTimeout.objects.all()[0]
+        instance.timeoutMonth = None
+        instance.updated = date(2018, 1, 1)
+        self.assertIsNotNone(instance.outdated())
+        self.assertFalse(instance.outdated())
+
     def test_clearly_outdated(self):
         instance = WikiArticleTimeout.objects.all()[0]
         instance.timeoutMonth = 1
