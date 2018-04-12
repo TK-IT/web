@@ -266,7 +266,7 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
     tk_prefix.meta = {
         'short_description': 'Anciennitet',
         'help_text': ('Følgene makroer giver et titel-prefix eller -postfix ' +
-                      'relativt til det nuværende år. Eksempel vis bliver ' +
+                      'relativt til det nuværende år. Eksempelvis bliver ' +
                       '<code>[tk_prefix 2010 VC]</code> til T²OVC. Prefixet ' +
                       'bliver automatisk opdateret ved hver GF.' +
                       '<table class="table table-condensed">' +
