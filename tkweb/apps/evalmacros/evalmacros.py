@@ -152,6 +152,18 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
             return _inline_error(full, exn)
         return ''
 
+    timeout.meta = {
+        'short_description': 'Forfald',
+        'help_text': (
+            'Tilføjer en forfaldsdato til en artikel og tilføjer den til ' +
+            'listen over forældede artikler. Dog ikke hvis den er blevet ' +
+            'adjourført inden da.'),
+        'example_code': ('[timeout feb]'),
+        'args': {
+            'month': 'Måneden hvor artiklen forfalder.',
+        },
+    }
+
     def updated(self, title, date, full=''):
         wat = self.markdown.article.wikiArticleTimeout
         html = render_to_string(
@@ -163,6 +175,21 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
                 'outdated': wat.outdated(),
             })
         return self.markdown.htmlStash.store(html, safe=False)
+
+    updated.meta = {
+        'short_description': 'Ajourførelse',
+        'help_text': (
+            'Adjourføre en artikel. Det fjerner artiklen fra listen over ' +
+            'forældede artikler. Brug kun denne når <em>alle</em> fejl er ' +
+            'blevet rettet.'),
+        'example_code': ('[updated BEST 2018-05-12]'),
+        'args': {
+            'title': ('Navet på personen eller gruppen der har udført ' +
+                      'ajourførelsen.'),
+            'dato': ('Datoen, i formatet YYYY-MM-DD, hvor ajourførelsen har ' +
+                     'fundet sted.'),
+        },
+    }
 
     _TKBRANDFUNCS = [tkbrand.TK, tkbrand.TKAA, tkbrand.TKET, tkbrand.TKETAA,
                      tkbrand.TKETs, tkbrand.TKETsAA, tkbrand.TKETS,
