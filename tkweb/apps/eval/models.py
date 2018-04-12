@@ -30,23 +30,27 @@ class WikiArticleTimeout(models.Model):
 
 @receiver(post_save, sender=Article)
 def wikiArticle_callback(sender, instance, **kwargs):
-    lines = instance.current_revision.content
+    if instance.current_revision is not None:
+        lines = instance.current_revision.content
 
-    toPattern = (r"\[timeout(?:\s+(?P<month>(%s)))\]" %
-                 '|'.join(m for ml in MONTHS for m in ml))
-    toMo = re.search(toPattern, lines, re.IGNORECASE)
-    if toMo is not None:
-        timeout = parseTimeoutMonth(toMo.group('month'))
+        toPattern = (r"\[timeout(?:\s+(?P<month>(%s)))\]" %
+                     '|'.join(m for ml in MONTHS for m in ml))
+        toMo = re.search(toPattern, lines, re.IGNORECASE)
+        if toMo is not None:
+            timeout = parseTimeoutMonth(toMo.group('month'))
+        else:
+            timeout = None
+
+        upPattern = (r"\[updated(?:\s+(?P<title>[^\s\n]{0,300}))" +
+                     "(?:\s+(?P<date>\d{4}-\d{1,2}-\d{1,2}))\]")
+        upMo = re.search(upPattern, lines, re.IGNORECASE)
+        if upMo is not None:
+            updated = datetime.datetime.strptime(upMo.group('date'),
+                                                 "%Y-%m-%d").date()
+        else:
+            updated = None
     else:
         timeout = None
-
-    upPattern = (r"\[updated(?:\s+(?P<title>[^\s\n]{0,300}))" +
-                 "(?:\s+(?P<date>\d{4}-\d{1,2}-\d{1,2}))\]")
-    upMo = re.search(upPattern, lines, re.IGNORECASE)
-    if upMo is not None:
-        updated = datetime.datetime.strptime(upMo.group('date'),
-                                             "%Y-%m-%d").date()
-    else:
         updated = None
 
     try:
