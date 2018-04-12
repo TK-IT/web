@@ -1,4 +1,3 @@
-from constance import config
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -16,13 +15,18 @@ class WikiArticleTimeout(models.Model):
     updated = models.DateField(null=True)
 
     def __str__(self):
-        return '%s: %s' % (self.article, self.month)
+        return '%s: %s' % (self.article, self.timeoutMonth)
 
     def outdated(self):
         if self.timeoutMonth:
-            outdate = datetime.date(year=config.GFYEAR,
+            year = datetime.date.today().year
+            if self.timeoutMonth > 9:
+                year -= 1
+
+            outdate = datetime.date(year=year,
                                     month=self.timeoutMonth,
                                     day=1)
+
             return self.updated < outdate
         else:
             return None
