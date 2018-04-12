@@ -30,8 +30,15 @@ class WikiArticleTimeout(models.Model):
         return None
 
     def outdated(self):
-        if self.timeoutMonth:
+        if self.timeoutMonth and self.updated:
             return self.updated < self.timeout()
+
+        if self.timeoutMonth and self.updated is None:
+            return True
+
+        if self.timeoutMonth is None and self.updated:
+            return False
+
         return None
 
 
