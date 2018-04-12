@@ -4,20 +4,90 @@
 
 {% block wiki_contents%}
 <h2>Forældede artikler</h2>
+{% if outdated %}
 <div class="row">
-    <div class="col-sm-12">
-        <table class="table table-condensed">
+    <div class="col-xs-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
+        <table class="table table-condensed table-striped">
+            <thead>
+                <tr>
+                    <th class="col-xs-3 col-sm-6"></th>
+                    <th class="col-xs-3 col-sm-2">Forfaldsdato</th>
+                    <th class="col-xs-3 col-sm-2">Sidst adjourført</th>
+                    <th class="col-xs-3 col-sm-2 small">Sidste ændring</th>
+                </tr>
+            </thead>
             <tbody>
-                {% for wat in wats %}
+                {% for wat in outdated %}
                 <tr>
                     <td><a href="{{ wat.article.get_absolute_url }}">{{ wat.article }}</a></td>
-                    <td>{{ wat.timeoutMonth }}</td>
+                    <td>{{ wat.timeout|date:'F Y' }}</td>
                     <td>{{ wat.updated }}</td>
-                    <td>{{ wat.outdated }}</td>
+                    <td class="small"><a href="{{ wat.article.get_absolute_url }}_history/">{{ wat.article.modified }}</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+{% else %}
+<p class="lead">Der er ingen forældede artikler. I har fortjent en bajer!</p>
+{% endif %}
+
+
+<h2>Opdaterede artikler</h2>
+{% if nonoutdated %}
+<div class="row">
+    <div class="col-xs-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
+        <table class="table table-condensed table-striped">
+            <thead>
+                <tr>
+                    <th class="col-xs-3 col-sm-6"></th>
+                    <th class="col-xs-3 col-sm-2">Forfaldsdato</th>
+                    <th class="col-xs-3 col-sm-2">Sidst adjourført</th>
+                    <th class="col-xs-3 col-sm-2 small">Sidste ændring</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wat in nonoutdated %}
+                <tr>
+                    <td><a href="{{ wat.article.get_absolute_url }}">{{ wat.article }}</a></td>
+                    <td>{{ wat.timeout|date:'F Y' }}</td>
+                    <td>{{ wat.updated }}</td>
+                    <td class="small"><a href="{{ wat.article.get_absolute_url }}_history/">{{ wat.article.modified }}</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<p class="lead">Der er ingen opdaterede artikler. I har <em>ikke</em> fortjent en bajer!</p>
+{% endif %}
+
+
+<h2>Artiker uden forfaldsdato</h2>
+{% if notimeout %}
+<div class="row">
+    <div class="col-xs-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
+        <table class="table table-condensed table-striped">
+            <thead>
+                <tr>
+                    <th class="col-xs-9 col-sm-10"></th>
+                    <th class="col-xs-3 col-sm-2 small">Sidste ændring</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wat in notimeout %}
+                <tr>
+                    <td><a href="{{ wat.article.get_absolute_url }}">{{ wat.article }}</a></td>
+                    <td class="small"><a href="{{ wat.article.get_absolute_url }}_history/">{{ wat.article.modified }}</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<p class="lead">Der er ingen artikler uden en forfaldsdato. I har fortjent en bajer!</p>
+{% endif %}
 {% endblock %}

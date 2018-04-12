@@ -4,7 +4,11 @@ from django.shortcuts import render
 
 def timeouts(request, **kwargs):
     wats = WikiArticleTimeout.objects.all()
-    context = {'wats': wats,
+
+    context = {
+        'outdated': [wat for wat in wats if wat.outdated()],
+        'nonoutdated': [wat for wat in wats if wat.outdated() is False],
+        'notimeout': [wat for wat in wats if wat.outdated() is None],
     }
 
     return render(request, 'eval/timeouts.html', context)
