@@ -159,7 +159,7 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
             context={
                 'title': title,
                 'updated': wat.updated,
-                'timeoutMonth': datetime.date(year=2000, month=wat.timeoutMonth, day=1).strftime('%B'),
+                'timeout': wat.timeout(),
                 'outdated': wat.outdated(),
             })
         return self.markdown.htmlStash.store(html, safe=False)

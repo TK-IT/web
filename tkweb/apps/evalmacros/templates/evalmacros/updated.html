@@ -3,8 +3,8 @@
         <span class="btn btn-xs btn-default">
             Sidst ajourført af {{ title }} {{ updated }}
         </span>{% if outdated %}<span class="btn btn-xs btn-danger">
-            forfalt i {{ timeoutMonth }}.{% else %}<span class="btn btn-xs btn-success">
-            forfalder i {{ timeoutMonth }}.
+            forfalt i {{ timeout|date:'F' }}.{% else %}<span class="btn btn-xs btn-success">
+            forfalder i {{ timeout|date:'F' }}.
             {% endif %}</span>
     </span>
 </p>

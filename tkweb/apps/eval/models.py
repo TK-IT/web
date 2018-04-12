@@ -17,19 +17,22 @@ class WikiArticleTimeout(models.Model):
     def __str__(self):
         return '%s: %s' % (self.article, self.timeoutMonth)
 
-    def outdated(self):
+    def timeout(self):
         if self.timeoutMonth:
             year = datetime.date.today().year
             if self.timeoutMonth > 9:
                 year -= 1
 
-            outdate = datetime.date(year=year,
-                                    month=self.timeoutMonth,
-                                    day=1)
+            return datetime.date(
+                year=year,
+                month=self.timeoutMonth,
+                day=1)
+        return None
 
-            return self.updated < outdate
-        else:
-            return None
+    def outdated(self):
+        if self.timeoutMonth:
+            return self.updated < self.timeout()
+        return None
 
 
 @receiver(post_save, sender=Article)
