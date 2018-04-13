@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 import os
+import sys
+import socket
 import argparse
 
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--clear')
 parser.add_argument('root', nargs='+')
 
 
@@ -58,8 +61,21 @@ def main():
 
     from wiki.models import Article, ArticleRevision, URLPath
 
+    if args.clear:
+        if not contents:
+            parser.error('--clear: No input files')
+        hostname = socket.gethostname()
+        if args.clear != hostname:
+            parser.error('--clear: Please confirm by specifying ' +
+                         'the current hostname %r as argument' % hostname)
+        URLPath.objects.all().delete()
+        ArticleRevision.objects.all().delete()
+        Article.objects.all().delete()
+
     paths = {'': URLPath.create_root()}
-    for path, parent, title, content in contents:
+    for i, (path, parent, title, content) in enumerate(contents):
+        print('\r%s/%s %s\x1b[J' % (i+1, len(contents), title),
+              end='', flush=True, file=sys.stderr)
         parent_urlpath = paths[parent]
         paths[path] = URLPath.create_urlpath(
             parent=parent_urlpath,
@@ -68,6 +84,7 @@ def main():
             title=title,
             content=content,
         )
+    print('')
 
 
 if __name__ == "__main__":
