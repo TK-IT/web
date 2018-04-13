@@ -258,10 +258,13 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
         return tkbrand.tk_prepostfix((title, self._get_year(year)))
 
     def tk_email(self, year=None, title='', full=''):
-        if title in (None, ''):
-            return _inline_error(full, '\'\' is not a valid title')
-        return ('<' + tkbrand.tk_email((title, self._get_year(year))) +
-                '@TAAGEKAMMERET.dk>')
+        if not year:
+            return _inline_error(full, 'First argument is required')
+        if not title:
+            email = year
+        else:
+            email = tkbrand.tk_email((title, self._get_year(year)))
+        return '<%s@TAAGEKAMMERET.dk>' % email
 
     tk_prefix.meta = {
         'short_description': 'Anciennitet',
