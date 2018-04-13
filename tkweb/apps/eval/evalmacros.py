@@ -178,7 +178,7 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
         'help_text': (
             'Tilføjer en forfaldsdato til en artikel og tilføjer den til ' +
             'listen over forældede artikler. Dog ikke hvis den er blevet ' +
-            'adjourført inden da.'),
+            'ajourført inden da.'),
         'example_code': ('[timeout feb]'),
         'args': {
             'month': 'Måneden hvor artiklen forfalder.',
