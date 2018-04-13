@@ -1,7 +1,10 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from tkweb.apps.eval.evalmacros import MONTHS, parseTimeoutMonth
+from django.utils import dateparse
+from tkweb.apps.eval.evalmacros import (
+    parseTimeoutMonth, EvalMacroPreprocessor,
+)
 from wiki.models import Article
 import datetime
 import re
@@ -44,28 +47,26 @@ class WikiArticleTimeout(models.Model):
 
 @receiver(post_save, sender=Article)
 def wikiArticle_callback(sender, instance, **kwargs):
+    timeout = None
+    updated = None
     if instance.current_revision is not None:
         lines = instance.current_revision.content
 
-        toPattern = (r"\[timeout(?:\s+(?P<month>(%s)))\]" %
-                     '|'.join(m for ml in MONTHS for m in ml))
-        toMo = re.search(toPattern, lines, re.IGNORECASE)
-        if toMo is not None:
-            timeout = parseTimeoutMonth(toMo.group('month'))
-        else:
-            timeout = None
+        try:
+            match = EvalMacroPreprocessor.find_macro_invocations(
+                lines, 'timeout')[0]
+            timeout = parseTimeoutMonth(match.args[0])
+        except (IndexError, ValueError):
+            # No/invalid timeout
+            pass
 
-        upPattern = (r"\[updated(?:\s+(?P<title>[^\s\n]{0,300}))" +
-                     "(?:\s+(?P<date>\d{4}-\d{1,2}-\d{1,2}))\]")
-        upMo = re.search(upPattern, lines, re.IGNORECASE)
-        if upMo is not None:
-            updated = datetime.datetime.strptime(upMo.group('date'),
-                                                 "%Y-%m-%d").date()
-        else:
-            updated = None
-    else:
-        timeout = None
-        updated = None
+        try:
+            match = EvalMacroPreprocessor.find_macro_invocations(
+                lines, 'updated')[0]
+            updated = dateparse.parse_date(match.args[1])
+        except (IndexError, ValueError):
+            # No/invalid updated
+            pass
 
     try:
         wikiArticleTimeout = instance.wikiArticleTimeout

@@ -1,3 +1,4 @@
+import collections
 import datetime
 import markdown
 import random
@@ -67,23 +68,43 @@ class EvalMacroExtension(markdown.Extension):
 
 
 class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
-    def run(self, lines):
+    @staticmethod
+    def _get_pattern(method_names):
         pattern = (
-            # Start by matching one of the names in METHODS.
+            # Start by matching one of the names in method_names.
             r"\[(?P<macro>%s)" % '|'.join(
-                re.escape(method_name) for method_name in METHODS) +
+                re.escape(method_name) for method_name in method_names) +
             # Then match optional arguments of at most 300 characters.
             r"(?:\s+(?P<args>[^]\n]{0,300}))?\]"
         )
+        return pattern
+
+    MacroInvocation = collections.namedtuple(
+        'MacroInvocation', 'macro args full')
+
+    @staticmethod
+    def _parse_match(mo):
+        macro = mo.group('macro')
+        macro = macro.strip()
+        args_str = mo.group('args')
+        args = shlex.split(args_str) if args_str else ()
+        full = mo.group(0)
+        return EvalMacroPreprocessor.MacroInvocation(macro, args, full)
+
+    @staticmethod
+    def find_macro_invocations(article_content, method_name):
+        pattern = EvalMacroPreprocessor._get_pattern([method_name])
+        return [EvalMacroPreprocessor._parse_match(mo)
+                for mo in re.finditer(pattern, article_content)]
+
+    def run(self, lines):
+        pattern = self._get_pattern(METHODS)
 
         def repl(mo):
-            macro = mo.group('macro')
             try:
-                macro = macro.strip()
-                method = getattr(self, macro)
-                args_str = mo.group('args')
-                args = shlex.split(args_str) if args_str else ()
-                return method(*args, full=mo.group(0))
+                match = self._parse_match(mo)
+                method = getattr(self, match.macro)
+                return method(*match.args, full=match.full)
             except Exception as exn:
                 return _inline_error(mo.group(0), exn)
 
