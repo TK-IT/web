@@ -39,6 +39,7 @@ THIRD_PARTY_APPS = [
     'wiki.plugins.notifications',
     'wiki.plugins.images',
     'wiki.plugins.macros',
+    'mediumeditor',
 ]
 
 LOCAL_APPS = [
@@ -55,15 +56,6 @@ LOCAL_APPS = [
     'tkweb.apps.krydsliste',
     'tkweb.apps.uniprint',
 ]
-
-try:
-    # Is django-mediumeditor installed?
-    import mediumeditor
-except ImportError:
-    USE_MEDIUM_EDITOR = False
-else:
-    USE_MEDIUM_EDITOR = True
-    THIRD_PARTY_APPS.append('mediumeditor')
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 

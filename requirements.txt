@@ -16,6 +16,7 @@ mysqlclient>=1.3.7
 django-multiupload==0.5.2
 git+https://github.com/TK-IT/tktitler.git@v1.0.0#egg=tktitler
 git+https://github.com/django-wiki/django-wiki.git#egg=wiki # django-wiki>=0.4a3 is needed
+django-mediumeditor==0.2.0
 
 # For tests only
 #freezegun>=0.3.10
