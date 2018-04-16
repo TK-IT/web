@@ -17,6 +17,14 @@ Den meste funktionalitet kan findes i apps.
 - [`tkweb/apps/idm`](tkweb/apps/idm) er en ikke-offentlig app til at ændre
   persondata og maillister.
 - [`tkweb/apps/eval`](tkweb/apps/eval) er en ikke-offentlig wiki til evalueringer.
+- [`tkweb/apps/regnskab`](tkweb/apps/regnskab) tager sig af
+  krydslisteregnskabet. Den er afhængig af [`tkweb/apps/idm`](tkweb/apps/idm),
+  [`tkweb/apps/krydsliste`](tkweb/apps/krydsliste) og
+  [`tkweb/apps/uniprint`](tkweb/apps/uniprint).
+- [`tkweb/apps/krydsliste`](tkweb/apps/krydsliste) tager sig af opsætning og
+  udskrivning af fysiske krydslister.
+- [`tkweb/apps/uniprint`](tkweb/apps/uniprint) er en webapplikation til at
+  printe på A2 printeren gennem CUPS.
 
 Under [`templates`](templates) findes Django HTML-templates som er det der
 bliver vist til brugeren.
@@ -31,10 +39,6 @@ nemt ændres fra admin-interfacet.
 [`tkweb/settings`](tkweb/settings) indeholder konfigurationen. Den er delt op i
 flere moduler der nedarver fra hindanden. Se også under
 [Udviklingsmiljø](#udviklingsmiljø).
-
-Desuden findes der også nogle apps med deres eget repository men som kører samme django instans som denne side:
-- [`regnskab`](https://github.com/TK-IT/regnskab) tager sig af krydslisteregnskabet. Den er afhængig af [`tkweb/apps/idm`](tkweb/apps/idm) og [`uniprint`](https://github.com/TK-IT/uniprint).
-- [`uniprint`](https://github.com/TK-IT/uniprint) er en webapplikation til at printe på A2 printeren gennem CUPS. 
 
 ## Udviklingsmiljø
 

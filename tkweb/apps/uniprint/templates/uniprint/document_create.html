@@ -1,0 +1,14 @@
+{% extends "uniprint/base.html" %}
+{% block title %}Upload dokument{% endblock %}
+{% block content %}
+<h1>Upload dokument</h1>
+
+<p>Vælg en PDF-fil på din computer.
+Når du har uploadet, kan du vælge printer og duplex-indstillinger.</p>
+
+<form method="post" enctype="multipart/form-data">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Upload" />
+</form>
+
+{% endblock %}

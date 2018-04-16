@@ -1,0 +1,92 @@
+{% extends "regnskab/base.html" %}
+{% block title %}{{ profile }}{% endblock %}
+{% block head %}
+<style>
+.names td { height: 30px; }
+</style>
+{% endblock %}
+{% block content %}
+<h2>{{ profile }}</h2>
+
+{% if error %}
+<p>Fejl: {{ error }}</p>
+{% endif %}
+
+<form method="post">{% csrf_token %}
+    {% if sheetstatus %}
+    <input type="submit" name="remove_status" value="Fjern fra krydslisten" />
+    {% else %}
+    <input type="submit" name="add_status" value="Tilføj til krydslisten" />
+    {% endif %}
+</form>
+
+{% if names %}
+<form method="post">{% csrf_token %}
+<table class="names">
+    <thead>
+        <tr>
+            <th>Kaldenavn</th>
+            <th>Gyldig?</th>
+            <th>Fjern</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in names %}
+        <tr>
+            <td>{{ o.name }}</td>
+            <td>{{ o.since }}</td>
+            <td>{% if o.remove %}<input type="submit" name="{{ o.remove }}" value="X" />{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</form>
+{% endif %}
+
+<form method="post">{% csrf_token %}
+    <p>
+    Alias:
+    <input name="alias" />
+    <input name="add_alias" type="submit" value="Tilføj alias" />
+    </p>
+</form>
+
+{% if real_title %}
+<p>Vist titel: {{ real_title }}</p>
+{% else %}
+<form method="post">{% csrf_token %}
+    <p>
+    Vist titel:
+    <input name="primary_alias" value="{{ primary_alias|default:"" }}" />
+    <input name="set_primary_alias" type="submit" value="Gem vist titel" />
+    </p>
+</form>
+{% endif %}
+
+<table>
+    <thead>
+        <tr>
+            <th>Tidspunkt</th>
+            <th>Beskrivelse</th>
+            <th>Beløb</th>
+            <th>Balance</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+        <tr>
+            <td>
+                {% if row.href %}
+                <a href="{{ row.href }}">{{ row.date }}</a>
+                {% else %}
+                {{ row.date }}
+                {% endif %}
+            </td>
+            <td>{{ row.name }}</td>
+            <td align=right>{{ row.amount }}</td>
+            <td align=right>{{ row.balance }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

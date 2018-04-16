@@ -1,0 +1,27 @@
+{% load staticfiles regnskab repeatedblocks %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>{% block fulltitle %}{% repeated_block title %}{% endblock %} - {% regnskab_site_name %}{% endblock %}</title>
+<link rel="stylesheet" type="text/css"
+href="{% static 'regnskab/regnskab.css' %}" />
+{% block head %}
+{% endblock %}
+</head>
+<body>
+<nav>
+    <ul class="container">
+        <a href="{% url 'regnskab:home' %}"><li>{% regnskab_icon %} INKAs regnskab</li></a>
+        {% block navsession %}{% if session %}{% nav_session session %}{% endif %}{% endblock %}
+        {% block nav %}
+        {% endblock %}
+        {% block navcurrent %}<li>{% repeat title %}</li>{% endblock %}
+    </ul>
+</nav>
+<div class="container">
+{% block content %}
+{% endblock %}
+</div>
+</body>
+</html>

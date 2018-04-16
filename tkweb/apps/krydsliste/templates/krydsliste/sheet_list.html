@@ -1,0 +1,14 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Krydsliste-skabeloner{% endblock %}
+{% block content %}
+<h1>Krydsliste-skabeloner</h1>
+<p>Her kan du oprette og udskrive krydslister.
+Tip: Skabelonen med navnet "Standard" bruges som udgangspunkt
+når du opretter en ny krydsliste.</p>
+<ul>
+	<li><a href="{% url 'regnskab:krydsliste:sheet_create' %}">Opret ny</a></li>
+	{% for object in object_list %}
+	<li><a href="{% url 'regnskab:krydsliste:sheet_update' pk=object.pk %}">{{ object.name }}</a></li>
+	{% endfor %}
+</ul>
+{% endblock %}

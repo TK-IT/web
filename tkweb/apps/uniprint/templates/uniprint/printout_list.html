@@ -1,0 +1,52 @@
+{% extends "uniprint/base.html" %}
+{% block title %}Udskrifter{% endblock %}
+{% block content %}
+<h1>Udskrifter</h1>
+
+<table>
+<thead>
+    <tr>
+        <th>Tidspunkt</th>
+        <th>Dokument</th>
+        <th>Printer</th>
+        <th>Udskrevet af</th>
+        <th>Duplex</th>
+        <th>Sider</th>
+        <th>Antal kopier</th>
+        <th>Ark</th>
+    </tr>
+</thead>
+<tbody>
+    {% for o in object_list %}
+    <tr>
+        <td>{{ o.created_time }}</td>
+        <td><a href="{{ o.document.file.url }}">
+                {{ o.document.original_filename }}</a></td>
+        <td>{{ o.printer }}</td>
+        <td>{{ o.created_by.get_full_name|default:o.created_by.username }}</td>
+        <td>{% for x in o.lp_options %}{{ x }} {% endfor %}</td>
+        <td>{{ o.page_range_page_count }}</td>
+        <td>{{ o.copies }}</td>
+        <td>{{ o.sheet_count }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+
+{% if is_paginated %}
+<div class="pagination">
+<span class="page-links">
+{% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}">forrige</a>
+{% endif %}
+<span class="page-current">
+    Side {{ page_obj.number }} af {{ page_obj.paginator.num_pages }}.
+</span>
+{% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">næste</a>
+{% endif %}
+</span>
+</div>
+{% endif %}
+
+{% endblock %}

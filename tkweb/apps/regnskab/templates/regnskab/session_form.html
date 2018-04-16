@@ -1,0 +1,55 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Opgørelse{% endblock %}
+{% block head %}
+{{ form.media }}
+{% endblock %}
+{% block navsession %}{% endblock %}
+{% block navcurrent %}<li>Opgørelse {{ session.pk }}</li>{% endblock %}
+{% block content %}
+<p>Krydslister:</p>
+
+{% if sheets.rows %}
+{{ sheets }}
+{% else %}
+<p>Ingen endnu</p>
+{% endif %}
+
+{% if not object.sent %}
+<p><a href="{% url 'regnskab:sheet_create' session=object.pk %}">
+    Tilføj krydsliste til opgørelse</a></p>
+
+<p>
+<a href="{% url 'regnskab:payment_batch_create' pk=object.pk %}">Tilføj betalinger
+({{ payment_sum|floatformat:2 }} kr./{{ payment_count }})</a>
+&bullet;
+<a href="{% url 'regnskab:purchase_note_list' pk=object.pk %}">Tilføj "Andet"</a>
+</p>
+{% endif %}
+
+<p><a href="{% url 'regnskab:payment_purchase_list' pk=object.pk %}">
+Hvem har krydset uden at have betalt?</a></p>
+
+<form method="post" action="{% url 'regnskab:balance_print' pk=object.pk %}">{% csrf_token %}
+    <p>
+    {{ print_form.mode }} <label>Highlight over {{ max_debt }}: {{ print_form.highlight }}</label>
+    <input type="submit" value="Udskriv opgørelse" />
+    {% if print %}Opgørelsen er udskrevet på A2.{% endif %}
+    </p>
+</form>
+
+<p>Sendt:
+{% if object.sent %}
+{{ object.send_time }}.
+<a href="{% url 'regnskab:email_list' pk=object.pk %}">Vis sendte emails</a>
+{% else %}
+Ikke endnu. <a href="{% url 'regnskab:email_list' pk=object.pk %}">Gå til udsendelse</a>
+{% endif %}</p>
+
+{% if not object.sent %}
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Gem" />
+</form>
+{% endif %}
+
+{% endblock %}

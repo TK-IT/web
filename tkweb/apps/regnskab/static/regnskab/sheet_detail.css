@@ -1,0 +1,92 @@
+.crosses {
+	display: flex;
+	position: relative;
+	flex-direction: column;
+	flex-wrap: wrap;
+	height: 40px;
+	align-content: flex-start;
+	overflow: hidden;
+}
+.crosses > .cross {
+	height: 20px;
+	width: 20px;
+	text-align: center;
+	line-height: 20px;
+}
+.crosses > .count {
+	position: absolute;
+	top: 0;
+	left: 0;
+	line-height: 40px;
+	font-size: 20px;
+	font-weight: bold;
+	box-shadow: 0px 0px 8px #fff;
+}
+
+.sheetrow {
+    display: flex;
+    height: 40px;
+    border-top: 3px solid #aaa;
+}
+.sheetrow.sheetrow-header {
+    /*height: 18px;*/
+    border-top: 0 none;
+}
+.sheetrow > .summary { width: 30px; }
+.sheetrow > .name { width: 189px; }
+.sheetrow > .column {
+    position: relative;
+    border-left: 3px solid #aaa;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+.sheetrow.sheetrow-header > .column,
+.sheetrow .count {
+    padding-left: 10px;
+    background-color: rgba(100%, 100%, 100%, 0.5);
+}
+.sheetrow .count,
+.sheetrow .name-entry,
+.sheetrow .chosen-person {
+    box-sizing: border-box;
+    width: 100%;
+    border: 0 none;
+    color: inherit;
+}
+.sheetrow .count {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    font-size: 20px;
+    font-weight: bold;
+}
+.sheetrow .count {
+    line-height: 40px;
+}
+.sheetrow .chosen-person {
+    width: 100%;
+    box-sizing: border-box;
+}
+.sheetrow > .column-øl { width: 242px; }
+.sheetrow > .column-guldøl { width: 63px; }
+.sheetrow > .column-sodavand { width: 242px; }
+.sheetrow > .column-ølkasse,
+.sheetrow > .column-guldølkasse,
+.sheetrow > .column-sodavandkasse {
+    width: 60px;
+    border-left: 3px solid #ddd;
+}
+
+.sheetrow.highlight .count,
+.sheetrow.highlight .name {
+    background-color: rgba(255, 0, 0, 0.4);
+}
+.sheetrow.highlight > .column { border-color: #c66; }
+.sheetrow.highlight > .column-ølkasse,
+.sheetrow.highlight > .column-guldølkasse,
+.sheetrow.highlight > .column-sodavandkasse {
+    border-color: #eb8484;
+}
+
+.hide-empty .empty { display: none; }

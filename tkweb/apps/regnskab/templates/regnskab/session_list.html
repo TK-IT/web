@@ -1,0 +1,15 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Opgørelser i {{ period }}{% endblock %}
+{% block content %}
+
+<h1>Opgørelser i årgang {{ period }}</h1>
+<form method="post" action="{% url 'regnskab:session_create' %}">{% csrf_token %}
+    <input id="id_create_session" type="submit" value="Begynd ny opgørelse" />
+</form>
+
+{{ session_table }}
+
+<h2>Alle årgange</h2>
+
+{{ period_table }}
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Redigér parametre{% endblock %}
+{% block content %}
+{% for k, v in computed %}
+<textarea>{{ k }}:
+{{ v }}</textarea><br>
+{% endfor %}
+<img src="{{ fig_url }}" /><br>
+<form method="post">{% csrf_token %}
+    {% if saved %}Gemt!{% endif %}
+    {{ form.as_p }}
+    <input type="submit" value="Gem" />
+</form>
+{% endblock %}

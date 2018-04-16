@@ -12,6 +12,8 @@ import tkweb.apps.jubi.urls
 import tkweb.apps.redirect.urls
 import tkweb.apps.mailinglist.urls
 import tkweb.apps.eval.urls
+import tkweb.apps.regnskab
+import tkweb.apps.uniprint.urls
 import django.views.static
 import django.views.defaults
 import tkweb.views
@@ -66,6 +68,12 @@ urlpatterns = [
         include(tkweb.apps.eval.urls),
         name='eval'),
 
+    url(r'^regnskab/',
+        tkweb.apps.regnskab.site.urls),
+
+    url(r'^print/',
+        include((tkweb.apps.uniprint.urls, 'uniprint', 'uniprint'))),
+
     url(r'^admin/', admin.site.urls),
 
     # Temporary media (user uploaded static files)
@@ -84,11 +92,3 @@ urlpatterns = [
         include(tkweb.apps.redirect.urls), ),
 
 ]
-
-if 'regnskab' in settings.INSTALLED_APPS:
-    import regnskab
-    urlpatterns.append(url(r'^regnskab/', regnskab.site.urls))
-
-if 'uniprint' in settings.INSTALLED_APPS:
-    urlpatterns.append(
-        url(r'^print/', include(('uniprint.urls', 'uniprint', 'uniprint'))))

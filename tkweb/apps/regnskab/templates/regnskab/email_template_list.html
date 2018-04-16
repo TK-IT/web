@@ -1,0 +1,27 @@
+{% extends "regnskab/base.html" %}
+{% block title %}Emailskabeloner{% endblock %}
+{% block content %}
+<h2>Email-skabeloner</h2>
+<p>
+<a href="{% url 'regnskab:email_template_create' %}">Opret ny</a>
+</p>
+<table>
+    <thead>
+        <tr>
+            <th>Navn</th>
+            <th>Oprettet</th>
+            <th>Senest udsendt</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in object_list %}
+        <tr>
+            <td><a href="{% url 'regnskab:email_template_update' pk=o.pk %}">
+                    {{ o.name }}</a></td>
+            <td>{{ o.created_time }}</td>
+            <td>{{ o.latest_session.send_time }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

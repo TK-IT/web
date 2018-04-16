@@ -1,0 +1,112 @@
+{% extends "regnskab/base.html" %}
+{% block nav %}<a href="{% url 'regnskab:krydsliste:sheet_list' %}"><li>Krydsliste-skabeloner</li></a>{% endblock %}
+{% block navcurrent %}<li>{% if object %}{{ object }}{% else %}Ny{% endif %}</li>{% endblock %}
+{% block title %}Krydsliste-skabelon{% endblock %}
+
+{% block head %}
+<script>
+function n_matches(text, pattern) {
+    var matches = text.match(pattern);
+    return matches ? matches.length : 0;
+}
+
+function init_sheet_form_textarea(field) {
+    var textarea = document.getElementById('id_' + field);
+    var label = document.querySelector('label[for=id_' + field + ']');
+    if (!textarea || !label) return;
+
+    var initialLabel = label.textContent;
+
+    function update() {
+        // Count occurrences of "\person" or "\lille"
+        var c1 = n_matches(textarea.value, /\\person/g);
+        var c2 = n_matches(textarea.value, /\\lille/g);
+        // Write count at end of label
+        label.textContent = (
+            initialLabel +
+            ' (' + c1 + ' stor' + (c1 === 1 ? '' : 'e') + ', ' +
+            c2 + ' ' + (c2 === 1 ? 'lille' : 'små') + ')');
+    }
+    update();
+    // Trigger update() on keypress
+    textarea.addEventListener('input', update, false);
+    // Trigger update() when focus leaves textarea
+    textarea.addEventListener('change', update, false);
+}
+function init_sheet_form() {
+    if (!document.querySelector) return;
+    init_sheet_form_textarea('front_persons');
+    init_sheet_form_textarea('back_persons');
+}
+window.addEventListener('load', init_sheet_form, false);
+</script>
+{% endblock %}
+
+{% block content %}
+
+{% if object %}
+<h1>{{ object }}</h1>
+{% else %}
+<h1>Ny krydsliste-skabelon</h1>
+<p>Når du har gemt den nye krydsliste, kan du derefter hente den som PDF eller udskrive den på A2.</p>
+{% endif %}
+
+<form method="post">{% csrf_token %}
+    {% if form.non_field_errors %}<p>Fejl:</p>{{ form.non_field_errors }}{% endif %}
+    {{ form.name.errors }}
+    <p>{{ form.name.label_tag }} {{ form.name }}<br>
+    Giv skabelonen et navn til listen over skabeloner.
+    Skabelonen med navnet "Standard" bruges som udgangspunkt for nye skabeloner.</p>
+    <p>I nedenstående felter kan du bruge LaTeX-makroerne
+    <tt>\TKET</tt>, <tt>\TKETs</tt> (o.lign. fra tket-pakken),
+    <tt>\dato</tt> (for at indsætte __/__-__).</p>
+    {{ form.title.errors }}
+    <p style="margin-left: 5em">{{ form.title.label_tag }} {{ form.title }}</p>
+    {{ form.left_label.errors }}
+    {{ form.column1.errors }}
+    {{ form.column2.errors }}
+    {{ form.column3.errors }}
+    {{ form.right_label.errors }}
+    <p>{{ form.left_label }}
+    {{ form.column1 }}
+    {{ form.column2 }}
+    {{ form.column3 }}
+    {{ form.right_label }}</p>
+    <p>I nedenstående felter skal du bruge makroerne
+    <tt>\person{}</tt> og/eller <tt>\lille{}</tt>
+    for at lave store og små indgange,
+    og du kan fortrykke personer ved at skrive f.eks.
+    <tt>\person{\KASS}</tt> eller <tt>\lille{nf}</tt>.</p>
+    <div style="display:flex;flex-wrap:wrap">
+        <div>
+        {{ form.front_persons.errors }}
+        <div>{{ form.front_persons.label_tag }}</div>
+        <div>{{ form.front_persons }}</div>
+        </div>
+        <div>
+        {{ form.back_persons.errors }}
+        <div>{{ form.back_persons.label_tag }}</div>
+        <div>{{ form.back_persons }}</div>
+        </div>
+    </div>
+    <input type="submit" value="{% if object %}Gem ændringer{% else %}Gem kladde{% endif %}" />
+    {{ form.print_mode.errors }}
+    {{ form.copies.errors }}
+    {% if object %}
+    <p>
+    {{ form.print_mode }}
+    {{ form.copies }}
+    <input name="print" type="submit" value="Gem og udskriv krydsliste" />
+    {% if print %}Krydslisten er udskrevet på A2.{% endif %}
+    </p>
+    {% else %}
+    <p>
+    {{ form.print_mode }}
+    {{ form.copies }}
+    <input type="button" value="Gem og udskriv krydsliste" disabled />
+    Gem krydslisten inden du udskriver den.
+    </p>
+    {% endif %}
+</form>
+
+{% endblock %}
