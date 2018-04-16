@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from constance import config
 from django.core.management.base import BaseCommand
+from django.utils.html import strip_tags
 from icalendar import Calendar
 from tkweb.apps.calendar.models import Event
 import datetime
@@ -67,6 +68,10 @@ class Command(BaseCommand):
                 elif type(startdatetime) is datetime.date:
                     startdate = startdatetime
                 description = component.decoded('description').decode('utf-8')
+
+                title = strip_tags(title)
+                description = strip_tags(description)
+
                 e = Event(title=title, date=startdate, description=description)
                 e.clean()
                 k = event_key(e)
