@@ -57,7 +57,7 @@ LOCAL_APPS = [
     'tkweb.apps.uniprint',
 ]
 
-INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+INSTALLED_APPS = LOCAL_APPS + DEFAULT_APPS + THIRD_PARTY_APPS
 
 
 # Internationalization
