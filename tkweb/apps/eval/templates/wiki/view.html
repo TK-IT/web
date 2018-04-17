@@ -1,0 +1,11 @@
+{% extends "wiki/article.html" %}
+{% load wiki_tags i18n sekizai_tags %}
+
+
+{% block wiki_contents_tab %}
+
+{% include "eval/includes/updated.html" %}
+
+{% wiki_render article %}
+
+{% endblock %}

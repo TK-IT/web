@@ -5,6 +5,7 @@ import random
 import re
 import shlex
 from django.template.loader import render_to_string
+from django.utils import dateparse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from wiki.core.plugins import registry
@@ -171,6 +172,8 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
             parseTimeoutMonth(month)
         except Exception as exn:
             return _inline_error(full, exn)
+        # The output of timeout and updated is handled by
+        # templates/eval/includes/updated.html
         return ''
 
     timeout.meta = {
@@ -186,16 +189,14 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
     }
 
     def updated(self, title, date, full=''):
-        wat = self.markdown.article.wikiArticleTimeout
-        html = render_to_string(
-            "evalmacros/updated.html",
-            context={
-                'title': title,
-                'updated': wat.updated,
-                'timeout': wat.timeout(),
-                'outdated': wat.outdated(),
-            })
-        return self.markdown.htmlStash.store(html, safe=False)
+        try:
+            if dateparse.parse_date(date) is None:
+                raise ValueError('%s is not a valid date' % date)
+        except Exception as exn:
+            return _inline_error(full, exn)
+        # The output of timeout and updated is handled by
+        # templates/eval/includes/updated.html
+        return ''
 
     updated.meta = {
         'short_description': 'Ajourførelse',

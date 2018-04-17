@@ -1,0 +1,28 @@
+{% with wat=article.wikiArticleTimeout %}
+{% spaceless %}
+<p class="text-right" style="margin-top: -15px;">
+    {% if wat.updated or wat.timeout %}
+    <span class="tk-error">
+        {% if wat.updated %}
+        <span class="btn btn-xs btn-default">Sidst ajourført af {{ wat.title }} {{ wat.updated }}</span>
+        {% else %}
+        <span class="btn btn-xs btn-default">Aldrig ajourført</span>
+        {% endif %}
+        {% if wat.timeout %}
+        {% if wat.outdated %}
+        <span class="btn btn-xs btn-danger">forfalt i {{ wat.timeout|date:'F' }}.</span>
+        {% else %}
+        <span class="btn btn-xs btn-success">forfalder i {{ wat.timeout|date:'F' }}.</span>
+        {% endif %}
+        {% else %}
+        <span class="btn btn-xs btn-warning">ingen forfaldsdato.</span>
+        {% endif %}
+    </span>
+    {% else %}
+    <span class="btn btn-xs btn-info">
+        Ingen ajourførelse eller forfaldsdato.
+    </span>
+    {% endif %}
+</p>
+{% endspaceless %}
+{% endwith %}

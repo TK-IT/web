@@ -16,6 +16,7 @@ class WikiArticleTimeout(models.Model):
         related_name="wikiArticleTimeout")
     timeoutMonth = models.PositiveSmallIntegerField(null=True)
     updated = models.DateField(null=True)
+    title = models.CharField(max_length=300)
 
     def __str__(self):
         return '%s: %s' % (self.article, self.timeoutMonth)
@@ -48,6 +49,7 @@ class WikiArticleTimeout(models.Model):
 @receiver(post_save, sender=Article)
 def wikiArticle_callback(sender, instance, **kwargs):
     timeout = None
+    title = ''
     updated = None
     if instance.current_revision is not None:
         lines = instance.current_revision.content
@@ -63,6 +65,7 @@ def wikiArticle_callback(sender, instance, **kwargs):
         try:
             match = EvalMacroPreprocessor.find_macro_invocations(
                 lines, 'updated')[0]
+            title = match.args[0]
             updated = dateparse.parse_date(match.args[1])
         except (IndexError, ValueError):
             # No/invalid updated
@@ -74,5 +77,6 @@ def wikiArticle_callback(sender, instance, **kwargs):
         wikiArticleTimeout = WikiArticleTimeout(article=instance)
 
     wikiArticleTimeout.timeoutMonth = timeout
+    wikiArticleTimeout.title = title
     wikiArticleTimeout.updated = updated
     wikiArticleTimeout.save()
