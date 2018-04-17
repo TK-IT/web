@@ -8,3 +8,4 @@ class EvalConfig(AppConfig):
 
     def ready(self):
         autodiscover_modules('evalmacros')
+        autodiscover_modules('mdcheatsheet')
