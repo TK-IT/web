@@ -248,6 +248,3 @@ class AlbumFeed(Feed):
 
     def item_pubdate(self, item):
         return datetime.datetime.combine(item.publish_date, datetime.time.min)
-
-    def item_link(self, item):
-        return 'https://TAAGEKAMMERET.dk' + reverse('album', kwargs={'gfyear': item.gfyear, 'album_slug': item.slug})
