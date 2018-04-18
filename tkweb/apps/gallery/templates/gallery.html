@@ -11,7 +11,7 @@
 {% endblock opengraph %}
 
 {% block extra_head %}
-<link rel="alternate" type="application/rss+xml" title="RSS" href="{% url 'rss_feed' %}">
+<link rel="alternate" type="application/rss+xml" title="RSS" href="{% url 'album_rss' %}">
 {% endblock extra_head %}
 
 {% block content %}
@@ -76,6 +76,6 @@
   </div> <!-- panel-group -->
 </div> <!-- row -->
 <div>
-  <a href="{% url 'rss_feed' %}">Følg nye albummer med RSS her</a>
+  <a href="{% url 'album_rss' %}">Følg nye albummer med RSS her</a>
 <div>
 {% endblock content%}
