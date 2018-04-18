@@ -5,6 +5,7 @@ from datetime import date
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.dispatch import receiver
+from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import format_html
 from model_utils.managers import InheritanceManager
@@ -48,6 +49,11 @@ class Album(models.Model):
         if f:
             f.isCoverFile = True
             f.save()
+
+    def get_absolute_url(self):
+        return reverse('album', kwargs={'gfyear': self.gfyear,
+                                        'album_slug': self.slug})
+
 
 @python_2_unicode_compatible
 class BaseMedia(models.Model):
@@ -119,6 +125,12 @@ class BaseMedia(models.Model):
 
     def __str__(self):
         return '%s' % (self.slug)
+
+    def get_absolute_url(self):
+        return reverse('image', kwargs={'gfyear': self.album.gfyear,
+                                        'album_slug': self.album.slug,
+                                        'image_slug': self.slug})
+
 
 class Image(BaseMedia):
     class Meta:
