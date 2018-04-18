@@ -33,7 +33,7 @@ urlpatterns = [
         name='jfu_upload'),
 
     # RSS feed
-    url(r'^feed\.rss$',
+    url(r'^album\.rss$',
         tkweb.apps.gallery.views.AlbumFeed(),
-        name='rss_feed'),
+        name='album_rss'),
 ]
