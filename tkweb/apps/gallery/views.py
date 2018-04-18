@@ -234,7 +234,10 @@ def set_visibility(request):
 
 class AlbumFeed(Feed):
     title = 'TÅGEKAMMERETs billedalbummer'
-    link = '/galleri/'
+
+    def link(self):
+        return reverse('gallery_index')
+
     description = 'Feed med nye billedalbummer fra TÅGEKAMMERETs begivenheder.'
 
     def items(self):
