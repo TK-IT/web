@@ -16,7 +16,6 @@ from tkweb.apps.gallery.models import Album, BaseMedia, Image, GenericFile
 from tkweb.apps.gallery.forms import EditVisibilityForm
 import os
 import logging
-import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -248,6 +247,3 @@ class AlbumFeed(Feed):
 
     def item_description(self, item):
         return item.description
-
-    def item_pubdate(self, item):
-        return datetime.datetime.combine(item.publish_date, datetime.time.min)
