@@ -74,8 +74,16 @@
     </div>
   {% endfor %}
   </div> <!-- panel-group -->
+  <div class="col-xs-12">
+      <a href="{% url 'album_rss' %}">
+          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="15px" height="15px" id="RSSicon" viewBox="0 0 256 256" style="margin-bottom: -2px;">
+              <!-- Adapted from https://commons.wikimedia.org/wiki/File:Feed-icon.svg under MPL1.1-->
+              <rect width="256" height="256" rx="55" ry="55" x="0"  y="0" fill="#bbc"/>
+              <circle cx="68" cy="189" r="24" fill="#080808"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#080808"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#080808"/>
+          </svg> Følg nye albummer med RSS her.
+      </a>
+  <div>
 </div> <!-- row -->
-<div>
-  <a href="{% url 'album_rss' %}">Følg nye albummer med RSS her</a>
-<div>
 {% endblock content%}
