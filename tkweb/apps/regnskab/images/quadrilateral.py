@@ -9,9 +9,7 @@ def _coeff_property(i, j):
     def fset(self, v):
         self.A[i, j] = v
 
-    return property(
-        fget, fset, None,
-        "The (%d, %d)-entry of the matrix" % (i, j))
+    return property(fget, fset, None, "The (%d, %d)-entry of the matrix" % (i, j))
 
 
 def _coeff_properties(n, m):
@@ -36,8 +34,8 @@ class Quadrilateral(object):
         xy = np.asarray(xy)
         if xy.shape != (2, 4):
             raise TypeError(
-                "xy must be (2, 4) with corners in columns, not %r" %
-                (xy.shape,))
+                "xy must be (2, 4) with corners in columns, not %r" % (xy.shape,)
+            )
         x, y = xy
         self.A = np.eye(3)
         upper_left, upper_right, lower_right, lower_left = xy.T
@@ -69,20 +67,17 @@ class Quadrilateral(object):
         self.A_inv = np.linalg.inv(self.A)
 
     def arg(self):
-        return self.to_world(
-            [[0, 1, 1, 0], [0, 0, 1, 1]])
+        return self.to_world([[0, 1, 1, 0], [0, 0, 1, 1]])
 
-    (a, b, c,
-     d, e, f,
-     g, h, i) = _coeff_properties(3, 3)
+    (a, b, c, d, e, f, g, h, i) = _coeff_properties(3, 3)
 
     @staticmethod
     def _projective_transform(A, x):
         x = np.asarray(x)
         if x.shape[0] != 2 or x.ndim != 2:
             raise TypeError(
-                "data matrix must have 2 rows; invalid shape is %r"
-                % (x.shape,))
+                "data matrix must have 2 rows; invalid shape is %r" % (x.shape,)
+            )
         x1 = np.asarray((x[0], x[1], np.ones_like(x[0])))
         Ax = np.dot(A, x1)
         res_x = Ax[0] / Ax[2]
@@ -102,16 +97,16 @@ class Quadrilateral(object):
         return self._projective_transform(self.A_inv, xy)
 
     def suggested_size(self):
-        '''Compute max (horizontal, vertical) side length as (w, h)-pair'''
+        """Compute max (horizontal, vertical) side length as (w, h)-pair"""
         upper_left, upper_right, lower_right, lower_left = self.arg().T
 
         def dsq(p, q):
             return ((p - q) ** 2).sum()
 
-        width = np.sqrt(max(dsq(upper_left, upper_right),
-                            dsq(lower_left, lower_right)))
-        height = np.sqrt(max(dsq(upper_left, lower_left),
-                             dsq(upper_right, lower_right)))
+        width = np.sqrt(max(dsq(upper_left, upper_right), dsq(lower_left, lower_right)))
+        height = np.sqrt(
+            max(dsq(upper_left, lower_left), dsq(upper_right, lower_right))
+        )
         return (width, height)
 
 
@@ -123,7 +118,7 @@ def extract_quadrilateral(im, q, width=None, height=None, output=None):
         height = height or h / w * width
         width = width or w / h * height
     width, height = int(width), int(height)
-    y, x = np.mgrid[0:1:height*1j, 0:1:width*1j]
+    y, x = np.mgrid[0 : 1 : height * 1j, 0 : 1 : width * 1j]
     xy = np.array((x.ravel(), y.ravel()))
     x, y = q.to_world(xy)
     if output is None:
@@ -135,6 +130,6 @@ def extract_quadrilateral(im, q, width=None, height=None, output=None):
     for c in cs:
         s = (slice(None), slice(None)) + c
         output[s] = scipy.ndimage.interpolation.map_coordinates(
-            im[s], (y, x), order=1).reshape(
-            (output.shape[0], output.shape[1]))
+            im[s], (y, x), order=1
+        ).reshape((output.shape[0], output.shape[1]))
     return output

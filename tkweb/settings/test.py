@@ -1,15 +1,15 @@
 # encoding: utf8
 from tkweb.settings.base import *
 
-SECRET_KEY = 'This.is.not.a.secret.key'
+SECRET_KEY = "This.is.not.a.secret.key"
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 # This is not used
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, '../testdb.sqlite3'),
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.path.join(BASE_DIR, "../testdb.sqlite3"),
     }
 }
 

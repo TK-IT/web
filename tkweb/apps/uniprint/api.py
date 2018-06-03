@@ -1,4 +1,4 @@
-'''
+"""
 The functions in this module allow applications to print PDFs via uniprint.
 There are two modes of operation: interactive and non-interactive.
 If the user should be able to pick printing options (destination, # copies, ...),
@@ -14,7 +14,7 @@ If all options are given along with the PDF, the noninteractive mode can be used
         printer='A2', option='twosided',
         # plus any other arguments of print_document you may want
     )
-'''
+"""
 import shlex
 import logging
 
@@ -23,16 +23,18 @@ from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from tkweb.apps.uniprint.models import Document, Printout, Printer
 from tkweb.apps.uniprint.document import (
-    extract_plain_text, get_pdfinfo, pages_from_pdfinfo,
+    extract_plain_text,
+    get_pdfinfo,
+    pages_from_pdfinfo,
 )
 from tkweb.apps.uniprint.options import Options, Option
 
 
-logger = logging.getLogger('uniprint')
+logger = logging.getLogger("uniprint")
 
 
 def create_document(fp, filename, username):
-    if not hasattr(fp, 'open') and not isinstance(fp, bytes):
+    if not hasattr(fp, "open") and not isinstance(fp, bytes):
         fp = fp.read()
     if isinstance(fp, bytes):
         fp = ContentFile(fp, filename)
@@ -41,7 +43,7 @@ def create_document(fp, filename, username):
     try:
         document.created_by = User.objects.get(username=username)
     except User.DoesNotExist:
-        raise ValueError('user')
+        raise ValueError("user")
     document.original_filename = filename
     document.pdfinfo = get_pdfinfo(document.file)
     document.text = extract_plain_text(document.file)
@@ -51,12 +53,19 @@ def create_document(fp, filename, username):
 
 
 def print_url(document):
-    return reverse('printout_create') + '?d=%s' % document.pk
+    return reverse("printout_create") + "?d=%s" % document.pk
 
 
-def print_document(document, printer, username,
-                   copies=1, duplex=None, page_range=None,
-                   fake=False, option=None):
+def print_document(
+    document,
+    printer,
+    username,
+    copies=1,
+    duplex=None,
+    page_range=None,
+    fake=False,
+    option=None,
+):
 
     if duplex is not None and option is not None:
         raise TypeError("Cannot mix 'duplex' and 'option'")
@@ -80,7 +89,7 @@ def print_document(document, printer, username,
     if isinstance(option, str):
         option_string = option
     elif isinstance(option, list):
-        option_string = ' '.join(o.lp_string() for o in option)
+        option_string = " ".join(o.lp_string() for o in option)
     else:
         option_string = option.lp_string()
 
@@ -89,17 +98,21 @@ def print_document(document, printer, username,
             printer = Printer.objects.get(name=printer)
         except Printer.DoesNotExist:
             raise ValueError(printer)
-    printout = Printout(document=document, printer=printer,
-                        copies=copies, lp_option_string=option_string,
-                        page_range=page_range or '')
+    printout = Printout(
+        document=document,
+        printer=printer,
+        copies=copies,
+        lp_option_string=option_string,
+        page_range=page_range or "",
+    )
     try:
         printout.created_by = User.objects.get(username=username)
     except User.DoesNotExist:
         raise ValueError(username)
     printout.clean()
     if fake:
-        cmdline = ' '.join(map(shlex.quote, printout.get_command_line()))
-        logger.info('Fake: Not running %s', cmdline)
+        cmdline = " ".join(map(shlex.quote, printout.get_command_line()))
+        logger.info("Fake: Not running %s", cmdline)
     else:
         printout.send_to_printer()
     printout.save()

@@ -7,14 +7,16 @@ import tkweb.apps.idm.models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('idm', '0034_fix_email'),
-    ]
+    dependencies = [("idm", "0034_fix_email")]
 
     operations = [
         migrations.AlterField(
-            model_name='group',
-            name='regexp',
-            field=models.CharField(max_length=50, verbose_name='Regulært udtryk', validators=[tkweb.apps.idm.models.validate_regex_pattern]),
-        ),
+            model_name="group",
+            name="regexp",
+            field=models.CharField(
+                max_length=50,
+                verbose_name="Regulært udtryk",
+                validators=[tkweb.apps.idm.models.validate_regex_pattern],
+            ),
+        )
     ]

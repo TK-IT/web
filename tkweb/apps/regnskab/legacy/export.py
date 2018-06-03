@@ -11,7 +11,12 @@ import subprocess
 import collections
 
 from tkweb.apps.regnskab.legacy.base import (
-    Regnskab, read_regnskab, Person, get_amount, Forbrug, alder,
+    Regnskab,
+    read_regnskab,
+    Person,
+    get_amount,
+    Forbrug,
+    alder,
 )
 
 
@@ -24,13 +29,14 @@ def progress(elements, n=None):
     progress.w = len(str(progress.total))
     for i, x in enumerate(elements):
         progress.current += 1
-        sys.stderr.write('\r\x1B[K(%s/%s) %s' %
-                         (str(progress.current).rjust(progress.w),
-                          progress.total, x))
+        sys.stderr.write(
+            "\r\x1B[K(%s/%s) %s"
+            % (str(progress.current).rjust(progress.w), progress.total, x)
+        )
         yield x
     progress.active -= 1
     if not progress.active:
-        sys.stderr.write('\n')
+        sys.stderr.write("\n")
         progress.current = progress.total = 0
 
 
@@ -39,6 +45,7 @@ progress.active = progress.current = progress.total = 0
 
 def read_regnskab_revisions_gitpython(gitdir):
     from git import Repo
+
     repo = Repo(gitdir)
     master = repo.branches[0]
     commits = [master.commit]
@@ -46,7 +53,7 @@ def read_regnskab_revisions_gitpython(gitdir):
         commits.append(commits[-1].parents[0])
     commits.reverse()
     times = [c.authored_datetime for c in commits]
-    blobs = [c.tree.join('regnskab.dat') for c in commits]
+    blobs = [c.tree.join("regnskab.dat") for c in commits]
 
     prev_sha = None
     for t, blob in zip(progress(times), blobs):
@@ -64,27 +71,30 @@ def read_regnskab_revisions(gitdir):
     def cat_file(objects, gitdir):
         for o in objects:
             p = subprocess.Popen(
-                ('git', 'cat-file', 'blob', o),
-                cwd=gitdir, stdout=subprocess.PIPE)
+                ("git", "cat-file", "blob", o), cwd=gitdir, stdout=subprocess.PIPE
+            )
             with p:
                 yield p.stdout
 
     proc = subprocess.Popen(
-        ('git', 'log', '--pretty=%H %aI', 'HEAD', '--', 'regnskab.dat'),
+        ("git", "log", "--pretty=%H %aI", "HEAD", "--", "regnskab.dat"),
         universal_newlines=True,
-        cwd=gitdir, stdout=subprocess.PIPE)
+        cwd=gitdir,
+        stdout=subprocess.PIPE,
+    )
     revisions = []
     times = []
     for line in proc.stdout:
-        mo = re.match(r'^([0-9a-f]+) ([T0-9:-]+\+\d\d):(\d\d)$', line.strip())
+        mo = re.match(r"^([0-9a-f]+) ([T0-9:-]+\+\d\d):(\d\d)$", line.strip())
         assert mo, line
         revisions.append(mo.group(1))
-        times.append(datetime.datetime.strptime(
-            mo.group(2) + mo.group(3), '%Y-%m-%dT%H:%M:%S%z'))
+        times.append(
+            datetime.datetime.strptime(mo.group(2) + mo.group(3), "%Y-%m-%dT%H:%M:%S%z")
+        )
     revisions.reverse()
     times.reverse()
 
-    objects = ['%s:regnskab.dat' % r for r in revisions]
+    objects = ["%s:regnskab.dat" % r for r in revisions]
     # progress(...) must be in first argument to zip,
     # since zip stops when first stream is exhausted.
     for fp, t in zip(cat_file(progress(objects), gitdir), times):
@@ -97,16 +107,16 @@ def read_regnskab_revisions(gitdir):
 
 
 def read_regnskab_backups(gitdir):
-    pattern = r'^regnskab(\d{6})\.dat$'
-    files = sorted((f for f in os.scandir(gitdir)
-                    if re.match(pattern, f.name)),
-                   key=lambda f: f.name)
+    pattern = r"^regnskab(\d{6})\.dat$"
+    files = sorted(
+        (f for f in os.scandir(gitdir) if re.match(pattern, f.name)),
+        key=lambda f: f.name,
+    )
     # dates = [re.match(pattern, f.name).group(1) for f in files]
     mtimes = [f.stat().st_mtime for f in files]
     if mtimes != sorted(set(mtimes)):
         raise ValueError("Duplicate/not sorted modification times")
-    mtimes = [datetime.datetime.fromtimestamp(m, datetime.timezone.utc)
-              for m in mtimes]
+    mtimes = [datetime.datetime.fromtimestamp(m, datetime.timezone.utc) for m in mtimes]
     # expected_dates = [m.strftime('%y%m%d') for m in mtimes]
     # for f, a, b in zip(files, dates, expected_dates):
     #     if a != b:
@@ -114,7 +124,7 @@ def read_regnskab_backups(gitdir):
     # progress(...) must be in first argument to zip,
     # since zip stops when first stream is exhausted.
     for f, t in zip(progress(files), mtimes):
-        with open(f.path, 'rb') as fp:
+        with open(f.path, "rb") as fp:
             try:
                 r = read_regnskab(fp)
             except ValueError as exn:
@@ -145,30 +155,28 @@ def opdater_titel_broken(titel):
     >>> opdater_titel_broken('T69OVC')
     (True, 'T79OVC')
     """
-    mo = re.match(r'^[A-ZÆØÅ0-9]+$', titel)
+    mo = re.match(r"^[A-ZÆØÅ0-9]+$", titel)
     if mo is None:
         return (False, None)
-    mo = re.match(r'^([GBO]|T[0-9]*O)?', titel)
+    mo = re.match(r"^([GBO]|T[0-9]*O)?", titel)
     prefix = mo.group(0)
-    rest = titel[len(prefix):]
-    known_titles = 'FORM INKA KASS CERM SEKR NF VC PR'.split()
-    if rest in known_titles or (len(rest) == 4 and rest.startswith('FU')):
+    rest = titel[len(prefix) :]
+    known_titles = "FORM INKA KASS CERM SEKR NF VC PR".split()
+    if rest in known_titles or (len(rest) == 4 and rest.startswith("FU")):
         certain = True
     else:
         certain = False
-    tr = [''] + 'G B O TO T2O'.split()
+    tr = [""] + "G B O TO T2O".split()
     if prefix in tr[:-1]:
-        up_prefix = tr[tr.index(prefix)+1]
+        up_prefix = tr[tr.index(prefix) + 1]
     else:
-        mo = re.match(r'^T(\d*?)([0-8]?)(9*)O$', prefix)
+        mo = re.match(r"^T(\d*?)([0-8]?)(9*)O$", prefix)
         if mo.group(2):
             # This is broken if mo.group(3) is non-empty
-            up_prefix = 'T%s%s%sO' % (mo.group(1),
-                                      int(mo.group(2))+1,
-                                      mo.group(3))
+            up_prefix = "T%s%s%sO" % (mo.group(1), int(mo.group(2)) + 1, mo.group(3))
         else:
-            assert mo.group(1) == mo.group(2) == ''
-            up_prefix = '1' + '0' * len(mo.group(3))
+            assert mo.group(1) == mo.group(2) == ""
+            up_prefix = "1" + "0" * len(mo.group(3))
     return (certain, up_prefix + rest)
 
 
@@ -178,23 +186,23 @@ def is_title(titel):
 
 
 def extract_alias_or_title(periods, words):
-    '''
+    """
     >>> list(extract_alias_or_title([None, None, None, 2013],
     ...                             "Den harmoniske række FORM".split()))
     [(None, 'Den harmoniske række'), (2013, 'FORM')]
     >>> list(extract_alias_or_title([2013, 2014], "FUET EFUIT".split()))
     [(2013, 'FUET'), (2014, 'EFUIT')]
-    '''
+    """
     i = 0
     while i < len(words):
         if periods[i] is not None:
             yield (periods[i], words[i])
             i += 1
         else:
-            j = i+1
+            j = i + 1
             while j < len(words) and periods[j] is None:
                 j += 1
-            yield (None, ' '.join(words[i:j]))
+            yield (None, " ".join(words[i:j]))
             i = j
 
 
@@ -202,7 +210,7 @@ def extract_by_time(current_times, current_words, **kwargs):
     assert len(current_times) == len(current_words)
     i = 0
     while i < len(current_times):
-        j = i+1
+        j = i + 1
         while j < len(current_times):
             if current_times[j] == current_times[i]:
                 j += 1
@@ -210,18 +218,16 @@ def extract_by_time(current_times, current_words, **kwargs):
                 break
         remove_words = current_words[i:j]
         for period, root in extract_alias_or_title(*zip(*remove_words)):
-            yield dict(period=period, root=root,
-                       start_time=current_times[i],
-                       **kwargs)
+            yield dict(period=period, root=root, start_time=current_times[i], **kwargs)
         i = j
 
 
 def parse_alias(title, gfyear):
-    if title.startswith('-'):
-        return None, title.lstrip('-')
+    if title.startswith("-"):
+        return None, title.lstrip("-")
     is_title = opdater_titel_broken(title)[0]
     age, root = alder(title)
-    if not is_title or root in ('', 'EFUIT'):
+    if not is_title or root in ("", "EFUIT"):
         return None, title
     if age > 22:
         # Broken legacy handling of T19O which is upgraded to T29O
@@ -240,17 +246,19 @@ def extract_alias_times(aliases, **kwargs):
         if current_words == words:
             continue
         a_copy = list(current_words)
-        matcher = difflib.SequenceMatcher(
-            a=a_copy, b=words)
+        matcher = difflib.SequenceMatcher(a=a_copy, b=words)
         for op, alo, ahi, blo, bhi in matcher.get_opcodes():
-            if op == 'equal':
+            if op == "equal":
                 continue
             assert words[:blo] == current_words[:blo]
-            yield from extract_by_time(current_times[blo:blo+(ahi-alo)],
-                                       current_words[blo:blo+(ahi-alo)],
-                                       end_time=t, **kwargs)
-            current_words[blo:blo+(ahi-alo)] = words[blo:bhi]
-            current_times[blo:blo+(ahi-alo)] = (bhi-blo)*[t]
+            yield from extract_by_time(
+                current_times[blo : blo + (ahi - alo)],
+                current_words[blo : blo + (ahi - alo)],
+                end_time=t,
+                **kwargs
+            )
+            current_words[blo : blo + (ahi - alo)] = words[blo:bhi]
+            current_times[blo : blo + (ahi - alo)] = (bhi - blo) * [t]
         assert words == current_words
 
 
@@ -258,10 +266,10 @@ def get_aliases(persons, gfyears):
     result = []
     for person_history in persons:
         name = person_history[-1][0].navn
-        aliases = ([(gfyears[t], t,
-                     '%s %s' % (p.titel, p.aliaser.replace(',', ' ')))
-                    for p, t in person_history] +
-                   [(None, None, '')])
+        aliases = [
+            (gfyears[t], t, "%s %s" % (p.titel, p.aliaser.replace(",", " ")))
+            for p, t in person_history
+        ] + [(None, None, "")]
         result.extend(extract_alias_times(aliases, name=name))
     return result
 
@@ -272,18 +280,20 @@ def get_primary_alias(persons):
 
         display_titles = [
             # (t, 'real_title', p.titel.split()[0]) if p.titel else
-            (t, 'blank', '') if (p.aliaser or '-').startswith('-') else
-            (t, 'primary_alias', p.aliaser.split()[0])
-            for p, t in person_history]
+            (t, "blank", "")
+            if (p.aliaser or "-").startswith("-")
+            else (t, "primary_alias", p.aliaser.split()[0])
+            for p, t in person_history
+        ]
 
         def key(x):
-            if x[1] == 'primary_alias':
+            if x[1] == "primary_alias":
                 return x[2]
             else:
-                return ''
+                return ""
 
         groups = itertools.groupby(display_titles, key=key)
-        prev = ''
+        prev = ""
         prev_time = None
         for s, times in groups:
             time = next(times)[0]
@@ -321,10 +331,7 @@ def get_person_history(persons):
         name = x[-1][0].navn
         for p, t in x:
             h.setdefault(t, {})[name] = p
-    names = [
-        set(h[t].keys())
-        for t in sorted(h.keys())
-    ]
+    names = [set(h[t].keys()) for t in sorted(h.keys())]
     for n1, n2 in zip(names[:-1], names[1:]):
         d = n1 - n2
         if d:
@@ -336,14 +343,17 @@ def get_alias_dicts(persons, gfyears):
     aliases = get_aliases(persons, gfyears)
     dicts = []
     for o in aliases:
-        dicts.append(dict(
-            name=o['name'],
-            period=o['period'],
-            root=o['root'],
-            start_time=o['start_time'] and
-            o['start_time'].strftime('%Y-%m-%dT%H:%M:%S%z'),
-            end_time=o['end_time'] and
-            o['end_time'].strftime('%Y-%m-%dT%H:%M:%S%z')))
+        dicts.append(
+            dict(
+                name=o["name"],
+                period=o["period"],
+                root=o["root"],
+                start_time=o["start_time"]
+                and o["start_time"].strftime("%Y-%m-%dT%H:%M:%S%z"),
+                end_time=o["end_time"]
+                and o["end_time"].strftime("%Y-%m-%dT%H:%M:%S%z"),
+            )
+        )
     return dicts
 
 
@@ -351,22 +361,28 @@ def get_primary_alias_dicts(persons):
     aliases = get_primary_alias(persons)
     dicts = []
     for name, start_time, end_time, root in aliases:
-        dicts.append(dict(
-            name=name, start_time=start_time.strftime('%Y-%m-%dT%H:%M:%S%z'),
-            end_time=end_time and end_time.strftime('%Y-%m-%dT%H:%M:%S%z'),
-            root=root))
+        dicts.append(
+            dict(
+                name=name,
+                start_time=start_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                end_time=end_time and end_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                root=root,
+            )
+        )
     return dicts
 
 
 def get_status_dicts(persons):
     statuses = get_statuses(persons)
     statuses = [
-        dict(name=o['name'],
-             start_time=o['start_time'] and
-             o['start_time'].strftime('%Y-%m-%dT%H:%M:%S%z'),
-             end_time=o['end_time'] and
-             o['end_time'].strftime('%Y-%m-%dT%H:%M:%S%z'))
-        for o in statuses]
+        dict(
+            name=o["name"],
+            start_time=o["start_time"]
+            and o["start_time"].strftime("%Y-%m-%dT%H:%M:%S%z"),
+            end_time=o["end_time"] and o["end_time"].strftime("%Y-%m-%dT%H:%M:%S%z"),
+        )
+        for o in statuses
+    ]
     return statuses
 
 
@@ -378,13 +394,12 @@ def check_name_unique(persons):
         raise Exception()
 
 
-def get_gfyear(regnskab,
-               base=(('Bjarke Skjernaa', 'Bjarke Skjer'), 1999, 'KASS')):
+def get_gfyear(regnskab, base=(("Bjarke Skjernaa", "Bjarke Skjer"), 1999, "KASS")):
     names, year, title = base
     try:
         p = next(p for p in regnskab.personer if p.navn in names)
     except StopIteration:
-        print('\n'.join(sorted(p.navn for p in regnskab.personer)))
+        print("\n".join(sorted(p.navn for p in regnskab.personer)))
         raise
     age, title_ = alder(p.titel)
     if title_ != title:
@@ -394,20 +409,21 @@ def get_gfyear(regnskab,
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-g', '--git-dir')
-    parser.add_argument('-b', '--backup-dir')
+    parser.add_argument("-g", "--git-dir")
+    parser.add_argument("-b", "--backup-dir")
     args = parser.parse_args()
     if not args.git_dir and not args.backup_dir:
         parser.error("must specify at least one data source")
-    output, aliases, statuses, primary_aliases = (
-        export_data(args.git_dir, args.backup_dir))
-    with open('regnskab-aliases.json', 'w') as fp:
+    output, aliases, statuses, primary_aliases = export_data(
+        args.git_dir, args.backup_dir
+    )
+    with open("regnskab-aliases.json", "w") as fp:
         json.dump(aliases, fp, indent=2)
-    with open('regnskab-statuses.json', 'w') as fp:
+    with open("regnskab-statuses.json", "w") as fp:
         json.dump(statuses, fp, indent=2)
-    with open('regnskab-history.json', 'w') as fp:
+    with open("regnskab-history.json", "w") as fp:
         json.dump(output, fp, indent=2)
-    with open('regnskab-primary-aliases.json', 'w') as fp:
+    with open("regnskab-primary-aliases.json", "w") as fp:
         json.dump(primary_aliases, fp, indent=2)
 
 
@@ -457,7 +473,7 @@ def export_data(git_dir, backup_dir, name_trans=None):
             x = a.get(n, Forbrug(0, 0, 0, 0, 0, 0))
             y = b.get(n, Forbrug(0, 0, 0, 0, 0, 0))
             d.append(abs(x - y))
-        return sum(v**2 for v in d) < 1e-3
+        return sum(v ** 2 for v in d) < 1e-3
 
     def dict_minus(a, b):
         # return {k: v - b.get(k, type(v).ZERO) for k, v in a.items()}
@@ -470,34 +486,32 @@ def export_data(git_dir, backup_dir, name_trans=None):
     resets = []
 
     def append_reset(time, forbrug_diff):
-        if resets and resets[-1]['time'].date() == time.date():
+        if resets and resets[-1]["time"].date() == time.date():
             same_date = resets.pop()
-            forbrug_diff = dict_add(same_date['forbrug_diff'], forbrug_diff)
+            forbrug_diff = dict_add(same_date["forbrug_diff"], forbrug_diff)
         resets.append(dict(time=time, forbrug_diff=forbrug_diff))
 
     for gfyear, times in gfs:
-        times_subs = ((t, sub_all_persons(by_time[t]))
-                      for t in times)
+        times_subs = ((t, sub_all_persons(by_time[t])) for t in times)
         t1, s1 = next(times_subs)
         for t2, s2 in times_subs:
             if not allclose(s1, s2):
                 f = dict_minus(s2, s1)
                 append_reset(time=t1, forbrug_diff=f)
             t1, s1 = t2, s2
-        forbrug_before_gf = {name: person.senest
-                             for name, person in by_time[t1].items()}
+        forbrug_before_gf = {
+            name: person.senest for name, person in by_time[t1].items()
+        }
         append_reset(time=t1, forbrug_diff=forbrug_before_gf)
 
-    KINDS = ['oel', 'xmas', 'vand', 'kasser']
+    KINDS = ["oel", "xmas", "vand", "kasser"]
     output = []
     balance = {}
     for o in resets:
-        time = o['time']
-        forbrug = o['forbrug_diff']
+        time = o["time"]
+        forbrug = o["forbrug_diff"]
         prices = regnskab_history[time].priser
-        purchase_kinds = [
-            dict(key=k, price=getattr(prices, k))
-            for k in KINDS]
+        purchase_kinds = [dict(key=k, price=getattr(prices, k)) for k in KINDS]
         payments = {}
         purchases = {}
         names = {}
@@ -509,7 +523,7 @@ def export_data(git_dir, backup_dir, name_trans=None):
             p = by_time[time][name]
             names[name] = p.navn
             emails[name] = p.email
-            if p.titel and not p.titel.startswith('-'):
+            if p.titel and not p.titel.startswith("-"):
                 titles[name] = p.titel.split()[0]
             if forbrug[name].betalt:
                 payments[name] = forbrug[name].betalt
@@ -520,26 +534,29 @@ def export_data(git_dir, backup_dir, name_trans=None):
             if forbrug[name].andet:
                 others[name] = forbrug[name].andet
             purchase_amount = get_amount(prices, forbrug[name])
-            new_balance = (balance.get(name, 0) +
-                           (purchase_amount - forbrug[name].betalt))
+            new_balance = balance.get(name, 0) + (
+                purchase_amount - forbrug[name].betalt
+            )
             actual_balance = p.gaeld
             correction = actual_balance - new_balance
             if abs(correction) > 0.001:
                 corrections[name] = correction
                 new_balance += correction
             balance[name] = new_balance
-        output.append(dict(
-            time=time.strftime('%Y-%m-%dT%H:%M:%S%z'),
-            period=gfyears[time],
-            names=names,
-            emails=emails,
-            titles=titles,
-            kinds=purchase_kinds,
-            payments=payments,
-            purchases=purchases,
-            others=others,
-            corrections=corrections,
-        ))
+        output.append(
+            dict(
+                time=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                period=gfyears[time],
+                names=names,
+                emails=emails,
+                titles=titles,
+                kinds=purchase_kinds,
+                payments=payments,
+                purchases=purchases,
+                others=others,
+                corrections=corrections,
+            )
+        )
 
     aliases = get_alias_dicts(persons, gfyears)
     primary_aliases = get_primary_alias_dicts(persons)
@@ -549,13 +566,13 @@ def export_data(git_dir, backup_dir, name_trans=None):
 
 def fix_person_name(person, name_trans):
     d = person._asdict()
-    for k in ('navn', 'email'):
+    for k in ("navn", "email"):
         name = d[k]
-        name = name.lstrip('\'')
-        while '\b' in name:
-            name = re.sub(r'.\b', '', name, 1)
-        if name == 'Mette Lysgaard Schultz':
-            name = 'Mette Lysgaard Schulz'
+        name = name.lstrip("'")
+        while "\b" in name:
+            name = re.sub(r".\b", "", name, 1)
+        if name == "Mette Lysgaard Schultz":
+            name = "Mette Lysgaard Schulz"
         name = name_trans.get(name, name)
         d[k] = name
     return type(person)(**d)
@@ -579,8 +596,9 @@ def parse_regnskab_dat(regnskab_dat, name_trans):
     assert isinstance(name_trans, dict)
     regnskab_dat = fix_names(regnskab_dat, name_trans)
     regnskab_dat = remove_duplicates(regnskab_dat)
-    regnskab_dat = ((t, r) for t, r in regnskab_dat
-                    if t.date() != datetime.date(2008, 5, 3))
+    regnskab_dat = (
+        (t, r) for t, r in regnskab_dat if t.date() != datetime.date(2008, 5, 3)
+    )
     # regnskab_dat = ((t, r) for t, r in regnskab_dat for o in [get_gfyear(r)])
 
     dead_leaves = []
@@ -593,22 +611,27 @@ def parse_regnskab_dat(regnskab_dat, name_trans):
         pred_navn = [p.navn]
         if p.email:
             pred_navn.append(email_to_navn.get(p.email))
-        if p.navn.startswith('Søren Pingel '):
-            pred_navn.append('Søren Pingel')
-        elif p.navn == 'Mette Lysgaard Schultz':
-            pred_navn.append('Mette Lysgaard Schulz')
+        if p.navn.startswith("Søren Pingel "):
+            pred_navn.append("Søren Pingel")
+        elif p.navn == "Mette Lysgaard Schultz":
+            pred_navn.append("Mette Lysgaard Schulz")
         return set(n for n in pred_navn if n and n in leaf_navn)
 
     for i, (t2, r2) in enumerate(regnskab_dat):
         assert all(isinstance(ps, tuple) for ps in leaf_navn.values())
-        assert all(isinstance(p[0], Person) and
-                   isinstance(p[1], datetime.datetime)
-                   for ps in leaf_navn.values() for p in ps)
+        assert all(
+            isinstance(p[0], Person) and isinstance(p[1], datetime.datetime)
+            for ps in leaf_navn.values()
+            for p in ps
+        )
         assert len(set(email_to_navn.values())) == len(email_to_navn)
         assert set(email_to_navn.values()).issubset(leaf_navn.keys())
-        assert all(email_to_navn[p.email] == p.navn
-                   for ps in leaf_navn.values()
-                   for p in [ps[-1][0]] if p.email)
+        assert all(
+            email_to_navn[p.email] == p.navn
+            for ps in leaf_navn.values()
+            for p in [ps[-1][0]]
+            if p.email
+        )
 
         regnskab_history[t2] = r2
 
@@ -669,8 +692,10 @@ def parse_regnskab_dat(regnskab_dat, name_trans):
                 del email_to_navn[v[-1][0].email]
         leaf_navn = new_leaves
     if deleted_leaves:
-        print("%s deleted leaves, most recent on %s" %
-              (len(deleted_leaves), deleted_leaves[-1][-1][1]))
+        print(
+            "%s deleted leaves, most recent on %s"
+            % (len(deleted_leaves), deleted_leaves[-1][-1][1])
+        )
     return list(leaf_navn.values()), regnskab_history
 
 

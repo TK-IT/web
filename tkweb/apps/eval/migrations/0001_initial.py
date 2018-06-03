@@ -10,18 +10,31 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ('wiki', '0002_urlpath_moved_to'),
-    ]
+    dependencies = [("wiki", "0002_urlpath_moved_to")]
 
     operations = [
         migrations.CreateModel(
-            name='WikiArticleTimeout',
+            name="WikiArticleTimeout",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timeoutMonth', models.PositiveSmallIntegerField(null=True)),
-                ('updated', models.DateField(null=True)),
-                ('article', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='wikiArticleTimeout', to='wiki.Article')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("timeoutMonth", models.PositiveSmallIntegerField(null=True)),
+                ("updated", models.DateField(null=True)),
+                (
+                    "article",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="wikiArticleTimeout",
+                        to="wiki.Article",
+                    ),
+                ),
             ],
-        ),
+        )
     ]

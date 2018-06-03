@@ -12,6 +12,5 @@ def kalender(request):
     futureEvents = Event.objects.filter(date__gt=(todayish))
     pastEvents = Event.objects.filter(date__range=(yearAgo, todayish)).reverse()
 
-    context = {'futureEvents': futureEvents,
-               'pastEvents': pastEvents}
-    return render(request, 'kalender.html', context)
+    context = {"futureEvents": futureEvents, "pastEvents": pastEvents}
+    return render(request, "kalender.html", context)

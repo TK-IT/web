@@ -1,7 +1,5 @@
 from django.contrib import admin
-from .models import (
-    Document, Printer, Printout,
-)
+from .models import Document, Printer, Printout
 
 
 admin.site.register(Document)

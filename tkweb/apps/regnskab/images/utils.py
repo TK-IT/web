@@ -12,10 +12,13 @@ def imagemagick_page_count(filename):
     """
     Get the number of pages in a named TIFF or PDF file.
     """
-    cmdline = ('identify', filename)
+    cmdline = ("identify", filename)
     p = subprocess.Popen(
-        cmdline, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
-        universal_newlines=True)
+        cmdline,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        universal_newlines=True,
+    )
     with p:
         stdout, stderr = p.communicate()
     # The number of pages is just the number of lines in the output.
@@ -33,7 +36,7 @@ def load_tiff_page(filename, page):
         return None
     bw = False
     if im.mode == "YCbCr" and not bw:
-        im = im.convert('RGB')
+        im = im.convert("RGB")
     a = scipy.misc.fromimage(im, flatten=bw)
     if not bw and a.ndim == 2:
         a = a[:, :, np.newaxis]
@@ -43,12 +46,19 @@ def load_tiff_page(filename, page):
 
 def load_pdf_page(filename, page):
     # convert -density 150 '2221_001.pdf[0]' 2221_001_1.png
-    with tempfile.NamedTemporaryFile(suffix='.ppm') as fp:
+    with tempfile.NamedTemporaryFile(suffix=".ppm") as fp:
         subprocess.check_call(
-            ('convert', '-density', '150', '-depth', '8',
-             # '-background', 'white', '-alpha', 'remove',
-             '%s[%s]' % (filename, page),
-             fp.name))
+            (
+                "convert",
+                "-density",
+                "150",
+                "-depth",
+                "8",
+                # '-background', 'white', '-alpha', 'remove',
+                "%s[%s]" % (filename, page),
+                fp.name,
+            )
+        )
         img = scipy.misc.imread(fp.name)
 
     return img / 255.0
@@ -59,10 +69,10 @@ def save_png(im_array):
         im_array = (im_array * 255).astype(np.uint8)
     img = PIL.Image.fromarray(im_array)
     output = io.BytesIO()
-    img.save(output, 'PNG')
+    img.save(output, "PNG")
     return output.getvalue()
 
 
 def png_data_uri(png_data):
     png_b64 = base64.b64encode(png_data).decode()
-    return 'data:image/png;base64,%s' % png_b64
+    return "data:image/png;base64,%s" % png_b64

@@ -7,8 +7,8 @@ class Option:
     def __init__(self, *args, **kwargs):
         self.args = args
         self.key = None
-        self.name = kwargs.pop('name', None)
-        self._sheet_count = kwargs.pop('sheets', None)
+        self.name = kwargs.pop("name", None)
+        self._sheet_count = kwargs.pop("sheets", None)
         if kwargs:
             raise TypeError(kwargs.keys())
 
@@ -19,17 +19,20 @@ class Option:
             return self._sheet_count(n)
 
     def lp_options(self):
-        return [o for arg in self.args for o in
-                ((arg,) if isinstance(arg, str) else arg.lp_options())]
+        return [
+            o
+            for arg in self.args
+            for o in ((arg,) if isinstance(arg, str) else arg.lp_options())
+        ]
 
     def lp_string(self):
-        return ' '.join('-o %s' % shlex.quote(s) for s in self.lp_options())
+        return " ".join("-o %s" % shlex.quote(s) for s in self.lp_options())
 
     def __str__(self):
         return self.name or self.key or self.lp_string()
 
     def __repr__(self):
-        return '<Option %s>' % self.key if self.key else '<Option>'
+        return "<Option %s>" % self.key if self.key else "<Option>"
 
 
 def set_option_keys(cls):
@@ -42,7 +45,7 @@ def set_option_keys(cls):
 
 @set_option_keys
 class Options:
-    '''
+    """
     >>> Options.booklet.lp_string()
     '-o Booklet=Left'
     >>> Options.parse(Options.booklet.lp_string())
@@ -51,33 +54,37 @@ class Options:
     [<Option stapled_a5_book>]
     >>> all([o] == Options.parse(o.lp_string()) for o in Options.get_options())
     True
-    '''
+    """
 
     # Printing an A4 document with just Booklet=Left and no
     # PageSize/fit-to-page will result in a folded booklet made from A3 paper.
-    booklet = Option('Booklet=Left')
+    booklet = Option("Booklet=Left")
 
     # SaddleStitch probably only makes sense with Booklet.
     # SaddleStitch means fold and staple.
-    stapled_folded_book = Option(booklet, 'SaddleStitch=On')
+    stapled_folded_book = Option(booklet, "SaddleStitch=On")
 
     # The following options force the source material to A5 size
     # so that the booklet option will use A4 paper.
-    a5paper = Option('PageSize=A5')
-    fit_to_page = Option('fit-to-page')
+    a5paper = Option("PageSize=A5")
+    fit_to_page = Option("fit-to-page")
     fit_a5 = Option(a5paper, fit_to_page)
 
-    a5_book = Option(booklet, fit_a5,
-                     name='A5-hæfte',
-                     sheets=lambda n: math.ceil(n / 4))
+    a5_book = Option(
+        booklet, fit_a5, name="A5-hæfte", sheets=lambda n: math.ceil(n / 4)
+    )
 
-    stapled_a5_book = Option(stapled_folded_book, fit_a5,
-                             name='A5-hæfte, klipset+foldet',
-                             sheets=lambda n: math.ceil(n / 4))
+    stapled_a5_book = Option(
+        stapled_folded_book,
+        fit_a5,
+        name="A5-hæfte, klipset+foldet",
+        sheets=lambda n: math.ceil(n / 4),
+    )
 
-    twosided = Option('Duplex=DuplexNoTumble', name='Tosidet',
-                      sheets=lambda n: math.ceil(n / 2))
-    onesided = Option('Duplex=None', name='Enkeltsidet')
+    twosided = Option(
+        "Duplex=DuplexNoTumble", name="Tosidet", sheets=lambda n: math.ceil(n / 2)
+    )
+    onesided = Option("Duplex=None", name="Enkeltsidet")
 
     @classmethod
     def get_options(cls):
@@ -92,12 +99,11 @@ class Options:
 
         # 'string' was a valid command line option string,
         # now let's check if it is on the form (-o <OPTION>)*
-        invalid = [o for o in args[::2] if o != '-o']
+        invalid = [o for o in args[::2] if o != "-o"]
         if invalid:
-            raise ValueError('Every other argument should be "-o": %s' %
-                             (invalid,))
+            raise ValueError('Every other argument should be "-o": %s' % (invalid,))
         if len(args) % 2 != 0:
-            raise ValueError('Last option not supplied')
+            raise ValueError("Last option not supplied")
 
         # Throw away all the -o's
         input_options = args[1::2]
@@ -129,14 +135,16 @@ class Options:
         # In the future we might want to put the unparsed options into a
         # CustomOption type (or similar).
         if remaining:
-            raise ValueError("Unrecognized: %s" %
-                             ' '.join(remaining.elements()))
+            raise ValueError("Unrecognized: %s" % " ".join(remaining.elements()))
         return result
 
 
 # These are the choices from which the user must select exactly one.
 # The first choice is the default choice.
-choices = [getattr(Options, k) for k in '''
+choices = [
+    getattr(Options, k)
+    for k in """
     twosided onesided
     a5_book stapled_a5_book
-'''.split()]
+""".split()
+]

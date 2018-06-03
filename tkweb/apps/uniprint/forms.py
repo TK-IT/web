@@ -12,12 +12,13 @@ class PrintoutForm(forms.Form):
 
     def clean_option(self):
         choice_objects = tkweb.apps.uniprint.options.choices
-        key = self.cleaned_data['option']
+        key = self.cleaned_data["option"]
         return next(o for o in choice_objects if o.key == key)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         choice_objects = tkweb.apps.uniprint.options.choices
         choices = [(c.key, c.name) for c in choice_objects]
-        self.fields['option'] = forms.ChoiceField(
-            choices=choices, initial=choice_objects[0].key)
+        self.fields["option"] = forms.ChoiceField(
+            choices=choices, initial=choice_objects[0].key
+        )

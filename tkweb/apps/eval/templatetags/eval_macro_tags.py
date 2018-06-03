@@ -3,6 +3,7 @@ from tkweb.apps.eval.evalmacros import EvalMacroPreprocessor, METHODS
 
 register = template.Library()
 
+
 @register.simple_tag
 def allowed_evalmacros():
     for method in METHODS:

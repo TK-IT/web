@@ -5,9 +5,7 @@ import itertools
 import collections
 
 from django.core.urlresolvers import reverse
-from django.views.generic import (
-    FormView, View, TemplateView,
-)
+from django.views.generic import FormView, View, TemplateView
 from django.shortcuts import get_object_or_404
 from django.utils.html import format_html, format_html_join
 from django.http import HttpResponse
@@ -15,14 +13,14 @@ from django.http import HttpResponse
 from tkweb.apps.regnskab.models import SheetImage, Purchase
 from .auth import regnskab_permission_required_method
 from tkweb.apps.regnskab.images.quadrilateral import (
-    Quadrilateral, extract_quadrilateral,
+    Quadrilateral,
+    extract_quadrilateral,
 )
 from tkweb.apps.regnskab.images.forms import (
-    SheetImageCrossesForm, SheetImageParametersForm,
+    SheetImageCrossesForm,
+    SheetImageParametersForm,
 )
-from tkweb.apps.regnskab.images.extract import (
-    extract_images, plot_extract_rows_cols,
-)
+from tkweb.apps.regnskab.images.extract import extract_images, plot_extract_rows_cols
 from tkweb.apps.regnskab.images.utils import png_data_uri
 
 import numpy as np
@@ -30,11 +28,11 @@ import numpy as np
 import PIL
 
 
-logger = logging.getLogger('regnskab')
+logger = logging.getLogger("regnskab")
 
 
 class SheetImageList(TemplateView):
-    template_name = 'regnskab/sheet_image_list.html'
+    template_name = "regnskab/sheet_image_list.html"
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
@@ -43,21 +41,21 @@ class SheetImageList(TemplateView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         qs = SheetImage.objects.all()
-        qs = qs.order_by('sheet', 'page')
+        qs = qs.order_by("sheet", "page")
         groups = itertools.groupby(qs, key=lambda o: o.sheet_id)
         sheets = []
         for sheet_id, g in groups:
             sheet_images = list(g)
             sheets.append((sheet_images[0].sheet, sheet_images))
-        context_data['sheets'] = sheets
+        context_data["sheets"] = sheets
         return context_data
 
 
 class SheetImageMixin:
     def get_sheet_image(self):
         return get_object_or_404(
-            SheetImage.objects, sheet__pk=self.kwargs['pk'],
-            page=self.kwargs['page'])
+            SheetImage.objects, sheet__pk=self.kwargs["pk"], page=self.kwargs["page"]
+        )
 
 
 class SheetImageFile(View, SheetImageMixin):
@@ -68,21 +66,19 @@ class SheetImageFile(View, SheetImageMixin):
     def get(self, request, **kwargs):
         sheet_image = self.get_sheet_image()
         im_data = sheet_image.get_image()
-        if self.kwargs.get('projected'):
+        if self.kwargs.get("projected"):
             quad = Quadrilateral(sheet_image.quad)
             im_data = extract_quadrilateral(im_data, quad)
         im_data = (255 * im_data).astype(np.uint8)
         img = PIL.Image.fromarray(im_data)
         output = io.BytesIO()
-        img.save(output, 'PNG')
-        return HttpResponse(
-            content=output.getvalue(),
-            content_type='image/png')
+        img.save(output, "PNG")
+        return HttpResponse(content=output.getvalue(), content_type="image/png")
 
 
 class SheetImageCrosses(FormView, SheetImageMixin):
     form_class = SheetImageCrossesForm
-    template_name = 'regnskab/sheet_image_crosses.html'
+    template_name = "regnskab/sheet_image_crosses.html"
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
@@ -91,21 +87,22 @@ class SheetImageCrosses(FormView, SheetImageMixin):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         sheet_image = self.get_sheet_image()
-        context_data['image_url'] = reverse(
-            'regnskab:sheet_image_file_projected',
-            kwargs=dict(pk=sheet_image.sheet_id, page=sheet_image.page))
-        context_data['layout'] = json.dumps(
-            {'rows': sheet_image.rows, 'cols': sheet_image.cols},
-            indent=2)
+        context_data["image_url"] = reverse(
+            "regnskab:sheet_image_file_projected",
+            kwargs=dict(pk=sheet_image.sheet_id, page=sheet_image.page),
+        )
+        context_data["layout"] = json.dumps(
+            {"rows": sheet_image.rows, "cols": sheet_image.cols}, indent=2
+        )
         quad = Quadrilateral(sheet_image.quad)
         width, height = quad.suggested_size()
-        context_data['image_width'] = int(width)
-        context_data['image_height'] = int(height)
+        context_data["image_width"] = int(width)
+        context_data["image_height"] = int(height)
         return context_data
 
     def get_form_kwargs(self, **kwargs):
         r = super().get_form_kwargs(**kwargs)
-        r['instance'] = self.get_sheet_image()
+        r["instance"] = self.get_sheet_image()
         return r
 
     def form_valid(self, form):
@@ -113,16 +110,15 @@ class SheetImageCrosses(FormView, SheetImageMixin):
         o.crosses = form.get_crosses()
         o.boxes = form.get_boxes()
         o.compute_person_counts()
-        if form.cleaned_data['verified']:
+        if form.cleaned_data["verified"]:
             o.set_verified(self.request.user)
         o.save()
-        return self.render_to_response(
-            self.get_context_data(form=form, saved=True))
+        return self.render_to_response(self.get_context_data(form=form, saved=True))
 
 
 class SheetImageParameters(FormView, SheetImageMixin):
     form_class = SheetImageParametersForm
-    template_name = 'regnskab/sheet_image_parameters.html'
+    template_name = "regnskab/sheet_image_parameters.html"
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):
@@ -130,24 +126,24 @@ class SheetImageParameters(FormView, SheetImageMixin):
 
     def get_form_kwargs(self, **kwargs):
         r = super().get_form_kwargs(**kwargs)
-        r['parameters'] = self.get_sheet_image().parameters
+        r["parameters"] = self.get_sheet_image().parameters
         return r
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         computed = []
         sheet_image = self.get_sheet_image()
-        for k in 'quad cols rows person_rows'.split():
+        for k in "quad cols rows person_rows".split():
             d = getattr(sheet_image, k)
             shape = np.asarray(d).shape
             v = json.dumps(d, indent=2)
-            computed.append(('%s (%s)' % (k, '×'.join(map(str, shape))), v))
-        context_data['computed'] = computed
+            computed.append(("%s (%s)" % (k, "×".join(map(str, shape))), v))
+        context_data["computed"] = computed
 
         fig = plot_extract_rows_cols(sheet_image)
         png_buf = io.BytesIO()
-        fig.savefig(png_buf, format='png')
-        context_data['fig_url'] = png_data_uri(png_buf.getvalue())
+        fig.savefig(png_buf, format="png")
+        context_data["fig_url"] = png_data_uri(png_buf.getvalue())
 
         return context_data
 
@@ -158,19 +154,19 @@ class SheetImageParameters(FormView, SheetImageMixin):
         sheet = sheet_image.sheet
         sheet_image.save()  # Save parameters
         images, rows, purchases = extract_images(
-            sheet, list(sheet.purchasekind_set.all()))
+            sheet, list(sheet.purchasekind_set.all())
+        )
         sheet_image, = [im for im in images if im.page == sheet_image.page]
         sheet_image.set_verified(False)
         sheet_image.save()  # Save computed values
-        if form.cleaned_data['reset']:
+        if form.cleaned_data["reset"]:
             sheet.sheetrow_set.all().delete()
             for o in rows:
                 o.save()
             for o in purchases:
                 o.row = o.row  # Update row_id
             Purchase.objects.bulk_create(purchases)
-        return self.render_to_response(
-            self.get_context_data(form=form, saved=True))
+        return self.render_to_response(self.get_context_data(form=form, saved=True))
 
 
 def get_sheetimage_cross_classes(qs):
@@ -199,8 +195,8 @@ def img_tag(im_data, **kwargs):
     png_data = save_png(im_data.reshape((24, 24, 3)))
     png_uri = png_data_uri(png_data)
     return format_html(
-        '<img src="{}" {}/>', png_uri,
-        format_html_join('', '{}="{}" ', kwargs.items()))
+        '<img src="{}" {}/>', png_uri, format_html_join("", '{}="{}" ', kwargs.items())
+    )
 
 
 class Svm(View):
@@ -209,38 +205,33 @@ class Svm(View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        pos, neg = get_sheetimage_cross_classes(
-            SheetImage.objects.all()[0:4])
+        pos, neg = get_sheetimage_cross_classes(SheetImage.objects.all()[0:4])
         pos = [im.ravel() for im in pos]
         neg = [im.ravel() for im in neg]
 
         from sklearn.svm import SVC
 
-        svm = SVC(C=1e3, kernel='linear')
+        svm = SVC(C=1e3, kernel="linear")
         svm.fit(pos + neg, [1] * len(pos) + [0] * len(neg))
 
         result = []
 
         sv_labels = svm.predict(svm.support_vectors_)
         sv_and_labels = list(zip(svm.support_vectors_, sv_labels))
-        result.extend(img_tag(im)
-                      for im, label in sv_and_labels
-                      if label == 0)
-        result.append('<hr />')
-        result.extend(img_tag(im)
-                      for im, label in sv_and_labels
-                      if label == 1)
-        result.append('<hr />')
+        result.extend(img_tag(im) for im, label in sv_and_labels if label == 0)
+        result.append("<hr />")
+        result.extend(img_tag(im) for im, label in sv_and_labels if label == 1)
+        result.append("<hr />")
 
-        result.extend(img_tag(im) for im, label in
-                      zip(pos, svm.predict(pos))
-                      if label == 0)
-        result.append('<hr />')
-        result.extend(img_tag(im) for im, label in
-                      zip(neg, svm.predict(neg))
-                      if label == 1)
+        result.extend(
+            img_tag(im) for im, label in zip(pos, svm.predict(pos)) if label == 0
+        )
+        result.append("<hr />")
+        result.extend(
+            img_tag(im) for im, label in zip(neg, svm.predict(neg)) if label == 1
+        )
 
-        return HttpResponse(''.join(result))
+        return HttpResponse("".join(result))
 
 
 class NaiveParam(View):
@@ -250,14 +241,13 @@ class NaiveParam(View):
 
     def get(self, request):
         pos, neg = get_sheetimage_cross_classes(
-            list(SheetImage.objects.all()[0:4]) +
-            list(SheetImage.objects.all()[6:8]))
+            list(SheetImage.objects.all()[0:4]) + list(SheetImage.objects.all()[6:8])
+        )
 
         from tkweb.apps.regnskab.images.extract import naive_cross_value
-        pos = sorted(((im, naive_cross_value(im)) for im in pos),
-                     key=lambda x: x[1])
-        neg = sorted(((im, naive_cross_value(im)) for im in neg),
-                     key=lambda x: x[1])
+
+        pos = sorted(((im, naive_cross_value(im)) for im in pos), key=lambda x: x[1])
+        neg = sorted(((im, naive_cross_value(im)) for im in neg), key=lambda x: x[1])
         neg_max = max(v for im, v in neg)
         pos_min = min(v for im, v in pos)
         neg_certain = ((im, v) for im, v in neg if v < pos_min)
@@ -269,6 +259,6 @@ class NaiveParam(View):
             return img_tag(x[0], title=str(x[1]))
 
         imgss = [neg_certain, neg_maybe, pos_maybe, pos_certain]
-        return HttpResponse('<hr />'.join(
-            ''.join(map(value_tag, imgs))
-            for imgs in imgss))
+        return HttpResponse(
+            "<hr />".join("".join(map(value_tag, imgs)) for imgs in imgss)
+        )

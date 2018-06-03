@@ -5,17 +5,14 @@ from wiki.urls import get_pattern as get_wiki_pattern
 import tkweb.apps.eval.views
 
 urlpatterns = [
-    url(r'^$',
-        RedirectView.as_view(url='/eval/wiki/',
-                             permanent=False),
-        name='evalindex'),
-
+    url(
+        r"^$",
+        RedirectView.as_view(url="/eval/wiki/", permanent=False),
+        name="evalindex",
+    ),
     # django-wiki urls
-    url(r'wiki/', get_wiki_pattern()),
-    url(r'notifications/', get_nyt_pattern()),
-
+    url(r"wiki/", get_wiki_pattern()),
+    url(r"notifications/", get_nyt_pattern()),
     # Other urls
-    url(r'^timeouts/$',
-        tkweb.apps.eval.views.timeouts,
-        name='eval_timeouts'),
-    ]
+    url(r"^timeouts/$", tkweb.apps.eval.views.timeouts, name="eval_timeouts"),
+]

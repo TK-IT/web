@@ -9,7 +9,7 @@ class FileTypeError(Exception):
 
 def file_for_subprocess(file):
     try:
-        file.open('rb')
+        file.open("rb")
         file.fileno()
     except Exception:
         stdin = subprocess.PIPE
@@ -21,15 +21,12 @@ def file_for_subprocess(file):
 
 
 def run_poppler(file, *args):
-    '''
+    """
     Run a command from the poppler utility distribution.
-    '''
+    """
     stdin, comm_args = file_for_subprocess(file)
     proc = subprocess.Popen(
-        args,
-        stdin=stdin,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        args, stdin=stdin, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     stdoutbytes, stderrbytes = proc.communicate(*comm_args)
     stdout = stdoutbytes.decode()
@@ -40,22 +37,21 @@ def run_poppler(file, *args):
     elif proc.returncode != 0:
         # Internal/other error
         stderr_brief = stderr[:100]
-        raise subprocess.CalledProcessError(
-            proc.returncode, proc.args, stdout, stderr)
+        raise subprocess.CalledProcessError(proc.returncode, proc.args, stdout, stderr)
     return stdout
 
 
 def extract_plain_text(file):
-    return run_poppler(file, 'pdftotext', '-', '-')
+    return run_poppler(file, "pdftotext", "-", "-")
 
 
 def get_pdfinfo(file):
-    return run_poppler(file, 'pdfinfo', '-')
+    return run_poppler(file, "pdfinfo", "-")
 
 
 def pages_from_pdfinfo(text):
     try:
-        line, = (l for l in text.splitlines() if l.startswith('Pages:'))
+        line, = (l for l in text.splitlines() if l.startswith("Pages:"))
         return int(line.split()[1])
     except Exception:
         raise Exception("Could not parse pdfinfo: %r" % (text,))

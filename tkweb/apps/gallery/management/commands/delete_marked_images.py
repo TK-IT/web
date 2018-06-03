@@ -18,7 +18,6 @@ class Command(BaseCommand):
         qs = BaseMedia.objects.filter(visibility=BaseMedia.DELETE)
         n = qs.count()
         if n:
-            ids = sorted(qs.values_list('id', flat=True))
-            logger.info("Deleting %s BaseMedia objects with IDs %s",
-                        n, ids)
+            ids = sorted(qs.values_list("id", flat=True))
+            logger.info("Deleting %s BaseMedia objects with IDs %s", n, ids)
             BaseMedia.objects.filter(id__in=ids).delete()

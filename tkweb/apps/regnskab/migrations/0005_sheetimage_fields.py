@@ -11,23 +11,28 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('regnskab', '0004_quad_shape'),
+        ("regnskab", "0004_quad_shape"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='sheetimage',
-            name='boxes',
+            model_name="sheetimage",
+            name="boxes",
             field=jsonfield.fields.JSONField(default=[]),
         ),
         migrations.AddField(
-            model_name='sheetimage',
-            name='verified_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="sheetimage",
+            name="verified_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='sheetimage',
-            name='verified_time',
+            model_name="sheetimage",
+            name="verified_time",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

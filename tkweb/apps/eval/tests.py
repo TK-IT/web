@@ -9,7 +9,6 @@ from wiki.models import Article
 @freeze_time("2018-09-20")
 @override_config(GFYEAR="2017")
 class WikiArticleTimeoutTestOutdatedRightBeforeGF(TestCase):
-
     def setUp(self):
         Article.objects.create()
 

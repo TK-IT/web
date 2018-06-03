@@ -15,13 +15,15 @@ class MailinglistAdmin(admin.ModelAdmin):
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.module_name
         return [
-            url(r'^add/$',
-                RedirectView.as_view(url='/email/', permanent=False),
-                name='%s_%s_add' % info),
+            url(
+                r"^add/$",
+                RedirectView.as_view(url="/email/", permanent=False),
+                name="%s_%s_add" % info,
+            )
         ]
 
     def has_add_permission(self, request, obj=None):
-        return request.user.has_perm('mailinglist.send')
+        return request.user.has_perm("mailinglist.send")
 
     def has_delete_permission(self, *args, **kwargs):
         return False
@@ -32,10 +34,10 @@ class MailinglistAdmin(admin.ModelAdmin):
 
 class Email(object):
     class Meta:
-        app_label = 'mailinglist'
-        object_name = 'Email'
-        model_name = module_name = 'email'
-        verbose_name = verbose_name_plural = 'Email til hængerlisten'
+        app_label = "mailinglist"
+        object_name = "Email"
+        model_name = module_name = "email"
+        verbose_name = verbose_name_plural = "Email til hængerlisten"
         abstract = False
         swapped = False
 
@@ -43,7 +45,7 @@ class Email(object):
             return False
 
         def get_change_permission(self):
-            return 'change_%s' % self.model_name
+            return "change_%s" % self.model_name
 
         def app_config(self):
             return None
@@ -55,30 +57,34 @@ class SharedFileAdmin(admin.ModelAdmin):
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.module_name
         return [
-            url(r'^$',
-                RedirectView.as_view(url='/email/file/', permanent=False),
-                name='%s_%s_changelist' % info),
-            url(r'^add/$',
-                RedirectView.as_view(url='/email/file/upload/', permanent=False),
-                name='%s_%s_add' % info),
+            url(
+                r"^$",
+                RedirectView.as_view(url="/email/file/", permanent=False),
+                name="%s_%s_changelist" % info,
+            ),
+            url(
+                r"^add/$",
+                RedirectView.as_view(url="/email/file/upload/", permanent=False),
+                name="%s_%s_add" % info,
+            ),
         ]
 
     def has_add_permission(self, request, obj=None):
-        return request.user.has_perm('mailinglist.send')
+        return request.user.has_perm("mailinglist.send")
 
     def has_delete_permission(self, *args, **kwargs):
         return False
 
     def has_change_permission(self, request, obj=None):
-        return request.user.has_perm('mailinglist.send')
+        return request.user.has_perm("mailinglist.send")
 
 
 class SharedFile(object):
     class Meta:
-        app_label = 'mailinglist'
-        object_name = 'SharedFile'
-        model_name = module_name = 'sharedfile'
-        verbose_name = verbose_name_plural = 'Vedhæftet fil'
+        app_label = "mailinglist"
+        object_name = "SharedFile"
+        model_name = module_name = "sharedfile"
+        verbose_name = verbose_name_plural = "Vedhæftet fil"
         abstract = False
         swapped = False
 
@@ -86,7 +92,7 @@ class SharedFile(object):
             return False
 
         def get_change_permission(self):
-            return 'change_%s' % self.model_name
+            return "change_%s" % self.model_name
 
         def app_config(self):
             return None

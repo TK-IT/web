@@ -11,17 +11,20 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class Command(BaseCommand):
-    help = 'Opdater kalenderen fra iCal'
+    help = "Opdater kalenderen fra iCal"
 
     def get_calendar(self):
         url = config.ICAL_URL
 
         try:
             with urllib.request.urlopen(url) as response:
-                data = response.read().decode('utf-8')
+                data = response.read().decode("utf-8")
         except ValueError as e:
-            logger.error("%s Did you remember to preprend http(s?):// URL: '%s'" % (e, url))
+            logger.error(
+                "%s Did you remember to preprend http(s?):// URL: '%s'" % (e, url)
+            )
             return
         except urllib.error.HTTPError as e:
             logger.error("Received HTTP error code %s. URL: '%s'" % (e.code, url))
@@ -41,8 +44,7 @@ class Command(BaseCommand):
             return
 
         def event_key(event):
-            return (event.title, event.date,
-                    event.description, event.facebook)
+            return (event.title, event.date, event.description, event.facebook)
 
         previous_events = {}
         for e in Event.objects.all():
@@ -61,13 +63,13 @@ class Command(BaseCommand):
 
         for component in cal.walk():
             if component.name == "VEVENT":
-                title = component.decoded('summary').decode('utf-8')
-                startdatetime = component.decoded('dtstart')
+                title = component.decoded("summary").decode("utf-8")
+                startdatetime = component.decoded("dtstart")
                 if type(startdatetime) is datetime.datetime:
                     startdate = startdatetime.date()
                 elif type(startdatetime) is datetime.date:
                     startdate = startdatetime
-                description = component.decoded('description').decode('utf-8')
+                description = component.decoded("description").decode("utf-8")
 
                 title = strip_tags(title)
                 description = strip_tags(description)
@@ -82,8 +84,9 @@ class Command(BaseCommand):
 
         # At this point, "previous_events" and "same_events"
         # contain all the events in the database.
-        assert (set(Event.objects.all()) ==
-                set(previous_events.values()) | set(same_events))
+        assert set(Event.objects.all()) == set(previous_events.values()) | set(
+            same_events
+        )
         # "previous_events" and "same_events" have no events in common.
         assert len(set(previous_events.values()) & set(same_events)) == 0
 
@@ -107,10 +110,12 @@ class Command(BaseCommand):
         # contain all the events in the database.
         assert set(Event.objects.all()) == set(new_events) | set(same_events)
 
-        finishText = ('The calendar was updated. ' +
-                      '%s events deleted, ' % len(previous_event_ids) +
-                      '%s events created, ' % len(new_events) +
-                      '%s left unchanged.' % len(same_events))
+        finishText = (
+            "The calendar was updated. "
+            + "%s events deleted, " % len(previous_event_ids)
+            + "%s events created, " % len(new_events)
+            + "%s left unchanged." % len(same_events)
+        )
         # Don't log unless something changed
         if len(previous_event_ids) or len(new_events):
             logger.info(finishText)

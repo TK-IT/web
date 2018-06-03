@@ -23,26 +23,27 @@ class EditVisibilityForm(forms.Form):
                 pk, visibility, album = file
             else:
                 raise TypeError(type(file))
-            k = 'i%s' % pk
+            k = "i%s" % pk
             self.album_pks.add(album)
             self.fields[k] = forms.ChoiceField(
                 choices=BaseMedia.VISIBILITY,
                 initial=visibility,
-                widget=forms.RadioSelect)
+                widget=forms.RadioSelect,
+            )
             self.basemedias.append((pk, k))
 
     @classmethod
     def from_POST(cls, post_data):
-        pattern = r'^i(\d+)$'
+        pattern = r"^i(\d+)$"
         pks = []
         for k, v in post_data.items():
             mo = re.match(pattern, k)
             if mo:
                 pks.append(int(mo.group(1)))
         files = BaseMedia.objects.filter(pk__in=pks)
-        files = list(files.values_list('pk', 'visibility', 'album_id'))
+        files = list(files.values_list("pk", "visibility", "album_id"))
         found_pks = [f[0] for f in files]
         missing = set(pks) - set(found_pks)
         if missing:
-            raise cls.Missing('Not found: %r' % (sorted(missing),))
+            raise cls.Missing("Not found: %r" % (sorted(missing),))
         return cls(files, data=post_data)

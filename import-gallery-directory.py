@@ -8,26 +8,25 @@ NAME = dict(_=" ", ae="æ", AE="Æ", oe="ø", OE="Ø", aa="å", AA="Å")
 
 
 def setup_django():
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE",
-                          "tkweb.settings.prod")
-    sys.path.append('/home/tkammer/tkweb/venv/lib/python3.5/site-packages')
-    sys.path.append('/home/tkammer/tkweb')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tkweb.settings.prod")
+    sys.path.append("/home/tkammer/tkweb/venv/lib/python3.5/site-packages")
+    sys.path.append("/home/tkammer/tkweb")
 
     import django
+
     django.setup()
 
 
 def repl_name(s):
-    return re.sub('|'.join(NAME.keys()),
-                  lambda mo: NAME[mo.group(0)], s)
+    return re.sub("|".join(NAME.keys()), lambda mo: NAME[mo.group(0)], s)
 
 
-def get_paths(input_dir, exts=('jpg',)):
+def get_paths(input_dir, exts=("jpg",)):
     known = []
     unknown = []
     for name in os.listdir(input_dir):
         name_lower = name.lower()
-        if any(name_lower.endswith('.' + e) for e in exts):
+        if any(name_lower.endswith("." + e) for e in exts):
             known.append(name)
         else:
             unknown.append(name)
@@ -41,9 +40,9 @@ def album_from_args(input_dir, parser_error, args):
     from django.utils.text import slugify
 
     order = args.order  # possibly None
-    dirname = os.path.basename(input_dir.rstrip('/'))
+    dirname = os.path.basename(input_dir.rstrip("/"))
     if args.year is None:
-        mo = re.match(r'^((?:19|20)\d\d)-(?:(\d\d)-)?(.*)$', dirname)
+        mo = re.match(r"^((?:19|20)\d\d)-(?:(\d\d)-)?(.*)$", dirname)
         if mo is None:
             parser_error("--year is required")
         year = int(mo.group(1))
@@ -54,10 +53,10 @@ def album_from_args(input_dir, parser_error, args):
         year = args.year
         name = dirname
     print(name, year, order)
-    old_folder = '%02d-%02d%02d/%02d-%s' % (
+    old_folder = "%02d-%02d%02d/%02d-%s" % (
         year - 1996,
         year % 100,
-        (year+1) % 100,
+        (year + 1) % 100,
         order,
         name,
     )
@@ -74,11 +73,10 @@ def album_from_args(input_dir, parser_error, args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-y', '--year', type=int)
-    parser.add_argument('-o', '--order', type=int)
-    parser.add_argument('-m', '--type-misc', action='store_false',
-                        dest='eventalbum')
-    parser.add_argument('input_dirs', nargs='+')
+    parser.add_argument("-y", "--year", type=int)
+    parser.add_argument("-o", "--order", type=int)
+    parser.add_argument("-m", "--type-misc", action="store_false", dest="eventalbum")
+    parser.add_argument("input_dirs", nargs="+")
     args = parser.parse_args()
 
     setup_django()
@@ -96,15 +94,14 @@ def make_objects(album_data, paths):
     from django.core.exceptions import ValidationError
     from django.core.files import File
     from tkweb.apps.gallery.models import Album, Image
+
     album = Album(**album_data)
     images = []
     errors = []
     for i, path in enumerate(paths):
-        fp = open(path, 'rb')
+        fp = open(path, "rb")
         fo = File(fp)
-        instance = Image(
-            file=fo, album=album,
-            forcedOrder=i)
+        instance = Image(file=fo, album=album, forcedOrder=i)
         try:
             instance.clean()
         except ValidationError as e:

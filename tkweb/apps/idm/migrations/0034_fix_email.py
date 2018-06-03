@@ -5,12 +5,12 @@ from django.db import models, migrations
 
 
 def fix_emails(apps, schema_editor):
-    Profile = apps.get_model('idm', 'Profile')
+    Profile = apps.get_model("idm", "Profile")
     save = []
     for p in Profile.objects.all():
         e = p.email
-        e = e.replace('&#064;', '@')
-        e = e.replace(' ', '')
+        e = e.replace("&#064;", "@")
+        e = e.replace(" ", "")
         if e != p.email:
             p.email = e
             save.append(p)
@@ -20,11 +20,6 @@ def fix_emails(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('idm', '0033_add_verbose_names'),
-    ]
+    dependencies = [("idm", "0033_add_verbose_names")]
 
-    operations = [
-        migrations.RunPython(fix_emails,
-                             lambda apps, schema_editor: None)
-    ]
+    operations = [migrations.RunPython(fix_emails, lambda apps, schema_editor: None)]

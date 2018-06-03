@@ -6,7 +6,7 @@ from tkweb.apps.regnskab.legacy.export import read_regnskab_revisions
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('gitdir')
+    parser.add_argument("gitdir")
     args = parser.parse_args()
 
     t1 = time.time()

@@ -7,13 +7,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         GFYEAR = config.GFYEAR
         for t in Title.objects.all():
-            if t.root.startswith('FU'):
+            if t.root.startswith("FU"):
                 kind = Title.FU
-            elif t.root.startswith('EFU'):
+            elif t.root.startswith("EFU"):
                 kind = Title.EFU
             else:
                 kind = Title.BEST
             if t.kind != kind:
                 t.kind = kind
-                self.stdout.write('%s %s' % (kind, t.display_title(GFYEAR)))
+                self.stdout.write("%s %s" % (kind, t.display_title(GFYEAR)))
                 t.save()

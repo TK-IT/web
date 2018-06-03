@@ -23,10 +23,10 @@ def document_path(instance, input_filename):
     slug_base = slugify(base)
     slug_name = slug_base + ext
     username = instance.created_by.username
-    return '/'.join(('uniprint', username, slug_name))
+    return "/".join(("uniprint", username, slug_name))
 
 
-logger = logging.getLogger('uniprint')
+logger = logging.getLogger("uniprint")
 
 
 class Document(models.Model):
@@ -36,16 +36,17 @@ class Document(models.Model):
     size = models.BigIntegerField()
     pages = models.IntegerField()
     pdfinfo = models.TextField(blank=True, null=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
-                                   null=True, blank=False)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=False
+    )
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        s = 'side' if self.pages == 1 else 'sider'
-        return '%s (%s %s)' % (self.original_filename, self.pages, s)
+        s = "side" if self.pages == 1 else "sider"
+        return "%s (%s %s)" % (self.original_filename, self.pages, s)
 
     class Meta:
-        ordering = ['created_time']
+        ordering = ["created_time"]
 
 
 class Printer(models.Model):
@@ -54,7 +55,7 @@ class Printer(models.Model):
 
     @property
     def hostname(self):
-        return 'localhost'
+        return "localhost"
 
     @property
     def port(self):
@@ -64,23 +65,22 @@ class Printer(models.Model):
         return self.name
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
 
 def page_range_ranges(s):
-    parts = s.split(',')
+    parts = s.split(",")
     for p in parts:
         try:
-            s, e = p.split('-')
+            s, e = p.split("-")
         except ValueError:
             s, e = p, p
         try:
-            r = range(int(s), int(e)+1)
+            r = range(int(s), int(e) + 1)
         except ValueError:
-            raise ValidationError('%r er ikke et heltal' % (v,))
+            raise ValidationError("%r er ikke et heltal" % (v,))
         if len(r) == 0:
-            raise ValidationError('%s-%s er et ugyldigt interval' %
-                                  (s, e))
+            raise ValidationError("%s-%s er et ugyldigt interval" % (s, e))
         yield r
 
 
@@ -94,26 +94,28 @@ def page_range_page_count(s, d):
 def validate_page_range(s, pages):
     for r in page_range_ranges(s):
         if not (1 <= r.start <= r.stop - 1 <= pages):
-            raise ValidationError('Dokumentet har kun %s sider' %
-                                  pages)
+            raise ValidationError("Dokumentet har kun %s sider" % pages)
 
 
 class Printout(models.Model):
-    document = models.ForeignKey(Document, on_delete=models.SET_NULL,
-                                 null=True, blank=False)
-    printer = models.ForeignKey(Printer, on_delete=models.SET_NULL,
-                                null=True, blank=False)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
-                                   null=True, blank=False)
+    document = models.ForeignKey(
+        Document, on_delete=models.SET_NULL, null=True, blank=False
+    )
+    printer = models.ForeignKey(
+        Printer, on_delete=models.SET_NULL, null=True, blank=False
+    )
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=False
+    )
     created_time = models.DateTimeField(auto_now_add=True)
 
     copies = models.PositiveIntegerField(default=1)
     lp_option_string = models.TextField(blank=True)
-    page_range = models.CharField(max_length=255, blank=True, default='')
+    page_range = models.CharField(max_length=255, blank=True, default="")
     output = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return '<Printout %s on %s>' % (self.document, self.printer)
+        return "<Printout %s on %s>" % (self.document, self.printer)
 
     def clean(self):
         if self.page_range:
@@ -129,9 +131,9 @@ class Printout(models.Model):
 
     @property
     def duplex(self):
-        if 'Duplex=DuplexNoTumble' in self.lp_option_string.split():
+        if "Duplex=DuplexNoTumble" in self.lp_option_string.split():
             return True
-        elif 'Duplex=None' in self.lp_option_string.split():
+        elif "Duplex=None" in self.lp_option_string.split():
             return False
 
     @property
@@ -153,31 +155,32 @@ class Printout(models.Model):
             return self.copies * o.sheet_count(self.page_range_page_count)
 
     def get_command_line(self):
-        host = '%s:%s' % (self.printer.hostname, self.printer.port)
+        host = "%s:%s" % (self.printer.hostname, self.printer.port)
         destination = self.printer.destination
 
         filename = self.document.file.path
-        cmd = ('lp', '-h', host, '-d', destination)
+        cmd = ("lp", "-h", host, "-d", destination)
         if self.copies != 1:
-            cmd += ('-n', str(self.copies))
+            cmd += ("-n", str(self.copies))
         cmd += tuple(shlex.split(self.lp_option_string))
         if self.page_range:
-            cmd += ('-P', self.page_range)
+            cmd += ("-P", self.page_range)
         if self.created_by:
-            cmd += ('-U', self.created_by.username)
+            cmd += ("-U", self.created_by.username)
         cmd += (filename,)
         return cmd
 
     def send_to_printer(self):
         cmd = self.get_command_line()
-        cmdline = ' '.join(map(shlex.quote, cmd))
-        logger.info('Running %s', cmdline)
+        cmdline = " ".join(map(shlex.quote, cmd))
+        logger.info("Running %s", cmdline)
         p = subprocess.Popen(
             cmd,
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            universal_newlines=True)
+            universal_newlines=True,
+        )
         with p:
             try:
                 output, _ = p.communicate(timeout=2)
@@ -188,16 +191,18 @@ class Printout(models.Model):
                 except subprocess.TimeoutExpired:
                     p.kill()
                     p.wait(timeout=0.1)
-                msg = '%s timed out' % cmdline
+                msg = "%s timed out" % cmdline
                 logger.error(msg)
                 raise ValidationError(msg)
-        output_lines = output.splitlines() or ('',)
+        output_lines = output.splitlines() or ("",)
         output_brief = output_lines[0][:100]
         if p.returncode != 0:
-            msg = ('%s return code was %s, ' % (cmdline, p.returncode) +
-                   'output: %r' % output_brief)
+            msg = (
+                "%s return code was %s, " % (cmdline, p.returncode)
+                + "output: %r" % output_brief
+            )
             logger.error(msg)
             raise ValidationError(msg)
-        logger.info('lp output: %r', output_brief)
+        logger.info("lp output: %r", output_brief)
         self.output = output[:100000]
         return output

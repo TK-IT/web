@@ -8,10 +8,12 @@ class RegnskabCommand(BaseCommand):
             n = len(elements)
         w = len(str(n))
         for i, x in enumerate(elements):
-            self.stdout.write('\r\x1B[K(%s/%s) %s' % (str(i+1).rjust(w), n, x), ending='')
+            self.stdout.write(
+                "\r\x1B[K(%s/%s) %s" % (str(i + 1).rjust(w), n, x), ending=""
+            )
             self.stdout.flush()
             yield x
-        self.stdout.write('')
+        self.stdout.write("")
 
     def save_all(self, objects, unique_attrs=None, only_new=False, bulk=False):
         if not objects:
@@ -37,8 +39,7 @@ class RegnskabCommand(BaseCommand):
             new.extend(objects)
 
         if new:
-            self.stdout.write("Save %s %s objects" %
-                              (len(new), type(new[0]).__name__))
+            self.stdout.write("Save %s %s objects" % (len(new), type(new[0]).__name__))
             if bulk:
                 type(new[0]).objects.bulk_create(new)
             else:
@@ -70,6 +71,7 @@ class RegnskabCommand(BaseCommand):
 
     def at_least_one(self, options, choices):
         if not any(o in options for o in choices):
-            raise CommandError("At least one of %s must be provided" %
-                               ', '.join('--%s' % k.replace('_', '-')
-                                         for k in choices))
+            raise CommandError(
+                "At least one of %s must be provided"
+                % ", ".join("--%s" % k.replace("_", "-") for k in choices)
+            )

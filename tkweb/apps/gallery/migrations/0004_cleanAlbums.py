@@ -13,10 +13,6 @@ def cleanAlbums(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('gallery', '0003_basemedia_iscoverfile'),
-    ]
+    dependencies = [("gallery", "0003_basemedia_iscoverfile")]
 
-    operations = [
-        migrations.RunPython(cleanAlbums)
-    ]
+    operations = [migrations.RunPython(cleanAlbums)]

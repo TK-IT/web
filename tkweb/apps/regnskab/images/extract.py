@@ -9,11 +9,12 @@ from .utils import save_png
 from .quadrilateral import Quadrilateral, extract_quadrilateral
 
 import matplotlib
-matplotlib.use('Agg')
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa
 
 
-@parameter('q')
+@parameter("q")
 def contrast_stretch(im, q=0.02):
     if im.ndim == 2:
         im_channels = im[:, :, np.newaxis]
@@ -22,8 +23,9 @@ def contrast_stretch(im, q=0.02):
     im_channels = im_channels.astype(np.float)
 
     pct = q * 100
-    fractiles = np.percentile(im_channels, [pct, 100 - pct], (0, 1),
-                              interpolation='nearest', keepdims=True)
+    fractiles = np.percentile(
+        im_channels, [pct, 100 - pct], (0, 1), interpolation="nearest", keepdims=True
+    )
     mins, maxs = fractiles
     return np.minimum(1, np.maximum(0, (im - mins) / (maxs - mins)))
 
@@ -55,24 +57,19 @@ def max_object(labels, max_label, k):
     else:
         mos = reversed(list(np.argsort(object_areas)[-5:]))
 
-    return [
-        (mo + 1,
-         object_areas[mo],
-         np.sum(labels == mo + 1))
-        for mo in mos
-    ]
+    return [(mo + 1, object_areas[mo], np.sum(labels == mo + 1)) for mo in mos]
 
 
-@parameter('sigma margin1 threshold')
+@parameter("sigma margin1 threshold")
 def find_bbox(im, sigma=1, margin1=10, threshold=0.6):
     im = im[margin1:-margin1, margin1:-margin1]
     if sigma > 0.01:
-        im = scipy.ndimage.filters.gaussian_filter(im, sigma, mode='constant')
-    dark = (im < threshold)
+        im = scipy.ndimage.filters.gaussian_filter(im, sigma, mode="constant")
+    dark = im < threshold
 
     labels, no_labels = scipy.ndimage.label(dark)
     (label, area, count), = max_object(labels, no_labels, 1)
-    obj = np.zeros((im.shape[0] + 2*margin1, im.shape[1] + 2*margin1))
+    obj = np.zeros((im.shape[0] + 2 * margin1, im.shape[1] + 2 * margin1))
     obj[margin1:-margin1, margin1:-margin1] = (labels == label) * 1.0
     ys, xs = (labels == label).nonzero()
     top_left = np.argmax(-xs - ys / 2)
@@ -81,8 +78,8 @@ def find_bbox(im, sigma=1, margin1=10, threshold=0.6):
     bottom_left = np.argmax(-xs + ys)
 
     corners = np.transpose(
-        [[xs[i], ys[i]]
-         for i in (top_left, top_right, bottom_right, bottom_left)])
+        [[xs[i], ys[i]] for i in (top_left, top_right, bottom_right, bottom_left)]
+    )
     # Set top_right to be top_left + (bottom_right - bottom_left)
     corners[:, 1] = corners[:, 0] + (corners[:, 2] - corners[:, 3])
     corners += margin1
@@ -90,9 +87,10 @@ def find_bbox(im, sigma=1, margin1=10, threshold=0.6):
 
 
 def extract_quad(sheet_image):
-    quad, obj = find_bbox(to_grey(sheet_image.get_image(),
-                                  sheet_image.parameters),
-                          parameters=sheet_image.parameters)
+    quad, obj = find_bbox(
+        to_grey(sheet_image.get_image(), sheet_image.parameters),
+        parameters=sheet_image.parameters,
+    )
     sheet_image.quad = quad.arg().tolist()
 
 
@@ -106,13 +104,14 @@ def fill_in_skipped(xs):
     for y, extra in zip(xs[:-1], skipped):
         fixed.append(y)
         for i in range(int(extra)):
-            fixed.append(y + (i+1) * m)
+            fixed.append(y + (i + 1) * m)
     fixed.append(xs[-1])
     return fixed
 
 
 PeaksResult = namedtuple(
-    'PeaksResult', 'peaks cutoff min_cutoff max_cutoff opt_cutoff'.split())
+    "PeaksResult", "peaks cutoff min_cutoff max_cutoff opt_cutoff".split()
+)
 
 
 def find_peaks(xs, cutoff, skip_start=True, skip_end=True, full=False):
@@ -127,14 +126,14 @@ def find_peaks(xs, cutoff, skip_start=True, skip_end=True, full=False):
     assert len(start) == len(end)
     peaks = []
     for i, j in zip(start, end):
-        peaks.append(i + np.argmax(xs[i:j+1]))
+        peaks.append(i + np.argmax(xs[i : j + 1]))
     peaks = np.array(peaks, dtype=np.intp)
     m = np.median(np.diff(peaks))
     # TODO Make 1/3 configurable
     if skip_start:
-        peaks = peaks[peaks > m/3]
+        peaks = peaks[peaks > m / 3]
     if skip_end:
-        peaks = peaks[peaks < n - m/3]
+        peaks = peaks[peaks < n - m / 3]
     if not full:
         return peaks
     maxima = scipy.signal.argrelmax(xs)[0]
@@ -142,8 +141,7 @@ def find_peaks(xs, cutoff, skip_start=True, skip_end=True, full=False):
     min_cutoff = np.max(maxima_vals[maxima_vals <= cutoff])
     max_cutoff = np.min(maxima_vals[maxima_vals > cutoff])
     opt_cutoff = min_cutoff + (max_cutoff - min_cutoff) / 2
-    return PeaksResult(
-        peaks, cutoff, min_cutoff, max_cutoff, opt_cutoff)
+    return PeaksResult(peaks, cutoff, min_cutoff, max_cutoff, opt_cutoff)
 
 
 def get_name_part(sheet_image, input):
@@ -156,26 +154,24 @@ def get_crosses_part(sheet_image, input):
     return input[:, k:]
 
 
-@parameter('cutoff')
+@parameter("cutoff")
 def extract_cols(sheet_image, input_grey, cutoff=0.39):
     image_width = input_grey.shape[1]
     col_avg = np.mean(input_grey, axis=0)
     col_peaks = find_peaks(-col_avg, -cutoff)
-    sheet_image.cols = fill_in_skipped(
-        (col_peaks / image_width).tolist() + [1])
+    sheet_image.cols = fill_in_skipped((col_peaks / image_width).tolist() + [1])
 
 
-@parameter('cutoff')
+@parameter("cutoff")
 def extract_rows(sheet_image, input_grey, cutoff=0.6):
     crosses_grey = get_crosses_part(sheet_image, input_grey)
     height = crosses_grey.shape[0]
     row_avg = np.mean(crosses_grey, axis=1)
     row_peaks = find_peaks(-row_avg, -cutoff)
-    sheet_image.rows = fill_in_skipped(
-        [0] + (row_peaks / height).tolist() + [1])
+    sheet_image.rows = fill_in_skipped([0] + (row_peaks / height).tolist() + [1])
 
 
-@parameter('cutoff')
+@parameter("cutoff")
 def extract_person_rows(sheet_image, input_grey, cutoff=0.45):
     names_grey = get_name_part(sheet_image, input_grey)
     height = names_grey.shape[0]
@@ -183,13 +179,10 @@ def extract_person_rows(sheet_image, input_grey, cutoff=0.45):
     row_peaks = find_peaks(-row_avg, -cutoff) / height
 
     rows = np.asarray(sheet_image.rows)
-    closest = np.abs(row_peaks.reshape(-1, 1) -
-                     rows.reshape(1, -1)).argmin(1)
-    sheet_image.person_rows = np.diff(
-        [0] + closest.tolist() + [len(rows)-1]).tolist()
+    closest = np.abs(row_peaks.reshape(-1, 1) - rows.reshape(1, -1)).argmin(1)
+    sheet_image.person_rows = np.diff([0] + closest.tolist() + [len(rows) - 1]).tolist()
     if any(v == 0 for v in sheet_image.person_rows):
-        raise Exception('Person has no rows: %s' %
-                        (sheet_image.person_rows,))
+        raise Exception("Person has no rows: %s" % (sheet_image.person_rows,))
 
 
 def extract_rows_cols(sheet_image):
@@ -216,28 +209,28 @@ def plot_extract_rows_cols(sheet_image):
     fig, (ax1, ax2, ax3) = plt.subplots(3)
 
     col_avg = np.mean(input_grey, axis=0)
-    ax1.plot(np.arange(len(col_avg)) / (len(col_avg) - 1), col_avg, 'k-')
-    col_cutoff = sheet_image.parameters['extract_cols.cutoff']
-    ax1.plot([0, 1], [col_cutoff, col_cutoff], 'r-')
+    ax1.plot(np.arange(len(col_avg)) / (len(col_avg) - 1), col_avg, "k-")
+    col_cutoff = sheet_image.parameters["extract_cols.cutoff"]
+    ax1.plot([0, 1], [col_cutoff, col_cutoff], "r-")
     col_peak_data = find_peaks(-col_avg, -col_cutoff, full=True)
     col_peaks = col_peak_data.peaks
-    ax1.plot(col_peaks / (len(col_avg) - 1), col_avg[col_peaks], '.')
+    ax1.plot(col_peaks / (len(col_avg) - 1), col_avg[col_peaks], ".")
 
     row_avg = np.mean(crosses_grey, axis=1)
-    ax2.plot(np.arange(len(row_avg)) / (len(row_avg) - 1), row_avg, 'k-')
-    row_cutoff = sheet_image.parameters['extract_rows.cutoff']
-    ax2.plot([0, 1], [row_cutoff, row_cutoff], 'r-')
+    ax2.plot(np.arange(len(row_avg)) / (len(row_avg) - 1), row_avg, "k-")
+    row_cutoff = sheet_image.parameters["extract_rows.cutoff"]
+    ax2.plot([0, 1], [row_cutoff, row_cutoff], "r-")
     row_peak_data = find_peaks(-row_avg, -row_cutoff, full=True)
     row_peaks = row_peak_data.peaks
-    ax2.plot(row_peaks / (len(row_avg) - 1), row_avg[row_peaks], '.')
+    ax2.plot(row_peaks / (len(row_avg) - 1), row_avg[row_peaks], ".")
 
     name_avg = np.mean(names_grey, axis=1, keepdims=True)
-    ax3.plot(np.arange(len(name_avg)) / (len(name_avg) - 1), name_avg, 'k-')
-    name_cutoff = sheet_image.parameters['extract_person_rows.cutoff']
+    ax3.plot(np.arange(len(name_avg)) / (len(name_avg) - 1), name_avg, "k-")
+    name_cutoff = sheet_image.parameters["extract_person_rows.cutoff"]
     name_peak_data = find_peaks(-name_avg, -name_cutoff, full=True)
     name_peaks = name_peak_data.peaks
-    ax3.plot([0, 1], [name_cutoff, name_cutoff], 'r-')
-    ax3.plot(name_peaks / (len(name_avg) - 1), name_avg[name_peaks], '.')
+    ax3.plot([0, 1], [name_cutoff, name_cutoff], "r-")
+    ax3.plot(name_peaks / (len(name_avg) - 1), name_avg[name_peaks], ".")
 
     # print(col_peak_data.opt_cutoff)
     # print(row_peak_data.opt_cutoff)
@@ -273,8 +266,7 @@ def naive_cross_value(data):
     neg_i = (height - 1) - i
     neg_j = (width - 1) - j
     weights = np.minimum(
-        np.minimum(i, neg_i) / (height - 1),
-        np.minimum(j, neg_j) / (width - 1),
+        np.minimum(i, neg_i) / (height - 1), np.minimum(j, neg_j) / (width - 1)
     )
     weights = weights ** 2
     weights /= weights.sum() * depth
@@ -282,13 +274,10 @@ def naive_cross_value(data):
     # return (v - lo) / (hi - lo)
 
 
-@parameter('lo hi')
+@parameter("lo hi")
 def extract_crosses(sheet_image, lo=0.030, hi=0.045):
     cross_imgs = extract_cross_images(sheet_image)
-    values = [
-        [naive_cross_value(c) for c in row]
-        for row in cross_imgs
-    ]
+    values = [[naive_cross_value(c) for c in row] for row in cross_imgs]
     # Treat values <= lo as "definitely False"
     # and values >= hi as "definitely True".
     # Mark values between lo and hi as True if they are between
@@ -302,7 +291,7 @@ def extract_crosses(sheet_image, lo=0.030, hi=0.045):
                 if row[i] and row[prev_decided]:
                     # Mark everything in-between these definitely True
                     # as True.
-                    row[prev_decided:i] = (i-prev_decided)*[True]
+                    row[prev_decided:i] = (i - prev_decided) * [True]
                 prev_decided = i
         labels.append(row)
     sheet_image.crosses = labels
@@ -310,14 +299,18 @@ def extract_crosses(sheet_image, lo=0.030, hi=0.045):
 
 def get_sheet_rows(sheet_image):
     from tkweb.apps.regnskab.models import SheetImage, SheetRow
-    prev_pages = SheetImage.objects.filter(sheet=sheet_image.sheet,
-                                           page__lt=sheet_image.page)
+
+    prev_pages = SheetImage.objects.filter(
+        sheet=sheet_image.sheet, page__lt=sheet_image.page
+    )
     prev_person_count = sum(len(o.person_rows) for o in prev_pages)
     n = len(sheet_image.person_rows)
     # Note position is 1-indexed
-    qs = SheetRow.objects.filter(sheet=sheet_image.sheet,
-                                 position__gte=prev_person_count + 1,
-                                 position__lte=prev_person_count + n)
+    qs = SheetRow.objects.filter(
+        sheet=sheet_image.sheet,
+        position__gte=prev_person_count + 1,
+        position__lte=prev_person_count + n,
+    )
     sheet_rows = list(qs)
     assert len(sheet_rows) == len(sheet_image.person_rows)
     return sheet_rows
@@ -325,6 +318,7 @@ def get_sheet_rows(sheet_image):
 
 def get_cross_counts(sheet_image, kinds):
     from tkweb.apps.regnskab.models import Purchase
+
     sheet_rows = get_sheet_rows(sheet_image)
     purchase_kinds = list(sheet_image.sheet.purchasekind_set.all())
     purchases = {
@@ -340,14 +334,11 @@ def get_cross_counts(sheet_image, kinds):
                 p = purchases[sheet_row.id, kind.id]
             except KeyError:
                 continue
-            if kind.name.endswith('kasse'):
+            if kind.name.endswith("kasse"):
                 boxes[kind.name[:-5]] = p.count
             else:
                 singles[kind.name] = p.count
-        result.append([
-            (singles.get(kind, 0), boxes.get(kind, 0))
-            for kind in kinds
-        ])
+        result.append([(singles.get(kind, 0), boxes.get(kind, 0)) for kind in kinds])
     return result
 
 
@@ -364,17 +355,18 @@ def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
     }
     order = sorted(values.keys(), key=lambda k: values[k], reverse=True)
     rank = {k: i for i, k in enumerate(order)}
-    min_extra = int(2*boxes)
-    if singles + min_extra > n*m:
+    min_extra = int(2 * boxes)
+    if singles + min_extra > n * m:
         # User put in too many crosses.
         # We can't do better than mark everything as a cross.
-        print("Warning: Too many crosses (%s and %s boxes for %sx%s)" %
-              (singles, boxes, n, m))
-        return [(i + row_offset, j + col_offset)
-                for i in range(n) for j in range(m)]
-    assert singles + min_extra <= n*m
-    max_extra = min(int(4*boxes), n*m - singles)
-    assert 0 <= min_extra <= max_extra <= n*m - singles
+        print(
+            "Warning: Too many crosses (%s and %s boxes for %sx%s)"
+            % (singles, boxes, n, m)
+        )
+        return [(i + row_offset, j + col_offset) for i in range(n) for j in range(m)]
+    assert singles + min_extra <= n * m
+    max_extra = min(int(4 * boxes), n * m - singles)
+    assert 0 <= min_extra <= max_extra <= n * m - singles
 
     crosses = []
     remaining = []
@@ -385,10 +377,10 @@ def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
             # Entire row is crossed.
             crosses.extend((i, j) for j in range(m))
         else:
-            row_singles = next(j for j in range(m)
-                               if rank[i, j] >= singles + min_extra)
-            row_boxes = next(j for j in range(m, 0, -1)
-                             if rank[i, j-1] >= singles + min_extra)
+            row_singles = next(j for j in range(m) if rank[i, j] >= singles + min_extra)
+            row_boxes = next(
+                j for j in range(m, 0, -1) if rank[i, j - 1] >= singles + min_extra
+            )
             # FIXME: Don't take too many crosses on the right,
             # but use max_extra to limit this.
             crosses.extend((i, j) for j in range(0, row_singles))
@@ -401,7 +393,7 @@ def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
     certain_cross = values[order[singles + min_extra - 1]]
     # There are at most (singles + max_extra) crosses,
     # so 'certain_not_cross' is the value of the "strong" certain not-cross.
-    if singles + max_extra < n*m:
+    if singles + max_extra < n * m:
         certain_not_cross = values[order[singles + max_extra]]
     else:
         certain_not_cross = 0
@@ -409,18 +401,18 @@ def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
     # that have value greater than 'threshold'.
     threshold = certain_not_cross + (certain_cross - certain_not_cross) / 2
     remaining.sort(key=lambda k: values[k], reverse=True)
-    for k in remaining[:singles + max_extra - len(crosses)]:
+    for k in remaining[: singles + max_extra - len(crosses)]:
         if values[k] > threshold:
             crosses.append(k)
     assert singles + min_extra <= len(crosses) <= singles + max_extra
     return [(i + row_offset, j + col_offset) for i, j in crosses]
 
 
-@parameter('get_person_crosses.øl',
-           'get_person_crosses.guldøl',
-           'get_person_crosses.sodavand')
+@parameter(
+    "get_person_crosses.øl", "get_person_crosses.guldøl", "get_person_crosses.sodavand"
+)
 def get_crosses_from_counts(sheet_image, øl=15, guldøl=6, sodavand=15):
-    KINDS = 'øl guldøl sodavand'.split()
+    KINDS = "øl guldøl sodavand".split()
     cross_counts = get_cross_counts(sheet_image, KINDS)
     assert sum(sheet_image.person_rows) == len(sheet_image.rows) - 1
     cross_imgs = extract_cross_images(sheet_image)
@@ -432,15 +424,15 @@ def get_crosses_from_counts(sheet_image, øl=15, guldøl=6, sodavand=15):
     cross_coordinates = []
 
     for person_index in range(n):
-        r1, r2 = row_bounds[person_index], row_bounds[person_index+1]
+        r1, r2 = row_bounds[person_index], row_bounds[person_index + 1]
         for kind_index in range(len(KINDS)):
-            c1, c2 = col_bounds[kind_index], col_bounds[kind_index+1]
+            c1, c2 = col_bounds[kind_index], col_bounds[kind_index + 1]
             singles, boxes = cross_counts[person_index][kind_index]
             assert singles == int(singles)
             assert 0 <= r1 < r2 <= len(cross_imgs), (r1, r2, len(cross_imgs))
             add = get_crosses_from_field(
-                [row[c1:c2] for row in cross_imgs[r1:r2]],
-                int(singles), boxes, r1, c1)
+                [row[c1:c2] for row in cross_imgs[r1:r2]], int(singles), boxes, r1, c1
+            )
             assert all(r1 <= r < r2 for r, c in add), add
             assert all(c1 <= c < c2 for r, c in add), add
             assert len(set(add)) == len(add), add
@@ -448,7 +440,7 @@ def get_crosses_from_counts(sheet_image, øl=15, guldøl=6, sodavand=15):
     return cross_imgs, cross_coordinates
 
 
-@parameter('øl guldøl sodavand')
+@parameter("øl guldøl sodavand")
 def get_person_crosses(person_rows, øl=15, guldøl=6, sodavand=15):
     col_bounds = np.cumsum([0, øl, guldøl, sodavand])
     groups = []
@@ -457,19 +449,19 @@ def get_person_crosses(person_rows, øl=15, guldøl=6, sodavand=15):
         crosses = box_crosses = 0
         for r in group_rows:
             try:
-                x = next(i for i in range(len(r))
-                         if not r[len(r)-1-i])
+                x = next(i for i in range(len(r)) if not r[len(r) - 1 - i])
             except StopIteration:
                 x = 0
             r_crosses = sum(r) - x
             crosses += r_crosses
             box_crosses += x
-        groups.append([crosses, box_crosses/2])
+        groups.append([crosses, box_crosses / 2])
     return groups
 
 
 def get_images(sheet):
     from tkweb.apps.regnskab.models import SheetImage
+
     if sheet.pk:
         existing = list(SheetImage.objects.filter(sheet=sheet))
         if existing:
@@ -519,6 +511,7 @@ def rerun_extract_images(sheet):
 
 def extract_row_image(sheet, kinds, images):
     from tkweb.apps.regnskab.models import SheetRow, Purchase
+
     rows = []
     purchases = []
 
@@ -537,28 +530,29 @@ def extract_row_image(sheet, kinds, images):
             y1, y2 = im_rows[i], im_rows[j]
             corners = quad.to_world([[0, 1, 1, 0], [y1, y1, y2, y2]])
             person_quad = Quadrilateral(corners)
-            stitched_image.append(extract_quadrilateral(
-                im.get_image(), person_quad, width, height=None))
+            stitched_image.append(
+                extract_quadrilateral(im.get_image(), person_quad, width, height=None)
+            )
             height = stitched_image[-1].shape[0]
 
-            rows.append(SheetRow(sheet=sheet, position=position,
-                                 image_start=stitched_image_height,
-                                 image_stop=stitched_image_height + height))
+            rows.append(
+                SheetRow(
+                    sheet=sheet,
+                    position=position,
+                    image_start=stitched_image_height,
+                    image_stop=stitched_image_height + height,
+                )
+            )
 
-            p_crosses = get_person_crosses(im.crosses[i:j],
-                                           parameters=im.parameters)
+            p_crosses = get_person_crosses(im.crosses[i:j], parameters=im.parameters)
             for col_idx, (count, boxcount) in enumerate(p_crosses):
-                kind, boxkind = kinds[2*col_idx:2*(col_idx+1)]
+                kind, boxkind = kinds[2 * col_idx : 2 * (col_idx + 1)]
                 if count:
-                    purchases.append(Purchase(
-                        row=rows[-1],
-                        kind=kind,
-                        count=count))
+                    purchases.append(Purchase(row=rows[-1], kind=kind, count=count))
                 if boxcount:
-                    purchases.append(Purchase(
-                        row=rows[-1],
-                        kind=boxkind,
-                        count=boxcount))
+                    purchases.append(
+                        Purchase(row=rows[-1], kind=boxkind, count=boxcount)
+                    )
 
             stitched_image_height += height
             i = j
@@ -570,6 +564,6 @@ def extract_row_image(sheet, kinds, images):
     from django.utils import timezone
 
     png_data = save_png(stitched_image)
-    png_name = timezone.now().strftime('rows-%Y-%m-%d.png')
+    png_name = timezone.now().strftime("rows-%Y-%m-%d.png")
     png_file = ContentFile(png_data, png_name)
     return rows, purchases, png_file
