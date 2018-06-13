@@ -4,6 +4,7 @@ import logging
 import tempfile
 import subprocess
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
@@ -152,7 +153,13 @@ class Printout(models.Model):
         else:
             return self.copies * o.sheet_count(self.page_range_page_count)
 
-    def get_command_line(self):
+    def get_command_line(self, username_prefix=None):
+        if username_prefix is None:
+            try:
+                username_prefix = settings.PRINT_USERNAME_PREFIX
+            except AttributeError:
+                username_prefix = ""
+
         host = '%s:%s' % (self.printer.hostname, self.printer.port)
         destination = self.printer.destination
 
@@ -164,7 +171,10 @@ class Printout(models.Model):
         if self.page_range:
             cmd += ('-P', self.page_range)
         if self.created_by:
-            cmd += ('-U', self.created_by.username)
+            username = self.created_by.username
+        else:
+            username = "unknown"
+        cmd += ("-U", username_prefix + username)
         cmd += (filename,)
         return cmd
 
