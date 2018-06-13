@@ -248,3 +248,8 @@ WIKI_MARKDOWN_KWARGS = {
         'markdown.extensions.admonition',
     ],
 }
+
+# Uniprint
+# --------
+
+PRINT_USERNAME_PREFIX = "tk-"
