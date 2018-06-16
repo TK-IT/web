@@ -1,4 +1,5 @@
 from datetime import date
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.dispatch import receiver
@@ -157,6 +158,29 @@ class Image(BaseMedia):
             else:
                 self.slug = self.date.strftime('%Y%m%d%H%M%S_%f')[:len("YYYYmmddHHMMSS_ff")]
 
+    def save(self, *args, **kwargs):
+        """
+        This saves the Image, tries to prewarm VersatileImageField and deletes
+        itself again if it fails. Ideally this would be done in clean(), but
+        VersatileImageField cannot prewarm before it is saved and does not have
+        a clean that checks if the warming is bound to succeed.
+
+        """
+        super().save(*args, **kwargs)
+        image_warmer = VersatileImageFieldWarmer(
+            instance_or_queryset=self, rendition_key_set="gallery", image_attr="file"
+        )
+
+        num_created, failed_to_create = image_warmer.warm()
+        if failed_to_create:
+
+            self.delete()  # Hey! Look at me!
+
+            logger.warning(
+                "Prewarming during save() of %s failed. Deleting again." % self
+            )
+            raise ValidationError("Corrupt image. Deleting")
+
 
 class GenericFile(BaseMedia):
     class Meta:
@@ -185,19 +209,6 @@ class GenericFile(BaseMedia):
 def cleanAlbum(sender, instance, **kwargs):
     if instance.isCoverFile is None:
         instance.album.full_clean()
-
-
-@receiver(models.signals.post_save, sender=Image)
-def generateImageThumbnails(sender, instance, **kwargs):
-    image_warmer = VersatileImageFieldWarmer(
-        instance_or_queryset=instance,
-        rendition_key_set='gallery',
-        image_attr='file',
-    )
-
-    num_created, failed_to_create = image_warmer.warm()
-    logger.debug('generateImageThumbnails: %d thumbnails created. Missing %s' % (
-                 num_created, failed_to_create))
 
 
 @receiver(models.signals.post_delete, sender=Image)

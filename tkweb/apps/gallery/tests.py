@@ -44,3 +44,27 @@ class SimpleMediaTest(TestCase):
 
     def test_simple_gif_album(self):
         self.generate_image(".gif")
+
+
+@override_settings(MEDIA_ROOT=tempfile.gettempdir())
+class CorruptedMediaTest(TestCase):
+    def setUp(self):
+        album = Album.objects.create(
+            title="Corrupt Album Title", slug="corrupt-album-title"
+        )
+        album.full_clean()
+
+    def test_truncated_jpg_album(self):
+        album = Album.objects.all()[0]
+
+        temp_file = tempfile.NamedTemporaryFile(suffix=".jpg")
+        PILImage.new("RGB", (100, 100)).save(temp_file, "jpeg")
+        temp_file.truncate(800)
+
+        instance = Image(file=temp_file.name, album=album)
+        instance.full_clean()
+        with self.assertLogs(level="ERROR"):
+            with self.assertRaises(ValidationError):
+                instance.save()
+
+        self.assertEqual(len(Image.objects.all()), 0)
