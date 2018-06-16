@@ -175,6 +175,7 @@ def upload(request):
 
     try:
         instance.full_clean()
+        instance.save()
     except ValidationError as exn:
         try:
             error = ' '.join(
@@ -191,7 +192,6 @@ def upload(request):
         }
         return UploadResponse(request, jfu_msg)
 
-    instance.save()
     jfu_msg = {
         'name': os.path.basename(instance.file.path),
         'size': file.size,
