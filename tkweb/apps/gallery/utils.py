@@ -1,6 +1,3 @@
-# encoding: utf8
-from __future__ import absolute_import, unicode_literals, division
-
 from PIL.ExifTags import TAGS
 from constance import config
 from datetime import datetime

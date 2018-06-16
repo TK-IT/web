@@ -1,6 +1,3 @@
-# encoding: utf8
-from __future__ import absolute_import, unicode_literals, division
-
 from datetime import date
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models

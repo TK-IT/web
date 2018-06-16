@@ -1,6 +1,3 @@
-# encoding: utf8
-from __future__ import unicode_literals
-
 import re
 
 from django.core.exceptions import ValidationError

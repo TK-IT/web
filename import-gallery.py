@@ -1,6 +1,3 @@
-# encoding: utf8
-from __future__ import unicode_literals
-
 # You can use `find . -name '*.DS_Store' -type f -delete` if you operating
 # system is a bitch and pollutes you folders
 

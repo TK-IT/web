@@ -1,6 +1,3 @@
-# encoding: utf8
-from __future__ import absolute_import, unicode_literals, division
-
 from django.contrib.syndication.views import Feed
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
