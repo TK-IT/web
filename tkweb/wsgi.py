@@ -1,4 +1,3 @@
-# encoding: utf8
 """
 WSGI config for tkweb project.
 
@@ -8,7 +7,6 @@ For more information on this file, see
 https://docs.djangoproject.com/en/1.7/howto/deployment/wsgi/
 """
 
-from __future__ import unicode_literals
 import os
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tkweb.settings.prod")

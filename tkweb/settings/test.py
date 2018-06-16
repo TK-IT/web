@@ -1,4 +1,3 @@
-# encoding: utf8
 from tkweb.settings.base import *
 
 SECRET_KEY = 'This.is.not.a.secret.key'

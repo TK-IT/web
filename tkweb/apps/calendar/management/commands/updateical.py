@@ -1,12 +1,10 @@
-# encoding: utf8
-from __future__ import unicode_literals
 from constance import config
 from django.core.management.base import BaseCommand
 from django.utils.html import strip_tags
 from icalendar import Calendar
 from tkweb.apps.calendar.models import Event
 import datetime
-from six.moves import urllib
+import urllib
 import logging
 
 logger = logging.getLogger(__name__)

@@ -1,4 +1,3 @@
-# encoding: utf8
 from django.shortcuts import render
 from tkweb.apps.idm.models import Profile, Title
 from constance import config

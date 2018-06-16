@@ -1,6 +1,3 @@
-# encoding: utf8
-from __future__ import absolute_import, unicode_literals, division
-
 import re
 from django import forms
 from tkweb.apps.gallery.models import BaseMedia

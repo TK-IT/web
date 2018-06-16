@@ -1,5 +1,3 @@
-# encoding: utf8
-from __future__ import unicode_literals
 from tkweb.settings.base import *
 
 # https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/

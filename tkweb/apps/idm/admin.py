@@ -1,4 +1,3 @@
-# encoding: utf8
 from django import forms
 from django.urls import reverse
 from django.db.models import Q
