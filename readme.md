@@ -1,6 +1,6 @@
 # TÅGEKAMMERETS webside
 
-Websiden er skrevet i Django 1.8 LTS med Bootstrap 3 som frontend framework.
+Websiden er skrevet i Django med Bootstrap 3 som frontend framework.
 Den meste funktionalitet kan findes i apps.
 
 - [`tkweb/apps/gallery`](tkweb/apps/gallery) indeholder galleriet inklusiv
@@ -37,7 +37,7 @@ nemt ændres fra admin-interfacet.
 [Bootstrap 3](http://getbootstrap.com) som et `git submodule`.
 
 [`tkweb/settings`](tkweb/settings) indeholder konfigurationen. Den er delt op i
-flere moduler der nedarver fra hindanden. Se også under
+flere moduler der nedarver fra hinanden. Se også under
 [Udviklingsmiljø](#udviklingsmiljø).
 
 ## Udviklingsmiljø
