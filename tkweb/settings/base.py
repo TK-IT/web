@@ -48,7 +48,6 @@ LOCAL_APPS = [
     'tkweb.apps.tkbrand',
     'tkweb.apps.idm',
     'tkweb.apps.mailinglist',
-    'tkweb.apps.scripts',
     'tkweb.apps.eval',
     'tkweb.apps.regnskab',
     'tkweb.apps.krydsliste',
