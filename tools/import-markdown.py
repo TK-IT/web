@@ -1,12 +1,25 @@
 #!/usr/bin/env python
+
+'''
+Import a Markdown project into evalwiki.
+
+Given a root Markdown file, the script recursively finds all Markdown files
+referred to by the root using `[link text](filename.md)` link syntax, and
+creates Article, ArticleRevision and URLPath models for the files found.
+'''
+
 import os
 import sys
 import socket
 import argparse
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--clear')
+parser = argparse.ArgumentParser(
+    description=__doc__.strip(),
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+)
+parser.add_argument('--clear', help='remove all existing evalwiki content',
+                    metavar='HOSTNAME')
 parser.add_argument('root', nargs='+')
 
 
