@@ -43,7 +43,7 @@ flere moduler der nedarver fra hinanden. Se også under
 ## Udviklingsmiljø
 
 Det er en forudsætning at maskinen har en fungerende python installation med
-`pip`.
+[`pipenv`](https://docs.pipenv.org/), som kan installeres med `pip install pipenv`.
 
 En mysql installation er også påkrævet så `mysql_client` er tilgængelig, f.eks. skal man installere pakken `libmysqlclient-dev` på Ubuntu/Debian.
 
