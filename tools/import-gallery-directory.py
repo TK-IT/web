@@ -10,7 +10,7 @@ NAME = dict(_=" ", ae="æ", AE="Æ", oe="ø", OE="Ø", aa="å", AA="Å")
 def setup_django():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE",
                           "tkweb.settings.prod")
-    sys.path.append('/home/tkammer/tkweb/venv/lib/python3.5/site-packages')
+    sys.path.append('/home/tkammer/tkweb/.venv/lib/python3.5/site-packages')
     sys.path.append('/home/tkammer/tkweb')
 
     import django
