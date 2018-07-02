@@ -53,9 +53,8 @@ installere alle pakker og oprette en database.
 ```shell
 git clone --recursive https://github.com/TK-IT/web.git
 cd web
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+pipenv install --three
+pipenv shell
 ./manage.py migrate --settings=tkweb.settings.dev
 ./manage.py createsuperuser --settings=tkweb.settings.dev
 ```
@@ -68,11 +67,6 @@ at køre udviklingsserveren med udviklingskonfigurationen skriv:
 ```shell
 ./manage.py runserver --settings=tkweb.settings.dev
 ```
-
-#### Windows
-
-I `cmd.exe` på Windows kan man aktivere virtualenv ved at køre
-`venv\Scripts\activate` istedet for `source venv/bin/activate`.
 
 ## LESS og CSS
 
