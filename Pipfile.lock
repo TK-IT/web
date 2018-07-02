@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "3f576548c207091a6c7469c7009e8ac78dc2306219b51b5df00505bf35430f47"
+            "sha256": "2cbc6db251f2dbdc4cfd415529e58349bc03b97f41bf45e2f2cfb7006f8f8707"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -43,6 +43,14 @@
             "index": "pypi",
             "version": "==10.0.1"
         },
+        "django-cleanup": {
+            "hashes": [
+                "sha256:0e91783200d75f21a64cb5f9d9dbc1bedd377a7d8de97a55ec8a0e2e28abaf5d",
+                "sha256:36f04ec3901e6d9fd996b99b383c2367c0b880c77e6699142b51ca64cb659e54"
+            ],
+            "index": "pypi",
+            "version": "==2.1.0"
+        },
         "django-constance": {
             "hashes": [
                 "sha256:1d74fa615ee6c69512faa214ec7b4962aa039dfe802e967972c3fbdad7852977",
@@ -69,6 +77,14 @@
             ],
             "index": "pypi",
             "version": "==1.0.0"
+        },
+        "django-model-utils": {
+            "hashes": [
+                "sha256:2c057f3bf0859aba27f04389f0cedd2d48f8c9b3848acb86fd9970794e58f477",
+                "sha256:8cd377744aa45f9f131d652ec460c57d1aaa88d3e9b586c8e27eb709341b9084"
+            ],
+            "index": "pypi",
+            "version": "==3.1.2"
         },
         "django-multiupload": {
             "hashes": [
@@ -143,6 +159,7 @@
                 "sha256:ea36e19ac0a483eea239320aef0bd40702404ff8c7e42179a2d9d36c5afcb55c",
                 "sha256:f923406e6b32c86309261b8195e24e18b6a8801df0cfc7814ac44017bfcb3939"
             ],
+            "markers": "python_version != '3.2.*' and python_version != '3.1.*' and python_version >= '2.7' and python_version != '3.0.*'",
             "version": "==1.0.1"
         },
         "matplotlib": {
@@ -238,6 +255,7 @@
                 "sha256:c793dfaa130847ccff958492b76ae8b9304e60b8a79a92962cb19e368276a22b",
                 "sha256:ddd16ab250b4fc97db1c47407e78c25216a75c29d29d10ad37e51b7a2ec7b2c3"
             ],
+            "index": "pypi",
             "version": "==5.0.0"
         },
         "pyparsing": {
@@ -301,6 +319,14 @@
                 "sha256:832dc0e10feb1aa2c68dcc57dbb658f1c7e65b9b61af69048abc87a2db00a0eb"
             ],
             "version": "==1.11.0"
+        },
+        "sorl-thumbnail": {
+            "hashes": [
+                "sha256:1cc6d913fe4f1224e479f25a23ec2ad3ca71c3154919a2c9463b07e7fbe11ac2",
+                "sha256:c5ef989da07d31925754922ce95783fd2b1f8735124c0510884633eb32a4cd3e"
+            ],
+            "index": "pypi",
+            "version": "==12.4.1"
         },
         "tktitler": {
             "git": "https://github.com/TK-IT/tktitler.git",
