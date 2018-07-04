@@ -13,7 +13,7 @@ wiki = {git = "https://github.com/django-wiki/django-wiki.git"}
 django-constance = {version = "*", extras = ["database"]}
 
 # We can't use newer versions of Pillow, because of django-verstatileimagefield
-Pillow = "5.0.0"
+Pillow = "==5.0.0"
 django-versatileimagefield = "*"
 
 django-cleanup = "*"
