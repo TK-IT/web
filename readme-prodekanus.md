@@ -3,7 +3,7 @@
 På prodekanus ligger Django projektet under `/home/tkammer/tkweb/`. Det er ejet
 af brugeren `tkammer`, men bliver håndteret igennem WSGI af apache2 og brugeren
 `www-data`. WSGI bruger et Python3 virtual environment (venv) der ligger i
-`/home/tkammer/tkweb/venv/`.
+`/home/tkammer/tkweb/.venv/`.
 
 Apache2 håndterer også de statiske filer. Mediefiler ligger på et stor drev
 `/Picture/tkammer/media/`.
@@ -15,11 +15,12 @@ For at opdatere siden med de nyeste ændring fra Github skal du gøre følgende:
 ```sh
     sudo -u tkammer -s  # start en ny shell med tkammer som bruger
     cd /home/tkammer/tkweb  # Skift til mappen med siden.
-    source venv/bin/activate  # Aktiver virtualenv.
     git pull  # Hent de nyeste ændringer fra Github.
-    pip install -U pip -r requirements.txt  # Installer og opdater alle python pakker i virtualenv. Det kan være at den skal køres flere gange.
-    python3 manage.py migrate --settings=tkweb.settings.prod  # Migrer databasen til en evt. ny model.
-    python3 manage.py collectstatic --settings=tkweb.settings.prod  # Saml statiske filer så apache kan finde dem.
+    export PIPENV_VENV_IN_PROJECT=1  # Sig til pipenv at den skal bruge .venv mappe inde i projektet
+    pipenv install --three  # Installer og opdater alle python pakker i virtualenv.
+    pipenv shell  # Aktiver virtualenv
+    ./manage.py migrate --settings=tkweb.settings.prod  # Migrer databasen til en evt. ny model.
+    ./manage.py collectstatic --settings=tkweb.settings.prod  # Saml statiske filer så apache kan finde dem.
     sudo service apache2 restart  # Genstart apache så de nye filer bliver taget i brug.
 ```
 

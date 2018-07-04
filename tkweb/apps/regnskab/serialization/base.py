@@ -13,7 +13,7 @@ def django_setup():
     else:
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.extend(
-        glob.glob(os.path.join(BASE_DIR, 'venv/lib/*/site-packages')))
+        glob.glob(os.path.join(BASE_DIR, '.venv/lib/*/site-packages')))
     if 'DJANGO_SETTINGS_MODULE' not in os.environ:
         with open(os.path.join(BASE_DIR, 'manage.py')) as fp:
             settings_line = next(l for l in fp

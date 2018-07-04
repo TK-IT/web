@@ -229,7 +229,7 @@ if __name__ == "__main__":
         BASE_DIR = '.'
     else:
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    sys.path.append(os.path.join(BASE_DIR, 'venv/lib/python3.6/site-packages'))
+    sys.path.append(os.path.join(BASE_DIR, '.venv/lib/python3.6/site-packages'))
     with open(os.path.join(BASE_DIR, 'manage.py')) as fp:
         settings_line = next(l for l in fp
                              if 'DJANGO_SETTINGS_MODULE' in l)
