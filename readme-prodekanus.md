@@ -17,7 +17,7 @@ For at opdatere siden med de nyeste ændring fra Github skal du gøre følgende:
     cd /home/tkammer/tkweb  # Skift til mappen med siden.
     git pull  # Hent de nyeste ændringer fra Github.
     export PIPENV_VENV_IN_PROJECT=1  # Sig til pipenv at den skal bruge .venv mappe inde i projektet
-    pipenv install --three  # Installer og opdater alle python pakker i virtualenv. Det kan være at den skal køres flere gange.
+    pipenv install --three  # Installer og opdater alle python pakker i virtualenv.
     pipenv shell  # Aktiver virtualenv
     ./manage.py migrate --settings=tkweb.settings.prod  # Migrer databasen til en evt. ny model.
     ./manage.py collectstatic --settings=tkweb.settings.prod  # Saml statiske filer så apache kan finde dem.
