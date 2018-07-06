@@ -17,38 +17,54 @@ import os
 GALLERY_PERMISSION = 'gallery.change_image'
 
 
+def get_basemedia_count_by_album():
+    """
+    Return C such that::
+
+        C[v][i] == BaseMedia.objects.filter(visibility=v, album_id=i).count()
+    """
+
+    qs = BaseMedia.objects.all()
+    qs = qs.order_by().values("album_id", "visibility")
+    qs = qs.annotate(count=Count("id"))
+    by_visibility = {}
+    for record in qs:
+        by_album = by_visibility.setdefault(record["visibility"], {})
+        by_album[record["album_id"]] = record["count"]
+    return by_visibility
+
+
 def gallery(request, **kwargs):
-    allalbums_allmedia = Album.objects.all()
-    allalbums_public = allalbums_allmedia.filter(
-        basemedia__visibility=BaseMedia.PUBLIC)
-
-    public_count = dict(
-        allalbums_public.annotate(count=Count('basemedia'))
-        .values_list('id', 'count'))
-
+    count_by_visibility = get_basemedia_count_by_album()
+    public_count = count_by_visibility.get(BaseMedia.PUBLIC, {})
+    new_count = count_by_visibility.get(BaseMedia.NEW, {})
     edit_visibility = request.user.has_perm(GALLERY_PERMISSION)
-    if edit_visibility:
-        allalbums = allalbums_allmedia
-    else:
-        # Hide albums with no public images
-        allalbums = allalbums_public
-    # Hide albums with no images
-    allalbums = allalbums.exclude(basemedia__isnull=True)
-    # Without order_by(), distinct() still returns duplicate gfyears.
-    years = allalbums.order_by().values_list('gfyear', flat=True).distinct()
-    years = sorted(years, reverse=True)
-    if not years:
-        raise Http404("No albums exist")
-    latest_year = years[0]
 
-    show_year = kwargs.get('gfyear', latest_year)
-    show_year = int(show_year) if show_year else None
+    try:
+        requested_year = int(kwargs["gfyear"])
+    except (KeyError, ValueError):
+        requested_year = None
 
-    albums = allalbums.filter(gfyear__exact=show_year)
-
-    albums = list(albums)
+    albums = list(Album.objects.all())
     for album in albums:
         album.count = public_count.get(album.id, 0)
+        album.new_count = new_count.get(album.id, 0) if edit_visibility else 0
+
+    # Hide albums with no images
+    albums = [a for a in albums if a.count + a.new_count > 0]
+    years = set(a.gfyear for a in albums)
+    years = sorted(years, reverse=True)
+
+    if requested_year is None:
+        show_year = max(years)
+    else:
+        show_year = requested_year
+
+    # Hide albums not in show_year
+    albums = [a for a in albums if a.gfyear == show_year]
+
+    if not albums:
+        raise Http404("No albums exist")
 
     firstImages = BaseMedia.objects.filter(album__in=albums, isCoverFile=True)
     firstImages = firstImages.select_subclasses()
