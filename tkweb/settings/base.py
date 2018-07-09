@@ -34,6 +34,7 @@ THIRD_PARTY_APPS = [
     'macros',
     'wiki',
     'wiki.plugins.attachments',
+    'wiki.plugins.globalhistory',
     'wiki.plugins.notifications',
     'wiki.plugins.images',
     'wiki.plugins.macros',
