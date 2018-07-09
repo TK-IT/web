@@ -13,7 +13,7 @@ Databasen er en fælles lokal MySQL.
 ## Opdatering
 For at opdatere siden med de nyeste ændring fra Github skal du gøre følgende:
 ```sh
-    sudo -u tkammer -s  # start en ny shell med tkammer som bruger
+    sudo -u tkammer -i  # start en ny shell med tkammer som bruger
     cd /home/tkammer/tkweb  # Skift til mappen med siden.
     git pull  # Hent de nyeste ændringer fra Github.
     export PIPENV_VENV_IN_PROJECT=1  # Sig til pipenv at den skal bruge .venv mappe inde i projektet
