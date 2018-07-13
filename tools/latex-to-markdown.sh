@@ -17,3 +17,4 @@ python -m tkweb.apps.eval.latexmd -o "evalmd/formeval.md" "evalsrc/formeval/main
 python -m tkweb.apps.eval.latexmd -o "evalmd/kass.md" "evalsrc/kass/KASSs VISKASS.tex" -l chapter
 python -m tkweb.apps.eval.latexmd -o "evalmd/vc.md" "evalsrc/vc/besteval.tex" -l chapter
 python -m tkweb.apps.eval.latexmd -o "evalmd/nf.md" "evalsrc/nf/PROPAGANDA.tex" -l section
+python -m tkweb.apps.eval.latexmd -o "evalmd/cerm.md" "evalsrc/cerm/CIRKUS1718.tex" -l chapter

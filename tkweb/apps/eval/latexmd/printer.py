@@ -119,8 +119,10 @@ class MarkdownPrinter:
         self.print('`%s`' % node.args[0], end='')
 
     def visit_DocFormatted(self, node):
-        contents = node.args[1].to_list()
-        assert isinstance(contents, str)
+        with self.capture() as buf:
+            self.visit(node.args[1])
+        contents = buf.getvalue()
+        assert isinstance(contents, str), repr(contents)
         if node.args[0] == 'emph':
             self.print('*%s*' % contents, end='')
         elif node.args[0] == 'paragraph':
