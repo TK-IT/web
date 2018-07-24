@@ -199,16 +199,16 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
         return ''
 
     updated.meta = {
-        'short_description': 'Ajourførelse',
+        'short_description': 'Ajourføring',
         'help_text': (
-            'Adjourføre en artikel. Det fjerner artiklen fra listen over ' +
+            'Ajourføre en artikel. Det fjerner artiklen fra listen over ' +
             'forældede artikler. Brug kun denne når <em>alle</em> fejl er ' +
             'blevet rettet.'),
         'example_code': ('[updated BEST 2018-05-12]'),
         'args': {
             'title': ('Navet på personen eller gruppen der har udført ' +
-                      'ajourførelsen.'),
-            'dato': ('Datoen, i formatet YYYY-MM-DD, hvor ajourførelsen har ' +
+                      'ajourføringen.'),
+            'dato': ('Datoen, i formatet YYYY-MM-DD, hvor ajourføringen har ' +
                      'fundet sted.'),
         },
     }
