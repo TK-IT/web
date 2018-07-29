@@ -17,6 +17,7 @@ METHODS = [
     'begin_hide', 'end_hide', 'fixme', 'timeout', 'updated',
     'TK', 'TKAA', 'TKET', 'TKETAA', 'TKETs', 'TKETsAA', 'TKETS', 'TKETSAA',
     'tk_prefix', 'tk_kprefix', 'tk_postfix', 'tk_prepostfix', 'tk_email',
+    'eps', 'remtor',
 ]
 
 MONTHS = [('Jan', 'January', 'Januar'),
@@ -250,6 +251,23 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
             '<tr><th>Makro</th><th>Output</th></tr>' +
             ''.join(['<tr><td>[%s]</td><td>%s</td></tr>'
                      % (f.__name__, f()) for f in _TKBRANDFUNCS]) +
+            '</table>'),
+    }
+
+    def remtor(self, full=''):
+        return 'R&epsilon;mToR'
+
+    def eps(self, full=''):
+        return '&epsilon;'
+
+    TK.meta = {
+        'short_description': 'R&epsilon;mToR',
+        'help_text': (
+            'Brug følgende makroer til at skrive R&epsilon;mToR.' +
+            '<table class="table table-condensed">' +
+            '<tr><th>Makro</th><th>Output</th></tr>' +
+            '<tr><td>[remtor]</td><td>R&epsilon;mToR</td></tr>' +
+            '<tr><td>[eps]</td><td>&epsilon;</td></tr>' +
             '</table>'),
     }
 
