@@ -244,7 +244,7 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
     TK.meta = {
         'short_description': '%s og venner' % tkbrand.TKET(),
         'help_text': (
-            ('Brug følgende makroer til at skrive %s og ligendene med ' +
+            ('Brug følgende makroer til at skrive %s og lignende med ' +
              'hoppe-danseskrift.') % tkbrand.TKET() +
             '<table class="table table-condensed">' +
             '<tr><th>Makro</th><th>Output</th></tr>' +
