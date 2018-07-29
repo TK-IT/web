@@ -38,6 +38,7 @@ THIRD_PARTY_APPS = [
     'wiki.plugins.notifications',
     'wiki.plugins.images',
     'wiki.plugins.macros',
+    'wiki.plugins.redlinks',
     'mediumeditor',
 ]
 
