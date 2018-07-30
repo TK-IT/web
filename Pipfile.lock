@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "3a183415ca4ede9f9094beaa095700bf4a7e8f0d59d315dae46ab67521ff26bc"
+            "sha256": "2cbc6db251f2dbdc4cfd415529e58349bc03b97f41bf45e2f2cfb7006f8f8707"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -164,7 +164,7 @@
                 "sha256:efabbcd4f406b532206b8801058c8bab9e79645b9880329253ae3322b7b02cd5",
                 "sha256:f923406e6b32c86309261b8195e24e18b6a8801df0cfc7814ac44017bfcb3939"
             ],
-            "markers": "python_version >= '2.7' and python_version != '3.3.*' and python_version != '3.1.*' and python_version != '3.2.*' and python_version != '3.0.*'",
+            "markers": "python_version != '3.2.*' and python_version != '3.1.*' and python_version >= '2.7' and python_version != '3.0.*' and python_version != '3.3.*'",
             "version": "==1.0.1"
         },
         "matplotlib": {
@@ -265,7 +265,7 @@
                 "sha256:ddd16ab250b4fc97db1c47407e78c25216a75c29d29d10ad37e51b7a2ec7b2c3"
             ],
             "index": "pypi",
-            "markers": "python_version >= '2.7' and python_version != '3.3.*' and python_version != '3.1.*' and python_version != '3.2.*' and python_version != '3.0.*'",
+            "markers": "python_version != '3.2.*' and python_version != '3.1.*' and python_version >= '2.7' and python_version != '3.0.*' and python_version != '3.3.*'",
             "version": "==5.0.0"
         },
         "pyparsing": {
@@ -351,8 +351,8 @@
             "version": "==1.0.22"
         },
         "wiki": {
-            "git": "https://github.com/Mortal/django-wiki.git",
-            "ref": "5996fb9945cd846da7a883dc00d82d4650480c8e"
+            "git": "https://github.com/django-wiki/django-wiki.git",
+            "ref": "9b87770d8c9b6f6053531529e967ee5005b7b75b"
         }
     },
     "develop": {}
