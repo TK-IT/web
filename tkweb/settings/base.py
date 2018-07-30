@@ -246,6 +246,10 @@ WIKI_MARKDOWN_KWARGS = {
         'markdown.extensions.sane_lists',
         'markdown.extensions.admonition',
     ],
+    'extension_configs': {
+        'wiki.plugins.macros.mdx.toc': {'title': 'Indhold'},
+        'wiki.core.markdown.mdx.codehilite': {'guess_lang': False},
+    },
 }
 
 # Uniprint
