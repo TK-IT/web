@@ -63,6 +63,11 @@ def parseTimeoutMonth(month):
 
 
 class EvalMacroPattern(markdown.inlinepatterns.Pattern):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.hide_stack = []
+
     @staticmethod
     def _get_pattern(method_names):
         pattern = (
@@ -118,10 +123,20 @@ class EvalMacroPattern(markdown.inlinepatterns.Pattern):
                 'id': title+'-'+str(random.randrange(9999)),
                 'expanded': expanded,
             })
+        self.hide_stack.append(title)
         return self.markdown.htmlStash.store(html, safe=False)
 
-    def end_hide(self, full=''):
+    def end_hide(self, title='', full=''):
         html = render_to_string("evalmacros/end_hide.html")
+        if self.hide_stack:
+            expected_title = self.hide_stack.pop()
+            if title and title != expected_title:
+                html += _inline_error(
+                    full, 'Expected [end_hide %s]' % expected_title
+                )
+        else:
+            html += _inline_error(full, 'Unmatched [end_hide]')
+
         return self.markdown.htmlStash.store(html, safe=False)
 
     begin_hide.meta = {
@@ -130,7 +145,7 @@ class EvalMacroPattern(markdown.inlinepatterns.Pattern):
                       'grupper eller personer. Andre kan stadig se ' +
                       'sektionen ved at trykke på en knap.'),
         'example_code': ('[begin_hide KASS]\nNoget der er ' +
-                         'skjult for alle andre end KASS.\n[end_hide]'),
+                         'skjult for alle andre end KASS.\n[end_hide KASS]'),
         'args': {
             'title': 'Personen eller gruppen indholdet ikke er skjult for.',
         },
