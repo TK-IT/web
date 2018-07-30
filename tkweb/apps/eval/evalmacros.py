@@ -320,8 +320,8 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
                       ('<tr><td>[tk_kprefix 2016 BEST]</td><td>%s</td></tr>' % tkbrand.tk_kprefix(('BEST', 2016))) +
                       ('<tr><td>KA$$[tk_postfix 2017]</td><td>KA$$%s</td></tr>' % tkbrand.tk_postfix(('', 2017))) +
                       ('<tr><td>[tk_postfix 2017 KASS]</td><td>%s</td></tr>' % tkbrand.tk_postfix(('KASS', 2017))) +
-                      ('<tr><td>[tk_prepostfix SEKR 2015]</td><td>%s</td></tr>' % tkbrand.tk_prepostfix(('SEKR', 2015))) +
-                      ('<tr><td>[tk_email FUHØ 2010]</td><td><a href="mailto:%(e)s@TAAGEKAMMERET.dk">%(e)s@TAAGEKAMMERET.dk</a></td></tr>' % { 'e': tkbrand.tk_email(('FUHØ', 2010))}) +
+                      ('<tr><td>[tk_prepostfix 2015 SEKR]</td><td>%s</td></tr>' % tkbrand.tk_prepostfix(('SEKR', 2015))) +
+                      ('<tr><td>[tk_email 2010 FUHØ]</td><td><a href="mailto:%(e)s@TAAGEKAMMERET.dk">%(e)s@TAAGEKAMMERET.dk</a></td></tr>' % { 'e': tkbrand.tk_email(('FUHØ', 2010))}) +
                       '</table>'),
     }
 
