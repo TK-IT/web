@@ -3,7 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import dateparse
 from tkweb.apps.eval.evalmacros import (
-    parseTimeoutMonth, EvalMacroPreprocessor,
+    parseTimeoutMonth, EvalMacroPattern,
 )
 from wiki.models import Article
 import datetime
@@ -55,7 +55,7 @@ def wikiArticle_callback(sender, instance, **kwargs):
         lines = instance.current_revision.content
 
         try:
-            match = EvalMacroPreprocessor.find_macro_invocations(
+            match = EvalMacroPattern.find_macro_invocations(
                 lines, 'timeout')[0]
             timeout = parseTimeoutMonth(match.args[0])
         except (IndexError, ValueError):
@@ -63,7 +63,7 @@ def wikiArticle_callback(sender, instance, **kwargs):
             pass
 
         try:
-            match = EvalMacroPreprocessor.find_macro_invocations(
+            match = EvalMacroPattern.find_macro_invocations(
                 lines, 'updated')[0]
             title = match.args[0]
             updated = dateparse.parse_date(match.args[1])

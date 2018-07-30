@@ -62,14 +62,7 @@ def parseTimeoutMonth(month):
         return _convert(MONTHS)[mg]
 
 
-class EvalMacroExtension(markdown.Extension):
-    def extendMarkdown(self, md, md_globals):
-        """ Insert EvalMacroPreprocessor before ReferencePreprocessor. """
-        md.preprocessors.add(
-            'tk-macros', EvalMacroPreprocessor(md), '>html_block')
-
-
-class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
+class EvalMacroPattern(markdown.inlinepatterns.Pattern):
     @staticmethod
     def _get_pattern(method_names):
         pattern = (
@@ -90,27 +83,22 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
         macro = macro.strip()
         args_str = mo.group('args')
         args = shlex.split(args_str) if args_str else ()
-        full = mo.group(0)
-        return EvalMacroPreprocessor.MacroInvocation(macro, args, full)
+        full = mo.group(2)
+        return EvalMacroPattern.MacroInvocation(macro, args, full)
 
     @staticmethod
     def find_macro_invocations(article_content, method_name):
-        pattern = EvalMacroPreprocessor._get_pattern([method_name])
-        return [EvalMacroPreprocessor._parse_match(mo)
+        pattern = EvalMacroPattern._get_pattern([method_name])
+        return [EvalMacroPattern._parse_match(mo)
                 for mo in re.finditer(pattern, article_content)]
 
-    def run(self, lines):
-        pattern = self._get_pattern(METHODS)
-
-        def repl(mo):
-            try:
-                match = self._parse_match(mo)
-                method = getattr(self, match.macro)
-                return method(*match.args, full=match.full)
-            except Exception as exn:
-                return _inline_error(mo.group(0), exn)
-
-        return [re.sub(pattern, repl, line) for line in lines]
+    def handleMatch(self, mo):
+        try:
+            match = self._parse_match(mo)
+            method = getattr(self, match.macro)
+            return method(*match.args, full=match.full)
+        except Exception as exn:
+            return _inline_error(mo.group(2), exn)
 
     def get_user_groups(self):
         try:
@@ -219,28 +207,28 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
                      tkbrand.TKETSAA]
 
     def TK(self, full=''):
-        return tkbrand.TK()
+        return self.markdown.htmlStash.store(tkbrand.TK())
 
     def TKAA(self, full=''):
-        return tkbrand.TKAA()
+        return self.markdown.htmlStash.store(tkbrand.TKAA())
 
     def TKET(self, full=''):
-        return tkbrand.TKET()
+        return self.markdown.htmlStash.store(tkbrand.TKET())
 
     def TKETAA(self, full=''):
-        return tkbrand.TKETAA()
+        return self.markdown.htmlStash.store(tkbrand.TKETAA())
 
     def TKETs(self, full=''):
-        return tkbrand.TKETs()
+        return self.markdown.htmlStash.store(tkbrand.TKETs())
 
     def TKETsAA(self, full=''):
-        return tkbrand.TKETsAA()
+        return self.markdown.htmlStash.store(tkbrand.TKETsAA())
 
     def TKETS(self, full=''):
-        return tkbrand.TKETS()
+        return self.markdown.htmlStash.store(tkbrand.TKETS())
 
     def TKETSAA(self, full=''):
-        return tkbrand.TKETSAA()
+        return self.markdown.htmlStash.store(tkbrand.TKETSAA())
 
     TK.meta = {
         'short_description': '%s og venner' % tkbrand.TKET(),
@@ -255,10 +243,10 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
     }
 
     def remtor(self, full=''):
-        return 'R&epsilon;mToR'
+        return self.markdown.htmlStash.store('R&epsilon;mToR')
 
     def eps(self, full=''):
-        return '&epsilon;'
+        return self.markdown.htmlStash.store('&epsilon;')
 
     remtor.meta = {
         'short_description': 'R&epsilon;mToR',
@@ -304,7 +292,10 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
             email = year
         else:
             email = tkbrand.tk_email((title, self._get_year(year)))
-        return '<%s@TAAGEKAMMERET.dk>' % email
+        return self.markdown.htmlStash.store(
+            '<a href="mailto:%s@TAAGEKAMMERET.dk">%s@%s.dk</a>' %
+            (email, email, tkbrand.TKETAA())
+        )
 
     tk_prefix.meta = {
         'short_description': 'Anciennitet',
@@ -324,6 +315,16 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
                       ('<tr><td>[tk_email 2010 FUHØ]</td><td><a href="mailto:%(e)s@TAAGEKAMMERET.dk">%(e)s@TAAGEKAMMERET.dk</a></td></tr>' % { 'e': tkbrand.tk_email(('FUHØ', 2010))}) +
                       '</table>'),
     }
+
+
+class EvalMacroExtension(markdown.Extension):
+    def extendMarkdown(self, md, md_globals):
+        md.inlinePatterns.add(
+            'tk-macros',
+            EvalMacroPattern(EvalMacroPattern._get_pattern(METHODS), md),
+            '>escape',
+        )
+
 
 class EvalMacroPlugin(BasePlugin):
     # TODO: settings.SLUG

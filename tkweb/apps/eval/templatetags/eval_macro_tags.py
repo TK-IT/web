@@ -1,5 +1,5 @@
 from django import template
-from tkweb.apps.eval.evalmacros import EvalMacroPreprocessor, METHODS
+from tkweb.apps.eval.evalmacros import EvalMacroPattern, METHODS
 
 register = template.Library()
 
@@ -7,6 +7,6 @@ register = template.Library()
 def allowed_evalmacros():
     for method in METHODS:
         try:
-            yield getattr(EvalMacroPreprocessor, method).meta
+            yield getattr(EvalMacroPattern, method).meta
         except AttributeError:
             continue
