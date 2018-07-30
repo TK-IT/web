@@ -260,7 +260,7 @@ class EvalMacroPreprocessor(markdown.preprocessors.Preprocessor):
     def eps(self, full=''):
         return '&epsilon;'
 
-    TK.meta = {
+    remtor.meta = {
         'short_description': 'R&epsilon;mToR',
         'help_text': (
             'Brug følgende makroer til at skrive R&epsilon;mToR.' +
