@@ -1,6 +1,9 @@
 from PIL import Image as PILImage
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
+from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
+from tkweb.apps.gallery import views
 from tkweb.apps.gallery.models import Album, Image
 import tempfile
 
@@ -68,3 +71,28 @@ class CorruptedMediaTest(TestCase):
                 instance.save()
 
         self.assertEqual(len(Image.objects.all()), 0)
+
+
+class GalleryViewTest(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.album = Album.objects.create(gfyear=2018, title="Test", slug="test")
+        # Create two images
+        self.create_image("image1")
+        self.create_image("image2")
+
+    def create_image(self, slug):
+        with tempfile.NamedTemporaryFile(suffix=".png") as im:
+            PILImage.new("RGB", (100, 100)).save(im)
+            im.seek(0)
+            contents = ContentFile(im.read(), "im.png")
+            image = Image(
+                file=contents, album=self.album, slug=slug, visibility=Image.PUBLIC
+            )
+            image.full_clean()
+            image.save()
+            return image
+
+    def test_album_count(self):
+        response = self.client.get(reverse("gallery_index"))
+        self.assertEquals(1, len(list(response.context["albumSets"])))
