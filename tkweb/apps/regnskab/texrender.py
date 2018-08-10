@@ -19,11 +19,11 @@ def tex_to_pdf(source, jobname='django'):
             cwd=d,
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True)
+            stderr=subprocess.STDOUT)
         with p:
-            output, _ = p.communicate()
+            output_bytes, _ = p.communicate()
         if p.returncode != 0:
+            output = output_bytes.decode("utf8", errors="replace")
             raise RenderError(p.returncode, cmd, output, stderr=None)
         with open(base + '.pdf', 'rb') as fp:
             return fp.read()
