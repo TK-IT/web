@@ -6,22 +6,24 @@ af brugeren `tkammer`, men bliver håndteret igennem WSGI af apache2 og brugeren
 `/home/tkammer/tkweb/.venv/`.
 
 Apache2 håndterer også de statiske filer. Mediefiler ligger på et stor drev
-`/Picture/tkammer/media/`.
+`/Pictures/tkammer/media/`.
 
 Databasen er en fælles lokal MySQL.
 
 ## Opdatering
-For at opdatere siden med de nyeste ændring fra Github skal du gøre følgende:
+
+For at opdatere siden med de nyeste ændringer fra GitHub skal du gøre følgende:
+
 ```sh
     sudo -u tkammer -i  # start en ny shell med tkammer som bruger
     cd /home/tkammer/tkweb  # Skift til mappen med siden.
-    git pull  # Hent de nyeste ændringer fra Github.
+    git pull  # Hent de nyeste ændringer fra GitHub.
     export PIPENV_VENV_IN_PROJECT=1  # Sig til pipenv at den skal bruge .venv mappe inde i projektet
     pipenv install --three  # Installer og opdater alle python pakker i virtualenv.
     pipenv shell  # Aktiver virtualenv
     ./manage.py migrate --settings=tkweb.settings.prod  # Migrer databasen til en evt. ny model.
     ./manage.py collectstatic --settings=tkweb.settings.prod  # Saml statiske filer så apache kan finde dem.
-    sudo service apache2 restart  # Genstart apache så de nye filer bliver taget i brug.
+    sudo apache2ctl graceful  # Genstart apache så de nye filer bliver taget i brug.
 ```
 
 
