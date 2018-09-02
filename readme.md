@@ -86,6 +86,24 @@ cd static-src
 lessc --clean-css --source-map style.less style.min.css
 ```
 
+## JavaScript i regnskab appen
+
+I [`tkweb/apps/regnskab`](tkweb/apps/regnskab) er der en fil,
+[regnskab.es6x](tkweb/apps/regnskab/static/regnskab/regnskab.es6x),
+der bruger ECMAScript 6 features og JSX.
+Denne oversættes vha. følgende kommando til en JavaScript-fil der kan køre i browseren:
+
+```shell
+tools/babel-compile.py tkweb/apps/regnskab/static/regnskab/regnskab.es6x
+```
+
+Det kræver at `dukpy` er installeret
+(vha. `.venv/bin/pip install dukpy`).
+
+Desuden er der JavaScript tests i
+[tkweb/apps/regnskab/tests.js](tkweb/apps/regnskab/tests.js)
+som køres af `manage.py test` når `dukpy` er installeret.
+
 ## Prodekanus
 
 For informationer om siden på prodekanus
