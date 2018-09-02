@@ -352,7 +352,7 @@
         },
         "wiki": {
             "git": "https://github.com/django-wiki/django-wiki.git",
-            "ref": "9b87770d8c9b6f6053531529e967ee5005b7b75b"
+            "ref": "122d38b7af38741a703b509afbfab35455ce48c2"
         }
     },
     "develop": {}
