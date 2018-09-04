@@ -33,3 +33,5 @@ matplotlib = "*"
 Unidecode = "*"
 
 [dev-packages]
+freezegun = "*"
+dukpy = "*"
