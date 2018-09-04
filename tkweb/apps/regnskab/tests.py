@@ -18,7 +18,6 @@ LIB_FILES = [
     "tkweb/apps/regnskab/static/react/react.js",
 ]
 PREAMBLE = """
-require("babel-polyfill");
 var window = {addEventListener: function (a, b, c) {}, TK_PROFILES: []};
 """  # JavaScript that runs after LIB_FILES and before CODE_FILES
 CODE_FILES = ["tkweb/apps/regnskab/static/regnskab/regnskab.js"]
