@@ -5,6 +5,7 @@ import logging
 import datetime
 from decimal import Decimal
 from collections import defaultdict
+from constance import config
 
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
@@ -107,8 +108,16 @@ class BalancePrint(FormView):
             Session.objects, pk=kwargs['pk'])
         return super().dispatch(request, *args, **kwargs)
 
-    def get_tex_source(self, threshold):
-        period = self.regnskab_session.period
+    @staticmethod
+    def get_tex_context_data(
+        period=None, time=None, current_session_id=None, threshold=None
+    ):
+        if threshold is None:
+            threshold = float('inf')
+        if period is None:
+            period = config.GFYEAR
+        if time is None:
+            time = timezone.now()
 
         purchase_qs = Purchase.objects.all().order_by().filter(
             row__sheet__period=period)
@@ -150,7 +159,7 @@ class BalancePrint(FormView):
             else:
                 real_name, real_count = name, count
             counts[profile_id, real_name] += real_count
-            if session_id == self.regnskab_session.id:
+            if session_id == current_session_id:
                 cur_counts[profile_id, real_name] += real_count
 
         transaction_qs = Transaction.objects.all()
@@ -167,7 +176,7 @@ class BalancePrint(FormView):
                 real_name = 'andet'
                 amount = o.amount
             counts[o.profile_id, real_name] += amount
-            if o.session_id == self.regnskab_session.id:
+            if o.session_id == current_session_id:
                 cur_counts[o.profile_id, real_name] += amount
 
         context = {}
@@ -179,7 +188,6 @@ class BalancePrint(FormView):
             context['total_%s' % k] = context['last_%s' % k] = Decimal()
         context['total_balance'] = Decimal()
 
-        time = self.regnskab_session.send_time
         profiles = get_profiles_title_status(period=period, time=time)
         if period == 2016 and timezone.now().year == 2016:
             hængere = [i for i in range(len(profiles))
@@ -201,34 +209,55 @@ class BalancePrint(FormView):
             FORM.title = None
         balances = compute_balance()
 
-        rows = []
+        context['personer'] = []
         for p in profiles:
-            balance = balances.get(p.id, 0)
-            context['total_balance'] += balance
             for k in keys:
                 context['total_%s' % k] += counts[p.id, k]
                 context['last_%s' % k] += cur_counts[p.id, k]
             p_context = {}
+            p_context['balance'] = balances.get(p.id, 0)
+            context['total_balance'] += p_context['balance']
             if p.title:
                 if p.title.period is None:
                     title_str = title_to_tex(p.title.root)
                 else:
                     title_str = tk.prefix(p.title, period, type='tex')
+                p_context['alias'] = title_str
                 p_context['name'] = '%s %s' % (title_str, p.name)
             else:
-                p_context['name'] = p.name
-            FMT = dict(betalt='\\hfill \\num{%.2f}', andet='\\hfill \\num{%.2f}',
-                       ølkasse='\\hfill \\num{%.1f}')
-            p_context['last'] = ' & '.join(
-                FMT.get(k, '\\hfill \\num{%g}') % cur_counts.get((p.id, k), 0)
-                for k in keys)
-            p_context['total'] = ' & '.join(
-                FMT.get(k, '\\hfill \\num{%g}') % counts.get((p.id, k), 0)
-                for k in keys)
-            p_context['balance'] = balance
-            p_context['hl'] = '\\hl' if balance > threshold else ''
+                p_context['alias'] = p_context['name'] = p.name
+            p_context['last'] = {
+                k: cur_counts.get((p.id, k), 0) for k in keys
+            }
+            p_context['total'] = {
+                k: counts.get((p.id, k), 0) for k in keys
+            }
+            p_context['hl'] = p_context['balance'] > threshold
             if not p.status or p.status.end_time is not None:
                 continue
+            context['personer'].append(p_context)
+
+        return context
+
+    def get_tex_source(self, threshold):
+        period = self.regnskab_session.period
+        time = self.regnskab_session.send_time
+        context = self.get_tex_context_data(
+            period, time, self.regnskab_session.id, threshold
+        )
+
+        rows = []
+        keys = 'ølkasse guldøl øl sodavand andet betalt'.split()
+        FMT = dict(betalt='\\hfill \\num{%.2f}', andet='\\hfill \\num{%.2f}',
+                   ølkasse='\\hfill \\num{%.1f}')
+        for p_context in context['personer']:
+            p_context['last'] = ' & '.join(
+                FMT.get(k, '\\hfill \\num{%g}') % p_context['last'][k]
+                for k in keys)
+            p_context['total'] = ' & '.join(
+                FMT.get(k, '\\hfill \\num{%g}') % p_context['total'][k]
+                for k in keys)
+            p_context['hl'] = '\\hl' if p_context['hl'] else ''
             rows.append(BALANCE_ROW % p_context)
 
         context['personer'] = '\n'.join(rows)
@@ -240,7 +269,7 @@ class BalancePrint(FormView):
     def form_valid(self, form):
         mode = form.cleaned_data['mode']
         should_highlight = form.cleaned_data['highlight']
-        threshold = get_max_debt() if should_highlight else float('inf')
+        threshold = get_max_debt() if should_highlight else None
 
         tex_source = self.get_tex_source(threshold=threshold)
         if mode == BalancePrintForm.SOURCE:
