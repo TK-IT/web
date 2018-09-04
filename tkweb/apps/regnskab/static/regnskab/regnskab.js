@@ -12,6 +12,14 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var case_sensitive = false;
 
+function case_smash(s) {
+    if (case_sensitive) {
+        return s;
+    } else {
+        return s.toLowerCase();
+    }
+}
+
 function prefix_to_age(p) {
     // Assume p matches tk_prefix in get_query_filters.
     var base_value = { 'K': -1, 'G': 1, 'B': 2, 'O': 3, 'T': 1, '': 1 };
@@ -134,17 +142,13 @@ function get_query_filters(query) {
         })();
     }
     if (!mo_prefix) {
-        if (case_sensitive) {
-            // Fallback: case sensitive search in title
-            filters.push(function (t) {
-                return t.indexOf(query) !== -1;
-            });
-        } else {
-            // Case insensitive search
-            filters.push(function (t) {
-                return t.toLowerCase().indexOf(query.toLowerCase()) !== -1;
-            });
-        }
+        // Fallback: Search in title. First, try prefix, then try all.
+        filters.push(function (t) {
+            return case_smash(t).substring(0, query.length) === case_smash(query);
+        });
+        filters.push(function (t) {
+            return case_smash(t).indexOf(case_smash(query)) !== -1;
+        });
     }
     return filters;
 }
