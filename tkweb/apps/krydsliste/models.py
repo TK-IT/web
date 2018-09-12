@@ -20,3 +20,9 @@ class Sheet(models.Model):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def format_persons(name_list, rows=31):
+        name_list = list(name_list)[:rows]
+        name_list += [''] * (rows - len(name_list))
+        return '\n'.join(r'\person{%s}' % name for name in name_list)

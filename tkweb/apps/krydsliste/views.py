@@ -10,7 +10,7 @@ from tkweb.apps.krydsliste.models import Sheet
 from tkweb.apps.krydsliste.forms import SheetForm
 from tkweb.apps.regnskab.views.auth import regnskab_permission_required_method
 from tkweb.apps.regnskab.texrender import tex_to_pdf, RenderError
-from tkweb.apps.regnskab.views.printing import BalancePrint
+from tkweb.apps.regnskab.views import BalancePrint
 
 try:
     from tkweb.apps.uniprint.api import print_new_document
@@ -104,7 +104,10 @@ class SheetCreate(CreateView, PrintMixin):
         except (KeyError, ValueError):
             pass
         else:
-            initial['front_persons'] = self.get_highscore(n)
+            if n <= 100:
+                initial['front_persons'] = self.get_highscore(count=n)
+            else:
+                initial['front_persons'] = self.get_highscore(limit=n)
         return initial
 
     def get_standard(self):
@@ -133,16 +136,17 @@ class SheetCreate(CreateView, PrintMixin):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
-    def get_highscore(self, n):
+    def get_highscore(self, count=None, limit=None):
         context = BalancePrint.get_tex_context_data()
-        rows = 31
-        context['personer'].sort(key=lambda p: p['total']['betalt'], reverse=True)
-        if n <= rows:
-            names = [p['alias'] for p in context['personer'][:n]]
-        else:
-            names = [p['alias'] for p in context['personer'] if p['total']['betalt'] >= n]
-        names += [''] * (rows - len(names))
-        return '\n'.join(r'\person{%s}' % n for n in names)
+        personer = sorted(
+            context['personer'], key=lambda p: p['total']['betalt'], reverse=True
+        )
+        if count is not None:
+            personer = personer[:count]
+        if limit is not None:
+            personer = [p for p in personer if p['total']['betalt'] >= limit]
+        names = [p['alias'] for p in personer]
+        return Sheet.format_persons(names)
 
 
 class SheetUpdate(UpdateView, PrintMixin):
