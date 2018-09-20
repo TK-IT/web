@@ -14,7 +14,7 @@ import tkweb.apps.tkbrand.templatetags.tkbrand as tkbrand
 from constance import config
 
 METHODS = [
-    'begin_hide', 'end_hide', 'fixme', 'timeout', 'updated',
+    'begin_hide', 'end_hide', 'begin_fixme', 'end_fixme', 'timeout', 'updated',
     'TK', 'TKAA', 'TKET', 'TKETAA', 'TKETs', 'TKETsAA', 'TKETS', 'TKETSAA',
     'tk_prefix', 'tk_kprefix', 'tk_postfix', 'tk_prepostfix', 'tk_email',
     'eps', 'remtor',
@@ -151,24 +151,22 @@ class EvalMacroPattern(markdown.inlinepatterns.Pattern):
         },
     }
 
-    def fixme(self, *args, full=''):
-        title = 'FIXME'
+    def begin_fixme(self, full=""):
+        title = "FIXME"
         html = render_to_string(
-            "evalmacros/fixme.html",
-            context={
-                'title': title,
-                'id': title+'-'+str(random.randrange(9999)),
-                'message': ' '.join(args),
-            })
+            "evalmacros/begin_fixme.html",
+            context={"title": title, "id": title + "-" + str(random.randrange(9999))},
+        )
         return self.markdown.htmlStash.store(html, safe=False)
 
-    fixme.meta = {
-        'short_description': 'Fixme',
-        'help_text': ('Tilføjer en fixme note.'),
-        'example_code': ('[fixme Her mangler at blive læst korrektur.]'),
-        'args': {
-            'message': 'Teksten til fixme noten',
-        },
+    def end_fixme(self, full=""):
+        html = render_to_string("evalmacros/end_fixme.html")
+        return self.markdown.htmlStash.store(html, safe=False)
+
+    begin_fixme.meta = {
+        "short_description": "Fixme",
+        "help_text": "Tilføjer en fixme note.",
+        "example_code": "[begin_fixme]\nHer mangler at blive læst korrektur.\n[end_fixme]",
     }
 
     def timeout(self, month, full=''):
