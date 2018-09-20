@@ -10,7 +10,7 @@ Den meste funktionalitet kan findes i apps.
 - [`tkweb/apps/jubi`](tkweb/apps/jubi) indeholder jubilæumssiderne som
   [flatpages](https://docs.djangoproject.com/en/1.8/ref/contrib/flatpages/) og
   de tilhørende statiske filer,
-- [`tkweb/apps/tkbrad`](tkweb/apps/tkbrand) er en lille HTML kopi af LaTeX
+- [`tkweb/apps/tkbrand`](tkweb/apps/tkbrand) er en lille HTML kopi af LaTeX
   pakken `tket.sty` til at skrive TÅGEKAMMERET med hoppe-danse-skrift,
 - [`tkweb/apps/redirect`](tkweb/apps/redirect) tager sig af vidrestilling af
   URLer fra den gamle PHP-side.
