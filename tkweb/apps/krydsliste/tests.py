@@ -1,3 +1,4 @@
+import unittest
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
@@ -22,3 +23,17 @@ class NonUtf8ErrorTest(TestCase):
         url = reverse("regnskab:krydsliste:sheet_update", kwargs=dict(pk=sheet.pk))
         response = self.client.post(url, post_data)
         self.assertIn("Fejl:", response.rendered_content)
+
+
+class FormatPersonsTest(unittest.TestCase):
+    def test_exact(self):
+        output = Sheet.format_persons(['Foo', 'Bar'], rows=2)
+        self.assertEquals('\\person{Foo}\n\\person{Bar}', output)
+
+    def test_more(self):
+        output = Sheet.format_persons(['Foo', 'Bar', 'Baz'], rows=2)
+        self.assertEquals('\\person{Foo}\n\\person{Bar}', output)
+
+    def test_less(self):
+        output = Sheet.format_persons(['Foo', 'Bar'], rows=3)
+        self.assertEquals('\\person{Foo}\n\\person{Bar}\n\\person{}', output)

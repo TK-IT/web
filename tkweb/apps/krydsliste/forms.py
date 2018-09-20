@@ -2,11 +2,9 @@ from django import forms
 from tkweb.apps.krydsliste.models import Sheet
 
 
-FRONT_INITIAL = '\n'.join(
-    r'\person{%s}' % p
-    for p in (
-        r'\CERM FORM INKA \KASS NF PR SEKR \VC FUAN'.split() +
-        9*['FU'] + ['EFUIT'] + 12*['']))
+FRONT_INITIAL = Sheet.format_persons(
+    r'\CERM FORM INKA \KASS NF PR SEKR \VC FUAN'.split() +
+    9*['FU'] + ['EFUIT'])
 BACK_INITIAL = '\n'.join(24*[r'\person{}'] + 15*[r'\lille{}'])
 
 

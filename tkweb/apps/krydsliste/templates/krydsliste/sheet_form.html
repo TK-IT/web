@@ -49,6 +49,7 @@ window.addEventListener('load', init_sheet_form, false);
 {% else %}
 <h1>Ny krydsliste-skabelon</h1>
 <p>Når du har gemt den nye krydsliste, kan du derefter hente den som PDF eller udskrive den på A2.</p>
+<p>Lav highscore med <a href="?highscore=12">top 12</a> eller <a href="?highscore=10000">alle over 10.000</a></p>
 {% endif %}
 
 <form method="post">{% csrf_token %}
