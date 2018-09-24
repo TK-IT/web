@@ -4,9 +4,12 @@ from constance import config
 
 
 def bestfu(request, **kwargs):
+    period = config.GFYEAR
+    if request.GET.get('y') == 'g':
+        period -= 1
     best = Title.objects.filter(kind=Title.BEST,
-                                period=config.GFYEAR).select_related()
+                                period=period).select_related()
     fu = Title.objects.filter(kind=Title.FU,
-                              period=config.GFYEAR).select_related()
+                              period=period).select_related()
     context = {'best': best, 'fu': fu, }
     return render(request, 'bestfu.html', context)
