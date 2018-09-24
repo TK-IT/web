@@ -11,5 +11,10 @@ def bestfu(request, **kwargs):
                                 period=period).select_related()
     fu = Title.objects.filter(kind=Title.FU,
                               period=period).select_related()
+    if request.GET.get('y') == 'g':
+        best = list(best)
+        fu = list(fu)
+        for title in best + fu:
+            title.period += 1
     context = {'best': best, 'fu': fu, }
     return render(request, 'bestfu.html', context)
