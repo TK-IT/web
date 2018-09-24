@@ -99,6 +99,12 @@ class Title(models.Model):
     root = models.CharField(max_length=10, verbose_name='Titel')
     kind = models.CharField(max_length=10, choices=KIND, verbose_name='Slags')
 
+    def clean(self):
+        try:
+            tk.prefix(self)
+        except Exception as e:
+            raise ValidationError(str(e)) from e
+
     def title_tuple(self):
         return (self.root, self.period)
 
@@ -124,4 +130,8 @@ class Title(models.Model):
 
     @tk.set_gfyear(lambda: config.GFYEAR)
     def __str__(self):
-        return '%s %s' % (tk.prefix(self, type='unicode'), getattr(self, 'profile', ''))
+        try:
+            return '%s %s' % (tk.prefix(self, type='unicode'), getattr(self, 'profile', ''))
+        except ValueError:
+            # tk.prefix() deems our title_tuple() to be invalid.
+            return '%s %s %s' % (self.root, self.period, getattr(self, 'profile', ''))
