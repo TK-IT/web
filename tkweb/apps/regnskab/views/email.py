@@ -240,6 +240,7 @@ def get_image_for_emails(emails):
     sheets = session.sheet_set.exclude(row_image=None)
     sheets = sheets.prefetch_related('sheetrow_set')
     rows_by_profile = {email.profile_id: [] for email in emails}
+    assert len(rows_by_profile) == len(emails)
     for sheet in sheets:
         if not sheet.row_image:
             continue
