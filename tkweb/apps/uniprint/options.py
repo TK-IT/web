@@ -70,6 +70,15 @@ class Options:
     fit_to_page = Option('fit-to-page')
     fit_a5 = Option(a5paper, fit_to_page)
 
+    a4paper = Option("PageSize=A4")
+    fit_a4 = Option(a4paper, fit_to_page)
+
+    # Possible interpretation of 1PLU = one punch left up
+    staple_top_left = Option("Staple=1PLU")
+
+    # Possible interpretation of 2PL = two punches left
+    staple_left = Option("Staple=2PL")
+
     a5_book = Option(booklet, fit_a5,
                      name='A5-hæfte',
                      sheets=lambda n: math.ceil(n / 4))
@@ -84,6 +93,18 @@ class Options:
                       sheets=lambda n: math.ceil(n / 2))
     onesided_base = Option('Duplex=None')
     onesided = Option(collate, onesided_base, name='Enkeltsidet')
+
+    a4_book = Option(a4paper, fit_a4, twosided)
+
+    a4_book_single = Option(
+        a4_book,
+        staple_top_left,
+        name="A4-bog, én klips",
+        sheets=lambda n: math.ceil(n / 2),
+    )
+    a4_book_double = Option(
+        a4_book, staple_left, name="A4-bog, to klips", sheets=lambda n: math.ceil(n / 2)
+    )
 
     @classmethod
     def get_options(cls):
