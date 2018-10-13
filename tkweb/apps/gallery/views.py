@@ -255,7 +255,8 @@ class AlbumFeed(Feed):
     description = 'Feed med nye billedalbummer fra TÅGEKAMMERETs begivenheder.'
 
     def items(self):
-        return Album.objects.order_by('-publish_date')
+        nonempties = Album.objects.filter(basemedia__visibility=BaseMedia.PUBLIC).distinct()
+        return nonempties.order_by('-publish_date')
 
     def item_title(self, item):
         return item.title
