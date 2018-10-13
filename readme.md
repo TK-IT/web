@@ -47,7 +47,7 @@ Det er en forudsætning at maskinen har en fungerende python installation med
 
 En mysql installation er også påkrævet så `mysql_client` er tilgængelig, f.eks. skal man installere pakken `libmysqlclient-dev` på Ubuntu/Debian.
 
-Brug nedenstående til at klone git-repoet, sættet et python ≥ 3.3 virtualenv op,
+Brug nedenstående til at klone git-repoet, sættet et python \[3.3, 3.7) virtualenv op,
 installere alle pakker og oprette en database.
 
 ```shell
