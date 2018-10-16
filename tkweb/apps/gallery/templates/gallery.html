@@ -43,11 +43,10 @@
               {% endif %}{% endifchanged %}
               <div class="col-xs-6 col-sm-4 col-md-3">
                 <a class="thumbnail" href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">
-                  <div class="thumbcap"
-                     {% if firstFile.type == "I" %}
-                     style="background-image: url('{{ firstFile.file.crop.253x253.url }}')"
-                     {% endif %}>
-                    {% if firstFile.type == "V" %}
+                  <div class="thumbcap">
+                    {% if firstFile.type == "I" %}
+                      <img src="{{ firstFile.file.crop.253x253.url }}" alt="{{ album.title }}">
+                    {% elif firstFile.type == "V" %}
                       {% bootstrap_icon "film" %}
                     {% elif firstFile.type == "A" %}
                       {% bootstrap_icon "volume-up" %}

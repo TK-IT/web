@@ -43,11 +43,10 @@ hvoraf {{ new_count }} er ny{{ new_count|pluralize:'e' }}.
   {% for file in files %}
   <div class="col-xs-6 col-sm-4 col-md-3">
     <a class="thumbnail" href="{% url 'image' gfyear=album.gfyear album_slug=album.slug image_slug=file.slug %}" alt="Se billede">
-      <div class="thumbcap"
-           {% if file.type == "I" %}
-           style="background-image: url('{{ file.file.crop.253x253.url }}')"
-           {% endif %}>
-          {% if file.type == "V" %}
+      <div class="thumbcap">
+          {% if file.type == "I" %}
+            <img src="{{ file.file.crop.253x253.url }}" alt="{{ album.title }}">
+          {% elif file.type == "V" %}
             {% bootstrap_icon "film" %}
           {% elif file.type == "A" %}
             {% bootstrap_icon "volume-up" %}
