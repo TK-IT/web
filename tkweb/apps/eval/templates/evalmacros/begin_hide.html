@@ -1,5 +1,7 @@
-<a class="btn btn-default btn-xs" role="button" data-toggle="collapse" href="#{{ id }}" aria-expanded="{{ expanded }}" aria-controls="{{ id }}">
-    {{ title }}
-</a>
-<div class="collapse {% if expanded %}in{% endif %}" id="{{ id }}">
-    <div class="well">
+<div class="panel panel-default">
+    <div class="panel-heading" role="tab">
+        <a data-toggle="collapse" href="#{{ id }}" aria-expanded="{{ expanded }}" aria-controls="{{ id }}">
+            <div><span class="glyphicon glyphicon-menu-down"></span> {{ title }}</div>
+        </a>
+    </div> <!-- panel-heading -->
+    <div id="{{ id }}" class="panel-body panel-collapse collapse{% if expanded %} in{% endif %}" role="tabpanel">
