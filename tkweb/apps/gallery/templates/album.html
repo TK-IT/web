@@ -27,13 +27,13 @@ hvoraf {{ new_count }} er ny{{ new_count|pluralize:'e' }}.
 </form>
 {% endif %}
 <div class="row">
-  <div class="col-xs-12 col-sm-7">
+  <div class="col-xs-12 col-sm-7 col-md-6">
     <ol class="breadcrumb imagetitle">
       <li><a href="{% url 'gfyear' gfyear=album.gfyear  %}">{{ album.gfyear|gfyearPPslash_gallery }}</a></li>
       <li class="active">{{ album.title }}</li>
     </ol>
   </div>
-  <div class="col-xs-12 col-sm-5 text-right">
+  <div class="col-xs-12 col-sm-5 col-md-6 text-right">
       <p class="imagetitle">
           {{ files|length }} billede{{ files|length|pluralize:"r" }}{% if album.publish_date %} fra d. {{ album.publish_date }}{% endif %}
       </p>
