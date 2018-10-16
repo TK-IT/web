@@ -42,24 +42,11 @@ def _inline_error(method, error):
     return html
 
 def parseTimeoutMonth(month):
-
-        pattern = (r"(?P<month>(%s))" %
-                   '|'.join(m for ml in MONTHS for m in ml))
-        mo = re.search(pattern, month, re.IGNORECASE)
-
-        if mo is None:
-            raise ValueError("\'%s\' is not a valid month" % month)
-
-        mg = mo.group('month')
-
-        def _convert(lst):
-            dct = {}
-            for i, v in enumerate(lst):
-                for v in v:
-                    dct[v.lower()] = i+1
-            return dct
-
-        return _convert(MONTHS)[mg]
+    for i, month_names in enumerate(MONTHS):
+        for name in month_names:
+            if name.lower() == month.lower():
+                return i + 1
+    raise ValueError("'%s' is not a valid month" % month)
 
 
 class EvalMacroPattern(markdown.inlinepatterns.Pattern):
