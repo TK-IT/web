@@ -43,20 +43,23 @@
               {% endif %}{% endifchanged %}
               <div class="col-xs-6 col-sm-4 col-md-3">
                 <a class="thumbnail" href="{% url 'album' gfyear=album.gfyear album_slug=album.slug %}">
-                    <div class="thumbcap">
-                      {% if firstFile %}
-                      {% if firstFile.type == "I" %}
-                        <img class="img-responsive" src="{{ firstFile.file.crop.253x253.url }}" alt="{{ album.title }}" />
-                      {% else %}
-                        <div class="placeholder253x253">
-                          <p>{% bootstrap_icon "file" %}</p>
-                        </div>
-                      {% endif %}
-                    {% else %}
-                    <p>{{ album.title }} (Tomt album)</p>
+                  <div class="thumbcap"
+                     {% if firstFile.type == "I" %}
+                     style="background-image: url('{{ firstFile.file.crop.253x253.url }}')"
+                     {% endif %}>
+                    {% if firstFile.type == "V" %}
+                      {% bootstrap_icon "film" %}
+                    {% elif firstFile.type == "A" %}
+                      {% bootstrap_icon "volume-up" %}
+                    {% elif firstFile.type == "O" %}
+                      {% bootstrap_icon "file" %}
+                    {% elif not firstFile %}
+                      {% bootstrap_icon "ban-circle" %}
                     {% endif %}
                     <div class="caption">
-                        <h5>{{ album.title }} <small>{{ album.count }} billede{{ album.count|pluralize:"r" }}</small></h5>
+                      <h5>{{ album.title }}
+                        <small>{{ album.count }} billede{{ album.count|pluralize:"r" }}</small>
+                      </h5>
                     </div>
                   </div>
                 </a>
