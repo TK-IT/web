@@ -22,6 +22,20 @@ def validate_regex_pattern(value):
         raise ValidationError('Invalid regex pattern: %s' % (exn,))
 
 
+def validate_tktitler_root(value):
+    try:
+        tk.validate_title((value, 1956))
+    except ValueError as exn:
+        raise ValidationError("Invalid title root: %s" % exn)
+
+
+def validate_tktitler_period(value):
+    try:
+        tk.validate_title(("", value))
+    except ValueError as exn:
+        raise ValidationError("Invalid title period: %s" % exn)
+
+
 @python_2_unicode_compatible
 class Group(models.Model):
     REGEXP_MAILING_LIST = 'no$public$address'
@@ -95,8 +109,12 @@ class Title(models.Model):
     KIND = [(BEST, 'BEST'), (FU, 'FU'), (EFU, 'EFU')]
 
     profile = models.ForeignKey('Profile', on_delete=models.CASCADE)
-    period = models.IntegerField(verbose_name='Årgang')
-    root = models.CharField(max_length=10, verbose_name='Titel')
+    period = models.IntegerField(
+        verbose_name="Årgang", validators=[validate_tktitler_period]
+    )
+    root = models.CharField(
+        max_length=10, verbose_name="Titel", validators=[validate_tktitler_root]
+    )
     kind = models.CharField(max_length=10, choices=KIND, verbose_name='Slags')
 
     def title_tuple(self):
