@@ -11,17 +11,10 @@ from tkweb.apps.mailinglist.models import SharedFile
 from tkweb.apps.idm.models import Group
 
 
-send_permission_required = permission_required(
-    'mailinglist.send', raise_exception=True)
-
-
+@method_decorator(permission_required("mailinglist.send"), name="dispatch")
 class EmailFormView(FormView):
     template_name = 'mailinglist/email_form.html'
     form_class = EmailForm
-
-    @method_decorator(send_permission_required)
-    def dispatch(self, request, *args, **kwargs):
-        return super(EmailFormView, self).dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse('email_form')
@@ -111,22 +104,16 @@ class EmailFormView(FormView):
         return HttpResponseRedirect(self.get_success_url())
 
 
+@method_decorator(permission_required("mailinglist.send"), name="dispatch")
 class FileList(ListView):
     queryset = SharedFile.objects.all()
     template_name = 'mailinglist/file_list.html'
 
-    @method_decorator(send_permission_required)
-    def dispatch(self, request, *args, **kwargs):
-        return super(FileList, self).dispatch(request, *args, **kwargs)
 
-
+@method_decorator(permission_required("mailinglist.send"), name="dispatch")
 class FileCreate(FormView):
     form_class = FileForm
     template_name = 'mailinglist/file_create.html'
-
-    @method_decorator(send_permission_required)
-    def dispatch(self, request, *args, **kwargs):
-        return super(FileCreate, self).dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         for i in form.cleaned_data['files']:
