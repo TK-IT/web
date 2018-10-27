@@ -54,6 +54,7 @@ LOCAL_APPS = [
     'tkweb.apps.regnskab',
     'tkweb.apps.krydsliste',
     'tkweb.apps.uniprint',
+    'tkweb.apps.drinks',
 ]
 
 INSTALLED_APPS = LOCAL_APPS + DEFAULT_APPS + THIRD_PARTY_APPS
