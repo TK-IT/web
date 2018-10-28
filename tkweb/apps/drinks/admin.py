@@ -1,6 +1,10 @@
 from django.contrib import admin
 
-from .models import Drink, Sprut 
+from .models import Drink, Sprut, Barcard 
+
+class BarcardAdmin(admin.ModelAdmin):
+    model = Barcard
+    filter_horizontal = ('drinks',)
 
 class SprutInline(admin.TabularInline):
     model = Sprut
@@ -14,4 +18,5 @@ class DrinkAdmin(admin.ModelAdmin):
                 ['serving','soda']})]
     inlines = [SprutInline]
 
+admin.site.register(Barcard, BarcardAdmin)
 admin.site.register(Drink, DrinkAdmin)

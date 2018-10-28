@@ -14,3 +14,9 @@ class Sprut(models.Model):
     amount = models.IntegerField()
     def __str__(self):
         return self.name
+
+class Barcard(models.Model):
+    name = models.CharField(max_length=30)
+    drinks = models.ManyToManyField(Drink)
+    def __str__(self):
+        return self.name
