@@ -1,0 +1,10 @@
+
+{% extends "drinks/base.html" %}
+{% block fulltitle %}Drinks{% endblock %}
+{% block content %}
+<h1>Drinks</h1>
+<p> Download file her: </p>
+{% if bar_uploaded_file_url %}
+    <p>File uploaded at: <a href="{{ bar_uploaded_file_url }}">{{ bar_uploaded_file_url }}</a></p>
+{% endif %}
+{% endblock %}

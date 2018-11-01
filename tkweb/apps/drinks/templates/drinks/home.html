@@ -1,6 +1,12 @@
 {% extends "drinks/base.html" %}
 {% block fulltitle %}Drinks{% endblock %}
 {% block content %}
-<h1>Drinks</h1>
+<h1>Barkort generator:</h1>
+<p> Vælg det barkort, som du ønsker at generere </p>
+<form action="download/" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Generate">
+</form>
 
 {% endblock %}

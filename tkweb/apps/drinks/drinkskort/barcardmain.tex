@@ -1,0 +1,42 @@
+\font\Name=ecsx1000       at 10mm
+\font\Preis=ecsx1000      at 10mm
+\font\Dinge=ecsx1000      at  5mm
+\font\Servierung=ecss1000 at  5mm
+
+\hoffset=-1.62cm %Was -1.54 (1.62)
+\voffset=-1.54cm
+
+\frenchspacing
+\hyphenation{citron}
+
+\hsize=277mm % Was 277 (285)
+\vsize=190mm
+
+\newdimen\Breite \Breite=.49\hsize
+\newdimen\Hoehe  \Hoehe=.4\vsize
+\baselineskip=6mm
+\parindent=0pt
+\raggedbottom
+
+\nopagenumbers
+\newbox\aeske
+\newif\ifbanjo
+
+% Magic!
+\def\drik#1\til#2\med#3\serveret#4\par{%
+  \setbox0=\vbox to\Hoehe{\hsize=\Breite
+  \line{\Name#1\hfill\Preis#2kr.}
+  \bigskip
+  \let\og\cr
+  \line{\vtop{\halign{\hbox to 2cm{\Dinge\hfill\strut##\ }&\Dinge##\hfill\cr#3}}
+  \hfill\vtop{\hsize=.5\Breite\Dinge Servering:\par
+  \rightskip=0pt plus.1\Breite\Servierung#4\par}}
+  \vss}
+  \ifbanjo\line{\box\aeske\hfill\box0}\banjofalse
+  \else\setbox\aeske\box0\banjotrue\fi}
+
+% Input the generated table
+\input barcard
+
+\ifvoid\aeske\else\line{\box\aeske\hfill}\fi
+\bye
