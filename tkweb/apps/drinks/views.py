@@ -1,14 +1,9 @@
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import TemplateView, ListView
 from django.views.generic.edit import FormView
-
-from django.core.files.storage import FileSystemStorage
-from django.core.files import File
 
 from .forms import BarcardGenForm
 from .models import Barcard
-import subprocess
 
 class BarcardSelect(FormView):
     template_name = 'drinks/home.html'

@@ -1,6 +1,5 @@
 from django.db import models
 import subprocess
-from django.core.files.storage import FileSystemStorage
 from django.core.files import File
 
 
