@@ -2,9 +2,7 @@
 {% extends "drinks/base.html" %}
 {% block fulltitle %}Drinks{% endblock %}
 {% block content %}
-<h1>Drinks</h1>
-<p> Download file her: </p>
-{% if bar_uploaded_file_url %}
-    <p>File uploaded at: <a href="{{ bar_uploaded_file_url }}">{{ bar_uploaded_file_url }}</a></p>
-{% endif %}
+<h1>{{ barcard.name }}</h1>
+<p> Download barkort her: <a href='{{barcard.barcardFile.url}}'>{{barcard.name}} barkort</a> </p>
+<p> Download blandekort her: <a href='{{barcard.mixingFile.url}}'>{{barcard.name}} blandeliste</a></p>
 {% endblock %}

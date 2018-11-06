@@ -1,36 +1,36 @@
-from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import render, get_object_or_404
+from django.views.generic import TemplateView, ListView
 from django.views.generic.edit import FormView
 
 from django.core.files.storage import FileSystemStorage
 from django.core.files import File
 
 from .forms import BarcardGenForm
+from .models import Barcard
 import subprocess
 
 class BarcardSelect(FormView):
     template_name = 'drinks/home.html'
     form_class = BarcardGenForm
-    success_url = 'download/'
+    success_url = 'generate/'
 
     def form_valid(self, form):
         return super().form_valid(form)
 
 def barcardGen(request):
     if request.method =='POST':
-        card = request.POST.__getitem__('barcard')
-        bashCommand = 'make -C tkweb/apps/drinks/drinkskort/'
-        subprocess.call(bashCommand, shell=True)
-        barFile = open('tkweb/apps/drinks/drinkskort/bar_drinks.pdf',  encoding = "ISO-8859-1")
-#        mixFile = open('drinkskort/mixing_drinks.pdf')
+        card = request.POST.get('barcard')
+        card_obj = Barcard.objects.get(id=card)
+        barcardName = card_obj.name
+        card_obj.generateFiles()
+        return HttpResponseRedirect('/drinks/download/'+card)
+    else:
+        return HttpResponseRedirect('/drinks/')
 
-        fs = FileSystemStorage()
-        barFilename = fs.save('barkort', barFile)
-#        mixFilename = fs.save(car.__str__+'_mix', mixFile)
-        bar_uploaded_file_url = fs.url(barFilename)
-#        mix_uploaded_file_url = fs.url(barFilename)
-        return render(request, 'drinks/download.html', {
-            'bar_uploaded_file_url': bar_uploaded_file_url
-        })
-    return render(request, 'drinks/download.html')
-        
+def download(request, barcard_id):
+    if request.method == 'GET':
+        barcard = get_object_or_404(Barcard, pk=barcard_id)
+        return render(request, 'drinks/download.html', {'barcard':barcard})
+    else:
+        return HttpResponseRedirect('/drinks/')
