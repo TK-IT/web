@@ -14,7 +14,7 @@ class Drink(models.Model):
         return self.name
 
 class Sprut(models.Model):
-    drink = models.ForeignKey(Drink, on_delete=models.CASCADE)
+    drink = models.ForeignKey(Drink, on_delete=models.CASCADE) 
     name = models.CharField(max_length=30)
     amount = models.IntegerField()
 
@@ -31,12 +31,19 @@ class Barcard(models.Model):
         return self.name
 
     def generateFiles(self):
-        # todo: function for converting model to drinks.txt
-        # and overwrite  drinkskort/drinks.txt
+        filePath = 'tkweb/apps/drinks/drinkskort/drinks.txt'
+        with open(filePath, 'w') as f:
+            for drink in self.drinks.all():
+                f.write('= '+drink.name+'\n')
+                for sprut in drink.sprut_set.all():
+                    f.write('- '+str(sprut.amount)+' cl - '+sprut.name+'\n')
+                f.write('-- '+drink.soda+'\n')
+                f.write('! '+drink.serving+'\n')
+                f.write('$ '+str(drink.price)+'\n')
         bashCommand = 'make -C tkweb/apps/drinks/drinkskort/'
         subprocess.call(bashCommand, shell=True)
-        
-        barFile = open('tkweb/apps/drinks/drinkskort/bar_drinks.pdf', mode='rb')
-        mixFile = open('tkweb/apps/drinks/drinkskort/mixing_drinks.pdf', mode='rb' )
+        filePath =  'tkweb/apps/drinks/drinkskort/'
+        barFile = open(filePath+'bar_drinks.pdf', mode='rb')
+        mixFile = open(filePath+'/mixing_drinks.pdf', mode='rb')
         self.barcardFile.save(self.name+'_barcard',File(barFile))
         self.mixingFile.save(self.name+'_mixing',File(mixFile))
