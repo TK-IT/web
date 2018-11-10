@@ -51,6 +51,7 @@
 				src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 				{% else %}
 				src="{{ file.file.thumbnail.720x720.url }}"
+				title="{{ file.caption }}"
 				{% endif %}>
 		{% elif file.type == "A" %}
 			<audio controls
