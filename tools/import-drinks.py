@@ -1,3 +1,12 @@
+"""
+Import script in old python-drinkskort format.
+
+Remember to set DJANGO_SETTINGS_MODULE and PYTHONPATH
+and run inside the venv. Example:
+
+DJANGO_SETTINGS_MODULE=tkweb.settings.dev PYTHONPATH=. pipenv run tools/import-drinks.py drinks.txt
+"""
+
 import os
 import sys
 import argparse
