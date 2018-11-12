@@ -1,7 +1,12 @@
 {% extends "regnskab/base.html" %}
 {% block head %}
 <style>
-.amount input { text-align: right; width: 4em; }
+.amount input {
+    text-align: right; width: 4em;
+}
+#transaction_form tr:focus-within {
+    background: #ff9;
+}
 </style>
 <script>
 function above(checkbox) {
@@ -112,11 +117,6 @@ function init() {
 window.addEventListener('keypress', window_onkeypress, true);
 window.addEventListener('load', init, false);
 </script>
-<style>
-#transaction_form tr:focus-within {
-    background: #ff9;
-}
-</style>
 {% endblock %}
 {% block title %}{{ header }}{% endblock %}
 {% block nav %}
