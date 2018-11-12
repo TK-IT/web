@@ -19,7 +19,7 @@ class SodaInline(admin.TabularInline):
 
 class DrinkAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {"fields": ["name", "price"]}),
+        (None, {"fields": ["name", "price", "secret"]}),
         ("Recipe", {"fields": ["serving"]}),
     ]
     inlines = [SodaInline, SprutInline]

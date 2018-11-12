@@ -8,6 +8,7 @@ class Drink(models.Model):
     name = models.CharField(max_length=30)
     serving = models.CharField(max_length=50)
     price = models.IntegerField()
+    secret = models.BooleanField()
 
     def __str__(self):
         return self.name
@@ -43,7 +44,10 @@ class Barcard(models.Model):
         file_path = os.path.join(os.path.dirname(__file__), "drinkskort")
         with open(os.path.join(file_path, "drinks.txt"), "w") as f:
             for drink in self.drinks.all():
-                f.write("= %s\n" % drink.name)
+                secret = ''
+                if drink.secret:
+                    secret = '?'
+                f.write("=%s %s\n" % (secret, drink.name))
                 for sprut in drink.sprut_set.all():
                     f.write("- %s cl - %s\n" % (sprut.amount, sprut.name))
                 for soda in drink.soda_set.all():

@@ -17,12 +17,17 @@ def read_input(drink_file):
     for line in drink_file:
         if line.startswith('='):
             name = line[1:].strip()
+            secret = False
+            if name.startswith('?'):
+                secret = True
+                name = name[1:].strip()
             currentdrinkdict = {
                     'name': name,
                     'soda': [],
                     'price': '',
                     'serving': '',
                     'sprut': [],
+                    'secret': secret,
                     }
             drinks.append(currentdrinkdict)
         elif line.startswith('--'):
@@ -60,7 +65,8 @@ def write_to_db(drinks):
     for drinkdic in drinks:
         drink = Drink(name=drinkdic['name'],
                         serving=drinkdic['serving'],
-                        price=int(drinkdic['price']))
+                        price=int(drinkdic['price']),
+                        secret=drinkdic['secret'])
         print('Saving %s' % drinkdic['name'])
         drink.save()
         for soda in drinkdic['soda']:
