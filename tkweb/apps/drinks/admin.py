@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from tkweb.apps.drinks.models import Drink, Sprut, Barcard
+from tkweb.apps.drinks.models import Drink, Sprut, Barcard, Soda
 
 
 class BarcardAdmin(admin.ModelAdmin):
@@ -13,13 +13,16 @@ class SprutInline(admin.TabularInline):
     model = Sprut
     extra = 1
 
+class SodaInline(admin.TabularInline):
+    model = Soda
+    extra = 1
 
 class DrinkAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {"fields": ["name", "price"]}),
-        ("Recipe", {"fields": ["serving", "soda"]}),
+        ("Recipe", {"fields": ["serving"]}),
     ]
-    inlines = [SprutInline]
+    inlines = [SodaInline, SprutInline]
 
 
 admin.site.register(Barcard, BarcardAdmin)

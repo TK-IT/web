@@ -4,7 +4,7 @@ Import script in old python-drinkskort format.
 Remember to set DJANGO_SETTINGS_MODULE and PYTHONPATH
 and run inside the venv. Example:
 
-DJANGO_SETTINGS_MODULE=tkweb.settings.dev PYTHONPATH=. pipenv run tools/import-drinks.py drinks.txt
+DJANGO_SETTINGS_MODULE=tkweb.settings.dev PYTHONPATH=. pipenv run python tools/import-drinks.py drinks.txt
 """
 
 import os
@@ -15,34 +15,28 @@ import argparse
 def read_input(drink_file):
     drinks = []
     for line in drink_file:
-        if line.startwith('='):
+        if line.startswith('='):
             name = line[1:].strip()
             currentdrinkdict = {
                     'name': name,
-                    'soda': '',
+                    'soda': [],
                     'price': '',
                     'serving': '',
                     'sprut': [],
                     }
             drinks.append(currentdrinkdict)
-        elif line.startwith('--'):
+        elif line.startswith('--'):
             currentsoda = line[2:].strip()
-            currentdrinkdict['soda'] = currentsoda
+            currentdrinkdict['soda'].append(currentsoda)
         elif line.startswith("-"):
             sprutdic = {'name': '',
-                        'amount': '',
-                        'sirup': False}
-
+                        'amount': ''}
             currentspirit = line[1:].strip()
             amount = ''
             for s in currentspirit.split():
                 if s.isdigit():
                     amount = s
-            if amount == '':
-                sprutdic['sirup'] = True
-                sprutdic['amount'] = '0'
-            else:
-                sprutdic['amount'] = amount
+            sprutdic['amount'] = amount
             
             currentspirit = currentspirit.split('-', 1)[-1]
             sprutdic['name'] = currentspirit
@@ -62,17 +56,21 @@ def read_input(drink_file):
 
 
 def write_to_db(drinks):
-    from tkweb.apps.drinks.models import Drinks, Sprut
+    from tkweb.apps.drinks.models import Drink, Sprut, Soda
     for drinkdic in drinks:
-        drink = Drinks(name=drinkdic['name'],
-                       serving=drinkdic['serving'],
-                       soda=drinkdic['soda'])
+        drink = Drink(name=drinkdic['name'],
+                        serving=drinkdic['serving'],
+                        price=int(drinkdic['price']))
+        print('Saving %s' % drinkdic['name'])
         drink.save()
+        for soda in drinkdic['soda']:
+            soda = Soda(name=soda,
+                        drink=drink)
+            soda.save()
         for sprutdic in drinkdic['sprut']:
             sprut = Sprut(name=sprutdic['name'],
-                          amount=sprutdic['amount'],
-                          drink=drink,
-                          sirup=sprutdic['sirup'])
+                          amount=int(sprutdic['amount']),
+                          drink=drink)
             sprut.save()
 
 
@@ -95,7 +93,7 @@ def main():
     file_path = args.filepath
     print(file_path)
     with open(file_path, mode='r') as drinks_file:
-        drinks = read_drinks(drinks_file)
+        drinks = read_input(drinks_file)
         write_to_db(drinks)
 
 
