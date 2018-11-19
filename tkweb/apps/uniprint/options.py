@@ -78,9 +78,12 @@ class Options:
                              name='A5-hæfte, klipset+foldet',
                              sheets=lambda n: math.ceil(n / 4))
 
-    twosided = Option(collate, 'Duplex=DuplexNoTumble', name='Tosidet',
+    twosided_base = Options('Duplex=DuplexNoTumble',
+                            sheets=lambda n: math.ceil(n / 2))
+    twosided = Option(collate, twosided_base, name='Tosidet',
                       sheets=lambda n: math.ceil(n / 2))
-    onesided = Option(collate, 'Duplex=None', name='Enkeltsidet')
+    onesided_base = Options('Duplex=None')
+    onesided = Option(collate, onesided_base, name='Enkeltsidet')
 
     @classmethod
     def get_options(cls):
