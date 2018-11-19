@@ -53,6 +53,9 @@ class Options:
     True
     '''
 
+    # Print pages 1,2,3,1,2,3,1,2,3,... instead of 1,1,1,...,2,2,2...
+    collate = Option('Collate=True')
+
     # Printing an A4 document with just Booklet=Left and no
     # PageSize/fit-to-page will result in a folded booklet made from A3 paper.
     booklet = Option('Booklet=Left')
@@ -75,9 +78,9 @@ class Options:
                              name='A5-hæfte, klipset+foldet',
                              sheets=lambda n: math.ceil(n / 4))
 
-    twosided = Option('Duplex=DuplexNoTumble', name='Tosidet',
+    twosided = Option(collate, 'Duplex=DuplexNoTumble', name='Tosidet',
                       sheets=lambda n: math.ceil(n / 2))
-    onesided = Option('Duplex=None', name='Enkeltsidet')
+    onesided = Option(collate, 'Duplex=None', name='Enkeltsidet')
 
     @classmethod
     def get_options(cls):
@@ -138,5 +141,6 @@ class Options:
 # The first choice is the default choice.
 choices = [getattr(Options, k) for k in '''
     twosided onesided
-    a5_book stapled_a5_book
 '''.split()]
+# a5_book and stapled_a5_book removed since the new Xerox Altalink C8055
+# printer at MATH does not support booklet printing on Linux :-(
