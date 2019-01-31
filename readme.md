@@ -25,6 +25,7 @@ Den meste funktionalitet kan findes i apps.
   udskrivning af fysiske krydslister.
 - [`tkweb/apps/uniprint`](tkweb/apps/uniprint) er en webapplikation til at
   printe på A2 printeren gennem CUPS.
+- [`tkweb/apps/drinks`](tkweb/apps/drinks) giver et GUI til SEKR TeX, samt tilføjer muligheden for at gemme drinks og barkort til databasen.
 
 Under [`templates`](templates) findes Django HTML-templates som er det der
 bliver vist til brugeren.

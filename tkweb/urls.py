@@ -12,6 +12,7 @@ import tkweb.apps.mailinglist.urls
 import tkweb.apps.eval.urls
 import tkweb.apps.regnskab
 import tkweb.apps.uniprint.urls
+import tkweb.apps.drinks.urls
 import django.views.static
 import django.views.defaults
 import tkweb.views
@@ -71,6 +72,9 @@ urlpatterns = [
 
     url(r'^print/',
         include((tkweb.apps.uniprint.urls, 'uniprint', 'uniprint'))),
+
+    url(r'^drinks/',
+        include((tkweb.apps.drinks.urls, 'drinks', 'drinks'))),
 
     url(r'^admin/', admin.site.urls),
 
