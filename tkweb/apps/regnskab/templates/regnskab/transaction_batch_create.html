@@ -1,7 +1,12 @@
 {% extends "regnskab/base.html" %}
 {% block head %}
 <style>
-.amount input { text-align: right; width: 4em; }
+.amount input {
+    text-align: right; width: 4em;
+}
+#transaction_form tr:focus-within {
+    background: #ff9;
+}
 </style>
 <script>
 function above(checkbox) {
@@ -10,50 +15,106 @@ function above(checkbox) {
         row = row.parentNode;
     var prev = row.previousSibling;
     while (prev && prev.nodeType != 1) prev = prev.previousSibling;
-    return prev.querySelector('input[type=checkbox]');
+    return prev && prev.querySelector('input[type=checkbox]');
 }
+
 function below(checkbox) {
     var row = checkbox;
     while (row && (row.nodeType != 1 || row.tagName !== 'TR'))
         row = row.parentNode;
     var next = row.nextSibling;
     while (next && next.nodeType != 1) next = next.nextSibling;
-    return next.querySelector('input[type=checkbox]');
+    return next && next.querySelector('input[type=checkbox]');
 }
 
-function paid_keypress(ev) {
-    if (ev.charCode === 106) { // j
+function getFocusedCheckbox() {
+    var cur = document.activeElement;
+    if (cur && cur.tagName === 'INPUT' && cur.type === 'checkbox') {
+        return cur;
+    }
+    return null;
+}
+
+function setChecked(b) {
+    var cur = getFocusedCheckbox();
+    if (cur) cur.checked = b;
+}
+
+function nextCheckbox() {
+    var cur = getFocusedCheckbox();
+    return cur ? below(cur) : firstCheckbox();
+}
+
+function previousCheckbox() {
+    var cur = getFocusedCheckbox();
+    return cur ? above(cur) : lastCheckbox();
+}
+
+function firstCheckbox() {
+    var table = document.getElementById('transaction_form');
+    var checks = table.querySelectorAll('input[type=checkbox]');
+    return checks[0];
+}
+
+function lastCheckbox() {
+    var table = document.getElementById('transaction_form');
+    var checks = table.querySelectorAll('input[type=checkbox]');
+    return checks[checks.length - 1];
+}
+
+function setFocus(el) {
+    if (el) {
+        el.focus();
+    } else if (document.activeElement) {
+        document.activeElement.blur();
+    }
+}
+
+function window_onkeypress(ev) {
+    if (ev.target.tagName === 'INPUT' && ev.target.type !== 'checkbox') {
+        // Don't handle key presses on input fields
+        return;
+    }
+    if (ev.key === 'j') {
         // Go down
-        below(ev.target).focus();
-    } else if (ev.charCode === 107) { // k
-        above(ev.target).focus();
-    } else if (ev.charCode === 109) { // m
-        ev.target.checked = true;
-        below(ev.target).focus();
-    } else if (ev.charCode === 117) {
-        ev.target.checked = false;
-        below(ev.target).focus();
+        setFocus(nextCheckbox());
+    } else if (ev.key === 'k') {
+        setFocus(previousCheckbox());
+    } else if (ev.key === 'f') {
+        setChecked(true);
+        setFocus(nextCheckbox());
+    } else if (ev.key === 'd') {
+        setChecked(false);
+        setFocus(nextCheckbox());
     } else {
         return;
     }
     ev.stopPropagation();
     ev.preventDefault();
 }
+
+function amount_oninput(ev) {
+    // Find the "paid" checkbox in the same row.
+    var row = ev.target.parentNode.parentNode;
+    if (row.tagName !== 'TR') return;
+    var paid_input = row.cells[2].querySelector('input');
+    // Check the "paid" checkbox.
+    paid_input.checked = true;
+}
+
 function init() {
     var table = document.getElementById('transaction_form');
-    var tbody = table.tBodies[0];
-    var rows = tbody.rows;
+    var rows = table.tBodies[0].rows;
     for (var i = 0; i < rows.length; ++i) {
-        var paid_cell = rows[i].cells[0];
-        var amount_cell = rows[i].cells[2];
-        var paid_input = paid_cell.querySelector('input');
+        var amount_cell = rows[i].cells[1];
         var amount_input = amount_cell.querySelector('input');
-        amount_input.addEventListener('input', function () {paid_input.checked=true}, false);
-	paid_input.addEventListener('keypress', paid_keypress);
+        amount_input.addEventListener('input', amount_oninput, false);
     }
 
-    table.querySelector('input[type=checkbox]').focus();
+    // Focus first checkbox on page
+    firstCheckbox().focus();
 }
+window.addEventListener('keypress', window_onkeypress, true);
 window.addEventListener('load', init, false);
 </script>
 {% endblock %}
@@ -62,6 +123,12 @@ window.addEventListener('load', init, false);
 {% endblock %}
 {% block content %}
 <h2>{{ header }}</h2>
+
+<p>Tastaturgenveje:<br>
+<b>J</b>: Ned<br>
+<b>K</b>: Op<br>
+<b>F</b>: Sæt kryds<br>
+<b>D</b>: Fjern kryds</p>
 
 <form method="post">{% csrf_token %}
     <table id="transaction_form">
