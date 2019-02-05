@@ -1,4 +1,6 @@
-from django.http import HttpResponseRedirect
+import subprocess
+
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.generic.edit import FormView
 from django.urls import reverse
@@ -19,7 +21,12 @@ def barcard_gen(request):
     if request.method == "POST":
         card = request.POST.get("barcard")
         card_obj = get_object_or_404(Barcard, id=card)
-        card_obj.generate_files()
+        try:
+            card_obj.generate_files()
+        except subprocess.CalledProcessError as e:
+            return HttpResponse(e.stdout + e.stderr)
+        except Exception as e:
+            return HttpResponse(repr(e))
         return HttpResponseRedirect("/drinks/download/" + card)
     else:
         return HttpResponseRedirect("/drinks/")
