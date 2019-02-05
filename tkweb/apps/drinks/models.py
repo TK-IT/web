@@ -68,7 +68,23 @@ class Barcard(models.Model):
                         f.write("-- %s\n" % soda.name)
                     f.write("! %s\n" % drink.serving)
                     f.write("$ %s\n" % drink.price)
-            subprocess.call("make", shell=True, cwd=temp_dir)
+            env = dict(
+                TEXMFMAIN=os.path.join(temp_dir, "texmf-main"),
+                TEXMFDIST=os.path.join(temp_dir, "texmf-dist"),
+                TEXMFVAR=os.path.join(temp_dir, "texmf-var"),
+                TEXMFCONFIG=os.path.join(temp_dir, "texmf-config"),
+            )
+            env.update(os.environ)
+            result = subprocess.run(
+                "make",
+                shell=True,
+                cwd=temp_dir,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=10,
+                check=True,
+                env=env,
+            )
             with open(
                 os.path.join(temp_dir, "bar_drinks.pdf"), mode="r", encoding="utf8"
             ) as bar_file:
