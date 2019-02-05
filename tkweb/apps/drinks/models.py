@@ -56,7 +56,7 @@ class Barcard(models.Model):
             for sf in files:
                 copyfile(os.path.join(fp_src, sf), os.path.join(temp_dir, sf))
 
-            with open(os.path.join(temp_dir, "drinks.txt"), "w") as f:
+            with open(os.path.join(temp_dir, "drinks.txt"), "w", encoding="utf8") as f:
                 for drink in self.drinks.all():
                     secret = ""
                     if drink.secret:
@@ -69,9 +69,15 @@ class Barcard(models.Model):
                     f.write("! %s\n" % drink.serving)
                     f.write("$ %s\n" % drink.price)
             subprocess.call("make", shell=True, cwd=temp_dir)
-            bar_file = open(os.path.join(temp_dir, "bar_drinks.pdf"), mode="rb")
-            mix_file = open(os.path.join(temp_dir, "mixing_drinks.pdf"), mode="rb")
-            src_file = open(os.path.join(temp_dir, "drinks.txt"), mode="r")
-            self.barcard_file.save(self.name + "_barcard", File(bar_file))
-            self.mixing_file.save(self.name + "_mixing", File(mix_file))
-            self.source_file.save(self.name + "_source", File(src_file))
+            with open(
+                os.path.join(temp_dir, "bar_drinks.pdf"), mode="r", encoding="utf8"
+            ) as bar_file:
+                self.barcard_file.save(self.name + "_barcard", File(bar_file))
+            with open(
+                os.path.join(temp_dir, "mixing_drinks.pdf"), mode="r", encoding="utf8"
+            ) as mix_file:
+                self.mixing_file.save(self.name + "_mixing", File(mix_file))
+            with open(
+                os.path.join(temp_dir, "drinks.txt"), mode="r", encoding="utf8"
+            ) as src_file:
+                self.source_file.save(self.name + "_source", File(src_file))
