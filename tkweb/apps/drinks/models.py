@@ -1,10 +1,11 @@
-from django.db import models
-import subprocess
 import os
-from django.core.files import File
+import subprocess
 import tempfile
-from django.conf import settings
 from shutil import copyfile
+
+from django.conf import settings
+from django.core.files import File
+from django.db import models
 
 
 class Drink(models.Model):
