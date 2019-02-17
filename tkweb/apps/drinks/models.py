@@ -29,7 +29,7 @@ class Soda(models.Model):
 class Sprut(models.Model):
     drink = models.ForeignKey(Drink, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
-    amount = models.IntegerField()
+    amount = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -63,7 +63,10 @@ class Barcard(models.Model):
                         secret = "?"
                     f.write("=%s %s\n" % (secret, drink.name))
                     for sprut in drink.sprut_set.all():
-                        f.write("- %s cl - %s\n" % (sprut.amount, sprut.name))
+                        if sprut.amount is None:
+                            f.write("- %s\n" % sprut.name)
+                        else:
+                            f.write("- %s cl - %s\n" % (sprut.amount, sprut.name))
                     for soda in drink.soda_set.all():
                         f.write("-- %s\n" % soda.name)
                     f.write("! %s\n" % drink.serving)

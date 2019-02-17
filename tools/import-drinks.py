@@ -34,18 +34,13 @@ def read_input(drink_file):
             currentsoda = line[2:].strip()
             currentdrinkdict['soda'].append(currentsoda)
         elif line.startswith("-"):
-            sprutdic = {'name': '',
-                        'amount': ''}
             currentspirit = line[1:].strip()
-            amount = ''
+            amount = ""
             for s in currentspirit.split():
                 if s.isdigit():
                     amount = s
-            sprutdic['amount'] = amount
-            
-            currentspirit = currentspirit.split('-', 1)[-1]
-            sprutdic['name'] = currentspirit
-
+            name = currentspirit.split("-", 1)[-1]
+            sprutdic = {"name": name, "amount": amount}
             currentdrinkdict["sprut"].append(sprutdic)
         elif line.startswith("$"):
             currentprice = line[1:].strip()
@@ -74,9 +69,11 @@ def write_to_db(drinks):
                         drink=drink)
             soda.save()
         for sprutdic in drinkdic['sprut']:
-            sprut = Sprut(name=sprutdic['name'],
-                          amount=int(sprutdic['amount']),
-                          drink=drink)
+            if sprutdic["amount"]:
+                amount = int(sprutdic["amount"])
+            else:
+                amount = None
+            sprut = Sprut(name=sprutdic["name"], amount=amount, drink=drink)
             sprut.save()
 
 
