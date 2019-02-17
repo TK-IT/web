@@ -83,11 +83,11 @@ class Barcard(models.Model):
                 env=env,
             )
             with open(
-                os.path.join(temp_dir, "bar_drinks.pdf"), mode="r", encoding="utf8"
+                os.path.join(temp_dir, "bar_drinks.pdf"), mode="rb"
             ) as bar_file:
                 self.barcard_file.save(self.name + "_barcard", File(bar_file))
             with open(
-                os.path.join(temp_dir, "mixing_drinks.pdf"), mode="r", encoding="utf8"
+                os.path.join(temp_dir, "mixing_drinks.pdf"), mode="rb"
             ) as mix_file:
                 self.mixing_file.save(self.name + "_mixing", File(mix_file))
             with open(
