@@ -68,9 +68,7 @@ class Barcard(models.Model):
                         f.write("-- %s\n" % soda.name)
                     f.write("! %s\n" % drink.serving)
                     f.write("$ %s\n" % drink.price)
-            env = dict(
-                TEXMFVAR=os.path.join(temp_dir, "texmf-var"),
-            )
+            env = dict(TEXMFVAR=os.path.join(temp_dir, "texmf-var"))
             env.update(os.environ)
             result = subprocess.run(
                 "make",
@@ -82,15 +80,11 @@ class Barcard(models.Model):
                 check=True,
                 env=env,
             )
-            with open(
-                os.path.join(temp_dir, "bar_drinks.pdf"), mode="rb"
-            ) as bar_file:
+            with open(os.path.join(temp_dir, "bar_drinks.pdf"), mode="rb") as bar_file:
                 self.barcard_file.save(self.name + "_barcard", File(bar_file))
             with open(
                 os.path.join(temp_dir, "mixing_drinks.pdf"), mode="rb"
             ) as mix_file:
                 self.mixing_file.save(self.name + "_mixing", File(mix_file))
-            with open(
-                os.path.join(temp_dir, "drinks.txt"), mode="r", encoding="utf8"
-            ) as src_file:
+            with open(os.path.join(temp_dir, "drinks.txt"), mode="rb") as src_file:
                 self.source_file.save(self.name + "_source", File(src_file))
