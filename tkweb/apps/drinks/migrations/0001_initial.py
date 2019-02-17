@@ -15,13 +15,30 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Barcard',
+            name="Barcard",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=30)),
-                ('barcard_file', models.FileField(blank=True, upload_to='barcard')),
-                ('mixing_file', models.FileField(blank=True, upload_to='mixing')),
-                ('source_file', models.FileField(blank=True, upload_to='source')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=30)),
+                (
+                    "barcard_file",
+                    models.FileField(blank=True, upload_to="drinkskort/barcard"),
+                ),
+                (
+                    "mixing_file",
+                    models.FileField(blank=True, upload_to="drinkskort/mixing"),
+                ),
+                (
+                    "source_file",
+                    models.FileField(blank=True, upload_to="drinkskort/source"),
+                ),
             ],
         ),
         migrations.CreateModel(
