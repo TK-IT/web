@@ -1,5 +1,7 @@
 from django.db import models, migrations
 
+import tkweb.apps.idm.models
+
 
 class Migration(migrations.Migration):
 
@@ -101,13 +103,20 @@ class Migration(migrations.Migration):
             field=models.CharField(max_length=10, verbose_name='Slags', choices=[('BEST', 'BEST'), ('FU', 'FU'), ('EFU', 'EFU')]),
         ),
         migrations.AlterField(
-            model_name='title',
-            name='period',
-            field=models.IntegerField(verbose_name='Årgang'),
+            model_name="title",
+            name="period",
+            field=models.IntegerField(
+                validators=[tkweb.apps.idm.models.validate_tktitler_period],
+                verbose_name="Årgang",
+            ),
         ),
         migrations.AlterField(
-            model_name='title',
-            name='root',
-            field=models.CharField(max_length=10, verbose_name='Titel'),
+            model_name="title",
+            name="root",
+            field=models.CharField(
+                max_length=10,
+                validators=[tkweb.apps.idm.models.validate_tktitler_root],
+                verbose_name="Titel",
+            ),
         ),
     ]
