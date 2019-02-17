@@ -38,9 +38,9 @@ class Sprut(models.Model):
 class Barcard(models.Model):
     name = models.CharField(max_length=30)
     drinks = models.ManyToManyField(Drink)
-    barcard_file = models.FileField(blank=True, upload_to="barcard")
-    mixing_file = models.FileField(blank=True, upload_to="mixing")
-    source_file = models.FileField(blank=True, upload_to="source")
+    barcard_file = models.FileField(blank=True, upload_to="drinkskort/barcard")
+    mixing_file = models.FileField(blank=True, upload_to="drinkskort/mixing")
+    source_file = models.FileField(blank=True, upload_to="drinkskort/source")
 
     def __str__(self):
         return self.name
@@ -81,10 +81,10 @@ class Barcard(models.Model):
                 env=env,
             )
             with open(os.path.join(temp_dir, "bar_drinks.pdf"), mode="rb") as bar_file:
-                self.barcard_file.save(self.name + "_barcard", File(bar_file))
+                self.barcard_file.save(self.name + "_barcard.pdf", File(bar_file))
             with open(
                 os.path.join(temp_dir, "mixing_drinks.pdf"), mode="rb"
             ) as mix_file:
-                self.mixing_file.save(self.name + "_mixing", File(mix_file))
+                self.mixing_file.save(self.name + "_mixing.pdf", File(mix_file))
             with open(os.path.join(temp_dir, "drinks.txt"), mode="rb") as src_file:
-                self.source_file.save(self.name + "_source", File(src_file))
+                self.source_file.save(self.name + "_source.txt", File(src_file))
