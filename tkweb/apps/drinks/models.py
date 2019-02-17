@@ -69,10 +69,7 @@ class Barcard(models.Model):
                     f.write("! %s\n" % drink.serving)
                     f.write("$ %s\n" % drink.price)
             env = dict(
-                TEXMFMAIN=os.path.join(temp_dir, "texmf-main"),
-                TEXMFDIST=os.path.join(temp_dir, "texmf-dist"),
                 TEXMFVAR=os.path.join(temp_dir, "texmf-var"),
-                TEXMFCONFIG=os.path.join(temp_dir, "texmf-config"),
             )
             env.update(os.environ)
             result = subprocess.run(

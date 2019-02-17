@@ -38,7 +38,7 @@ all: bar_$(fest).pdf mixing_$(fest).pdf
 
 # Create the barcards
 bar_$(fest).pdf: barcard.tex barcardmain.tex
-	xetex -jobname=bar_$(fest) -output-driver="xdvipdfmx -q -E -p a4 -l" barcardmain.tex
+	pdftex -jobname=bar_$(fest) -output-driver="xdvipdfmx -q -E -p a4 -l" barcardmain.tex
 
 # Create the mixing card
 mixing_$(fest).pdf: mixing.tex mixingcardmain.tex
