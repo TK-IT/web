@@ -6,6 +6,7 @@ from django.views.generic.base import RedirectView
 
 import tkweb.apps.calendar.views
 import tkweb.apps.gallery.urls
+import tkweb.apps.idm.urls
 import tkweb.apps.jubi.urls
 import tkweb.apps.redirect.urls
 import tkweb.apps.mailinglist.urls
@@ -66,6 +67,10 @@ urlpatterns = [
     url(r'^eval/',
         include(tkweb.apps.eval.urls),
         name='eval'),
+
+    url(r'^idm/',
+        include(tkweb.apps.idm.urls),
+        name='idm'),
 
     url(r'^regnskab/',
         tkweb.apps.regnskab.site.urls),

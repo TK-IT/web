@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Ny BEST</h1>
+<p>På denne side kan du ændre det aktuelle bestyrelsesår samt hvem der er medlem af bestyrelsen.</p>
+<form method="post">{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="Gem ændringer" />
+</form>
+{% endblock %}
