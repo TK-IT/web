@@ -243,19 +243,19 @@ class EvalMacroPattern(markdown.inlinepatterns.Pattern):
     }
 
     def remtor(self, full=''):
-        return self.markdown.htmlStash.store('R&epsilon;mToR')
+        return self.markdown.htmlStash.store('R&straightepsilon;mToR')
 
     def eps(self, full=''):
-        return self.markdown.htmlStash.store('&epsilon;')
+        return self.markdown.htmlStash.store('&straightepsilon;')
 
     remtor.meta = {
-        'short_description': 'R&epsilon;mToR',
+        'short_description': 'R&straightepsilon;mToR',
         'help_text': (
-            'Brug følgende makroer til at skrive R&epsilon;mToR.' +
+            'Brug følgende makroer til at skrive R&straightepsilon;mToR.' +
             '<table class="table table-condensed">' +
             '<tr><th>Makro</th><th>Output</th></tr>' +
-            '<tr><td>[remtor]</td><td>R&epsilon;mToR</td></tr>' +
-            '<tr><td>[eps]</td><td>&epsilon;</td></tr>' +
+            '<tr><td>[remtor]</td><td>R&straightepsilon;mToR</td></tr>' +
+            '<tr><td>[eps]</td><td>&straightepsilon;</td></tr>' +
             '</table>'),
     }
 
