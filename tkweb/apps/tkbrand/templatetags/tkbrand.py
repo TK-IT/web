@@ -47,42 +47,46 @@ HTML_TKETSAA = HTML_TKETAA + 'S'
 
 @register.simple_tag
 def TK():
-    return mark_safe('<span class="tk-brand">' + HTML_TK + '</span>')
+    return wrap_tk_html(HTML_TK)
 
 
 @register.simple_tag
 def TKAA():
-    return mark_safe('<span class="tk-brand">' + HTML_TKAA + '</span>')
+    return wrap_tk_html(HTML_TKAA)
 
 
 @register.simple_tag
 def TKET():
-    return mark_safe('<span class="tk-brand">' + HTML_TKET + '</span>')
+    return wrap_tk_html(HTML_TKET)
 
 
 @register.simple_tag
 def TKETAA():
-    return mark_safe('<span class="tk-brand">' + HTML_TKETAA + '</span>')
+    return wrap_tk_html(HTML_TKETAA)
 
 
 @register.simple_tag
 def TKETs():
-    return mark_safe('<span class="tk-brand">' + HTML_TKETs + '</span>')
+    return wrap_tk_html(HTML_TKETs)
 
 
 @register.simple_tag
 def TKETsAA():
-    return mark_safe('<span class="tk-brand">' + HTML_TKETsAA + '</span>')
+    return wrap_tk_html(HTML_TKETsAA)
 
 
 @register.simple_tag
 def TKETS():
-    return mark_safe('<span class="tk-brand">' + HTML_TKETS + '</span>')
+    return wrap_tk_html(HTML_TKETS)
 
 
 @register.simple_tag
 def TKETSAA():
-    return mark_safe('<span class="tk-brand">' + HTML_TKETSAA + '</span>')
+    return wrap_tk_html(HTML_TKETSAA)
+
+
+def wrap_tk_html(html):
+    return mark_safe('<span class="tk-brand">' + html + '</span>')
 
 
 @register.filter
