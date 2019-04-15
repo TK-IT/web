@@ -1,3 +1,4 @@
+import re
 from django import template
 from django.utils.safestring import mark_safe
 from constance import config
@@ -33,7 +34,10 @@ HTML_GEKAMMER = (
 HTML_TK = HTML_T + HTML_ARING + HTML_GEKAMMER
 HTML_TKAA = HTML_T + HTML_AA + HTML_GEKAMMER
 
-HTML_ET = '<span style="vertical-align: 0.057em">ET</span>'
+HTML_ET = (
+    '<span style="vertical-align: 0.057em">E</span>'
+    + '<span style="vertical-align: 0.057em">T</span>'
+)
 
 HTML_TKET = HTML_TK + HTML_ET
 HTML_TKETAA = HTML_TKAA + HTML_ET
@@ -85,7 +89,34 @@ def TKETSAA():
     return wrap_tk_html(HTML_TKETSAA)
 
 
+def add_pride_colors(html):
+    PRIDE_COLORS = (
+        '''#e40303 #ff8c00 #ffed00 #008026 #004dff #b100cc #e40303 #ff8c00
+        #ffed00 #008026 #004dff #b100cc'''.split()
+    )
+    insert_after = 'style="'
+    count = html.count(insert_after)
+    if count < len(PRIDE_COLORS):
+        colors = [
+            PRIDE_COLORS[int(i / count * len(PRIDE_COLORS))] for i in range(count)
+        ]
+    else:
+        s = 1
+        extra = count - len(PRIDE_COLORS) + 1
+        # Repeat element at index s enough times.
+        colors = PRIDE_COLORS[:s] + extra * PRIDE_COLORS[s:s+1] + PRIDE_COLORS[s+1:]
+    assert len(colors) == count
+
+    def repl(mo):
+        # Insert next color from 'colors' after 'style="'
+        return "%scolor: %s; " % (mo.group(0), colors.pop(0))
+
+    return re.sub(re.escape(insert_after), repl, html)
+
+
 def wrap_tk_html(html):
+    if config.PRIDE:
+        html = add_pride_colors(html)
     return mark_safe('<span class="tk-brand">' + html + '</span>')
 
 

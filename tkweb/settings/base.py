@@ -216,6 +216,7 @@ CONSTANCE_CONFIG = {
                  'iCalendar URLen hvor den offentlige kalender bliver genereret fra.'),
     'CAL_URL': ('//calendar.google.com/calendar/embed?src=BEST@TAAGEKAMMERET.dk&ctz=Europe/Copenhagen',
                 'URLen til \'Tilføj til din egen kalender\'-linket på kalendersiden.'),
+    'PRIDE': (False, 'Skriv TÅGEKAMMERET i regnbuens farver på hjemmesiden'),
 }
 
 # Wiki
