@@ -61,5 +61,11 @@ class AlbumAdmin(admin.ModelAdmin):
 
     get_visibility_link.short_description = 'Udvælg billeder'
 
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        # Update isCoverFile on all images in album
+        # now that images have been saved to the database.
+        form.instance.clean()
+
 
 admin.site.register(Album, AlbumAdmin)
