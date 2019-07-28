@@ -43,6 +43,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    'tkweb.apps.barplan',
     'tkweb.apps.calendar',
     'tkweb.apps.drinks',
     'tkweb.apps.eval',

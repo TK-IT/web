@@ -1,0 +1,8 @@
+*.py
+.dockerignore
+.git
+Dockerfile
+README.md
+build.sh
+static
+templates

@@ -19,3 +19,6 @@
 
 # TLS keys (Let's encrypt)
 *.key
+
+# Built with Docker
+tkweb/apps/barplan/static/barplan.min.js
