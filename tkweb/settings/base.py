@@ -44,17 +44,17 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     'tkweb.apps.calendar',
-    'tkweb.apps.gallery',
-    'tkweb.apps.jubi',
-    'tkweb.apps.redirect',
-    'tkweb.apps.tkbrand',
-    'tkweb.apps.idm',
-    'tkweb.apps.mailinglist',
-    'tkweb.apps.eval',
-    'tkweb.apps.regnskab',
-    'tkweb.apps.krydsliste',
-    'tkweb.apps.uniprint',
     'tkweb.apps.drinks',
+    'tkweb.apps.eval',
+    'tkweb.apps.gallery',
+    'tkweb.apps.idm',
+    'tkweb.apps.jubi',
+    'tkweb.apps.krydsliste',
+    'tkweb.apps.mailinglist',
+    'tkweb.apps.redirect',
+    'tkweb.apps.regnskab',
+    'tkweb.apps.tkbrand',
+    'tkweb.apps.uniprint',
 ]
 
 INSTALLED_APPS = LOCAL_APPS + DEFAULT_APPS + THIRD_PARTY_APPS
