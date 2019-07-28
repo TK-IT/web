@@ -5,15 +5,15 @@ from django.contrib.flatpages import views
 from django.views.generic.base import RedirectView
 
 import tkweb.apps.calendar.views
+import tkweb.apps.drinks.urls
+import tkweb.apps.eval.urls
 import tkweb.apps.gallery.urls
 import tkweb.apps.idm.urls
 import tkweb.apps.jubi.urls
-import tkweb.apps.redirect.urls
 import tkweb.apps.mailinglist.urls
-import tkweb.apps.eval.urls
+import tkweb.apps.redirect.urls
 import tkweb.apps.regnskab
 import tkweb.apps.uniprint.urls
-import tkweb.apps.drinks.urls
 import django.views.static
 import django.views.defaults
 import tkweb.views
