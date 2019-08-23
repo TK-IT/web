@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.contrib.flatpages import views
 from django.views.generic.base import RedirectView
 
+import tkweb.apps.barplan.urls
 import tkweb.apps.calendar.views
 import tkweb.apps.drinks.urls
 import tkweb.apps.eval.urls
@@ -80,6 +81,9 @@ urlpatterns = [
 
     url(r'^drinks/',
         include((tkweb.apps.drinks.urls, 'drinks', 'drinks'))),
+
+    url(r'^barplan/',
+        include((tkweb.apps.barplan.urls, 'barplan', 'barplan'))),
 
     url(r'^admin/', admin.site.urls),
 

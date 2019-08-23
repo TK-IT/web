@@ -26,6 +26,7 @@ Den meste funktionalitet kan findes i apps.
 - [`tkweb/apps/uniprint`](tkweb/apps/uniprint) er en webapplikation til at
   printe på A2 printeren gennem CUPS.
 - [`tkweb/apps/drinks`](tkweb/apps/drinks) giver et GUI til SEKR TeX, samt tilføjer muligheden for at gemme drinks og barkort til databasen.
+- [`tkweb/apps/barplan`](tkweb/apps/barplan) er en GUI som SEKR kan bruge til at lave en barplan.
 
 Under [`templates`](templates) findes Django HTML-templates som er det der
 bliver vist til brugeren.
@@ -104,6 +105,18 @@ Det kræver at `dukpy` er installeret
 Desuden er der JavaScript tests i
 [tkweb/apps/regnskab/tests.js](tkweb/apps/regnskab/tests.js)
 som køres af `manage.py test` når `dukpy` er installeret.
+
+## JavaScript i barplan appen
+
+I [`tkweb/apps/barplan`](tkweb/apps/barplan) er der et
+TypeScript+React projekt som skal bygges i en Docker container.
+
+For at generere `tkweb/apps/barplan/static/barplan.min.js`,
+skal du installére Docker og køre følgende script i roden af tkweb-repositoriet:
+
+```shell
+./build.sh
+```
 
 ## Prodekanus
 
