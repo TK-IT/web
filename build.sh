@@ -9,5 +9,5 @@ TMP="barplan-tmp.js"
 TAG=localhost/barplan:latest
 docker build --quiet -t "$TAG" .
 docker run --rm --entrypoint /bin/sh "$TAG" -c "cat dist/barplan.min.js" > "$TMP"
-mv "$TMP" "static/barplan.min.js"
+mv "$TMP" "tkweb/apps/barplan/static/barplan.min.js"
 )
