@@ -189,24 +189,6 @@ class BalancePrint(FormView):
         context['total_balance'] = Decimal()
 
         profiles = get_profiles_title_status(period=period, time=time)
-        if period == 2016 and timezone.now().year == 2016:
-            hængere = [i for i in range(len(profiles))
-                       if not profiles[i].title]
-            best = {profiles[i].title.root: i
-                    for i in range(len(profiles))
-                    if profiles[i].title and
-                    profiles[i].title.period == 2016}
-            assert best['FORM'] < best['NF']
-            nf = profiles[best['NF']]
-            del profiles[best['NF']]
-            nf.name = 'Taberen'
-            nf.title = None
-            profiles.insert(random.choice(hængere), nf)
-            FORM = profiles[best['FORM']]
-            del profiles[best['FORM']]
-            profiles.insert(0, FORM)
-            FORM.name = 'Vinderen'
-            FORM.title = None
         balances = compute_balance()
 
         context['personer'] = []
