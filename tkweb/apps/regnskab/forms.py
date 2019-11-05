@@ -30,6 +30,17 @@ class SheetCreateForm(forms.Form):
     kinds = forms.CharField(widget=forms.Textarea,
                             label='Priser')
 
+    def __init__(self, **kwargs):
+        period = kwargs.pop("period")
+        super().__init__(**kwargs)
+        choices = [
+            (period, "Nuværende %s/%02d" % (period, (period + 1) % 100)),
+            (period - 1, "Sidste år %s/%02d" % (period - 1, period % 100)),
+        ]
+        self.fields["period"] = forms.ChoiceField(
+            label="Bestyrelsesår", choices=choices
+        )
+
     def clean_kinds(self):
         s = self.cleaned_data['kinds']
         kinds = []

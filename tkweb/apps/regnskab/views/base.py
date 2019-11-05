@@ -126,6 +126,11 @@ class SheetCreate(FormView):
         return dict(kinds='\n'.join('%s %s' % x for x in kinds),
                     period=config.GFYEAR)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["period"] = config.GFYEAR
+        return kwargs
+
     def form_valid(self, form):
         from tkweb.apps.regnskab.images.extract import extract_images
 
