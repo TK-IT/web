@@ -592,6 +592,8 @@ def extract_row_image(
     sheet.row_image_width = width = 920
     position = 1
     for im in images:
+        parameters = get_parameters(im)
+        put_parameters(im, parameters)
         quad = Quadrilateral(im.quad)
         im_rows = im.rows
         i = 0
@@ -616,7 +618,7 @@ def extract_row_image(
             )
 
             p_crosses = get_person_crosses(im.crosses[i:j],
-                                           parameters=im.parameters)
+                                           parameters=parameters)
             for col_idx, (count, boxcount) in enumerate(p_crosses):
                 kind, boxkind = kinds[2*col_idx:2*(col_idx+1)]
                 if count:
