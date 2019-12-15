@@ -1,10 +1,11 @@
-from collections import namedtuple
+from typing import Any, Tuple, Optional, List, TYPE_CHECKING, NamedTuple
 
+from django.core.files.base import ContentFile
 import numpy as np
 import scipy.ndimage
 import scipy.signal
 
-from .parameters import parameter
+from .parameters import Parameters, default_parameters
 from .utils import save_png
 from .quadrilateral import Quadrilateral, extract_quadrilateral
 
@@ -13,8 +14,14 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt  # noqa
 
 
-@parameter('q')
-def contrast_stretch(im, q=0.02):
+if TYPE_CHECKING:
+    from ..models import SheetImage, SheetRow, Purchase, Sheet
+
+
+def contrast_stretch(
+    im: np.ndarray, parameters: Parameters
+) -> np.ndarray:
+    q = parameters.contrast_stretch_q
     if im.ndim == 2:
         im_channels = im[:, :, np.newaxis]
     else:
@@ -28,7 +35,7 @@ def contrast_stretch(im, q=0.02):
     return np.minimum(1, np.maximum(0, (im - mins) / (maxs - mins)))
 
 
-def to_grey(im, parameters):
+def to_grey(im: np.ndarray, parameters: Parameters) -> np.ndarray:
     if im.ndim == 3:
         im = contrast_stretch(im, parameters=parameters)
         return im.min(axis=2)
@@ -36,44 +43,44 @@ def to_grey(im, parameters):
         return im
 
 
-def max_object(labels, max_label, k):
-    objects = scipy.ndimage.find_objects(labels, max_label)
+def max_object(labels: np.ndarray, max_label: int) -> Tuple[int, int, int]:
+    objects: List[Tuple[slice, slice]] = scipy.ndimage.find_objects(labels, max_label)
 
-    def slice_length(s, axis):
+    def slice_length(s: slice, axis: int) -> int:
         start, stop, stride = s.indices(labels.shape[axis])
         return stop - start
 
-    def object_area(o):
+    def object_area(o: Optional[Tuple[slice, slice]]) -> int:
         if o is None:
             return 0
         else:
             return slice_length(o[0], 0) * slice_length(o[1], 1)
 
-    object_areas = np.fromiter(map(object_area, objects), dtype=np.int)
-    if k == 1:
-        mos = [np.argmax(object_areas)]
-    else:
-        mos = reversed(list(np.argsort(object_areas)[-5:]))
+    object_areas = [object_area(o) for o in objects]
+    mo = np.argmax(object_areas)
 
-    return [
-        (mo + 1,
-         object_areas[mo],
-         np.sum(labels == mo + 1))
-        for mo in mos
-    ]
+    return (
+        mo + 1,
+        object_areas[mo],
+        np.sum(labels == mo + 1),
+    )
 
 
-@parameter('sigma margin1 threshold')
-def find_bbox(im, sigma=1, margin1=10, threshold=0.6):
-    im = im[margin1:-margin1, margin1:-margin1]
+def find_bbox(
+    im: np.ndarray, parameters: Parameters
+) -> Quadrilateral:
+    sigma = parameters.find_bbox_sigma
+    margin1 = parameters.find_bbox_margin1
+    threshold = parameters.find_bbox_threshold
+    im = im[int(margin1):-int(margin1), int(margin1):-int(margin1)]
     if sigma > 0.01:
         im = scipy.ndimage.filters.gaussian_filter(im, sigma, mode='constant')
     dark = (im < threshold)
 
     labels, no_labels = scipy.ndimage.label(dark)
-    (label, area, count), = max_object(labels, no_labels, 1)
-    obj = np.zeros((im.shape[0] + 2*margin1, im.shape[1] + 2*margin1))
-    obj[margin1:-margin1, margin1:-margin1] = (labels == label) * 1.0
+    (label, area, count) = max_object(labels, no_labels)
+    obj = np.zeros((im.shape[0] + 2*int(margin1), im.shape[1] + 2*int(margin1)))
+    obj[int(margin1):-int(margin1), int(margin1):-int(margin1)] = (labels == label) * 1.0
     ys, xs = (labels == label).nonzero()
     top_left = np.argmax(-xs - ys / 2)
     top_right = np.argmax(xs - ys / 2)  # Top right not used, see below
@@ -85,14 +92,16 @@ def find_bbox(im, sigma=1, margin1=10, threshold=0.6):
          for i in (top_left, top_right, bottom_right, bottom_left)])
     # Set top_right to be top_left + (bottom_right - bottom_left)
     corners[:, 1] = corners[:, 0] + (corners[:, 2] - corners[:, 3])
-    corners += margin1
+    corners += int(margin1)
     return Quadrilateral(corners), obj
 
 
-def extract_quad(sheet_image):
+def extract_quad(sheet_image: "SheetImage") -> None:
+    parameters = get_parameters(sheet_image)
+    put_parameters(sheet_image, parameters)
     quad, obj = find_bbox(to_grey(sheet_image.get_image(),
-                                  sheet_image.parameters),
-                          parameters=sheet_image.parameters)
+                                  parameters),
+                          parameters=parameters)
     sheet_image.quad = quad.arg().tolist()
 
 
@@ -111,11 +120,17 @@ def fill_in_skipped(xs):
     return fixed
 
 
-PeaksResult = namedtuple(
-    'PeaksResult', 'peaks cutoff min_cutoff max_cutoff opt_cutoff'.split())
+class PeaksResult(NamedTuple):
+    peaks: Any
+    cutoff: Any
+    min_cutoff: Any
+    max_cutoff: Any
+    opt_cutoff: Any
 
 
-def find_peaks(xs, cutoff, skip_start=True, skip_end=True, full=False):
+def find_peaks(
+    xs: np.ndarray, cutoff: float, skip_start=True, skip_end=True, full=False
+) -> PeaksResult:
     xs = np.asarray(xs).ravel()
     n = len(xs)
     above = xs > cutoff
@@ -146,18 +161,20 @@ def find_peaks(xs, cutoff, skip_start=True, skip_end=True, full=False):
         peaks, cutoff, min_cutoff, max_cutoff, opt_cutoff)
 
 
-def get_name_part(sheet_image, input):
+def get_name_part(sheet_image: "SheetImage", input: np.ndarray) -> np.ndarray:
     k = int(sheet_image.cols[0] * input.shape[1])
     return input[:, :k]
 
 
-def get_crosses_part(sheet_image, input):
+def get_crosses_part(sheet_image: "SheetImage", input: np.ndarray) -> np.ndarray:
     k = int(sheet_image.cols[0] * input.shape[1])
     return input[:, k:]
 
 
-@parameter('cutoff')
-def extract_cols(sheet_image, input_grey, cutoff=0.39):
+def extract_cols(
+    sheet_image: "SheetImage", input_grey: np.ndarray, parameters: Parameters
+) -> None:
+    cutoff = parameters.extract_cols_cutoff
     image_width = input_grey.shape[1]
     col_avg = np.mean(input_grey, axis=0)
     col_peaks = find_peaks(-col_avg, -cutoff)
@@ -165,8 +182,10 @@ def extract_cols(sheet_image, input_grey, cutoff=0.39):
         (col_peaks / image_width).tolist() + [1])
 
 
-@parameter('cutoff')
-def extract_rows(sheet_image, input_grey, cutoff=0.6):
+def extract_rows(
+    sheet_image: "SheetImage", input_grey: np.ndarray, parameters: Parameters
+) -> None:
+    cutoff = parameters.extract_rows_cutoff
     crosses_grey = get_crosses_part(sheet_image, input_grey)
     height = crosses_grey.shape[0]
     row_avg = np.mean(crosses_grey, axis=1)
@@ -175,8 +194,10 @@ def extract_rows(sheet_image, input_grey, cutoff=0.6):
         [0] + (row_peaks / height).tolist() + [1])
 
 
-@parameter('cutoff')
-def extract_person_rows(sheet_image, input_grey, cutoff=0.45):
+def extract_person_rows(
+    sheet_image: "SheetImage", input_grey: np.ndarray, parameters: Parameters
+) -> None:
+    cutoff = parameters.extract_person_rows_cutoff
     names_grey = get_name_part(sheet_image, input_grey)
     height = names_grey.shape[0]
     row_avg = np.mean(names_grey, axis=1, keepdims=True)
@@ -192,24 +213,27 @@ def extract_person_rows(sheet_image, input_grey, cutoff=0.45):
                         (sheet_image.person_rows,))
 
 
-def extract_rows_cols(sheet_image):
+def extract_rows_cols(sheet_image: "SheetImage") -> None:
+    parameters = get_parameters(sheet_image)
+    put_parameters(sheet_image, parameters)
     im = sheet_image.get_image()
     input_bbox = Quadrilateral(sheet_image.quad)
 
     input_transform = extract_quadrilateral(im, input_bbox)
-    input_grey = to_grey(input_transform, sheet_image.parameters)
+    input_grey = to_grey(input_transform, parameters)
 
-    extract_cols(sheet_image, input_grey)
-    extract_rows(sheet_image, input_grey)
-    extract_person_rows(sheet_image, input_grey)
+    extract_cols(sheet_image, input_grey, parameters)
+    extract_rows(sheet_image, input_grey, parameters)
+    extract_person_rows(sheet_image, input_grey, parameters)
 
 
-def plot_extract_rows_cols(sheet_image):
+def plot_extract_rows_cols(sheet_image: "SheetImage") -> plt.Figure:
+    parameters = get_parameters(sheet_image)
     im = sheet_image.get_image()
     input_bbox = Quadrilateral(sheet_image.quad)
 
     input_transform = extract_quadrilateral(im, input_bbox)
-    input_grey = to_grey(input_transform, sheet_image.parameters)
+    input_grey = to_grey(input_transform, parameters)
     names_grey = get_name_part(sheet_image, input_grey)
     crosses_grey = get_crosses_part(sheet_image, input_grey)
 
@@ -217,7 +241,7 @@ def plot_extract_rows_cols(sheet_image):
 
     col_avg = np.mean(input_grey, axis=0)
     ax1.plot(np.arange(len(col_avg)) / (len(col_avg) - 1), col_avg, 'k-')
-    col_cutoff = sheet_image.parameters['extract_cols.cutoff']
+    col_cutoff = parameters.extract_cols_cutoff
     ax1.plot([0, 1], [col_cutoff, col_cutoff], 'r-')
     col_peak_data = find_peaks(-col_avg, -col_cutoff, full=True)
     col_peaks = col_peak_data.peaks
@@ -225,7 +249,7 @@ def plot_extract_rows_cols(sheet_image):
 
     row_avg = np.mean(crosses_grey, axis=1)
     ax2.plot(np.arange(len(row_avg)) / (len(row_avg) - 1), row_avg, 'k-')
-    row_cutoff = sheet_image.parameters['extract_rows.cutoff']
+    row_cutoff = parameters.extract_rows_cutoff
     ax2.plot([0, 1], [row_cutoff, row_cutoff], 'r-')
     row_peak_data = find_peaks(-row_avg, -row_cutoff, full=True)
     row_peaks = row_peak_data.peaks
@@ -233,7 +257,7 @@ def plot_extract_rows_cols(sheet_image):
 
     name_avg = np.mean(names_grey, axis=1, keepdims=True)
     ax3.plot(np.arange(len(name_avg)) / (len(name_avg) - 1), name_avg, 'k-')
-    name_cutoff = sheet_image.parameters['extract_person_rows.cutoff']
+    name_cutoff = parameters.extract_person_rows_cutoff
     name_peak_data = find_peaks(-name_avg, -name_cutoff, full=True)
     name_peaks = name_peak_data.peaks
     ax3.plot([0, 1], [name_cutoff, name_cutoff], 'r-')
@@ -245,7 +269,7 @@ def plot_extract_rows_cols(sheet_image):
     return fig
 
 
-def extract_cross_images(sheet_image):
+def extract_cross_images(sheet_image: "SheetImage") -> List[List[np.ndarray]]:
     im = sheet_image.get_image()
     quad = Quadrilateral(sheet_image.quad)
     input_transform = extract_quadrilateral(im, quad)
@@ -255,7 +279,7 @@ def extract_cross_images(sheet_image):
     rows = np.multiply(sheet_image.rows, height).astype(np.intp)
     cols = np.multiply(sheet_image.cols, width).astype(np.intp)
 
-    cross_imgs = []
+    cross_imgs: List[List[np.ndarray]] = []
     for i, (y1, y2) in enumerate(zip(rows[:-1], rows[1:])):
         cross_imgs.append([])
         for j, (x1, x2) in enumerate(zip(cols[:-1], cols[1:])):
@@ -265,7 +289,7 @@ def extract_cross_images(sheet_image):
     return cross_imgs
 
 
-def naive_cross_value(data):
+def naive_cross_value(data: np.ndarray) -> float:
     if data.max() > 1:
         data = data / data.max()
     height, width, depth = data.shape
@@ -282,8 +306,13 @@ def naive_cross_value(data):
     # return (v - lo) / (hi - lo)
 
 
-@parameter('lo hi')
-def extract_crosses(sheet_image, lo=0.030, hi=0.045):
+def extract_crosses(
+    sheet_image: "SheetImage"
+) -> None:
+    parameters = get_parameters(sheet_image)
+    put_parameters(sheet_image, parameters)
+    lo = parameters.extract_crosses_lo
+    hi = parameters.extract_crosses_hi
     cross_imgs = extract_cross_images(sheet_image)
     values = [
         [naive_cross_value(c) for c in row]
@@ -308,30 +337,36 @@ def extract_crosses(sheet_image, lo=0.030, hi=0.045):
     sheet_image.crosses = labels
 
 
-def get_sheet_rows(sheet_image):
-    from tkweb.apps.regnskab.models import SheetImage, SheetRow
-    prev_pages = SheetImage.objects.filter(sheet=sheet_image.sheet,
-                                           page__lt=sheet_image.page)
+def get_sheet_rows(sheet_image: "SheetImage") -> List["SheetRow"]:
+    from tkweb.apps.regnskab import models
+    prev_pages = models.SheetImage.objects.filter(
+        sheet=sheet_image.sheet,
+        page__lt=sheet_image.page,
+    )
     prev_person_count = sum(len(o.person_rows) for o in prev_pages)
     n = len(sheet_image.person_rows)
     # Note position is 1-indexed
-    qs = SheetRow.objects.filter(sheet=sheet_image.sheet,
-                                 position__gte=prev_person_count + 1,
-                                 position__lte=prev_person_count + n)
+    qs = models.SheetRow.objects.filter(
+        sheet=sheet_image.sheet,
+        position__gte=prev_person_count + 1,
+        position__lte=prev_person_count + n,
+    )
     sheet_rows = list(qs)
     assert len(sheet_rows) == len(sheet_image.person_rows)
     return sheet_rows
 
 
-def get_cross_counts(sheet_image, kinds):
-    from tkweb.apps.regnskab.models import Purchase
+def get_cross_counts(
+    sheet_image: "SheetImage", kinds: List[str]
+) -> List[List[Tuple[int, int]]]:
+    from tkweb.apps.regnskab import models
     sheet_rows = get_sheet_rows(sheet_image)
     purchase_kinds = list(sheet_image.sheet.purchasekind_set.all())
     purchases = {
         (p.row_id, p.kind_id): p
-        for p in Purchase.objects.filter(row__sheet=sheet_image.sheet)
+        for p in models.Purchase.objects.filter(row__sheet=sheet_image.sheet)
     }
-    result = []
+    result: List[List[Tuple[int, int]]] = []
     for sheet_row in sheet_rows:
         singles = {}
         boxes = {}
@@ -351,7 +386,13 @@ def get_cross_counts(sheet_image, kinds):
     return result
 
 
-def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
+def get_crosses_from_field(
+    cross_imgs: List[List[np.ndarray]],
+    singles: int,
+    boxes: int,
+    row_offset: int,
+    col_offset: int,
+) -> List[Tuple[int, int]]:
     assert cross_imgs, cross_imgs
     if singles == boxes == 0:
         return []
@@ -376,8 +417,8 @@ def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
     max_extra = min(int(4*boxes), n*m - singles)
     assert 0 <= min_extra <= max_extra <= n*m - singles
 
-    crosses = []
-    remaining = []
+    crosses: List[Tuple[int, int]] = []
+    remaining: List[Tuple[int, int]] = []
 
     # Add all strong crosses that are filled up from the left or right.
     for i in range(n):
@@ -416,10 +457,12 @@ def get_crosses_from_field(cross_imgs, singles, boxes, row_offset, col_offset):
     return [(i + row_offset, j + col_offset) for i, j in crosses]
 
 
-@parameter('get_person_crosses.øl',
-           'get_person_crosses.guldøl',
-           'get_person_crosses.sodavand')
-def get_crosses_from_counts(sheet_image, øl=15, guldøl=6, sodavand=15):
+def get_crosses_from_counts(
+    sheet_image: "SheetImage", parameters: Parameters
+) -> Tuple[List[List[np.ndarray]], List[List[Tuple[int, int]]]]:
+    øl = parameters.get_person_crosses_øl
+    guldøl = parameters.get_person_crosses_guldøl
+    sodavand = parameters.get_person_crosses_sodavand
     KINDS = 'øl guldøl sodavand'.split()
     cross_counts = get_cross_counts(sheet_image, KINDS)
     assert sum(sheet_image.person_rows) == len(sheet_image.rows) - 1
@@ -429,7 +472,7 @@ def get_crosses_from_counts(sheet_image, øl=15, guldøl=6, sodavand=15):
     row_bounds = np.cumsum([0] + sheet_image.person_rows)
     n = len(sheet_image.person_rows)
 
-    cross_coordinates = []
+    cross_coordinates: List[List[Tuple[int, int]]] = []
 
     for person_index in range(n):
         r1, r2 = row_bounds[person_index], row_bounds[person_index+1]
@@ -448,8 +491,12 @@ def get_crosses_from_counts(sheet_image, øl=15, guldøl=6, sodavand=15):
     return cross_imgs, cross_coordinates
 
 
-@parameter('øl guldøl sodavand')
-def get_person_crosses(person_rows, øl=15, guldøl=6, sodavand=15):
+def get_person_crosses(
+    person_rows: List[int], parameters: Parameters
+) -> List[Tuple[int, float]]:
+    øl = parameters.get_person_crosses_øl
+    guldøl = parameters.get_person_crosses_guldøl
+    sodavand = parameters.get_person_crosses_sodavand
     col_bounds = np.cumsum([0, øl, guldøl, sodavand])
     groups = []
     for i, j in zip(col_bounds[:-1], col_bounds[1:]):
@@ -464,24 +511,24 @@ def get_person_crosses(person_rows, øl=15, guldøl=6, sodavand=15):
             r_crosses = sum(r) - x
             crosses += r_crosses
             box_crosses += x
-        groups.append([crosses, box_crosses/2])
+        groups.append((crosses, box_crosses/2))
     return groups
 
 
-def get_images(sheet):
-    from tkweb.apps.regnskab.models import SheetImage
+def get_images(sheet: "Sheet") -> List["SheetImage"]:
+    from tkweb.apps.regnskab import models
     if sheet.pk:
-        existing = list(SheetImage.objects.filter(sheet=sheet))
+        existing = list(models.SheetImage.objects.filter(sheet=sheet))
         if existing:
             for o in existing:
                 o.get_image()
             return existing
-    images = []
+    images: List[np.ndarray] = []
     with sheet.image_file_name():
         i = 1
         while i < 1000:
             try:
-                im = SheetImage(sheet=sheet, page=i)
+                im = models.SheetImage(sheet=sheet, page=i)
                 im.get_image()
                 images.append(im)
             except Exception:
@@ -492,12 +539,27 @@ def get_images(sheet):
     return images
 
 
-def extract_images(sheet, kinds):
+def get_parameters(sheet_image: "SheetImage") -> Parameters:
+    # Translate '.' to '_' in parameters
+    d = {k.replace(".", "_"): v for k, v in sheet_image.parameters.items()}
+    return Parameters(**{
+        k: d.get(k, getattr(default_parameters, k))
+        for k in Parameters._fields
+    })
+
+
+def put_parameters(sheet_image: "SheetImage", parameters: Parameters) -> None:
+    sheet_image.parameters = parameters._asdict()
+
+
+def extract_images(
+    sheet: "Sheet", kinds: List[str]
+) -> Tuple[List["SheetImage"], Any, Any]:
     images = get_images(sheet)
-    for im in images:
-        extract_quad(im)
-        extract_rows_cols(im)
-        extract_crosses(im)
+    for sheet_image in images:
+        extract_quad(sheet_image)
+        extract_rows_cols(sheet_image)
+        extract_crosses(sheet_image)
 
     rows, purchases, png_file = extract_row_image(sheet, kinds, images)
     sheet.row_image = png_file
@@ -517,10 +579,12 @@ def rerun_extract_images(sheet):
         im.save()
 
 
-def extract_row_image(sheet, kinds, images):
-    from tkweb.apps.regnskab.models import SheetRow, Purchase
-    rows = []
-    purchases = []
+def extract_row_image(
+    sheet: "Sheet", kinds: List[str], images: List["SheetImage"]
+) -> Tuple[List["SheetRow"], List["Purchase"], ContentFile]:
+    from tkweb.apps.regnskab import models
+    rows: List["SheetRow"] = []
+    purchases: List["Purchase"] = []
 
     stitched_image = []
     stitched_image_height = 0
@@ -541,21 +605,26 @@ def extract_row_image(sheet, kinds, images):
                 im.get_image(), person_quad, width, height=None))
             height = stitched_image[-1].shape[0]
 
-            rows.append(SheetRow(sheet=sheet, position=position,
-                                 image_start=stitched_image_height,
-                                 image_stop=stitched_image_height + height))
+            rows.append(
+                models.SheetRow(
+                    sheet=sheet,
+                    position=position,
+                    image_start=stitched_image_height,
+                    image_stop=stitched_image_height + height,
+                )
+            )
 
             p_crosses = get_person_crosses(im.crosses[i:j],
                                            parameters=im.parameters)
             for col_idx, (count, boxcount) in enumerate(p_crosses):
                 kind, boxkind = kinds[2*col_idx:2*(col_idx+1)]
                 if count:
-                    purchases.append(Purchase(
+                    purchases.append(models.Purchase(
                         row=rows[-1],
                         kind=kind,
                         count=count))
                 if boxcount:
-                    purchases.append(Purchase(
+                    purchases.append(models.Purchase(
                         row=rows[-1],
                         kind=boxkind,
                         count=boxcount))
@@ -566,7 +635,6 @@ def extract_row_image(sheet, kinds, images):
 
     stitched_image = np.concatenate(stitched_image)
 
-    from django.core.files.base import ContentFile
     from django.utils import timezone
 
     png_data = save_png(stitched_image)

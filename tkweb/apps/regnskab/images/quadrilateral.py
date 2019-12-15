@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 import scipy.ndimage
 
@@ -115,19 +117,24 @@ class Quadrilateral(object):
         return (width, height)
 
 
-def extract_quadrilateral(im, q, width=None, height=None, output=None):
+def extract_quadrilateral(
+    im: np.ndarray,
+    q: Quadrilateral,
+    width: Optional[float] = None,
+    height: Optional[float] = None,
+    output: Optional[np.ndarray] = None,
+) -> np.ndarray:
     if width is None and height is None:
         width, height = q.suggested_size()
     elif width is None or height is None:
         w, h = q.suggested_size()
         height = height or h / w * width
         width = width or w / h * height
-    width, height = int(width), int(height)
-    y, x = np.mgrid[0:1:height*1j, 0:1:width*1j]
+    y, x = np.mgrid[0:1:int(height)*1j, 0:1:int(width)*1j]
     xy = np.array((x.ravel(), y.ravel()))
     x, y = q.to_world(xy)
     if output is None:
-        output = np.zeros((height, width) + im.shape[2:])
+        output = np.zeros((int(height), int(width)) + im.shape[2:])
     if im.ndim > 2:
         cs = [(i,) for i in range(im.shape[2])]
     else:

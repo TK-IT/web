@@ -41,7 +41,7 @@ def load_tiff_page(filename, page):
     return a / 255.0
 
 
-def load_pdf_page(filename, page):
+def load_pdf_page(filename: str, page: int) -> np.ndarray:
     # convert -density 150 '2221_001.pdf[0]' 2221_001_1.png
     with tempfile.NamedTemporaryFile(suffix='.ppm') as fp:
         subprocess.check_call(
