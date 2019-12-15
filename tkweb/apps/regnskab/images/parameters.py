@@ -3,19 +3,20 @@ import functools
 from typing import Callable, TypeVar, Dict, NamedTuple
 
 
-class Parameters(NamedTuple):
-    contrast_stretch_q: float
-    find_bbox_sigma: float
-    find_bbox_margin1: int
-    find_bbox_threshold: float
-    extract_cols_cutoff: float
-    extract_rows_cutoff: float
-    extract_person_rows_cutoff: float
-    extract_crosses_lo: float
-    extract_crosses_hi: float
-    get_person_crosses_øl: int
-    get_person_crosses_guldøl: int
-    get_person_crosses_sodavand: int
+Parameters = NamedTuple("Parameters", [
+    ("contrast_stretch_q", float),
+    ("find_bbox_sigma", float),
+    ("find_bbox_margin1", int),
+    ("find_bbox_threshold", float),
+    ("extract_cols_cutoff", float),
+    ("extract_rows_cutoff", float),
+    ("extract_person_rows_cutoff", float),
+    ("extract_crosses_lo", float),
+    ("extract_crosses_hi", float),
+    ("get_person_crosses_øl", int),
+    ("get_person_crosses_guldøl", int),
+    ("get_person_crosses_sodavand", int),
+])
 
 
 default_parameters = Parameters(

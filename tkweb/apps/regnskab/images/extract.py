@@ -44,7 +44,7 @@ def to_grey(im: np.ndarray, parameters: Parameters) -> np.ndarray:
 
 
 def max_object(labels: np.ndarray, max_label: int) -> Tuple[int, int, int]:
-    objects: List[Tuple[slice, slice]] = scipy.ndimage.find_objects(labels, max_label)
+    objects = scipy.ndimage.find_objects(labels, max_label)  # type: List[Tuple[slice, slice]]
 
     def slice_length(s: slice, axis: int) -> int:
         start, stop, stride = s.indices(labels.shape[axis])
@@ -120,12 +120,13 @@ def fill_in_skipped(xs):
     return fixed
 
 
-class PeaksResult(NamedTuple):
-    peaks: Any
-    cutoff: Any
-    min_cutoff: Any
-    max_cutoff: Any
-    opt_cutoff: Any
+PeaksResult = NamedTuple("PeaksResult", [
+    ("peaks", Any),
+    ("cutoff", Any),
+    ("min_cutoff", Any),
+    ("max_cutoff", Any),
+    ("opt_cutoff", Any),
+])
 
 
 def find_peaks(
@@ -279,7 +280,7 @@ def extract_cross_images(sheet_image: "SheetImage") -> List[List[np.ndarray]]:
     rows = np.multiply(sheet_image.rows, height).astype(np.intp)
     cols = np.multiply(sheet_image.cols, width).astype(np.intp)
 
-    cross_imgs: List[List[np.ndarray]] = []
+    cross_imgs = []  # type: List[List[np.ndarray]]
     for i, (y1, y2) in enumerate(zip(rows[:-1], rows[1:])):
         cross_imgs.append([])
         for j, (x1, x2) in enumerate(zip(cols[:-1], cols[1:])):
@@ -366,7 +367,7 @@ def get_cross_counts(
         (p.row_id, p.kind_id): p
         for p in models.Purchase.objects.filter(row__sheet=sheet_image.sheet)
     }
-    result: List[List[Tuple[int, int]]] = []
+    result = []  # type: List[List[Tuple[int, int]]]
     for sheet_row in sheet_rows:
         singles = {}
         boxes = {}
@@ -417,8 +418,8 @@ def get_crosses_from_field(
     max_extra = min(int(4*boxes), n*m - singles)
     assert 0 <= min_extra <= max_extra <= n*m - singles
 
-    crosses: List[Tuple[int, int]] = []
-    remaining: List[Tuple[int, int]] = []
+    crosses = []  # type: List[Tuple[int, int]]
+    remaining = []  # type: List[Tuple[int, int]]
 
     # Add all strong crosses that are filled up from the left or right.
     for i in range(n):
@@ -472,7 +473,7 @@ def get_crosses_from_counts(
     row_bounds = np.cumsum([0] + sheet_image.person_rows)
     n = len(sheet_image.person_rows)
 
-    cross_coordinates: List[List[Tuple[int, int]]] = []
+    cross_coordinates = []  # type: List[List[Tuple[int, int]]]
 
     for person_index in range(n):
         r1, r2 = row_bounds[person_index], row_bounds[person_index+1]
@@ -523,7 +524,7 @@ def get_images(sheet: "Sheet") -> List["SheetImage"]:
             for o in existing:
                 o.get_image()
             return existing
-    images: List[np.ndarray] = []
+    images = []  # type: List[np.ndarray]
     with sheet.image_file_name():
         i = 1
         while i < 1000:
@@ -583,8 +584,8 @@ def extract_row_image(
     sheet: "Sheet", kinds: List[str], images: List["SheetImage"]
 ) -> Tuple[List["SheetRow"], List["Purchase"], ContentFile]:
     from tkweb.apps.regnskab import models
-    rows: List["SheetRow"] = []
-    purchases: List["Purchase"] = []
+    rows = []  # type: List["SheetRow"]
+    purchases = []  # type: List["Purchase"]
 
     stitched_image = []
     stitched_image_height = 0
