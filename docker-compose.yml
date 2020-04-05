@@ -10,3 +10,13 @@ services:
     command: ["./manage.py", "runserver", "0.0.0.0:5000"]
     ports:
       - 5000:5000
+    depends_on:
+      - tkweb-db
+
+  tkweb-db:
+    image: mariadb:10
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_DATABASE: tkweb
+      MYSQL_PASSWORD: tkweb
+      MYSQL_USER: tkweb
