@@ -1,8 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# TODO wait for database to be ready in a proper way
-sleep 20
+./manage.py ensure_db_connection --wait 30
 
 # We run migration on container startup both in development and production. We
 # do this because: 1, we never run more than one instance of the web server on
