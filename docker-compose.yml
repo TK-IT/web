@@ -7,5 +7,6 @@ services:
       dockerfile: docker/Dockerfile
     environment:
       DJANGO_SETTINGS_MODULE: tkweb.settings.dev
+    command: ["./manage.py", "runserver", "0.0.0.0:5000"]
     ports:
       - 5000:5000

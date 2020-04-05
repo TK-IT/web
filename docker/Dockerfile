@@ -21,12 +21,17 @@ RUN set -ex \
   # `/etc/login.defs`. Hopefully there will be no conflicts with users of the
   # host system or users of other docker containers.
   && groupadd -g 847587 -r tkammer\
-  && useradd -u 847587 --no-log-init -r -g tkammer tkammer
+  && useradd -u 847587 --no-log-init -r -g tkammer tkammer \
   # Install system dependencies from file.
   #&& apt-get -y update \
   #&& apt-get -y install --no-install-recommends "$(grep -Eo '^(\w|-)+' sys-requirements.txt | paste -sd ' ')" \
   # clean up after apt-get and man-pages
   #&& apt-get clean && rm -rf "/var/lib/apt/lists/*" "/tmp/*" "/var/tmp/*" "/usr/share/man/??" "/usr/share/man/??_*"
+  # Create a folder for static content with write permission for the `tkammer`
+  # user. This is used for `./manage.py collectstatic` in `docker-entrypoint.sh`.
+  && install -d -o tkammer -g tkammer /code/static
+# Make the same folder a volume, so we do not write in the docker container.
+VOLUME /code/static
 
 # Install requirements
 COPY requirements.txt /code/requirements.txt
@@ -34,7 +39,9 @@ RUN pip3 install -r requirements.txt
 
 COPY docker ./docker
 COPY manage.py ./manage.py
+COPY templates ./templates
 COPY tkweb ./tkweb
+COPY static-src ./static-src
 
 # Copy frontend code.
 #COPY --from=frontend /code/frontend/package.json ./frontend/package.json
@@ -43,5 +50,5 @@ COPY tkweb ./tkweb
 # Run the server as the mora user on port 5000
 USER tkammer:tkammer
 EXPOSE 5000
-#ENTRYPOINT ["/code/docker/docker-entrypoint.sh"]
+ENTRYPOINT ["/code/docker/docker-entrypoint.sh"]
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "tkweb.wsgi"]
