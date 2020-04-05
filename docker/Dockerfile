@@ -1,4 +1,4 @@
-FROM node:12 AS frontend
+FROM node:12 AS css
 
 WORKDIR /code/static-src
 
@@ -7,6 +7,21 @@ RUN npm install -g less less-plugin-clean-css
 COPY static-src /code/static-src
 
 RUN lessc --clean-css --source-map style.less style.min.css
+
+
+FROM node:8-alpine AS barplan
+
+WORKDIR /code/tkweb/apps/barplan/
+
+COPY tkweb/apps/barplan/package.json tkweb/apps/barplan/package-lock.json ./
+
+RUN npm install
+
+COPY tkweb/apps/barplan/webpack.config.js tkweb/apps/barplan/tsconfig.json ./
+COPY tkweb/apps/barplan/sampledata ./sampledata/
+COPY tkweb/apps/barplan/src ./src/
+
+RUN ./node_modules/.bin/webpack --mode production
 
 
 FROM python:3.7 AS dist
@@ -54,8 +69,9 @@ COPY templates ./templates
 COPY tkweb ./tkweb
 COPY static-src ./static-src
 
-# Copy generated CSS
-COPY --from=frontend /code/static-src/style.min.css* /code/static-src/
+# Copy frontend
+COPY --from=css /code/static-src/style.min.css* /code/static-src/
+COPY --from=barplan /code/tkweb/apps/barplan/dist/barplan.min.js /code/static-src/
 
 # Run the server as the mora user on port 5000
 USER tkammer:tkammer

@@ -88,18 +88,6 @@ Desuden er der JavaScript tests i
 [tkweb/apps/regnskab/tests.js](tkweb/apps/regnskab/tests.js)
 som køres af `manage.py test` når `dukpy` er installeret.
 
-## JavaScript i barplan appen
-
-I [`tkweb/apps/barplan`](tkweb/apps/barplan) er der et
-TypeScript+React projekt som skal bygges i en Docker container.
-
-For at generere `tkweb/apps/barplan/static/barplan.min.js`,
-skal du installére Docker og køre følgende script i roden af tkweb-repositoriet:
-
-```shell
-./build.sh
-```
-
 ## Prodekanus
 
 For informationer om siden på prodekanus
