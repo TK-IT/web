@@ -23,6 +23,7 @@ django-picklefield==2.1.1  # via django-constance
 django-sekizai==1.1.0     # via wiki
 django-versatileimagefield==2.0  # via -r requirements.in
 django==1.11.29           # via -r requirements.in, django-appconf, django-classy-tags, django-macros, django-model-utils, django-mptt, django-multiupload, django-nyt, django-picklefield, django-sekizai, jsonfield, wiki
+gunicorn==20.0.4          # via -r requirements.in
 html2text==2020.1.16      # via -r requirements.in
 html5lib==1.0.1           # via bleach
 icalendar==4.0.5          # via -r requirements.in
@@ -44,3 +45,6 @@ git+https://github.com/TK-IT/tktitler.git@v1.1.0#egg=tktitler  # via -r requirem
 unidecode==1.1.1          # via -r requirements.in
 webencodings==0.5.1       # via html5lib
 wiki==0.4.5               # via -r requirements.in
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
