@@ -1,3 +1,14 @@
+FROM node:12 AS frontend
+
+WORKDIR /code/static-src
+
+RUN npm install -g less less-plugin-clean-css
+
+COPY static-src /code/static-src
+
+RUN lessc --clean-css --source-map style.less style.min.css
+
+
 FROM python:3.7 AS dist
 
 LABEL org.opencontainers.image.title="TKWEB" \
@@ -43,9 +54,8 @@ COPY templates ./templates
 COPY tkweb ./tkweb
 COPY static-src ./static-src
 
-# Copy frontend code.
-#COPY --from=frontend /code/frontend/package.json ./frontend/package.json
-#COPY --from=frontend /code/frontend/dist ./frontend/dist
+# Copy generated CSS
+COPY --from=frontend /code/static-src/style.min.css* /code/static-src/
 
 # Run the server as the mora user on port 5000
 USER tkammer:tkammer
