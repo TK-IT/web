@@ -928,12 +928,13 @@ class Newsletter(models.Model):
 def to_message(email):
     assert isinstance(email, (Email, NewsletterEmail))
 
-    sender = 'admin@TAAGEKAMMERET.dk'
+    sender = 'INKA@TAAGEKAMMERET.dk'
+    list_requests = 'admin@TAAGEKAMMERET.dk'
     list_name = 'krydsliste'
     list_id = '%s.TAAGEKAMMERET.dk' % list_name
-    unsub = '<mailto:%s?subject=unsubscribe%%20%s>' % (sender, list_name)
-    help = '<mailto:%s?subject=list-help>' % (sender,)
-    sub = '<mailto:%s?subject=subscribe%%20%s>' % (sender, list_name)
+    unsub = '<mailto:%s?subject=unsubscribe%%20%s>' % (list_requests, list_name)
+    help = '<mailto:%s?subject=list-help>' % (list_requests,)
+    sub = '<mailto:%s?subject=subscribe%%20%s>' % (list_requests, list_name)
 
     headers = OrderedDict([
         ('From', 'INKA@TAAGEKAMMERET.dk'),

@@ -66,12 +66,13 @@ class EmailFormView(FormView):
         if self.request.POST.get('only_me'):
             recipients = [self.request.user.email]
 
-        sender = 'admin@TAAGEKAMMERET.dk'
+        sender = from_email
+        list_requests = 'admin@TAAGEKAMMERET.dk'
         list_name = 'mailinglist'
         list_id = '%s.TAAGEKAMMERET.dk' % list_name
-        unsub = '<mailto:%s?subject=unsubscribe%%20%s>' % (sender, list_name)
-        help = '<mailto:%s?subject=list-help>' % (sender,)
-        sub = '<mailto:%s?subject=subscribe%%20%s>' % (sender, list_name)
+        unsub = '<mailto:%s?subject=unsubscribe%%20%s>' % (list_requests, list_name)
+        help = '<mailto:%s?subject=list-help>' % (list_requests,)
+        sub = '<mailto:%s?subject=subscribe%%20%s>' % (list_requests, list_name)
 
         messages = []
         for recipient in recipients:
@@ -93,7 +94,7 @@ class EmailFormView(FormView):
             msg = EmailMessage(
                 subject=subject,
                 body=text,
-                from_email='admin@TAAGEKAMMERET.dk',
+                from_email=sender,
                 bcc=[recipient],
                 headers=headers,
             )
