@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -22,6 +24,8 @@ from tkweb.apps.uniprint.forms import PrintoutForm
 printout_permission_required = permission_required('uniprint.add_printout')
 printout_permission_required_method = method_decorator(
     printout_permission_required)
+
+logger = logging.getLogger(__name__)
 
 
 class Home(TemplateView):
@@ -49,9 +53,11 @@ class DocumentCreate(CreateView):
     def form_valid(self, form):
         doc_dummy = form.save(commit=False)
         file = doc_dummy.file
+        filename = form.cleaned_data["file"].name.encode("ascii", errors="replace").decode("ascii").replace("?", "_")
         try:
             document = create_document(
-                fp=file, filename=form.cleaned_data['file'].name,
+                fp=file,
+                filename=filename,
                 username=self.request.user.username,
             )
         except FileTypeError as exn:

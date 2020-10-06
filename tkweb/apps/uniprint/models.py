@@ -23,8 +23,11 @@ def document_path(instance, input_filename):
     base, ext = os.path.splitext(filename)
     slug_base = slugify(base)
     slug_name = slug_base + ext
-    username = instance.created_by.username
-    return '/'.join(('uniprint', username, slug_name))
+    try:
+        username_bytes = instance.created_by.username.encode("ascii")
+    except UnicodeEncodeError:
+        username_bytes = ("user%s" % instance.created_by.id).encode("ascii")
+    return '/'.join(('uniprint', username_bytes.decode("ascii"), slug_name))
 
 
 logger = logging.getLogger('uniprint')
