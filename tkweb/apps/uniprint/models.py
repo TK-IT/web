@@ -1,7 +1,6 @@
 import os
 import shlex
 import logging
-import tempfile
 import subprocess
 
 from django.conf import settings
@@ -81,7 +80,7 @@ def page_range_ranges(s):
         try:
             r = range(int(s), int(e)+1)
         except ValueError:
-            raise ValidationError('%r er ikke et heltal' % (v,))
+            raise ValidationError('%r er ikke et heltal' % (p,))
         if len(r) == 0:
             raise ValidationError('%s-%s er et ugyldigt interval' %
                                   (s, e))
@@ -177,7 +176,9 @@ class Printout(models.Model):
             username = self.created_by.username
         else:
             username = "unknown"
-        cmd += ("-U", username_prefix + username)
+        prefixed = username_prefix + username
+        prefixed_bytes = prefixed.encode("ascii", errors="replace")
+        cmd += ("-U", prefixed_bytes.decode("ascii").replace("?", "_"))
         cmd += (filename,)
         return cmd
 
