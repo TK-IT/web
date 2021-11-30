@@ -54,14 +54,8 @@ class Document(models.Model):
 class Printer(models.Model):
     name = models.CharField(max_length=100)
     destination = models.CharField(max_length=100)
-
-    @property
-    def hostname(self):
-        return 'localhost'
-
-    @property
-    def port(self):
-        return 6631
+    hostname = models.CharField(max_length=100, default="localhost")
+    port = models.IntegerField(default=631)
 
     def __str__(self):
         return self.name
