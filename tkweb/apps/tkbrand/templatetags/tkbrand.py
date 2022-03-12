@@ -89,22 +89,25 @@ def TKETSAA():
     return wrap_tk_html(HTML_TKETSAA)
 
 
-def add_pride_colors(html):
-    PRIDE_COLORS = (
-        '''#e40303 #ff8c00 #ffed00 #008026 #004dff #b100cc #e40303 #ff8c00
-        #ffed00 #008026 #004dff #b100cc'''.split()
-    )
+PRIDE_COLORS = (
+    '''#e40303 #ff8c00 #ffed00 #008026 #004dff #b100cc #e40303 #ff8c00
+    #ffed00 #008026 #004dff #b100cc'''.split()
+)
+UKRAINE_COLORS = '#449FFF #FFD500'.split() * 6
+
+
+def add_colors(colors, html):
     insert_after = 'style="'
     count = html.count(insert_after)
-    if count < len(PRIDE_COLORS):
+    if count < len(colors):
         colors = [
-            PRIDE_COLORS[int(i / count * len(PRIDE_COLORS))] for i in range(count)
+            colors[int(i / count * len(colors))] for i in range(count)
         ]
     else:
         s = 1
-        extra = count - len(PRIDE_COLORS) + 1
+        extra = count - len(colors) + 1
         # Repeat element at index s enough times.
-        colors = PRIDE_COLORS[:s] + extra * PRIDE_COLORS[s:s+1] + PRIDE_COLORS[s+1:]
+        colors = colors[:s] + extra * colors[s:s+1] + colors[s+1:]
     assert len(colors) == count
 
     def repl(mo):
@@ -116,7 +119,9 @@ def add_pride_colors(html):
 
 def wrap_tk_html(html):
     if config.PRIDE:
-        html = add_pride_colors(html)
+        html = add_colors(PRIDE_COLORS, html)
+    elif config.UKRAINE:
+        html = add_colors(UKRAINE_COLORS, html)
     return mark_safe('<span class="tk-brand">' + html + '</span>')
 
 

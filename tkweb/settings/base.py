@@ -218,6 +218,7 @@ CONSTANCE_CONFIG = {
     'CAL_URL': ('//calendar.google.com/calendar/embed?src=BEST@TAAGEKAMMERET.dk&ctz=Europe/Copenhagen',
                 'URLen til \'Tilføj til din egen kalender\'-linket på kalendersiden.'),
     'PRIDE': (False, 'Skriv TÅGEKAMMERET i regnbuens farver på hjemmesiden'),
+    'UKRAINE': (False, 'Skriv TÅGEKAMMERET i blåt og gult på hjemmesiden'),
 }
 
 # Wiki
