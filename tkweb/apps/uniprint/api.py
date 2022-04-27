@@ -44,7 +44,10 @@ def create_document(fp, filename, username):
         raise ValueError('user')
     document.original_filename = filename
     document.pdfinfo = get_pdfinfo(document.file)
-    document.text = extract_plain_text(document.file)
+    plain_text = extract_plain_text(document.file)
+    assert isinstance(plain_text, str)
+    plain_text_ascii = plain_text.encode("ascii", errors="replace")
+    document.text = plain_text_ascii.decode()
     document.pages = pages_from_pdfinfo(document.pdfinfo)
     document.save()
     return document
