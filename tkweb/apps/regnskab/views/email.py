@@ -228,7 +228,7 @@ class NewsletterEmailList(EmailListBase):
 
 def get_image_for_emails(emails):
     import numpy as np
-    import scipy.misc
+    import imageio
 
     assert all(isinstance(email, Email) for email in emails)
     if not emails:
@@ -243,7 +243,7 @@ def get_image_for_emails(emails):
     for sheet in sheets:
         if not sheet.row_image:
             continue
-        row_image = scipy.misc.imread(sheet.row_image)
+        row_image = np.asarray(imageio.imread(sheet.row_image))
         for row in sheet.sheetrow_set.all():
             try:
                 p = rows_by_profile[row.profile_id]
