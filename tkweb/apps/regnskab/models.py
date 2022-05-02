@@ -342,10 +342,11 @@ class Sheet(models.Model):
                 # c2 is not closed, but f2 is now invalid
         '''
         try:
-            yield self._image_file_name
+            f = self._image_file_name
         except AttributeError:
             pass
         else:
+            yield f
             return
         if self.image_file and os.path.exists(self.image_file.path):
             yield self.image_file.path
