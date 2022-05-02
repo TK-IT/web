@@ -7,6 +7,7 @@ django-picklefield
 # We can't use newer versions of Pillow, because of django-verstatileimagefield.
 # Since django-verstatileimagefield==1.10 it has pillow 6.0.0 compability.
 Pillow>=2.4.0,<=6.0.0
+imageio<2.10
 django-versatileimagefield>=1.10
 django-cleanup
 django-model-utils
