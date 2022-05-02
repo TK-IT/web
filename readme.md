@@ -44,8 +44,7 @@ flere moduler der nedarver fra hinanden. Se også under
 
 ## Udviklingsmiljø
 
-Det er en forudsætning at maskinen har en fungerende python installation med
-[`pipenv`](https://docs.pipenv.org/), som kan installeres med `pip`.
+Det er en forudsætning at maskinen har en fungerende python installation med `pip`.
 
 En mysql installation er også påkrævet så `mysql_client` er tilgængelig, f.eks. skal man installere pakken `libmysqlclient-dev` på Ubuntu/Debian.
 
@@ -55,8 +54,8 @@ installere alle pakker og oprette en database.
 ```shell
 git clone --recursive https://github.com/TK-IT/web.git
 cd web
-pipenv install --three
-pipenv shell
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+. .venv/bin/activate
 ./manage.py migrate --settings=tkweb.settings.dev
 ./manage.py createsuperuser --settings=tkweb.settings.dev
 ```
