@@ -4,7 +4,7 @@ import tempfile
 import subprocess
 
 import numpy as np
-import scipy.misc
+import imageio
 import PIL
 
 
@@ -49,7 +49,7 @@ def load_pdf_page(filename: str, page: int) -> np.ndarray:
              # '-background', 'white', '-alpha', 'remove',
              '%s[%s]' % (filename, page),
              fp.name))
-        img = scipy.misc.imread(fp.name)
+        img = np.asarray(imageio.imread(fp.name))
 
     return img / 255.0
 
