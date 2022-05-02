@@ -1,0 +1,24 @@
+Django<1.12
+git+https://github.com/CalPolyResDev/django-jfu@b5633c72a1573380619570b3eb3d3732edc882f7
+git+https://github.com/TK-IT/tktitler.git
+git+https://github.com/django-wiki/django-wiki.git@4be3b53d3ba26252bed1a9aa9eb94aebcc621a76
+django-constance
+# We can't use newer versions of Pillow, because of django-verstatileimagefield.
+# Since django-verstatileimagefield==1.10 it has pillow 6.0.0 compability.
+Pillow>=2.4.0,<=6.0.0
+django-versatileimagefield>=1.10
+django-cleanup
+django-model-utils
+sorl-thumbnail
+django-bootstrap3
+icalendar
+django-macros
+mysqlclient
+django-multiupload
+django-mediumeditor
+jsonfield
+html2text
+numpy
+scipy
+matplotlib
+Unidecode
