@@ -65,7 +65,10 @@ class Command(BaseCommand):
                     startdate = startdatetime.date()
                 elif type(startdatetime) is datetime.date:
                     startdate = startdatetime
-                description = component.decoded('description').decode('utf-8')
+                try:
+                    description = component.decoded('description').decode('utf-8')
+                except KeyError:
+                    description = ""
 
                 title = strip_tags(title)
                 description = strip_tags(description)
