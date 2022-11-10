@@ -48,6 +48,14 @@ def get_inka():
         return Profile()
 
 
+def get_ginka():
+    try:
+        return Profile.objects.get(title__root='INKA',
+                                   title__period=config.GFYEAR - 1)
+    except Profile.DoesNotExist:
+        return Profile()
+
+
 def _get_gfyear(gfyear):
     if gfyear is None:
         return config.GFYEAR
@@ -710,6 +718,7 @@ def get_base_recipient_data(email_set):
 
     # Cache call to get_inka
     email_set._inka = get_inka()
+    email_set._ginka = get_ginka()
     # Cache call to get_max_debt
     from tkweb.apps.regnskab.rules import get_max_debt
     email_set._max_debt = get_max_debt()
@@ -740,6 +749,7 @@ def get_base_email_context(email_set, profile_data):
         'GAELD': format_price(balance),
         'MAXGAELD': format_price(email_set._max_debt),
         'INKA': email_set._inka.name,
+        'GINKA': email_set._ginka.name,
     }
     return context
 

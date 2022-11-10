@@ -219,6 +219,7 @@ CONSTANCE_CONFIG = {
                 'URLen til \'Tilføj til din egen kalender\'-linket på kalendersiden.'),
     'PRIDE': (False, 'Skriv TÅGEKAMMERET i regnbuens farver på hjemmesiden'),
     'UKRAINE': (False, 'Skriv TÅGEKAMMERET i blåt og gult på hjemmesiden'),
+    'GINKA_STANDIN_2022': (False, 'GINKA er stand-in for INKA 22/23'),
 }
 
 # Wiki
