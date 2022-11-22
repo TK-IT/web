@@ -49,6 +49,9 @@ urlpatterns = [
     url(r'^underforeninger/$',
         views.flatpage, {'url': '/underforeninger/'},
         name='underforeninger'),
+    url(r'^codeofconduct/$',
+        views.flatpage, {'url': '/codeofconduct/'},
+        name='codeofconduct'),
 
     url(r'^kalender/$',
         tkweb.apps.calendar.views.kalender,
