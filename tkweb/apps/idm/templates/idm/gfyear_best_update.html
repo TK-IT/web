@@ -1,4 +1,11 @@
 {% extends "base.html" %}
+{% block extra_head %}
+<style>
+input, select { background: black; border: 1px solid white; }
+label { min-width: 5em; display: inline-block; text-transform: uppercase; text-align: right; }
+label[for=id_period] { text-transform: none; }
+</style>
+{% endblock %}
 {% block content %}
 <h1>Ny BEST</h1>
 <p>På denne side kan du ændre det aktuelle bestyrelsesår samt hvem der er medlem af bestyrelsen.</p>
