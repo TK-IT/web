@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.template.loader import get_template
 from django.http import HttpResponse, HttpResponseRedirect
+from django.utils import timezone
 from tkweb.apps.krydsliste.models import Sheet
 from tkweb.apps.krydsliste.forms import SheetForm
 from tkweb.apps.regnskab.views.auth import regnskab_permission_required_method
@@ -20,8 +21,32 @@ except ImportError:
 logger = logging.getLogger('regnskab')
 
 
+class SheetDelete(View):
+    queryset = Sheet.objects.filter(deleted_time=None).order_by('-created_time')
+
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request):
+        for k, v in self.request.POST.items():
+            if not v:
+                continue
+            p = "delete_krydsliste_"
+            if k.startswith(p):
+                try:
+                    i = int(k.partition(p)[2])
+                except Exception:
+                    continue
+                delete_ids.append(i)
+        if delete_ids:
+            Sheet.objects.filter(deleted_time=None, id__in=delete_ids).update(
+                deleted_time=timezone.now()
+            )
+
+
 class SheetList(ListView):
-    queryset = Sheet.objects.all().order_by('-created_time')
+    queryset = Sheet.objects.filter(deleted_time=None).order_by('-created_time')
 
     @regnskab_permission_required_method
     def dispatch(self, request, *args, **kwargs):

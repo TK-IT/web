@@ -5,12 +5,13 @@ class KrydslisteSite(object):
         from django.conf import settings
         from django.conf.urls import url
         from tkweb.apps.krydsliste.views import (
-            SheetList, SheetCreate, SheetUpdate,
+            SheetList, SheetCreate, SheetUpdate, SheetDelete,
         )
 
         urls = [
             url(r'^$', SheetList.as_view(), name='sheet_list'),
             url(r'^new/$', SheetCreate.as_view(), name='sheet_create'),
+            url(r'^delete/$', SheetDelete.as_view(), name='sheet_delete'),
             url(r'^(?P<pk>\d+)/$', SheetUpdate.as_view(), name='sheet_update'),
         ]
         return urls
