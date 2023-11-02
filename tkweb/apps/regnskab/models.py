@@ -215,6 +215,14 @@ class Sheet(models.Model):
     row_image = models.FileField(upload_to=sheet_upload_to,
                                  blank=True, null=True)
 
+    def may_delete(self):
+        s = self.session
+        if s is None:
+            return False
+        if s.sent:
+            return False
+        return True
+
     def columns(self):
         qs = self.purchasekind_set.all()
         return qs.order_by('position')
@@ -413,7 +421,7 @@ class PurchaseKind(models.Model):
 
 
 class SheetRow(models.Model):
-    sheet = models.ForeignKey(Sheet)
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE)
     position = models.PositiveIntegerField()
     name = models.CharField(max_length=200, blank=False, null=True)
     profile = models.ForeignKey(Profile, blank=False, null=True)
@@ -450,7 +458,7 @@ class SheetRow(models.Model):
 
 
 class Purchase(models.Model):
-    row = models.ForeignKey(SheetRow)
+    row = models.ForeignKey(SheetRow, on_delete=models.CASCADE)
     kind = models.ForeignKey(PurchaseKind)
     count = models.DecimalField(max_digits=9, decimal_places=4,
                                 help_text='antal krydser eller brøkdel')

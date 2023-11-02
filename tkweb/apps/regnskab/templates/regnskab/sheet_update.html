@@ -19,6 +19,8 @@ href="{% static 'regnskab/sheet_update.css' %}" />
 
 {% if error %}<p>Der er sket en fejl. {{ error }}</p>{% endif %}
 
+<div><a href="{% url 'regnskab:sheet_delete' pk=sheet.pk %}">Slet</a></div>
+
 <div id="sheet-container"></div>
 <input type="submit" value="Gem" />
 </form>

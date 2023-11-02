@@ -5,10 +5,31 @@
 <p>Her kan du oprette og udskrive krydslister.
 Tip: Skabelonen med navnet "Standard" bruges som udgangspunkt
 når du opretter en ny krydsliste.</p>
+<form method="post" action="{% url 'regnskab:krydsliste:sheet_delete' %}">{% csrf_token %}
 <ul>
 	<li><a href="{% url 'regnskab:krydsliste:sheet_create' %}">Opret ny</a></li>
 	{% for object in object_list %}
-	<li><a href="{% url 'regnskab:krydsliste:sheet_update' pk=object.pk %}">{{ object.name }}</a></li>
+        <li><input type="checkbox" name="delete_krydsliste_{{ object.pk }}"><a href="{% url 'regnskab:krydsliste:sheet_update' pk=object.pk %}">{{ object.name }}</a></li>
 	{% endfor %}
 </ul>
+<input type="submit" value="Slet valgte">
+</form>
+<script>
+    const checkboxes = [...document.querySelectorAll("input[type=checkbox]")];
+    let lastclick = -1;
+
+    function checkClick(ix, ev) {
+        if (ev.shiftKey && lastclick != -1) {
+            const c = checkboxes[ix].checked;
+            for (let j = Math.min(ix, lastclick); j <= Math.max(ix, lastclick); ++j) {
+                checkboxes[j].checked = c;
+            }
+        }
+        lastclick = ix;
+    }
+
+    for (let i = 0; i < checkboxes.length; ++i) {
+        checkboxes[i].addEventListener("click", checkClick.bind(window, i));
+    }
+</script>
 {% endblock %}

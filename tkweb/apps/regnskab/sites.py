@@ -17,6 +17,8 @@ class RegnskabSite(object):
                 name='sheet_detail'),
             url(r'^sheet/(?P<pk>\d+)/edit/$', views.SheetRowUpdate.as_view(),
                 name='sheet_update'),
+            url(r'^sheet/(?P<pk>\d+)/delete/$', views.SheetDelete.as_view(),
+                name='sheet_delete'),
             url(r'^template/$', views.EmailTemplateList.as_view(),
                 name='email_template_list'),
             url(r'^template/(?P<pk>\d+)/$',
