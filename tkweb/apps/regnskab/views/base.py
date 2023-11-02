@@ -9,7 +9,7 @@ import json
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.db.models import F, Sum
 from django.utils import timezone
 from django.utils.html import format_html, format_html_join
@@ -175,6 +175,34 @@ class SheetCreate(FormView):
                     ' '.join('%s=%s' % (k['name'], k['unit_price'])
                              for k in data['kinds']))
         return redirect('regnskab:sheet_update', pk=sheet.pk)
+
+
+class SheetDelete(DeleteView):
+    @regnskab_permission_required_method
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_template_names(self):
+        return ['regnskab/sheet_delete.html']
+
+    def post(self, request, *args, **kwargs):
+        sheet = self.get_sheet()  # type: Sheet
+        session = sheet.session
+        assert session is not None
+        sheet.delete()
+        return redirect('regnskab:session_update', pk=session.pk)
+
+    def get_sheet(self):
+        s = get_object_or_404(Sheet.objects, pk=self.kwargs['pk'])
+        if not s.may_delete():
+            raise Http404
+        return s
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['sheet'] = self.get_sheet()
+        context_data['sheet_images'] = list(sheet.sheetimage_set.all())
+        return context_data
 
 
 class SheetDetail(TemplateView):
