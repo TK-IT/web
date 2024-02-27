@@ -22,6 +22,7 @@
                 { name: "csrfmiddlewaretoken", value: "{{ csrf_token }}" },
                 { name: "object_id", value: "{{ object_id }}" },
             ],
+            limitConcurrentUploads: 3,
 
             {% block JS_OPTS %}
               autoUpload: true,
