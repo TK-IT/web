@@ -70,8 +70,8 @@ class Command(BaseCommand):
                 except KeyError:
                     description = ""
 
-                title = strip_tags(title)
-                description = strip_tags(description)
+                title = strip_tags(title).encode("latin1", errors="replace").decode("latin1")
+                description = strip_tags(description).encode("latin1", errors="replace").decode("latin1")
 
                 e = Event(title=title, date=startdate, description=description)
                 e.clean()
