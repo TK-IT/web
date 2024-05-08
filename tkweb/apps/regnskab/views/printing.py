@@ -46,7 +46,7 @@ BALANCE_PRINT_TEX = r"""
 \usepackage{xcolor}
 \usepackage{colortbl}
 \sisetup{output-decimal-marker={,}}
-\setulmarginsandblock{8mm}{8mm}{*}
+\setulmarginsandblock{17mm}{27mm}{*}
 \setlrmarginsandblock{9mm}{5mm}{*}
 \setlength{\headheight}{0pt}
 \setlength{\headsep}{0pt}
@@ -54,7 +54,7 @@ BALANCE_PRINT_TEX = r"""
 \checkandfixthelayout
 \pagestyle{empty}
 \begin{document}
-\strut \hfill \today\\
+\strut \hfill \today\\[2mm]
 \definecolor{pink}{rgb}{1,0.80,0.88}
 \renewcommand{\hl}{\cellcolor{pink}}
 
