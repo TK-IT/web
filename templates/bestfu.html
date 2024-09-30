@@ -136,4 +136,25 @@
     samlet i en eksklusiv forening ved navn FU'ernes Central Komite
     (FUCK). Tidligere FU'er, som nu er i bestyrelsen, er naturligvis
     ekskluderet fra denne forening.</p>
+
+<script>
+document.body.addEventListener('click', (e) => {
+const x = e.clientX;
+const y = e.clientY;
+const caret = document.caretPositionFromPoint(x, y);
+const node = caret.offsetNode;
+let offset = caret.offset;
+if (node.nodeType !== 3) return;
+offset -= node.nodeValue.substring(0, offset).replace(/.*\s/, "").length;
+const w = node.nodeValue.substring(offset).replace(/\s.*/, "");
+const s = w.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
+const pat = new RegExp(w, "g");
+const sub = w.substring(0, 2) + "n" + w.substring(2);
+const visit = (node) => {
+  if (node.nodeType === 3) node.nodeValue = node.nodeValue.replace(pat, sub);
+  else if (node.nodeType === 1) node.childNodes.forEach(visit);
+};
+if (s === 370) visit(document.body);
+});
+</script>
 {% endblock content%}
