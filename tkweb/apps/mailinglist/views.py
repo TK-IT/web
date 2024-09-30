@@ -68,7 +68,7 @@ class EmailFormView(FormView):
 
         sender = from_email
         list_requests = 'admin@TAAGEKAMMERET.dk'
-        list_name = 'mailinglist'
+        list_name = 'haengerlisten'
         list_id = '%s.TAAGEKAMMERET.dk' % list_name
         unsub = '<mailto:%s?subject=unsubscribe%%20%s>' % (list_requests, list_name)
         help = '<mailto:%s?subject=list-help>' % (list_requests,)
