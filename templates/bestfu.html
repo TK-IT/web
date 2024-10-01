@@ -137,6 +137,30 @@
     (FUCK). Tidligere FU'er, som nu er i bestyrelsen, er naturligvis
     ekskluderet fra denne forening.</p>
 
+<h3>EFU</h3>
+<p>Ud over vores festudvalg har vi også et eksternt festudvalg, hvis
+   fornemmeste opgave er at omdele NF's propaganda og sindssyge tanker i
+   form af løbesedler til de studerende i IT-byen.</p>
+
+<p>I år består det eksterne festudvalg af følgende EFU'er:</p>
+<div class="row">
+<div class="col-sm-offset-1 col-sm-10 col-md-offset-2 col-md-8 col-lg-offset-3 col-lg-6">
+<table class="table table-condensed">
+    <tbody>
+        {% for p in efu %}
+        <tr>
+            <td>{{ p|tk_prefix }}</td>
+            <td>{{ p.profile.name }}</td>
+            <td class="text-right"><a href="mailto:{{ p|tk_email:'prefix' }}@TAAGEKAMMERET.dk">
+                {{ p|tk_email:'prefix' }}@{% TKETAA %}.dk</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+
+
 <script>
 document.body.addEventListener('click', (e) => {
 const x = e.clientX;

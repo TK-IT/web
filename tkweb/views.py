@@ -13,6 +13,8 @@ def bestfu(request, **kwargs):
         best = [b for b in best if b.root != "INKA"]
     fu = Title.objects.filter(kind=Title.FU,
                               period=period).select_related()
+    efu = Title.objects.filter(kind=Title.EFU,
+                               period=period).select_related()
     if request.GET.get('y') == 'g':
         best = list(best)
         fu = list(fu)
