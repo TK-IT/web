@@ -20,5 +20,5 @@ def bestfu(request, **kwargs):
         fu = list(fu)
         for title in best + fu:
             title.period += 1
-    context = {'best': best, 'fu': fu, }
+    context = {"best": best, "fu": fu, "efu": efu}
     return render(request, 'bestfu.html', context)
