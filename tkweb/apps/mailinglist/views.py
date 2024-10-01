@@ -80,7 +80,7 @@ class EmailFormView(FormView):
                 ('X-TK-Recipient', recipient),
                 ('X-TK-Sender', self.request.user.get_full_name()),
                 ('Sender', sender),
-                ('List-Name', list_name),
+                ('List-Name', "mailinglist"),
                 ('List-Id', list_id),
                 ('List-Unsubscribe', unsub),
                 ('List-Help', help),
