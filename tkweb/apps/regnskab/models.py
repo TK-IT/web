@@ -936,7 +936,8 @@ class Newsletter(models.Model):
         regenerate_emails(self)
 
     def get_email_context(self, profile_data):
-        if not profile_data['profile'].in_current:
+        profile = profile_data['profile']
+        if not profile.in_current or not profile.email:
             return
         return get_base_email_context(self, profile_data)
 
