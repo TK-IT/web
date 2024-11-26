@@ -1,6 +1,7 @@
 import re
 import textwrap
 from django import forms
+from django.core.validators import validate_email
 from multiupload.fields import MultiFileField
 from tkweb.apps.mailinglist.models import SharedFile
 
@@ -22,6 +23,18 @@ class EmailForm(forms.Form):
     text = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 20, 'cols': 90, 'class': 'form-control'}),
     )
+
+
+class EmailToRecipientsForm(EmailForm):
+    recipients = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 20, 'cols': 90, 'class': 'form-control'}),
+    )
+
+    def clean_recipients(self) -> str:
+        recipients = re.split(r'[\r\n,;]+', self.cleaned_data["recipients"].strip())
+        for r in recipients:
+            validate_email(r)
+        return "\n".join(sorted(set(recipients)))
 
 
 class FileForm(forms.Form):

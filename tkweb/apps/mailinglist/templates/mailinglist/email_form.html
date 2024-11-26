@@ -1,9 +1,28 @@
 {% extends 'base.html' %}
 {% load tkbrand %}
-{% block title %}Email til hængerlisten{% endblock title %}
+{% block title %}
+{% if form.recipients %}
+Email til folk
+{% else %}
+Email til hængerlisten
+{% endif %}
+{% endblock title %}
 {% block canonical_url %}{% url 'email_form' %}{% endblock canonical_url %}
 {% block content %}
     <form method="post" class="form-horizontal" >{% csrf_token %}
+        {% if form.recipients %}
+        <div class="form-group">
+            <label for="{{ form.recipients.auto_id }}" class="col-xs-4 col-sm-2 control-label">
+                {{ form.recipients.label }}
+            </label>
+            <div class="col-xs-8 col-sm-5 ">
+                {{ form.recipients }}
+            </div>
+            <div class="col-xs-12">
+                {{ form.recipients.errors }}
+            </div>
+        </div>
+        {% endif %}
         <div class="form-group">
             <label for="{{ form.sender_name.auto_id }}" class="col-xs-4 col-sm-2 control-label">
                 {{ form.sender_name.label }}
@@ -49,7 +68,11 @@
         <div class="form-group">
             <div class="col-xs-12">
                 <input type="submit" name="only_me" class="btn btn-default" value="Send kun til mig" />
+                {% if form.recipients %}
+                <input type="submit" name="send" class="btn btn-default" value="Send mail til folk" />
+                {% else %}
                 <input type="submit" name="send" class="btn btn-default" value="Send mail til hængerlisten" />
+                {% endif %}
             </div>
         </div>
     </form>

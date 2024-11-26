@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import FormView, ListView
 import django.core.mail
 from django.core.mail import EmailMessage
-from tkweb.apps.mailinglist.forms import EmailForm, FileForm
+from tkweb.apps.mailinglist.forms import EmailForm, FileForm, EmailToRecipientsForm
 from tkweb.apps.mailinglist.models import SharedFile
 from tkweb.apps.idm.models import Group
 
@@ -31,6 +31,7 @@ class EmailFormView(FormView):
             return self.form_invalid(form)
 
     def get_recipients(self, form):
+        "Overridden in EmailToRecipientsFormView."
         group = Group.objects.get(regexp=Group.REGEXP_MAILING_LIST)
         recipients = group.profile_set.all()
         recipients = recipients.exclude(email='')
@@ -93,6 +94,16 @@ class EmailFormView(FormView):
         email_backend = django.core.mail.get_connection()
         email_backend.send_messages(messages)
         return HttpResponseRedirect(self.get_success_url())
+
+
+class EmailToRecipientsFormView(EmailFormView):
+    form_class = EmailToRecipientsForm
+
+    def get_success_url(self):
+        return reverse('email_to_recipients_form')
+
+    def get_recipients(self, form):
+        return form.cleaned_data["recipients"].split()
 
 
 @method_decorator(permission_required("mailinglist.send"), name="dispatch")
