@@ -21,16 +21,7 @@ class EmailFormView(FormView):
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
-        if request.POST.get('wrap'):
-            # Don't check if form is valid; just wrap text and redisplay.
-            kwargs = self.get_form_kwargs()
-            data = kwargs['data'].copy()
-            data['text'] = form.perform_wrapping(data['text'],
-                                                 data['wrapping'])
-            kwargs['data'] = data
-            form = self.get_form_class()(**kwargs)
-            return self.render_to_response(self.get_context_data(form=form))
-        elif request.POST.get('send') or request.POST.get('only_me'):
+        if request.POST.get('send') or request.POST.get('only_me'):
             if form.is_valid():
                 return self.form_valid(form)
             else:
@@ -57,7 +48,7 @@ class EmailFormView(FormView):
         data = form.cleaned_data
         subject = data['subject']
         subject = self.translate_subject(subject)
-        text = data['wrapped_text']
+        text = data['text'].replace("\r", "")
         from_email = '%s@TAAGEKAMMERET.dk' % (data['sender_email'],)
         from_field = '"%s" <%s>' % (data['sender_name'], from_email)
 
