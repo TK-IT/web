@@ -1,5 +1,4 @@
 Django>=3.2,<3.2.99
-git+https://github.com/CalPolyResDev/django-jfu@b5633c72a1573380619570b3eb3d3732edc882f7
 git+https://github.com/TK-IT/tktitler.git
 git+https://github.com/django-wiki/django-wiki.git@9b05df98b7f1ca24683ff181abe5147c3a2fed86
 django-constance

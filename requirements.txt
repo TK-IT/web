@@ -36,8 +36,6 @@ django-cleanup==9.0.0
     # via -r requirements.in
 django-constance==4.3.2
     # via -r requirements.in
-django-jfu @ git+https://github.com/CalPolyResDev/django-jfu@b5633c72a1573380619570b3eb3d3732edc882f7
-    # via -r requirements.in
 django-js-asset==1.2.3
     # via django-mptt
 django-macros==0.4.0
