@@ -83,13 +83,13 @@ urlpatterns = [
         tkweb.apps.regnskab.site.urls),
 
     url(r'^print/',
-        include((tkweb.apps.uniprint.urls, 'uniprint', 'uniprint'))),
+        (tkweb.apps.uniprint.urls, 'uniprint', 'uniprint')),
 
     url(r'^drinks/',
-        include((tkweb.apps.drinks.urls, 'drinks', 'drinks'))),
+        (tkweb.apps.drinks.urls, 'drinks', 'drinks')),
 
     url(r'^barplan/',
-        include((tkweb.apps.barplan.urls, 'barplan', 'barplan'))),
+        (tkweb.apps.barplan.urls, 'barplan', 'barplan')),
 
     url(r'^admin/', admin.site.urls),
 

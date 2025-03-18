@@ -96,7 +96,7 @@ class RegnskabSite(object):
             url(r'^news/(?P<pk>\d+)/email/(?P<profile>\d+)/send/$',
                 email.NewsletterEmailSend.as_view(),
                 name='newsletter_email_send'),
-            url(r'^krydsliste/', include(krydsliste.site.urls)),
+            url(r'^krydsliste/', krydsliste.site.urls),
         ]
         if settings.DEBUG:
             urls += [
