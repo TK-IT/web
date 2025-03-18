@@ -87,7 +87,7 @@ packaging==24.2
     # via
     #   bleach
     #   matplotlib
-pillow==11.1.0
+pillow==8.4.0
     # via
     #   -r requirements.in
     #   django-versatileimagefield

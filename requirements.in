@@ -3,7 +3,7 @@ git+https://github.com/TK-IT/tktitler.git
 git+https://github.com/django-wiki/django-wiki.git@9b05df98b7f1ca24683ff181abe5147c3a2fed86
 django-constance
 django-picklefield
-Pillow>=2.4.0
+Pillow>=8.3.2,<8.99
 imageio
 django-versatileimagefield>=1.10
 django-cleanup
