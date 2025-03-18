@@ -1,4 +1,6 @@
+import functools
 import re
+import django.db.utils
 from django import template
 from django.utils.safestring import mark_safe
 from constance import config
@@ -117,6 +119,18 @@ def add_colors(colors, html):
     return re.sub(re.escape(insert_after), repl, html)
 
 
+def catch_db_errors(fn):
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except django.db.utils.OperationalError:
+            return "?"
+
+    return wrapper
+
+
+@catch_db_errors
 def wrap_tk_html(html):
     if config.PRIDE:
         html = add_colors(PRIDE_COLORS, html)
@@ -146,11 +160,13 @@ def gfyearPPslash_gallery(gfyear):
 
 
 @register.filter
+@catch_db_errors
 def tk_prefix(title, arg='unicode'):
     return tk.prefix(title, gfyear=config.GFYEAR,  type=arg)
 
 
 @register.filter
+@catch_db_errors
 def tk_kprefix(title, arg='unicode'):
     return tk.kprefix(title, gfyear=config.GFYEAR, type=arg)
 
@@ -161,6 +177,7 @@ def tk_postfix(title, arg='single'):
 
 
 @register.filter
+@catch_db_errors
 def tk_prepostfix(title, arg='longslash'):
     """
     :param str arg: postfixtype til :func:`tktitler.prepostfix`.
@@ -171,6 +188,7 @@ def tk_prepostfix(title, arg='longslash'):
 
 
 @register.filter
+@catch_db_errors
 def tk_email(title, arg='postfix'):
     return tk.email(title, gfyear=config.GFYEAR, type=arg)
 
