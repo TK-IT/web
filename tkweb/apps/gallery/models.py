@@ -4,7 +4,6 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.dispatch import receiver
 from django.urls import reverse
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import format_html
 from model_utils.managers import InheritanceManager
 from sorl.thumbnail import get_thumbnail
@@ -18,7 +17,6 @@ FORCEDORDERMAX = 10000
 
 logger = logging.getLogger(__name__)
 
-@python_2_unicode_compatible
 class Album(models.Model):
     class Meta:
         ordering = ['gfyear', '-eventalbum', 'oldFolder', 'publish_date']
@@ -53,7 +51,6 @@ class Album(models.Model):
                                         'album_slug': self.slug})
 
 
-@python_2_unicode_compatible
 class BaseMedia(models.Model):
     class Meta:
         ordering = ['forcedOrder', 'date', 'slug']

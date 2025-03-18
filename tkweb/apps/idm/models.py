@@ -2,7 +2,6 @@ import re
 
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from constance import config
 import tktitler as tk
 
@@ -36,7 +35,6 @@ def validate_tktitler_period(value):
         raise ValidationError("Invalid title period: %s" % exn)
 
 
-@python_2_unicode_compatible
 class Group(models.Model):
     REGEXP_MAILING_LIST = 'no$public$address'
 
@@ -71,7 +69,6 @@ class Group(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
 class Profile(models.Model):
     name = models.CharField(max_length=50, verbose_name="Navn")
     email = models.EmailField(max_length=50, blank=True,
@@ -103,7 +100,6 @@ class Profile(models.Model):
 
 
 @tk.title_class
-@python_2_unicode_compatible
 class Title(models.Model):
     BEST, FU, EFU = 'BEST', 'FU', 'EFU'
     KIND = [(BEST, 'BEST'), (FU, 'FU'), (EFU, 'EFU')]
