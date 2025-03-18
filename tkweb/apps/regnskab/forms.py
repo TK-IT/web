@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from tkweb.apps.regnskab.models import EmailTemplate, config
 from tkweb.apps.regnskab.utils import plain_to_html, html_to_plain
 import tktitler as tk
-from mediumeditor.widgets import MediumEditorTextarea
 
 
 def placeholder_from_help(cls):
@@ -99,7 +98,6 @@ class EmailTemplateForm(forms.ModelForm):
         initial.setdefault('body', EmailTemplateForm.initial_body(instance))
         super().__init__(**kwargs)
         if instance and instance.markup == EmailTemplate.HTML:
-            self.fields['body'].widget = MediumEditorTextarea()
             self.fields['initial_markup'].initial = EmailTemplate.HTML
         else:
             self.fields['initial_markup'].initial = EmailTemplate.PLAIN
@@ -162,7 +160,6 @@ class AnonymousEmailTemplateForm(forms.Form):
             initial_markup = data.get('markup', EmailTemplate.PLAIN)
 
         if initial_markup == EmailTemplate.HTML:
-            self.fields['body'].widget = MediumEditorTextarea()
             self.fields['initial_markup'].initial = EmailTemplate.HTML
         else:
             self.fields['initial_markup'].initial = EmailTemplate.PLAIN

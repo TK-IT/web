@@ -39,7 +39,6 @@ THIRD_PARTY_APPS = [
     'wiki.plugins.images',
     'wiki.plugins.macros',
     'wiki.plugins.redlinks',
-    'mediumeditor',
 ]
 
 LOCAL_APPS = [
