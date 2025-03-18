@@ -27,6 +27,7 @@ def jfu(
         'upload_handler_url': reverse(
             upload_handler_name, args = args, kwargs = kwargs
         ),
+        'object_id': context.get("object_id"),
     }
 
     # Use the request context variable, injected
