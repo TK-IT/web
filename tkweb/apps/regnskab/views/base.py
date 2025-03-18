@@ -7,7 +7,7 @@ from collections import Counter
 import json
 
 from django.core.exceptions import ValidationError, ImproperlyConfigured
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 from django.http import Http404, HttpResponse
 from django.db.models import F, Sum

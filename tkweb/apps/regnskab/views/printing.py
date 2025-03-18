@@ -7,7 +7,7 @@ from decimal import Decimal
 from collections import defaultdict
 from constance import config
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings

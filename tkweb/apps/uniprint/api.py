@@ -20,7 +20,7 @@ import logging
 
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from tkweb.apps.uniprint.models import Document, Printout, Printer
 from tkweb.apps.uniprint.document import (
     extract_plain_text, get_pdfinfo, pages_from_pdfinfo,

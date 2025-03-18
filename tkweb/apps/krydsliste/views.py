@@ -2,7 +2,7 @@ import io
 import logging
 from django.conf import settings
 from django.views.generic import ListView, CreateView, UpdateView, View
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.template.loader import get_template
 from django.http import HttpResponse, HttpResponseRedirect

@@ -1,7 +1,7 @@
 from PIL import Image as PILImage
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase, override_settings
 from tkweb.apps.gallery import views
 from tkweb.apps.gallery.models import Album, Image

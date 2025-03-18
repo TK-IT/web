@@ -1,7 +1,7 @@
 from django import template
 from django.utils.html import format_html
 from django.contrib.staticfiles.storage import staticfiles_storage
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 
 register = template.Library()
