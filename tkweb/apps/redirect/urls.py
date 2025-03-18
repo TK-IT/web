@@ -68,26 +68,26 @@ urlpatterns = [
                              permanent=True), ),
 
     # J60
-    url(r'(?i)^J60/index.html',
+    url(r'^J60/index.html',
         RedirectView.as_view(url='/J60/', permanent=True), ),
 
-    url(r'(?i)^J60/j60brev.pdf',
+    url(r'^J60/j60brev.pdf',
         RedirectView.as_view(url=STATIC_URL+'jubi/J60/j60brev.pdf',
                              permanent=True), ),
 
-    url(r'(?i)^J60/katalog-j60.pdf',
+    url(r'^J60/katalog-j60.pdf',
         RedirectView.as_view(url=STATIC_URL+'jubi/J60/katalog-j60.pdf',
                              permanent=False), ),
 
-    url(r'(?i)^J60revy$',
+    url(r'^J60revy$',
         RedirectView.as_view(url='https://auws.au.dk/TKrevy',
                              permanent=False)),
 
-    url(r'(?i)^J60foredrag$',
+    url(r'^J60foredrag$',
         RedirectView.as_view(url='https://auws.au.dk/TKforedrag',
                              permanent=False)),
 
-    url(r'(?i)^J60foredrag-prerelease$',
+    url(r'^J60foredrag-prerelease$',
         RedirectView.as_view(url='https://auws.au.dk/TKforedrag',
                              permanent=False)),
 ]

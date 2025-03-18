@@ -155,6 +155,7 @@ TEMPLATES = [
             'context_processors': [
                 'constance.context_processors.config',
                 'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
                 'django.template.context_processors.static',
                 'django.template.context_processors.debug',
@@ -261,3 +262,5 @@ WIKI_MARKDOWN_KWARGS = {
 # --------
 
 PRINT_USERNAME_PREFIX = "tk-"
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
