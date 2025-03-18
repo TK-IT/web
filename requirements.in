@@ -7,7 +7,7 @@ Pillow>=2.4.0
 imageio
 django-versatileimagefield>=1.10
 django-cleanup
-django-model-utils
+django-model-utils>=4.2.0,<4.2.99
 sorl-thumbnail<=12.9.0
 django-bootstrap3
 icalendar
