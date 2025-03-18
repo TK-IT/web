@@ -105,8 +105,7 @@ class BaseMedia(models.Model):
         validators=[MinValueValidator(-FORCEDORDERMAX),
                     MaxValueValidator(FORCEDORDERMAX)],
         verbose_name='Rækkefølge')
-    isCoverFile = models.NullBooleanField(null=True,
-                                          verbose_name='Vis på forsiden')
+    isCoverFile = models.BooleanField(null=True, verbose_name='Vis på forsiden')
 
     def admin_thumbnail(self):
         if self.type == BaseMedia.IMAGE:
