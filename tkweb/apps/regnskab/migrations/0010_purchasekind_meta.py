@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='purchasekind',
             name='sheet',
-            field=models.ForeignKey(related_name='+', to='regnskab.Sheet'),
+            field=models.ForeignKey(related_name='+', to='regnskab.Sheet', on_delete=models.CASCADE),
         ),
         migrations.AlterField(
             model_name='purchasekind',

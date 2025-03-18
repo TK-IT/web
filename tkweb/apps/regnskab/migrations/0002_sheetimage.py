@@ -51,6 +51,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sheetimage',
             name='sheet',
-            field=models.ForeignKey(to='regnskab.Sheet'),
+            field=models.ForeignKey(to='regnskab.Sheet', on_delete=models.CASCADE),
         ),
     ]

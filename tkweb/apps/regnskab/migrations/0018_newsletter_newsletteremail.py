@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                 ('body_html', models.TextField(blank=True, null=True)),
                 ('recipient_name', models.CharField(max_length=255)),
                 ('recipient_email', models.CharField(max_length=255)),
-                ('newsletter', models.ForeignKey(related_name='email_set', to='regnskab.Newsletter')),
+                ('newsletter', models.ForeignKey(related_name='email_set', to='regnskab.Newsletter', on_delete=models.CASCADE)),
                 ('profile', models.ForeignKey(null=True, related_name='+', on_delete=django.db.models.deletion.SET_NULL, to='idm.Profile')),
             ],
             options={

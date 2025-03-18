@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
                     model_name='email',
                     name='session',
                     field=models.ForeignKey(related_name='email_set',
-                                            to='regnskab.Session'),
+                                            to='regnskab.Session', on_delete=models.CASCADE),
                 ),
             ],
         ),

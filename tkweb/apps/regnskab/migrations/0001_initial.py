@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('end_time', models.DateTimeField(blank=True, null=True)),
                 ('created_time', models.DateTimeField(auto_now_add=True)),
                 ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
-                ('profile', models.ForeignKey(to='idm.Profile')),
+                ('profile', models.ForeignKey(to='idm.Profile', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['period', 'root'],
@@ -102,7 +102,7 @@ class Migration(migrations.Migration):
                 ('period', models.IntegerField(verbose_name='Årgang')),
                 ('created_time', models.DateTimeField(auto_now_add=True)),
                 ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
-                ('session', models.ForeignKey(null=True, to='regnskab.Session')),
+                ('session', models.ForeignKey(null=True, to='regnskab.Session', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['start_date'],
@@ -116,8 +116,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('position', models.PositiveIntegerField()),
                 ('name', models.CharField(max_length=200, null=True)),
-                ('profile', models.ForeignKey(null=True, to='idm.Profile')),
-                ('sheet', models.ForeignKey(to='regnskab.Sheet')),
+                ('profile', models.ForeignKey(null=True, to='idm.Profile', on_delete=models.CASCADE)),
+                ('sheet', models.ForeignKey(to='regnskab.Sheet', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['sheet', 'position'],
@@ -133,7 +133,7 @@ class Migration(migrations.Migration):
                 ('end_time', models.DateTimeField(blank=True, null=True)),
                 ('created_time', models.DateTimeField(auto_now_add=True)),
                 ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
-                ('profile', models.ForeignKey(to='idm.Profile')),
+                ('profile', models.ForeignKey(to='idm.Profile', on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -146,28 +146,28 @@ class Migration(migrations.Migration):
                 ('note', models.CharField(blank=True, max_length=255)),
                 ('created_time', models.DateTimeField(auto_now_add=True)),
                 ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=django.db.models.deletion.SET_NULL)),
-                ('profile', models.ForeignKey(to='idm.Profile')),
-                ('session', models.ForeignKey(null=True, to='regnskab.Session')),
+                ('profile', models.ForeignKey(to='idm.Profile', on_delete=models.CASCADE)),
+                ('session', models.ForeignKey(null=True, to='regnskab.Session', on_delete=models.CASCADE)),
             ],
         ),
         migrations.AddField(
             model_name='purchasekind',
             name='sheet',
-            field=models.ForeignKey(to='regnskab.Sheet'),
+            field=models.ForeignKey(to='regnskab.Sheet', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='purchase',
             name='kind',
-            field=models.ForeignKey(to='regnskab.PurchaseKind'),
+            field=models.ForeignKey(to='regnskab.PurchaseKind', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='purchase',
             name='row',
-            field=models.ForeignKey(to='regnskab.SheetRow'),
+            field=models.ForeignKey(to='regnskab.SheetRow', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='email',
             name='session',
-            field=models.ForeignKey(to='regnskab.Session'),
+            field=models.ForeignKey(to='regnskab.Session', on_delete=models.CASCADE),
         ),
     ]

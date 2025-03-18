@@ -79,7 +79,7 @@ class SheetStatus(models.Model):
 
 @tk.title_class
 class Alias(models.Model):
-    profile = models.ForeignKey(Profile)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     period = models.IntegerField(
         blank=True, null=True, verbose_name='Årgang',
         help_text='Bruges kun hvis aliaset skal opdateres automatisk ' +
@@ -124,7 +124,7 @@ class Transaction(models.Model):
     session = models.ForeignKey('Session', on_delete=models.CASCADE,
                                 null=True, blank=False)
     kind = models.CharField(max_length=10, choices=KIND)
-    profile = models.ForeignKey(Profile)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     time = models.DateTimeField()
     period = models.IntegerField(verbose_name='Årgang')
     amount = models.DecimalField(max_digits=9, decimal_places=2)
@@ -424,7 +424,7 @@ class SheetRow(models.Model):
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE)
     position = models.PositiveIntegerField()
     name = models.CharField(max_length=200, blank=False, null=True)
-    profile = models.ForeignKey(Profile, blank=False, null=True)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=False, null=True)
     image_start = models.PositiveIntegerField(blank=True, null=True)
     image_stop = models.PositiveIntegerField(blank=True, null=True)
 
@@ -459,7 +459,7 @@ class SheetRow(models.Model):
 
 class Purchase(models.Model):
     row = models.ForeignKey(SheetRow, on_delete=models.CASCADE)
-    kind = models.ForeignKey(PurchaseKind)
+    kind = models.ForeignKey(PurchaseKind, on_delete=models.CASCADE)
     count = models.DecimalField(max_digits=9, decimal_places=4,
                                 help_text='antal krydser eller brøkdel')
 

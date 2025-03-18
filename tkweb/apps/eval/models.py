@@ -13,6 +13,7 @@ import re
 class WikiArticleTimeout(models.Model):
     article = models.OneToOneField(
         Article,
+        on_delete=models.CASCADE,
         related_name="wikiArticleTimeout")
     timeoutMonth = models.PositiveSmallIntegerField(null=True)
     updated = models.DateField(null=True)
