@@ -242,9 +242,6 @@ WIKI_MARKDOWN_KWARGS = {
     'extensions': [
         'markdown.extensions.footnotes',
         'markdown.extensions.attr_list',
-        'markdown.extensions.smart_strong',
-        'markdown.extensions.footnotes',
-        'markdown.extensions.attr_list',
         'markdown.extensions.def_list',
         'markdown.extensions.tables',
         'markdown.extensions.abbr',
