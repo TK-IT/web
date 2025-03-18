@@ -11,6 +11,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='profile',
             name='gone',
-            field=models.BooleanField(verbose_name='Afdød', default=False),
+            field=models.BooleanField(verbose_name='Afdød', blank=True, default=False),
         ),
     ]

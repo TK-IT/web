@@ -11,6 +11,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='alias',
             name='is_title',
-            field=models.BooleanField(verbose_name='Primær titel', default=False, help_text='Markeres hvis aliaset skal vises foran personens navn som om det var en titel.'),
+            field=models.BooleanField(verbose_name='Primær titel', blank=True, default=False, help_text='Markeres hvis aliaset skal vises foran personens navn som om det var en titel.'),
         ),
     ]

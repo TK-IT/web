@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='basemedia',
             name='isCoverFile',
-            field=models.BooleanField(verbose_name='Vis på forsiden', default=False),
+            field=models.BooleanField(verbose_name='Vis på forsiden', default=False, null=True),
         ),
         migrations.AlterField(
             model_name='basemedia',

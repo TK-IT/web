@@ -11,6 +11,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='profile',
             name='allow_direct_email',
-            field=models.BooleanField(default=True, verbose_name='Tillad emails til titel'),
+            field=models.BooleanField(blank=True, default=True, verbose_name='Tillad emails til titel'),
         ),
     ]
