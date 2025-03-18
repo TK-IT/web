@@ -11,6 +11,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='basemedia',
             name='isCoverFile',
-            field=models.BooleanField(null=True, verbose_name='Vis på forsiden'),
+            field=models.BooleanField(blank=True, null=True, verbose_name='Vis på forsiden'),
         ),
     ]
