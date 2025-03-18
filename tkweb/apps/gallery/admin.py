@@ -12,7 +12,7 @@ class InlineBaseMediaAdmin(admin.TabularInline):
     fields = ('admin_thumbnail', 'date', 'caption', 'visibility', 'slug', 'forcedOrder', 'isCoverFile')
     readonly_fields = ( 'admin_thumbnail', 'slug', 'isCoverFile',)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None):
         return False
 
 
