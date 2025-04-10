@@ -26,7 +26,7 @@ def contrast_stretch(
         im_channels = im[:, :, np.newaxis]
     else:
         im_channels = im
-    im_channels = im_channels.astype(np.float)
+    im_channels = im_channels.astype(np.float64)
 
     pct = q * 100
     fractiles = np.percentile(im_channels, [pct, 100 - pct], (0, 1),
@@ -294,7 +294,7 @@ def naive_cross_value(data: np.ndarray) -> float:
     if data.max() > 1:
         data = data / data.max()
     height, width, depth = data.shape
-    i, j = np.mgrid[0:height, 0:width].astype(np.float)
+    i, j = np.mgrid[0:height, 0:width].astype(np.float64)
     neg_i = (height - 1) - i
     neg_j = (width - 1) - j
     weights = np.minimum(
