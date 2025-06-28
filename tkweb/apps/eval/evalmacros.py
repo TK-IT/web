@@ -111,7 +111,7 @@ class EvalMacroPattern(markdown.inlinepatterns.Pattern):
                 'expanded': expanded,
             })
         self.hide_stack.append(title)
-        return self.markdown.htmlStash.store(html, safe=False)
+        return self.markdown.htmlStash.store(html)
 
     def end_hide(self, title='', full=''):
         html = render_to_string("evalmacros/end_hide.html")
@@ -124,7 +124,7 @@ class EvalMacroPattern(markdown.inlinepatterns.Pattern):
         else:
             html += _inline_error(full, 'Unmatched [end_hide]')
 
-        return self.markdown.htmlStash.store(html, safe=False)
+        return self.markdown.htmlStash.store(html)
 
     begin_hide.meta = {
         'short_description': 'Skjul en sektion',
@@ -144,11 +144,11 @@ class EvalMacroPattern(markdown.inlinepatterns.Pattern):
             "evalmacros/begin_fixme.html",
             context={"title": title, "id": title + "-" + str(random.randrange(9999))},
         )
-        return self.markdown.htmlStash.store(html, safe=False)
+        return self.markdown.htmlStash.store(html)
 
     def end_fixme(self, full=""):
         html = render_to_string("evalmacros/end_fixme.html")
-        return self.markdown.htmlStash.store(html, safe=False)
+        return self.markdown.htmlStash.store(html)
 
     begin_fixme.meta = {
         "short_description": "Fixme",
