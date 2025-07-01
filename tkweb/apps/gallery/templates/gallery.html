@@ -46,13 +46,9 @@
                   <div class="thumbcap">
                     {% if firstFile.type == "I" %}
                       <img src="{{ firstFile.file.crop.253x253.url }}" alt="{{ album.title }}">
-                    {% elif firstFile.type == "V" %}
-                      {% bootstrap_icon "film" %}
-                    {% elif firstFile.type == "A" %}
-                      {% bootstrap_icon "volume-up" %}
-                    {% elif firstFile.type == "O" %}
-                      {% bootstrap_icon "file" %}
-                    {% elif not firstFile %}
+                    {% elif firstFile %}
+                      <div class="glyphicon" style="font:inherit">{{ firstFile.slug }}</div>
+                    {% else %}
                       {% bootstrap_icon "ban-circle" %}
                     {% endif %}
                     <div class="caption">
