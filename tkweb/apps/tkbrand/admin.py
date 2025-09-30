@@ -27,7 +27,9 @@ class TKBrandFlatPageAdmin(FlatPageAdmin):
             self.fields['url'].help_text = 'Eksempel: \'/om/kontakt/\'. Vær opmærksom på, at der skal være skråstreg både først og sidst.'
 
         class HelpWidget(forms.Widget):
-            def render(self, name, value, attrs=None):
+            def render(self, *args, **kwargs):
+                # This function used to take (name, value, attrs=None),
+                # but then a new version started passing "renderer" as well.
                 return render_to_string('tkbrand/templatetags.html')
 
         content_help = forms.CharField(label='', required=False, widget=HelpWidget)
