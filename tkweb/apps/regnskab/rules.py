@@ -8,7 +8,7 @@ from decimal import Decimal
 
 
 def get_max_debt():
-    return 250
+    return 300
 
 
 def get_max_debt_after_payment():
