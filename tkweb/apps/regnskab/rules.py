@@ -16,9 +16,9 @@ def get_max_debt_after_payment():
 
 
 def get_default_prices():
-    vand_price = Decimal('10.00')
-    øl_price = Decimal('12.00')
-    guld_price = Decimal('15.00')
+    vand_price = Decimal('12.00')
+    øl_price = Decimal('14.00')
+    guld_price = Decimal('18.00')
     vandkasse_price = 25*vand_price
     ølkasse_price = 25*øl_price
     guldkasse_price = 25*guld_price

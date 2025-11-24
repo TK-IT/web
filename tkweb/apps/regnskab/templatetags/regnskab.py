@@ -9,7 +9,7 @@ register = template.Library()
 
 @register.simple_tag
 def regnskab_site_name():
-    return 'INKAs onde overblik'
+    return 'INKAs gyldne gældssystem'
 
 
 @register.simple_tag
