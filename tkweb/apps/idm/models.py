@@ -139,3 +139,110 @@ class Title(models.Model):
     @tk.set_gfyear(lambda: config.GFYEAR)
     def __str__(self):
         return '%s %s' % (tk.prefix(self, type='unicode'), getattr(self, 'profile', ''))
+
+
+@python_2_unicode_compatible
+class Position(models.Model):
+    '''
+    A position held by different groups of people through the time. Examples:
+
+    - BEST/FU
+    - ABEN
+    - EFUIT
+    - Quizudvalg
+    '''
+    name = models.CharField(max_length=100, verbose_name='Titel', unique=True)
+    current_period = models.IntegerField()
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def get_current_period(name):
+        qs = Position.objects.filter(name=name)
+        result = list(qs.values_list('current_period', flat=True))
+        if not result:
+            raise Position.DoesNotExist()
+        if len(result) > 1:
+            raise Position.MultipleObjectsReturned()  # TODO: Verify this name
+        return result[0]
+
+
+@python_2_unicode_compatible
+class PositionPeriod(models.Model):
+    '''
+    A group of people holding a position at a particular time. Examples:
+
+    - BEST/FU from 2014-09-21 until 2015-09-20
+    - ABEN from 2015-12-16 until 2016-12-21
+    - EFUIT from 2011-10-03 until 2013-09-23
+    - Quizudvalg from 2016-04-01 until 2016-04-15
+
+    The "age" of a PositionPeriod is the number of PositionPeriods that follow,
+    which is used when forming relative titles with tktitler.
+    '''
+    position = models.ForeignKey(Position, on_delete=models.CASCADE)
+    period = models.IntegerField()
+
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = [('position', 'period')]
+
+    @property
+    def current(self):
+        return self.end_time is None
+
+    @staticmethod
+    def filter_by_age(position, age):
+        period = position.current_period - age
+        qs = PositionPeriod.objects.filter(position=position,
+                                           period=period)
+        return qs
+
+    @staticmethod
+    def get_by_age(position, age):
+        result = PositionPeriod.filter_by_age(position, age).get()
+        assert result.position_id == position.id
+        result.position = position
+        return result
+
+    def get_age(self):
+        return self.position.current_period - self.period
+
+    def __str__(self):
+        return tk.prefix((str(self.position), self.period),
+                         self.position.current_period)
+
+
+@python_2_unicode_compatible
+class Holder(models.Model):
+    '''
+    A person having a particular title in a particular position. Examples:
+
+    - 18 people in BEST/FU from 2014-09-21, all with different titles
+    - 2 people in ABEN from 2015-12-16, both with title "ABEN"
+    - 1 person in EFUIT from 2011-10-03 with title "EFUIT"
+    '''
+    title = models.ForeignKey(PositionPeriod, on_delete=models.CASCADE)
+    profile = models.ForeignKey('Profile', on_delete=models.CASCADE)
+    root = models.CharField(max_length=10, verbose_name='Titel')
+
+    @staticmethod
+    def get_by_age(position, age):
+        try:
+            position_period = PositionPeriod.get_by_age(position, age)
+        except PositionPeriod.DoesNotExist:
+            raise Holder.DoesNotExist()
+        result = list(position_period.holder_set.all())
+        if not result:
+            raise Holder.DoesNotExist()
+        for o in result:
+            # TODO Is this assignment already done by Django?
+            o.title = position_period
+        return result
+
+    def __str__(self):
+        return tk.prefix((self.root, self.title.period),
+                         self.title.position.current_period)
